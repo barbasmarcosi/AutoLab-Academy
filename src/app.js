@@ -149,8 +149,10 @@ function bmsView(){
  body+='<div class="section"><h2>Modelado físico con PyBaMM</h2></div>'+
  '<div class="panel"><p>AutoLab <strong>no implementa por su cuenta un modelo electroquímico</strong>. Para modelos SPM/DFN, utilizá el script complementario en Python con PyBaMM, exportá su serie temporal a CSV y cargala en este laboratorio.</p>'+
  '<div class="row"><a class="button alt" href="https://github.com/barbasmarcosi/AutoLab-Academy/blob/main/tools/pybamm_export.py" target="_blank" rel="noopener noreferrer">Ver script PyBaMM</a>'+
- '<a class="button alt" href="https://docs.pybamm.org/" target="_blank" rel="noopener noreferrer">Documentación oficial</a></div>'+
- '<p class="muted small">El modelo científico corre fuera de la PWA. Una exportación sin SOC de referencia se muestra únicamente como estimación por integración; jamás se atribuye una curva sintética a PyBaMM.</p></div>';
+ '<a class="button alt" href="https://docs.pybamm.org/" target="_blank" rel="noopener noreferrer">Documentación oficial</a>'+
+ '<a class="button alt" href="https://github.com/barbasmarcosi/AutoLab-Academy/actions/workflows/science-pybamm.yml" target="_blank" rel="noopener noreferrer">Resultados PyBaMM verificados</a></div>'+
+ '<p class="muted small">Para analizar modelos científicos sin instalar Python, abrí una ejecución exitosa de la CI científica, descargá el artefacto <strong>autolab-pybamm-validated-csv</strong>, extraé el archivo SPM o DFN e importalo aquí. Los artefactos vencen y cada CSV lleva un archivo .metadata.json con la versión del modelo y hash SHA-256.</p>'+
+ '<p class="muted small">El modelo científico corre fuera de la PWA. Una exportación sin SOC de referencia se muestra únicamente como estimación por integración; jamás se atribuye una curva sintética a PyBaMM. Simulación ≠ validación experimental.</p></div>';
  return body;
 }
 

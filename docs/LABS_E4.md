@@ -42,7 +42,11 @@ Una descarga constante de 12 A durante 3600 s consume 12 Ah; con capacidad asumi
 
 Importar autolab-pybamm.csv desde AutoLab Academy → Laboratorios → Baterías / BMS.
 
-**Estado de validación:** las pruebas de Node/JS verifican el laboratorio didáctico. El script PyBaMM se distribuye para ejecución local, pero no se ejecutó contra PyBaMM en Actions para evitar una dependencia pesada y no verificada como parte del flujo regular de Pages. Por lo tanto, no afirmamos tener un dataset físico producido y validado con PyBaMM dentro de esta versión.
+**Actualización (24/10/2026):** se creó un workflow científico independiente de Pages, con `pybamm==26.10.1.1`, Python 3.12 y pruebas automáticas de los modelos SPM y DFN. Estas pruebas resuelven las ecuaciones con PyBaMM real, exportan CSV, comparan el contrato del parser JS/estimador de AutoLab y guardan los resultados en artefactos de Actions. El archivo `.metadata.json` incorpora nombre de modelo, versión, conjunto de parámetros por defecto, observaciones y SHA-256. Se añade `python-environment.txt` para rastrear las dependencias transitivas reales. Consultar `.github/workflows/science-pybamm.yml`.
+
+La CI verifica **ejecución y consistencia técnica de simulaciones**, no validez experimental frente a baterías reales. Los archivos descargables de Actions expiran a los 14 días, y los parámetros por defecto no son específicos de fabricantes. Las muestras algebraicas internas de la PWA continúan claramente diferenciadas de los modelos PyBaMM.
+
+El workflow científico corre cuando cambian archivos científicos en un PR o se invoca manualmente; no añade dependencias pesadas al despliegue habitual de GitHub Pages.
 
 ## Seguridad
 
@@ -55,7 +59,7 @@ Importar autolab-pybamm.csv desde AutoLab Academy → Laboratorios → Baterías
 
 ## Calidad pendiente
 
-1. Ejecución comprobada del exportador con una versión fijada de PyBaMM en CI independiente.
+1. Mantener un corpus versionado y permanente de resultados PyBaMM (los artefactos CI expiran) con hashes y parámetros detallados.
 2. Datasets físicos externos con origen, química y parámetros trazables y golden vectors verificados.
 3. Estimadores más robustos y filtros (p. ej. Kalman) utilizando bibliotecas existentes, antes de promover a análisis real.
 4. Validación visual y táctil de gráficos e importaciones en Safari iPhone.

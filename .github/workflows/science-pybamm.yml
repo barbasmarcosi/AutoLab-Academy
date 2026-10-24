@@ -1,0 +1,44 @@
+name: Scientific validation — PyBaMM
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "tools/pybamm_export.py"
+      - "tests/science/**"
+      - "requirements-science.txt"
+      - ".github/workflows/science-pybamm.yml"
+permissions:
+  contents: read
+jobs:
+  scientific-smoke:
+    name: Physics simulations and CSV contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYBAMM_DISABLE_TELEMETRY: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-science.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install exact scientific dependency
+        run: python -m pip install -r requirements-science.txt
+      - name: Check SPM and DFN export against scientific solver and JS importer
+        run: python -m unittest discover -s tests/science -p 'test_*.py' -v
+      - name: Publish reproducible CSV fixtures from actual solver
+        run: |
+          mkdir -p science-output
+          python tools/pybamm_export.py --model spm --duration 600 --output science-output/pybamm-spm.csv
+          python tools/pybamm_export.py --model dfn --duration 600 --output science-output/pybamm-dfn.csv
+          python -m pip freeze > science-output/python-environment.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: autolab-pybamm-validated-csv
+          path: science-output/
+          retention-days: 14

@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
+import json
 import math
 from pathlib import Path
 
@@ -59,7 +61,28 @@ def main() -> None:
     solution = sim.solve([0, args.duration])
     rows = extract_series(solution)
     export_csv(rows, args.output)
+    # Provenance is deliberately separate from CSV to keep the PWA import contract simple.
+    # Output is a *simulation*, never an experimentally validated cell dataset.
+    provenance = {
+        "schema": "autolab.pybamm-provenance.v1",
+        "source": "PyBaMM physics-based simulation",
+        "model": args.model.upper(),
+        "model_name": str(getattr(model, "name", args.model.upper())),
+        "pybamm_version": pybamm.__version__,
+        "parameter_set": str(getattr(model.default_parameter_values, "name", "default")),
+        "duration_requested_s": args.duration,
+        "duration_observed_s": rows[-1][0] - rows[0][0],
+        "sample_count": len(rows),
+        "csv_file": args.output.name,
+        "csv_sha256": hashlib.sha256(args.output.read_bytes()).hexdigest(),
+        "soc_reference_in_csv": False,
+        "real_battery_validation": False,
+        "limitations": "Uncalibrated simulation with default parameter set; not a real vehicle diagnostic or measured SOH.",
+    }
+    provenance_file = args.output.with_suffix(".metadata.json")
+    provenance_file.write_text(json.dumps(provenance, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"PyBaMM {pybamm.__version__} ({args.model.upper()}): {len(rows)} muestras exportadas a {args.output}")
+    print(f"Proveniencia (hash SHA-256 y parámetros): {provenance_file}")
     print("NO se exporta SOC de referencia: AutoLab lo estima con la capacidad y SOC inicial que indiques.")
     print("La corriente de PyBaMM se interpreta positiva en descarga; verificar convención si cambia la fuente.")
 

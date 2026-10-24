@@ -1,0 +1,2 @@
+# PyBaMM scientific companion pinned to release available on 2026-10-24.
+pybamm==26.10.1.1
