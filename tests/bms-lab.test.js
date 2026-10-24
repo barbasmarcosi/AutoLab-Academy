@@ -35,14 +35,14 @@ test('BMS: importación CSV conserva curva, sin fórmula propietaria',()=>{
  assert.equal(result.referenceSocPct,80);
 });
 test('BMS: rechazo de CSV defectuoso, puntos inconsistentes y capacidad inválida',()=>{
- assert.throws(()=>parseBmsCsv('x,y\\n1,2\\n3,4'),/columna/i);
- assert.throws(()=>parseBmsCsv('t_s,current_a,voltage_v\\n0,12,4.0\\n0,12,3.9'),/tiempo/i);
+ assert.throws(()=>parseBmsCsv('x,y\n1,2\n3,4'),/columna/i);
+ assert.throws(()=>parseBmsCsv('t_s,current_a,voltage_v\n0,12,4.0\n0,12,3.9'),/tiempo/i);
  assert.throws(()=>parseBmsCsv('x'.repeat(MAX_BMS_FILE_BYTES+1)),/grande/i);
  assert.throws(()=>analyzeBms(generateSyntheticBms('nominal').rows,{capacityAh:0}),/capacidad/i);
  assert.throws(()=>capacitySohPct(10,0),/referencia/i);
 });
 test('BMS: diferencias negativas por carga y saturación advertida',()=>{
- const p=parseBmsCsv('t_s,current_a,voltage_v\\n0,-6,3.7\\n3600,-6,3.8');
+ const p=parseBmsCsv('t_s,current_a,voltage_v\n0,-6,3.7\n3600,-6,3.8');
  const a=analyzeBms(p.rows,{capacityAh:60,initialSocPct:95});
  assert(Math.abs(a.netDischargeAh+6)<1e-9);
  assert.equal(a.finalSocPct,100);
