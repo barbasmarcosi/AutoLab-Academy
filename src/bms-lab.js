@@ -52,7 +52,7 @@ export function formatBmsCsv(rows){
  if(!Array.isArray(rows)||!rows.length)throw Error('No hay muestras para exportar.');
  const withReference=rows.every(row=>Number.isFinite(row.soc_reference_pct));
  const header=columns.concat(withReference?['soc_reference_pct']:[]);
- return [header.join(','),...rows.map(row=>header.map(key=>Number(row[key]).toFixed(key==='t_s'?0:6)).join(','))].join('\n')+'\n';
+ return [header.join(','),...rows.map(row=>header.map(key=>Number(row[key]).toFixed(6)).join(','))].join('\n')+'\n';
 }
 export function analyzeBms(rows,options={}){
  if(!Array.isArray(rows)||rows.length<2||rows.length>MAX_BMS_ROWS)throw Error('Se requieren 2–2000 muestras.');
