@@ -133,7 +133,7 @@ if(labState.dbc){
  '<div class="table-wrap"><table class="frame-table"><thead><tr><th>ID</th><th>Mensaje</th><th>Señales según DBC</th></tr></thead><tbody>'+
  (rows.length?rows.map(r=>'<tr><td class="mono">0x'+esc(r.id)+'</td><td>'+esc(r.message)+'</td><td>'+r.signals.map(sig=>'<div><strong>'+esc(sig.name)+'</strong>: '+esc(sig.physical)+'</div>').join('')+'</td></tr>').join(''):'<tr><td colspan="3">No hay tramas decodificables con la base actual.</td></tr>')+
  '</tbody></table></div>'+
- (labState.sample&&report.decoded.some(r=>r.id==='120')?'<div class="section"><h3>Práctica DBC: aplicar el factor de escala</h3></div><p class="muted">En la primera trama 0x120 de este ejemplo sintético, el valor bruto RPM es 3120. El factor de escala del DBC es 0,25 y el offset es 0. ¿Qué RPM física corresponde?</p><label for="lab-dbc-answer">Elegí el resultado</label><select class="field" id="lab-dbc-answer"><option value="">Seleccionar…</option><option value="780" '+(labState.dbcAnswer==='780'?'selected':'')+'>780 rpm</option><option value="3120" '+(labState.dbcAnswer==='3120'?'selected':'')+'>3120 rpm</option><option value="195" '+(labState.dbcAnswer==='195'?'selected':'')+'>195 rpm</option></select><div class="row" style="margin-top:12px">'+button('Corregir DBC','lab-grade-dbc')+'</div>'+(labState.dbcFeedback?'<div class="result">'+esc(labState.dbcFeedback)+'</div>':''):'')+
+ (labState.sample&&labState.dbcLabel==='AutoLab synthetic v1 (educativa)'&&report.decoded.some(r=>r.id==='120')?'<div class="section"><h3>Práctica DBC: aplicar el factor de escala</h3></div><p class="muted">En la primera trama 0x120 de este ejemplo sintético, el valor bruto RPM es 3120. El factor de escala del DBC es 0,25 y el offset es 0. ¿Qué RPM física corresponde?</p><label for="lab-dbc-answer">Elegí el resultado</label><select class="field" id="lab-dbc-answer"><option value="">Seleccionar…</option><option value="780" '+(labState.dbcAnswer==='780'?'selected':'')+'>780 rpm</option><option value="3120" '+(labState.dbcAnswer==='3120'?'selected':'')+'>3120 rpm</option><option value="195" '+(labState.dbcAnswer==='195'?'selected':'')+'>195 rpm</option></select><div class="row" style="margin-top:12px">'+button('Corregir DBC','lab-grade-dbc')+'</div>'+(labState.dbcFeedback?'<div class="result">'+esc(labState.dbcFeedback)+'</div>':''):'')+
  '</div>';
 }
 
@@ -174,7 +174,7 @@ if(event.target.id==='dbc-file'){
  if(file.size>MAX_DBC_BYTES){toast('La base DBC supera 600 KB',true);return;}
  file.text().then(t=>{
   const parsed=loadDbc(t);
-  labState.dbc=parsed;labState.dbcLabel=file.name.slice(0,100);labState.dbcError='';render();
+  labState.dbc=parsed;labState.dbcLabel=file.name.slice(0,100);labState.dbcError='';labState.dbcAnswer='';labState.dbcFeedback='';render();
   toast('DBC cargado; las señales se interpretan en el navegador.');
  }).catch(error=>{labState.dbcError=String(error.message||error);render();toast('No se pudo interpretar el DBC',true);});
 }
@@ -194,7 +194,7 @@ document.addEventListener('click',async event=>{const target=event.target.closes
   const r=await fetch('./samples/autolab-synthetic.dbc');
   if(!r.ok)throw Error('No se encuentra el DBC de ejemplo ('+r.status+')');
   labState.dbc=loadDbc(await r.text());
-  labState.dbcLabel='AutoLab synthetic v1 (educativa)';labState.dbcError='';render();toast('DBC didáctico cargado.');
+  labState.dbcLabel='AutoLab synthetic v1 (educativa)';labState.dbcError='';labState.dbcAnswer='';labState.dbcFeedback='';render();toast('DBC didáctico cargado.');
  }catch(e){labState.dbcError=String(e?.message||e);render();toast('Error al cargar DBC sintético',true);}
  break;
 }
@@ -206,7 +206,7 @@ case'lab-grade-dbc':{
  data.cases.push({id:'lab-dbc-scaling-v1',score:ok?100:0,at:new Date().toISOString(),conclusion:labState.dbcAnswer});
  data.cases=data.cases.slice(-500);await persist();render();break;
 }
-case'lab-clear-dbc':labState.dbc=null;labState.dbcLabel='';labState.dbcError='';render();break;
+case'lab-clear-dbc':labState.dbc=null;labState.dbcLabel='';labState.dbcError='';labState.dbcAnswer='';labState.dbcFeedback='';render();break;
 case'lab-mode':labState.mode=id==='circuit'?'circuit':'can';render();break;
 case'lab-toggle-circuit':labState.circuitLoaded=!labState.circuitLoaded;render();break;
 case'lab-sample':labState={...labState,mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,answer:'',feedback:''};render();break;
