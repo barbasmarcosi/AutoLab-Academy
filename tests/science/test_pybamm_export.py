@@ -3,6 +3,7 @@ These verify numerical/transport sanity; they do not validate a real battery.
 """
 from __future__ import annotations
 import csv
+import hashlib
 import json
 import math
 import os
@@ -30,11 +31,21 @@ class PyBaMMContract(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 0, f"{model}: {proc.stdout}\n{proc.stderr}")
         self.assertTrue(destination.is_file())
+        meta_path = destination.with_suffix(".metadata.json")
+        self.assertTrue(meta_path.is_file(), f"No provenance sidecar for {model}")
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        self.assertEqual(meta["schema"], "autolab.pybamm-provenance.v1")
+        self.assertEqual(meta["model"], model.upper())
+        self.assertTrue(meta["pybamm_version"].startswith("26.10.1.1"))
+        self.assertEqual(meta["csv_sha256"], hashlib.sha256(destination.read_bytes()).hexdigest())
+        self.assertFalse(meta["real_battery_validation"])
+        self.assertFalse(meta["soc_reference_in_csv"])
         with destination.open(encoding="utf-8", newline="") as stream:
             reader = csv.DictReader(stream)
             self.assertEqual(reader.fieldnames, ["t_s", "current_a", "voltage_v"])
             rows = [{k: float(v) for k, v in row.items()} for row in reader]
         self.assertGreater(len(rows), 2)
+        self.assertEqual(meta['sample_count'], len(rows))
         self.assertLessEqual(len(rows), 2000, "PWA CSV import limit")
         for idx, row in enumerate(rows):
             self.assertTrue(all(math.isfinite(v) for v in row.values()))
