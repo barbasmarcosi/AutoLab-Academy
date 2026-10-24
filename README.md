@@ -30,9 +30,9 @@ Se almacena el progreso en IndexedDB local. **No existe sincronización automát
 
 - 30 preguntas introductorias, 6 lecciones, 15 casos sintéticos.
 - Repaso con intervalos simples (FSRS se evaluará para fases siguientes).
-- No hay CircuitJS, SocketCAN ni PyBaMM embebidos: enlaces a recursos externos.
+- Laboratorio de archivos candump clásico con tramas sintéticas y procesamiento 100% local. CircuitJS es iframe externo bajo demanda: requiere Internet; puede bloquearse. SocketCAN, cantools y PyBaMM no están embebidos.
 - No hay autenticación, IA ni conexión a vehículos.
 - El diseño web estático es una decisión deliberada de arranque; React/TypeScript, Dexie y test E2E quedan para evolución posterior.
 - Ningún resultado equivale a habilitación o certificación para intervenciones en alta tensión.
 
-Ver [roadmap](docs/ROADMAP.md) y [modelo y rúbrica de casos](docs/CASE_MODEL.md).
+Ver [roadmap](docs/ROADMAP.md), [modelo y rúbrica de casos](docs/CASE_MODEL.md) y [laboratorios E3](docs/LABS_E3.md).
