@@ -15,14 +15,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install verified dependencies
+        run: npm install --no-audit --no-fund
       - name: Tests and static checks
         run: npm run build
+      - name: Verify browser bundle on PR and main
+        run: ./node_modules/.bin/esbuild src/app.js --bundle --format=esm --target=es2020 --outfile=/tmp/autolab-app.js
       - name: Prepare public site (exclude repository metadata)
         if: github.event_name != 'pull_request'
         run: |
           mkdir site
           cp index.html manifest.webmanifest sw.js site/
           cp -R src icons site/
+          mkdir -p site/samples
+          cp samples/autolab-synthetic.dbc site/samples/
+          mkdir -p site/third-party
+          cp node_modules/candied/LICENSE site/third-party/CANDIED-LICENSE.txt
+      - name: Bundle web modules with Candied for offline Pages
+        if: github.event_name != 'pull_request'
+        run: ./node_modules/.bin/esbuild src/app.js --bundle --format=esm --target=es2020 --minify --outfile=site/src/app.js
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4

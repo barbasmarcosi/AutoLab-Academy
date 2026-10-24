@@ -1,0 +1,5 @@
+node_modules/
+preview/
+site/
+.env
+.DS_Store

@@ -5,7 +5,7 @@
 - E0 (base): iniciado con banco trazable de 30 preguntas, seis lecciones, tres casos sintéticos y documentos de arquitectura.
 - E1 (PWA): implementación MVP en GitHub Pages por Actions, exámenes, repaso con intervalos de implementación inicial, progreso local IndexedDB y backup JSON.
 - E2 (taller virtual): primera versión ampliada con 15 casos deterministas, hipótesis inicial, pruebas, razonamiento escrito, informes Markdown, nota con reglas y tests. **Faltan revisión externa de expertos, instrumentación calibrada, múltiples fallas y QA E2E. No hay motor físico automotriz, telemetría real ni DTC OEM.**
-- E3 (simuladores): **primer incremento implementado**: analizador candump offline de CAN clásico, muestra sintética con práctica guiada y CircuitJS externo bajo demanda. **Pendientes:** integración real same-origin/offline y revisión de licencia GPL CircuitJS; decodificación DBC mediante librería; laboratorios con SocketCAN/cantools en escritorio. Ver docs/LABS_E3.md.
+- E3 (simuladores): **primer incremento implementado**: analizador candump offline de CAN clásico, muestra sintética con práctica guiada y CircuitJS externo bajo demanda. **Incremento 2:** importación y decodificación DBC con Candied mediante bundle local; ejemplo didáctico con 0x120/0x220. **Pendientes:** integración real same-origin/offline y revisión de licencia GPL CircuitJS; validación DBC extendida, laboratorios con SocketCAN/cantools en escritorio. Ver docs/LABS_E3.md.
 - E4 (HEV/EV): contenido introductorio conceptual; PyBaMM y BMS científico pendientes.
 - E5 (tutor IA): pendiente, opcional, sin API keys en frontend.
 - E6 (portafolio y experiencia real): pendiente.
