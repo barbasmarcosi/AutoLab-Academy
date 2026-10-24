@@ -112,7 +112,7 @@ function bmsView(){
  const result=analyzeBms(bmsState.dataset.rows,{capacityAh:bmsState.capacityAh,initialSocPct:bmsState.initialSocPct,biasCorrectionA:bmsState.biasCorrectionA});
  const q=bmsState.dataset.scenarioId?bmsQuestion(bmsState.dataset.scenarioId):null;
  const net=n=>Number(n).toFixed(2);
- let body=heading('BATERÍAS Y BMS','Laboratorio de estimación SOC/SOH','Curvas, integración de corriente y fallas sintéticas. Los modelos físicos más avanzados se ejecutan con PyBaMM fuera del navegador.');
+ let body='<h2>Laboratorio BMS y estimación de SOC/SOH</h2><p class="muted">Curvas, integración de corriente y fallas sintéticas. Los modelos físicos más avanzados se ejecutan con PyBaMM fuera del navegador.</p>';
  body+='<div class="notice"><strong>Laboratorio educativo, no instrumento de diagnóstico HV.</strong> Las señales son virtuales o provienen de CSV aportados por el usuario; no se verifica procedencia, química, calibración ni condiciones de ensayo. No abrir ni medir paquetes de alta tensión como parte de esta actividad.</div>';
  body+='<div class="grid two" style="margin-top:18px"><div class="panel"><h3>Escenario didáctico</h3><label for="bms-scenario">Conjunto de datos</label><select class="field" id="bms-scenario">'+
  BMS_SCENARIOS.map(x=>'<option value="'+x.id+'" '+(x.id===bmsState.scenarioId?'selected':'')+'>'+esc(x.title)+'</option>').join('')+'</select>'+
