@@ -6,12 +6,14 @@ Primera versión funcional: módulos de lectura, exámenes corregidos con explic
 
 ## Probar en local
 
-Node 20+ (sin dependencias de npm):
+Node 20+ (dependencias instaladas solo para compilar el motor DBC existente):
 
 \`\`\`bash
+npm install
 npm test
 npm run build
-python3 -m http.server 8080
+./node_modules/.bin/esbuild src/app.js --bundle --format=esm --outfile=src/app.bundle.js
+# Para desarrollo: usar un servidor que exponga una copia del sitio con el bundle en src/app.js
 \`\`\`
 
 Abrir http://localhost:8080/ (service worker solamente en HTTPS o localhost). Evitar abrir index.html como archivo file://, porque los módulos y IndexedDB requieren origen web.
@@ -30,7 +32,8 @@ Se almacena el progreso en IndexedDB local. **No existe sincronización automát
 
 - 30 preguntas introductorias, 6 lecciones, 15 casos sintéticos.
 - Repaso con intervalos simples (FSRS se evaluará para fases siguientes).
-- Laboratorio de archivos candump clásico con tramas sintéticas y procesamiento 100% local. CircuitJS es iframe externo bajo demanda: requiere Internet; puede bloquearse. SocketCAN, cantools y PyBaMM no están embebidos.
+- Laboratorio CAN clásico + decodificación de señales mediante DBC por Candied. El DBC y las capturas se procesan localmente en el navegador; el ejemplo DBC es puramente sintético.
+- CircuitJS es iframe externo bajo demanda: requiere Internet; puede bloquearse. SocketCAN, cantools y PyBaMM no están embebidos.
 - No hay autenticación, IA ni conexión a vehículos.
 - El diseño web estático es una decisión deliberada de arranque; React/TypeScript, Dexie y test E2E quedan para evolución posterior.
 - Ningún resultado equivale a habilitación o certificación para intervenciones en alta tensión.
