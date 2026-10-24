@@ -9,3 +9,7 @@
 .circuit-frame{margin:18px 0;background:#fff;min-height:440px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .circuit-frame iframe{display:block;border:0;width:100%;height:min(75vh,680px);min-height:440px}
 @media(max-width:540px){.frame-table{font-size:.78rem}.frame-table th,.frame-table td{padding:9px}.circuit-frame{min-height:460px}.circuit-frame iframe{min-height:460px}}
+
+/* E4 battery laboratory: fluid scientific charts; keep input controls usable on iPhone */
+.bms-chart{display:block;width:100%;height:auto;max-height:280px;margin:8px auto 0;overflow:visible}
+@media(max-width:540px){.bms-chart{max-height:230px}.panel .row>.button{max-width:100%}}

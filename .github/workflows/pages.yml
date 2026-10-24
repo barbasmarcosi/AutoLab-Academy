@@ -17,6 +17,8 @@ jobs:
           node-version: '22'
       - name: Install verified dependencies
         run: npm install --no-audit --no-fund
+      - name: Validate PyBaMM companion syntax (physics runs separately)
+        run: python3 -m py_compile tools/pybamm_export.py
       - name: Tests and static checks
         run: npm run build
       - name: Verify browser bundle on PR and main
