@@ -18,9 +18,9 @@ test('BMS: un sesgo +0.6 A produce error acumulado y puede corregirse',()=>{
 test('BMS: la capacidad real 48 Ah difiere de estimación 60 Ah',()=>{
  const d=generateSyntheticBms('aged');
  const estimate=analyzeBms(d.rows,{capacityAh:60});
- assert.equal(estimate.finalSocPct,80);
- assert.equal(estimate.referenceSocPct,75);
- assert.equal(estimate.finalErrorPp,5);
+ assert(Math.abs(estimate.finalSocPct-80)<1e-9);
+ assert(Math.abs(estimate.referenceSocPct-75)<1e-9);
+ assert(Math.abs(estimate.finalErrorPp-5)<1e-9);
  const corrected=analyzeBms(d.rows,{capacityAh:48});
  assert(Math.abs(corrected.finalErrorPp)<1e-9);
  assert.equal(capacitySohPct(48,60),80);
@@ -31,8 +31,8 @@ test('BMS: importación CSV conserva curva, sin fórmula propietaria',()=>{
  const p=parseBmsCsv(csv);
  assert.equal(p.rows.length,121);
  const result=analyzeBms(p.rows);
- assert.equal(result.finalSocPct,80);
- assert.equal(result.referenceSocPct,80);
+ assert(Math.abs(result.finalSocPct-80)<1e-9);
+ assert(Math.abs(result.referenceSocPct-80)<1e-9);
 });
 test('BMS: rechazo de CSV defectuoso, puntos inconsistentes y capacidad inválida',()=>{
  assert.throws(()=>parseBmsCsv('x,y\n1,2\n3,4'),/columna/i);
