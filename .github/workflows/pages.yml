@@ -17,11 +17,17 @@ jobs:
           node-version: '22'
       - name: Tests and static checks
         run: npm run build
+      - name: Prepare public site (exclude repository metadata)
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir site
+          cp index.html manifest.webmanifest sw.js site/
+          cp -R src icons site/
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: ./site
   deploy:
     if: github.event_name != 'pull_request'
     needs: verify
