@@ -28,11 +28,11 @@ Se almacena el progreso en IndexedDB local. **No existe sincronización automát
 
 ## Limitaciones
 
-- 30 preguntas introductorias, 6 lecciones, 3 casos sintéticos.
+- 30 preguntas introductorias, 6 lecciones, 15 casos sintéticos.
 - Repaso con intervalos simples (FSRS se evaluará para fases siguientes).
 - No hay CircuitJS, SocketCAN ni PyBaMM embebidos: enlaces a recursos externos.
 - No hay autenticación, IA ni conexión a vehículos.
 - El diseño web estático es una decisión deliberada de arranque; React/TypeScript, Dexie y test E2E quedan para evolución posterior.
 - Ningún resultado equivale a habilitación o certificación para intervenciones en alta tensión.
 
-Ver [roadmap](docs/ROADMAP.md).
+Ver [roadmap](docs/ROADMAP.md) y [modelo y rúbrica de casos](docs/CASE_MODEL.md).

@@ -4,7 +4,7 @@
 
 - E0 (base): iniciado con banco trazable de 30 preguntas, seis lecciones, tres casos sintéticos y documentos de arquitectura.
 - E1 (PWA): implementación MVP en GitHub Pages por Actions, exámenes, repaso con intervalos de implementación inicial, progreso local IndexedDB y backup JSON.
-- E2 (taller virtual): prototipo funcional de casos deterministas. **No hay motor físico automotriz, telemetría real ni DTC OEM.**
+- E2 (taller virtual): primera versión ampliada con 15 casos deterministas, hipótesis inicial, pruebas, razonamiento escrito, informes Markdown, nota con reglas y tests. **Faltan revisión externa de expertos, instrumentación calibrada, múltiples fallas y QA E2E. No hay motor físico automotriz, telemetría real ni DTC OEM.**
 - E3 (simuladores): pendiente integrar CircuitJS1 con verificación de licencia y carga offline; SocketCAN y cantools son laboratorios de escritorio opcionales.
 - E4 (HEV/EV): contenido introductorio conceptual; PyBaMM y BMS científico pendientes.
 - E5 (tutor IA): pendiente, opcional, sin API keys en frontend.
