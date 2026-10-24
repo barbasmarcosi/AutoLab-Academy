@@ -1,41 +1,52 @@
 # AutoLab Academy
 
-**PWA de entrenamiento en electrónica y diagnóstico automotriz, híbridos y eléctricos.**
+PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y electromovilidad**.
 
-Primera versión funcional: módulos de lectura, exámenes corregidos con explicaciones y fuentes, escenarios deterministas de diagnóstico, repaso, notas y respaldo/exportación del progreso.
+## Qué está implementado
 
-## Probar en local
+- Academia con 6 lecciones, 30 preguntas, repaso e historial de resultados.
+- Taller virtual con 15 casos sintéticos, pruebas reproducibles, justificación e informes.
+- Analizador CAN clásico: lectura local de archivos `candump` y captura de ejemplo.
+- **Decodificación DBC:** importación local de un `.dbc`, interpretación de las primeras 400 tramas usando [Candied](https://github.com/bit-dream/candied), tabla de señales físicas y ejercicio de factor/offset. El ejemplo AutoLab usa únicamente identificadores y escalas ficticios.
+- CircuitJS original desde iframe externo bajo demanda; requiere Internet.
+- IndexedDB y respaldos JSON, sin backend ni sincronización automática.
 
-Node 20+ (dependencias instaladas solo para compilar el motor DBC existente):
+La aplicación no transmite datos CAN, no se conecta a ECUs, no realiza intervenciones HV y **no acredita competencia práctica**.
 
-\`\`\`bash
+## Ejecutar en local
+
+Requiere Node.js 20+ y Python 3 (solo para el servidor estático):
+
+```bash
 npm install
-npm test
 npm run build
-./node_modules/.bin/esbuild src/app.js --bundle --format=esm --outfile=src/app.bundle.js
-# Para desarrollo: usar un servidor que exponga una copia del sitio con el bundle en src/app.js
-\`\`\`
+mkdir -p preview
+cp index.html manifest.webmanifest sw.js preview/
+cp -R src icons samples preview/
+./node_modules/.bin/esbuild src/app.js --bundle --format=esm --target=es2020 --outfile=preview/src/app.js
+python3 -m http.server 8080 --directory preview
+```
 
-Abrir http://localhost:8080/ (service worker solamente en HTTPS o localhost). Evitar abrir index.html como archivo file://, porque los módulos y IndexedDB requieren origen web.
+Abrir `http://localhost:8080/`. No abrir `index.html` desde `file://` porque la PWA utiliza módulos web, service worker e IndexedDB. Los archivos fuente se conservan en `src/`, y la versión compilada se publica como `site/src/app.js` desde Actions.
 
-## GitHub Pages
+## Despliegue
 
-El sitio se publica mediante .github/workflows/pages.yml en cada push a main que supera los tests.
-Configurar **Settings → Pages → Source: GitHub Actions**. El workflow no usa secretos de despliegue.
-https://barbasmarcosi.github.io/AutoLab-Academy/
+El workflow `.github/workflows/pages.yml` valida el código y construye el bundle antes de publicar. En **Settings → Pages**, seleccionar **GitHub Actions** como fuente de despliegue.
 
-## Datos
+**PWA:** https://barbasmarcosi.github.io/AutoLab-Academy/
 
-Se almacena el progreso en IndexedDB local. **No existe sincronización automática ni backup remoto.** Desde "Mis datos" exportá el JSON y guardalo en un lugar seguro. La importación reemplaza el progreso actual luego de pedir confirmación. No introducir datos sensibles de clientes.
+## Privacidad y seguridad
 
-## Limitaciones
+Capturas CAN y bases DBC importadas se procesan exclusivamente en memoria del navegador; no se suben ni guardan en respaldos. Resultados y notas se almacenan en IndexedDB local, con exportación e importación manual. No introducir información sensible de clientes sin autorización.
 
-- 30 preguntas introductorias, 6 lecciones, 15 casos sintéticos.
-- Repaso con intervalos simples (FSRS se evaluará para fases siguientes).
-- Laboratorio CAN clásico + decodificación de señales mediante DBC por Candied. El DBC y las capturas se procesan localmente en el navegador; el ejemplo DBC es puramente sintético.
-- CircuitJS es iframe externo bajo demanda: requiere Internet; puede bloquearse. SocketCAN, cantools y PyBaMM no están embebidos.
-- No hay autenticación, IA ni conexión a vehículos.
-- El diseño web estático es una decisión deliberada de arranque; React/TypeScript, Dexie y test E2E quedan para evolución posterior.
-- Ningún resultado equivale a habilitación o certificación para intervenciones en alta tensión.
+Los escenarios son sintéticos y las mediciones no representan especificaciones OEM. Los cursos y simulaciones no habilitan trabajos sobre sistemas de alta tensión.
 
-Ver [roadmap](docs/ROADMAP.md), [modelo y rúbrica de casos](docs/CASE_MODEL.md) y [laboratorios E3](docs/LABS_E3.md).
+## Limitaciones y pendientes
+
+- El parser DBC externo admite muchos formatos, pero aún no se validaron exhaustivamente multiplexado, big-endian complejo, CAN FD ni matrices OEM grandes. El adaptador trabaja con CAN clásico, en este incremento.
+- PyBaMM, análisis científico BMS y SocketCAN en equipo personal: pendientes.
+- CircuitJS no está distribuido en el origen de la PWA ni funciona offline.
+- La QA completa de interfaz y respaldos en Safari/iPhone sigue pendiente.
+- Falta generar y conservar un lockfile npm para asegurar reproducibilidad estricta del build.
+
+Documentación: [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios](docs/LABS_E3.md).
