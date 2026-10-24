@@ -13,7 +13,7 @@ test('DBC sample supports 0x120 engine RPM and 0x220 coolant temperature',()=>{
  assert.equal(report.missing.length,0);
  assert.equal(report.decoded.length,54);
  const first=report.decoded.find(row=>row.id==='120');
- console.log('DBC_DEBUG',JSON.stringify({first,keys:Object.keys(model.database||{}),getMessage:Object.keys(model.dbc.getMessageById?.(288)||{})}));
+ console.log('DBC_DEBUG',JSON.stringify({first,keys:Object.keys(model.database||{}),getMessage:Object.keys(model.dbc.getMessageById?.(288)||{}),msgSignals:model.dbc.getMessageById?.(288)?.signals?.map?.(x=>x.name),msgBaseSignals:model.dbc.getMessageById?.(288)?.baseSignals?.map?.(x=>x.name),messageCount:model.database.messages?.length}));
  assert(first,'Message 0x120 not decoded');
  const rpm=first.signals.find(s=>s.name==='EngineRPM');
  assert(rpm,'Signal EngineRPM missing');
