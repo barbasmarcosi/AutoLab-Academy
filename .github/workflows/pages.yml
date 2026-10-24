@@ -19,6 +19,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Tests and static checks
         run: npm run build
+      - name: Verify browser bundle on PR and main
+        run: ./node_modules/.bin/esbuild src/app.js --bundle --format=esm --target=es2020 --outfile=/tmp/autolab-app.js
       - name: Prepare public site (exclude repository metadata)
         if: github.event_name != 'pull_request'
         run: |
