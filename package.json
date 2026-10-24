@@ -1,0 +1,14 @@
+{
+  "name": "autolab-academy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/app.js && node --check src/core.js && node --check src/content.js && node --test",
+    "build": "npm run check && node scripts/verify-static.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
