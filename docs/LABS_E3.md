@@ -15,7 +15,7 @@ La importación admite hasta 1 MB / 12.000 líneas de **tramas clásicas de dato
 
 IDs de 11 bits con 3 dígitos hexadecimales y de 29 bits con 8 dígitos. DLC 0–8, timestamps opcionales. Se descartan y contabilizan (no se reinterpretan) CAN FD con ##, tramas remotas RTR, error frames y formatos desconocidos. La información temporal solo existe cuando la captura incluye timestamps.
 
-El cálculo de intervalos por ID usa la mediana de diferencias positivas de timestamps ordenados; marca un posible gap cuando hay al menos cuatro intervalos y el máximo supera 2,5 veces la mediana y al menos 5 ms adicionales. **Es una heurística de estudio**, no una prueba de fallo del bus, ni una métrica de rendimiento de vehículo.
+El cálculo de intervalos por ID usa la mediana de diferencias positivas de timestamps ordenados; marca un posible gap cuando hay al menos cuatro intervalos y el máximo supera 3 veces la mediana y al menos 5 ms adicionales. **Es una heurística de estudio**, no una prueba de fallo del bus, ni una métrica de rendimiento de vehículo.
 
 No hay decodificación de señales propietarias, DBC, identificación de marcas ni diagnóstico OEM. El ejemplo sintético emplea un mapa propio y **no debe aplicarse a otras capturas con el mismo ID**.
 
