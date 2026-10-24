@@ -40,7 +40,7 @@ export function analyzeCanFrames(frames){
   const period=median(gaps);
   const maxGap=gaps.length?Math.max(...gaps):null;
   const distinctPayloads=new Set(rows.map(r=>r.bytes.map(b=>b.toString(16).padStart(2,'0')).join(''))).size;
-  return {id,extended:rows[0].extended,count:rows.length,dlcs:[...new Set(rows.map(r=>r.bytes.length))].sort((a,b)=>a-b),distinctPayloads,medianGapMs:period,maxGapMs:maxGap,gapCandidate:period!==null&&gaps.length>=4&&maxGap>=2.5*period&&maxGap>period+5};
+  return {id,extended:rows[0].extended,count:rows.length,dlcs:[...new Set(rows.map(r=>r.bytes.length))].sort((a,b)=>a-b),distinctPayloads,medianGapMs:period,maxGapMs:maxGap,gapCandidate:period!==null&&gaps.length>=4&&maxGap>=3*period&&maxGap>period+5};
  }).sort((a,b)=>b.count-a.count||a.id.localeCompare(b.id));
  const times=frames.filter(f=>f.time!==null).map(f=>f.time);
  return {frameCount:frames.length,uniqueIds:ids.length,ids,durationSeconds:times.length>=2?Math.max(...times)-Math.min(...times):null,observedInterfaces:[...new Set(frames.map(f=>f.interface))],suspectedGaps:ids.filter(x=>x.gapCandidate).length};
