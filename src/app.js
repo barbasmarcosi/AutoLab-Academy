@@ -3,7 +3,9 @@ import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{parseCandump,analyzeCanFrames,sampleCandump,decodeSyntheticSample,MAX_CAN_INPUT}from'./can-lab.js';
 import{loadDbc,decodeFramesWithDbc,MAX_DBC_BYTES}from'./dbc-lab.js';
+import{BMS_SCENARIOS,generateSyntheticBms,parseBmsCsv,formatBmsCsv,analyzeBms,bmsQuestion,capacitySohPct,MAX_BMS_FILE_BYTES}from'./bms-lab.js';
 const cases=[...baseCases,...additionalCases];
+let bmsState={scenarioId:'nominal',dataset:generateSyntheticBms('nominal'),capacityAh:60,initialSocPct:100,biasCorrectionA:0,answer:'',feedback:'',name:'Ejemplo nominal',fullCapacityAh:48,baselineCapacityAh:60};
 let labState={mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,circuitLoaded:false,answer:'',feedback:'',dbc:null,dbcLabel:'',dbcError:'',dbcAnswer:'',dbcFeedback:''};
 import{emptyProgress,scoreExam,scheduleReview,dueReviews,completedTopics,calculateCase,loadProgress,saveProgress,serializeBackup,parseBackup}from'./core.js';
 const root=document.getElementById('app');
@@ -16,7 +18,7 @@ function toast(message,error=false){document.querySelectorAll('.toast').forEach(
 async function persist(){try{await saveProgress(data);}catch(e){toast('No se pudieron guardar los cambios: '+e.message,true);}}
 function nav(next){page=next;exam=null;training=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1>'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const menus=[['home','Panel'],['learn','Academia'],['exams','Exámenes'],['cases','Taller virtual'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 0.3</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
+function layout(body){const menus=[['home','Panel'],['learn','Academia'],['exams','Exámenes'],['cases','Taller virtual'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 0.4</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=dueReviews(data).length;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
 function learn(){return heading('ACADEMIA','Tu biblioteca técnica','Seis lecciones de introducción aplicada, con fuentes públicas. El programa crecerá por etapas.')+'<section class="cards">'+lessons.map(l=>'<article class="panel lesson-card"><div><span class="tag dim">'+esc(tracks.find(t=>t.id===l.topic)?.title)+'</span><h3>'+esc(l.title)+'</h3><p class="muted">'+l.minutes+' minutos estimados</p></div>'+button('Estudiar','lesson','data-id="'+attr(l.id)+'"','alt')+'</article>').join('')+'</section>';}
 function lessonView(){const l=lessons.find(x=>x.id===selectedLesson);if(!l)return learn();return button('← Volver a academia','nav','data-id="learn"','alt small')+'<div class="section"></div>'+heading('LECCIÓN · '+l.topic.toUpperCase(),l.title,'Lectura orientada a diagnóstico y evidencia.')+'<article class="panel lesson-body">'+l.sections.map(([h,t])=>'<h2>'+esc(h)+'</h2><p>'+esc(t)+'</p>').join('')+'<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+link(l.url,'Abrir fuente y lecturas relacionadas')+'<div class="section">'+button('Registrar lectura y volver','complete-lesson','data-id="'+attr(l.id)+'"')+'</div></article>';}
@@ -84,10 +86,79 @@ function canTableRows(){
  const batch=frames.slice(labState.offset,labState.offset+80);
  return batch.length?batch.map(f=>'<tr><td>'+esc(f.time===null?'—':f.time.toFixed(3))+'</td><td>'+esc(f.interface)+'</td><td><strong>'+esc(f.id)+'</strong></td><td>'+f.bytes.length+'</td><td class="mono">'+esc(f.bytes.map(v=>v.toString(16).toUpperCase().padStart(2,'0')).join(' '))+'</td></tr>').join(''):'<tr><td colspan="5">No hay mensajes con ese filtro.</td></tr>';
 }
+
+function bmsPlot(points,key,title,min,max,referenceKey=null){
+ const w=660,h=230,px=54,py=16,cw=570,ch=164;
+ const values=points.map(p=>p[key]).filter(Number.isFinite),ref=referenceKey?points.map(p=>p[referenceKey]).filter(Number.isFinite):[];
+ if(!values.length)return '<div class="panel"><p>No hay datos para graficar.</p></div>';
+ const all=[...values,...ref];
+ const lo=min===null?Math.min(...all):min,hi=max===null?Math.max(...all):max;
+ const range=Math.max(1e-9,hi-lo);
+ const t0=points[0].t_s,t1=points.at(-1).t_s,dt=Math.max(1e-9,t1-t0);
+ const scaleX=t=>px+((t-t0)/dt)*cw;
+ const scaleY=v=>py+ch-(v-lo)/range*ch;
+ const path=k=>points.filter(p=>Number.isFinite(p[k])).map((p,i)=>(i===0?'M':'L')+scaleX(p.t_s).toFixed(2)+' '+scaleY(p[k]).toFixed(2)).join(' ');
+ return '<div class="panel"><h3>'+esc(title)+'</h3><svg class="bms-chart" role="img" aria-label="'+esc(title)+'; curva basada en muestras del laboratorio" viewBox="0 0 '+w+' '+h+'">'+
+ '<rect x="'+px+'" y="'+py+'" width="'+cw+'" height="'+ch+'" rx="7" fill="#0a1928"/>'+
+ [0,0.25,0.5,0.75,1].map(f=>{const y=py+ch*(1-f);return '<line x1="'+px+'" y1="'+y.toFixed(1)+'" x2="'+(px+cw)+'" y2="'+y.toFixed(1)+'" stroke="#304b62" stroke-width="1"/><text x="'+(px-7)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="11" fill="#a9becf">'+(lo+range*f).toFixed(1)+'</text>';}).join('')+
+ '<path d="'+path(key)+'" stroke="#65dfc5" fill="none" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'+
+ (referenceKey&&ref.length?'<path d="'+path(referenceKey)+'" stroke="#ffb76a" fill="none" stroke-dasharray="7 5" stroke-width="2.5"/>':'')+
+ '<text x="'+px+'" y="'+(h-10)+'" font-size="11" fill="#a9becf">'+(t0/3600).toFixed(2)+' h</text>'+
+ '<text x="'+(px+cw)+'" y="'+(h-10)+'" text-anchor="end" font-size="11" fill="#a9becf">'+(t1/3600).toFixed(2)+' h</text></svg>'+
+ '<p class="muted small"><span style="color:var(--mint)">━━</span> Estimación/medición'+(referenceKey&&ref.length?' · <span style="color:var(--amber)">┅┅</span> Referencia sintética':'')+'</p></div>';
+}
+function bmsView(){
+ const scenario=BMS_SCENARIOS.find(x=>x.id===bmsState.scenarioId);
+ const result=analyzeBms(bmsState.dataset.rows,{capacityAh:bmsState.capacityAh,initialSocPct:bmsState.initialSocPct,biasCorrectionA:bmsState.biasCorrectionA});
+ const q=bmsState.dataset.scenarioId?bmsQuestion(bmsState.dataset.scenarioId):null;
+ const net=n=>Number(n).toFixed(2);
+ let body=heading('BATERÍAS Y BMS','Laboratorio de estimación SOC/SOH','Curvas, integración de corriente y fallas sintéticas. Los modelos físicos más avanzados se ejecutan con PyBaMM fuera del navegador.');
+ body+='<div class="notice"><strong>Laboratorio educativo, no instrumento de diagnóstico HV.</strong> Las señales son virtuales o provienen de CSV aportados por el usuario; no se verifica procedencia, química, calibración ni condiciones de ensayo. No abrir ni medir paquetes de alta tensión como parte de esta actividad.</div>';
+ body+='<div class="grid two" style="margin-top:18px"><div class="panel"><h3>Escenario didáctico</h3><label for="bms-scenario">Conjunto de datos</label><select class="field" id="bms-scenario">'+
+ BMS_SCENARIOS.map(x=>'<option value="'+x.id+'" '+(x.id===bmsState.scenarioId?'selected':'')+'>'+esc(x.title)+'</option>').join('')+'</select>'+
+ '<p class="muted small">'+esc(scenario?.description||'Captura CSV personalizada')+'</p>'+
+ '<div class="row">'+button('Restaurar muestra','bms-reset','','alt')+'<label for="bms-file" class="button">Importar CSV</label><input type="file" id="bms-file" class="sr-only" accept=".csv,text/csv"></div>'+
+ '<p class="muted small">Formato: t_s,current_a,voltage_v y opcional soc_reference_pct. Corriente positiva = descarga. Hasta 2000 filas / 500 KB; se procesa solo en este navegador.</p>'+
+ button('Descargar CSV del escenario','bms-export','','alt small')+
+ '<p class="muted small">Origen: '+esc(bmsState.dataset.source)+'</p></div>'+
+ '<div class="panel"><h3>Parámetros del estimador</h3>'+
+ '<label for="bms-capacity">Capacidad supuesta (Ah)</label><input class="field" id="bms-capacity" type="number" min="0.1" max="2000" step="0.1" value="'+bmsState.capacityAh+'">'+
+ '<label for="bms-initial">SOC inicial supuesto (%)</label><input class="field" id="bms-initial" type="number" min="0" max="100" step="1" value="'+bmsState.initialSocPct+'">'+
+ '<label for="bms-bias">Corrección de sesgo sensor (A)</label><input class="field" id="bms-bias" type="number" min="-50" max="50" step="0.1" value="'+bmsState.biasCorrectionA+'">'+
+ '<div class="row" style="margin-top:15px">'+button('Recalcular curva','bms-recalculate')+'</div>'+
+ '<p class="muted small">Integración trapezoidal: SOC(t) = SOC₀ − ∫ I(t)dt / capacidad. No estima la capacidad real a partir de una descarga parcial.</p></div></div>';
+ body+='<div class="section"><h2>Resultados de la simulación o captura</h2></div><div class="grid">'+
+ [['SOC calculado',net(result.finalSocPct)+'%'],['Descarga acumulada',net(result.dischargeAh)+' Ah'],['Error frente a referencia',result.finalErrorPp===null?'Sin referencia':(result.finalErrorPp>=0?'+':'')+net(result.finalErrorPp)+' pp']].map(([label,value])=>'<div class="panel"><div class="stat-number">'+esc(value)+'</div><div class="stat-label">'+esc(label)+'</div></div>').join('')+'</div>';
+ if(result.warnings.length)body+='<div class="notice" style="margin-top:16px">'+result.warnings.map(w=>esc(w)).join(' ')+'</div>';
+ body+='<div class="grid two" style="margin-top:17px">'+bmsPlot(result.series,'soc_est_pct','Evolución SOC estimado (%)',0,100,'soc_reference_pct')+
+ bmsPlot(result.series,'voltage_v','Tensión registrada (V)',null,null)+'</div>';
+ body+='<div class="panel" style="margin-top:16px"><h3>Estado de salud por capacidad (SOH) — cálculo independiente</h3>'+
+ '<p class="muted">El SOH por capacidad requiere un ensayo <strong>completo, comparable y validado externamente</strong>. No surge automáticamente de las curvas anteriores.</p><div class="grid two">'+
+ '<div><label for="bms-full-measured">Capacidad útil en ensayo completo (Ah)</label><input id="bms-full-measured" class="field" type="number" min="0.01" step="0.1" value="'+bmsState.fullCapacityAh+'"></div>'+
+ '<div><label for="bms-full-new">Capacidad de referencia del ensayo (Ah)</label><input id="bms-full-new" class="field" type="number" min="0.01" step="0.1" value="'+bmsState.baselineCapacityAh+'"></div></div>'+
+ '<div class="row" style="margin-top:14px">'+button('Calcular relación de capacidades','bms-soh')+'<strong id="bms-soh-result">Ejemplo: '+net(capacitySohPct(bmsState.fullCapacityAh,bmsState.baselineCapacityAh))+'%</strong></div>'+
+ '<p class="muted small">Ejemplo ilustrativo. No constituye un SOH certificado; otras definiciones usan resistencia, energía, temperatura y condiciones de prueba distintas.</p></div>';
+ if(q){
+  body+='<div class="section"><h2>Desafío de diagnóstico BMS</h2></div><div class="panel"><span class="tag amber">PRÁCTICA SINTÉTICA</span><h3>'+esc(q.prompt)+'</h3>'+
+  '<div class="stack">'+q.options.map(([id,label])=>'<label class="option"><input type="radio" name="bms-answer" value="'+esc(id)+'" '+(bmsState.answer===id?'checked':'')+'>'+esc(label)+'</label>').join('')+'</div>'+
+  '<div class="row" style="margin-top:15px">'+button('Corregir desafío','bms-grade')+'</div>'+
+  (bmsState.feedback?'<div class="result">'+esc(bmsState.feedback)+'</div>':'')+'</div>';
+ }else{
+  body+='<div class="panel" style="margin-top:17px"><h3>Importación personalizada</h3><p class="muted">No se asigna una respuesta correcta sin conocer el origen y las condiciones de este conjunto de datos. Podés investigar sus curvas, pero una respuesta oficial sería especulativa.</p></div>';
+ }
+ body+='<div class="section"><h2>Modelado físico con PyBaMM</h2></div>'+
+ '<div class="panel"><p>AutoLab <strong>no implementa por su cuenta un modelo electroquímico</strong>. Para modelos SPM/DFN, utilizá el script complementario en Python con PyBaMM, exportá su serie temporal a CSV y cargala en este laboratorio.</p>'+
+ '<div class="row"><a class="button alt" href="https://github.com/barbasmarcosi/AutoLab-Academy/blob/main/tools/pybamm_export.py" target="_blank" rel="noopener noreferrer">Ver script PyBaMM</a>'+
+ '<a class="button alt" href="https://docs.pybamm.org/" target="_blank" rel="noopener noreferrer">Documentación oficial</a></div>'+
+ '<p class="muted small">El modelo científico corre fuera de la PWA. Una exportación sin SOC de referencia se muestra únicamente como estimación por integración; jamás se atribuye una curva sintética a PyBaMM.</p></div>';
+ return body;
+}
+
 function labView(){
  const mode=labState.mode;
  let body=heading('LABORATORIOS','Instrumentación y simulación','Entornos de entrenamiento. CAN es lectura de archivos sin conexión; CircuitJS es una herramienta externa y requiere Internet.');
- body+='<div class="row" style="margin:0 0 22px">'+button('Analizador CAN','lab-mode','data-id="can"',mode==='can'?'':'alt')+button('Circuitos con CircuitJS','lab-mode','data-id="circuit"',mode==='circuit'?'':'alt')+'</div>';
+ body+='<div class="row" style="margin:0 0 22px">'+button('Analizador CAN','lab-mode','data-id="can"',mode==='can'?'':'alt')+button('Baterías / BMS','lab-mode','data-id="bms"',mode==='bms'?'':'alt')+button('Circuitos con CircuitJS','lab-mode','data-id="circuit"',mode==='circuit'?'':'alt')+'</div>';
+ if(mode==='bms')return body+bmsView();
  if(mode==='circuit'){
   body+='<div class="panel"><span class="tag dim">HERRAMIENTA EXISTENTE · EXTERNA</span><h2>Simulador CircuitJS1 / Falstad</h2>'+
   '<p class="muted">Estudiá circuitos de 12 V, divisores resistivos, transistores y señales. El motor pertenece a CircuitJS; AutoLab no lo reimplementa.</p>'+
@@ -178,6 +249,22 @@ if(event.target.id==='dbc-file'){
   toast('DBC cargado; las señales se interpretan en el navegador.');
  }).catch(error=>{labState.dbcError=String(error.message||error);render();toast('No se pudo interpretar el DBC',true);});
 }
+if(event.target.name==='bms-answer'){bmsState.answer=event.target.value;}
+if(event.target.id==='bms-scenario'){
+ bmsState.scenarioId=event.target.value;
+ bmsState.dataset=generateSyntheticBms(bmsState.scenarioId);
+ bmsState.capacityAh=60;bmsState.initialSocPct=100;bmsState.biasCorrectionA=0;
+ bmsState.answer='';bmsState.feedback='';bmsState.name='Escenario sintético';
+ render();
+}
+if(event.target.id==='bms-file'){
+ const file=event.target.files?.[0];if(!file)return;
+ if(file.size>MAX_BMS_FILE_BYTES){toast('CSV superior a 500 KB',true);return;}
+ file.text().then(t=>{
+  bmsState.dataset=parseBmsCsv(t);bmsState.scenarioId='';bmsState.name=file.name.slice(0,100);bmsState.answer='';bmsState.feedback='';
+  render();toast('Archivo BMS analizado localmente: '+bmsState.dataset.rows.length+' muestras.');
+ }).catch(error=>toast('CSV incompatible: '+String(error?.message||error),true));
+}
 if(event.target.id==='can-file'){
  const file=event.target.files?.[0];if(!file)return;
  if(file.size>MAX_CAN_INPUT){toast('El archivo supera 1 MB',true);return;}
@@ -207,7 +294,44 @@ case'lab-grade-dbc':{
  data.cases=data.cases.slice(-500);await persist();render();break;
 }
 case'lab-clear-dbc':labState.dbc=null;labState.dbcLabel='';labState.dbcError='';labState.dbcAnswer='';labState.dbcFeedback='';render();break;
-case'lab-mode':labState.mode=id==='circuit'?'circuit':'can';render();break;
+case'bms-reset':
+ bmsState.dataset=generateSyntheticBms(bmsState.scenarioId||'nominal');bmsState.scenarioId=bmsState.dataset.scenarioId;
+ bmsState.capacityAh=60;bmsState.initialSocPct=100;bmsState.biasCorrectionA=0;bmsState.answer='';bmsState.feedback='';
+ render();break;
+case'bms-recalculate':{
+ const capacity=Number(document.getElementById('bms-capacity')?.value),initial=Number(document.getElementById('bms-initial')?.value),bias=Number(document.getElementById('bms-bias')?.value);
+ try{
+  analyzeBms(bmsState.dataset.rows,{capacityAh:capacity,initialSocPct:initial,biasCorrectionA:bias});
+  bmsState.capacityAh=capacity;bmsState.initialSocPct=initial;bmsState.biasCorrectionA=bias;render();
+ }catch(error){toast(String(error.message||error),true);}
+ break;
+}
+case'bms-soh':{
+ const measured=Number(document.getElementById('bms-full-measured')?.value),baseline=Number(document.getElementById('bms-full-new')?.value);
+ try{
+  const pct=capacitySohPct(measured,baseline);
+  bmsState.fullCapacityAh=measured;bmsState.baselineCapacityAh=baseline;
+  const el=document.getElementById('bms-soh-result');if(el)el.textContent=pct.toFixed(2)+'% (cálculo ilustrativo)';
+ }catch(error){toast(String(error.message||error),true);}
+ break;
+}
+case'bms-grade':{
+ const q=bmsState.dataset.scenarioId?bmsQuestion(bmsState.dataset.scenarioId):null;
+ if(!q||!bmsState.answer){toast('Elegí una opción antes de corregir.');break;}
+ const ok=q.answer===bmsState.answer;
+ bmsState.feedback=(ok?'Correcto. ':'Revisá tu hipótesis. ')+q.explanation;
+ data.cases.push({id:'lab-bms-'+bmsState.dataset.scenarioId+'-v1',score:ok?100:0,at:new Date().toISOString(),conclusion:bmsState.answer});
+ data.cases=data.cases.slice(-500);await persist();render();break;
+}
+case'bms-export':{
+ const text=formatBmsCsv(bmsState.dataset.rows);
+ const blob=new Blob([text],{type:'text/csv;charset=utf-8'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='autolab-bms-'+(bmsState.dataset.scenarioId||'captura')+'.csv';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);break;
+}
+
+case'lab-mode':labState.mode=id==='circuit'?'circuit':id==='bms'?'bms':'can';render();break;
 case'lab-toggle-circuit':labState.circuitLoaded=!labState.circuitLoaded;render();break;
 case'lab-sample':labState={...labState,mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,answer:'',feedback:''};render();break;
 case'lab-prev':labState.offset=Math.max(0,labState.offset-80);render();break;
