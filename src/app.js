@@ -2,8 +2,9 @@ import{tracks,lessons,questions,cases as baseCases,resources}from'./content.js';
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{parseCandump,analyzeCanFrames,sampleCandump,decodeSyntheticSample,MAX_CAN_INPUT}from'./can-lab.js';
+import{loadDbc,decodeFramesWithDbc,MAX_DBC_BYTES}from'./dbc-lab.js';
 const cases=[...baseCases,...additionalCases];
-let labState={mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,circuitLoaded:false,answer:'',feedback:''};
+let labState={mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,circuitLoaded:false,answer:'',feedback:'',dbc:null,dbcLabel:'',dbcError:''};
 import{emptyProgress,scoreExam,scheduleReview,dueReviews,completedTopics,calculateCase,loadProgress,saveProgress,serializeBackup,parseBackup}from'./core.js';
 const root=document.getElementById('app');
 let data=emptyProgress();let page='home';let selectedLesson=null;let exam=null;let training=null;let examResult=null;let caseResult=null;
@@ -112,7 +113,31 @@ function labView(){
  ].map(([n,label])=>'<div class="panel"><div class="stat-number">'+n+'</div><div class="stat-label">'+esc(label)+'</div></div>').join('')+'</div>'+
  '<div class="panel" style="margin-top:14px"><p class="muted">Duración observada: '+(stats.durationSeconds===null?'sin timestamps':stats.durationSeconds.toFixed(3)+' s')+' · Canales: '+esc(stats.observedInterfaces.join(', ')||'ninguno')+'</p>'+
  '<p class="muted small">La separación temporal refleja timestamps del registro, no prueba pérdidas en la red. Los ID y la carga útil no identifican por sí solos sensores ni causas.</p></div>';
- body+='<div class="section"><h2>Análisis de mensajes por ID</h2></div><div class="grid two">'+stats.ids.slice(0,30).map(x=>
+ body+='<div class="section"><h2>Decodificación DBC real</h2></div>'+
+ '<div class="panel"><div class="row spaced"><div><h3>Interpretar señales CAN mediante un archivo DBC</h3><p class="muted">Motor de terceros: Candied 2.2.0. Los mensajes se interpretan solo si el archivo DBC cargado define ese ID y sus señales. No presupone equivalencias entre marcas.</p></div>'+
+ (labState.dbc?'<span class="tag">DBC activo</span>':'<span class="tag dim">Sin DBC</span>')+'</div>'+
+ '<div class="row">'+button('Cargar DBC didáctico','lab-load-dbc-sample','','alt')+
+ '<label class="button" for="dbc-file">Importar archivo .dbc</label><input id="dbc-file" class="sr-only" type="file" accept=".dbc,text/plain">'+
+ (labState.dbc?button('Quitar DBC','lab-clear-dbc','','alt'):'')+'</div>'+
+ '<p class="muted small">Se procesa íntegramente en este navegador (máximo 600 KB). No almacena tu DBC ni lo envía a un servidor. La integración admite los formatos compatibles con Candied; revisá sus límites antes de analizar señales importantes.</p>'+
+ (labState.dbc?'<p><strong>Base seleccionada: '+esc(labState.dbcLabel)+'</strong></p>':'')+
+ (labState.dbcError?'<div class="notice">'+esc(labState.dbcError)+'</div>':'')+'</div>';
+if(labState.dbc){
+ let report;
+ try{report=decodeFramesWithDbc(labState.dbc,labState.capture.frames,400);}catch(e){report={decoded:[],missing:[],errors:[],errorCount:0,examined:0};}
+ const rows=report.decoded.slice(0,60);
+ body+='<div class="panel" style="margin-top:14px"><div class="row spaced"><h3>Valores interpretados con la base cargada</h3><span class="tag dim">'+report.decoded.length+' tramas decodificadas</span></div>'+
+ '<p class="muted small">Analiza como máximo las primeras '+report.examined+' tramas de la captura; presenta 60 filas. Sin definición DBC no es posible inferir unidades, escalas ni semántica.</p>'+
+ (report.missing.length?'<p class="muted small">IDs sin definición: '+esc(report.missing.slice(0,20).join(', '))+(report.missing.length>20?'…':'')+'</p>':'')+
+ (report.errorCount?'<div class="notice">'+report.errorCount+' tramas no se pudieron decodificar con este DBC; comprobá formato y DLC.</div>':'')+
+ '<div class="table-wrap"><table class="frame-table"><thead><tr><th>ID</th><th>Mensaje</th><th>Señales según DBC</th></tr></thead><tbody>'+
+ (rows.length?rows.map(r=>'<tr><td class="mono">0x'+esc(r.id)+'</td><td>'+esc(r.message)+'</td><td>'+r.signals.map(sig=>'<div><strong>'+esc(sig.name)+'</strong>: '+esc(sig.physical)+'</div>').join('')+'</td></tr>').join(''):'<tr><td colspan="3">No hay tramas decodificables con la base actual.</td></tr>')+
+ '</tbody></table></div>'+
+ (labState.sample&&report.decoded.some(r=>r.id==='120')?'<p class="muted">Ejercicio: con la DBC didáctica cargada, compará la primera lectura EngineRPM con el valor bruto little-endian de la trama 0x120. ¿Por qué 0,25 es el factor?</p>':'')+
+ '</div>';
+}
+
+body+='<div class="section"><h2>Análisis de mensajes por ID</h2></div><div class="grid two">'+stats.ids.slice(0,30).map(x=>
  '<div class="panel"><div class="row spaced"><h3>0x'+esc(x.id)+'</h3><span class="tag dim">'+x.count+' tramas</span></div><p class="muted small">DLC: '+esc(x.dlcs.join(', '))+' · Cargas distintas: '+x.distinctPayloads+'</p>'+
  '<p class="muted small">Intervalo mediano: '+(x.medianGapMs===null?'N/D':x.medianGapMs.toFixed(1)+' ms')+' · Máximo: '+(x.maxGapMs===null?'N/D':x.maxGapMs.toFixed(1)+' ms')+'</p>'+
  '<p class="'+(x.gapCandidate?'outcome-bad':'muted')+' small">'+(x.gapCandidate?'Pausa inusual por heurística: investigar':'Sin pausa marcada por la heurística')+'</p></div>').join('')+'</div>';
@@ -143,6 +168,15 @@ document.addEventListener('change',event=>{if(event.target.name==='answer'&&exam
  labState.selectedId=event.target.value;labState.offset=0;render();
 }
 if(event.target.id==='lab-answer'){labState.answer=event.target.value;}
+if(event.target.id==='dbc-file'){
+ const file=event.target.files?.[0];if(!file)return;
+ if(file.size>MAX_DBC_BYTES){toast('La base DBC supera 600 KB',true);return;}
+ file.text().then(t=>{
+  const parsed=loadDbc(t);
+  labState.dbc=parsed;labState.dbcLabel=file.name.slice(0,100);labState.dbcError='';render();
+  toast('DBC cargado; las señales se interpretan en el navegador.');
+ }).catch(error=>{labState.dbcError=String(error.message||error);render();toast('No se pudo interpretar el DBC',true);});
+}
 if(event.target.id==='can-file'){
  const file=event.target.files?.[0];if(!file)return;
  if(file.size>MAX_CAN_INPUT){toast('El archivo supera 1 MB',true);return;}
@@ -154,7 +188,17 @@ if(event.target.id==='can-file'){
  }).catch(error=>toast('No se pudo analizar la captura: '+error.message,true));
 }
 if(event.target.id==='import-file'){const file=event.target.files?.[0];if(!file)return;if(file.size>2000000){toast('Archivo demasiado grande',true);return;}file.text().then(async text=>{const recovered=parseBackup(text);if(!confirm('¿Restaurar el respaldo y reemplazar todos los datos actuales?'))return;await saveProgress(recovered);data=recovered;nav('home');toast('Respaldo restaurado correctamente');}).catch(e=>toast('No se pudo importar: '+e.message,true));}});
-document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const act=target.dataset.action;const id=target.dataset.id;switch(act){case'nav':selectedLesson=null;nav(id);break;case'lab-mode':labState.mode=id==='circuit'?'circuit':'can';render();break;
+document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const act=target.dataset.action;const id=target.dataset.id;switch(act){case'nav':selectedLesson=null;nav(id);break;case'lab-load-dbc-sample':{
+ try{
+  const r=await fetch('./samples/autolab-synthetic.dbc');
+  if(!r.ok)throw Error('No se encuentra el DBC de ejemplo ('+r.status+')');
+  labState.dbc=loadDbc(await r.text());
+  labState.dbcLabel='AutoLab synthetic v1 (educativa)';labState.dbcError='';render();toast('DBC didáctico cargado.');
+ }catch(e){labState.dbcError=String(e?.message||e);render();toast('Error al cargar DBC sintético',true);}
+ break;
+}
+case'lab-clear-dbc':labState.dbc=null;labState.dbcLabel='';labState.dbcError='';render();break;
+case'lab-mode':labState.mode=id==='circuit'?'circuit':'can';render();break;
 case'lab-toggle-circuit':labState.circuitLoaded=!labState.circuitLoaded;render();break;
 case'lab-sample':labState={...labState,mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,answer:'',feedback:''};render();break;
 case'lab-prev':labState.offset=Math.max(0,labState.offset-80);render();break;
