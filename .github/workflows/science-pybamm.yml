@@ -36,6 +36,7 @@ jobs:
           mkdir -p science-output
           python tools/pybamm_export.py --model spm --duration 600 --output science-output/pybamm-spm.csv
           python tools/pybamm_export.py --model dfn --duration 600 --output science-output/pybamm-dfn.csv
+          python -m pip freeze > science-output/python-environment.txt
       - uses: actions/upload-artifact@v4
         with:
           name: autolab-pybamm-validated-csv
