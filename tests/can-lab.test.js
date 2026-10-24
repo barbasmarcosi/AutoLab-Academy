@@ -19,6 +19,7 @@ test('candump: muestra sintética reproducible, detector estadístico y decodifi
  const p=parseCandump(sampleCandump()),stats=analyzeCanFrames(p.frames);
  assert.equal(p.skipped,0);assert.equal(stats.uniqueIds,2);assert.equal(stats.frameCount,54);
  assert(stats.ids.find(x=>x.id==='120').gapCandidate);
+ assert.equal(stats.ids.find(x=>x.id==='220').gapCandidate,false);
  const rpm=decodeSyntheticSample(p.frames);
  assert.equal(rpm.length,36);assert(rpm.every(x=>x.rpm>=780&&x.rpm<=885));
 });
