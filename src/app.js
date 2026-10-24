@@ -105,7 +105,7 @@ function bmsPlot(points,key,title,min,max,referenceKey=null){
  (referenceKey&&ref.length?'<path d="'+path(referenceKey)+'" stroke="#ffb76a" fill="none" stroke-dasharray="7 5" stroke-width="2.5"/>':'')+
  '<text x="'+px+'" y="'+(h-10)+'" font-size="11" fill="#a9becf">'+(t0/3600).toFixed(2)+' h</text>'+
  '<text x="'+(px+cw)+'" y="'+(h-10)+'" text-anchor="end" font-size="11" fill="#a9becf">'+(t1/3600).toFixed(2)+' h</text></svg>'+
- '<p class="muted small"><span style="color:var(--mint)">━━</span> Estimación/medición'+(referenceKey&&ref.length?' · <span style="color:var(--amber)">┅┅</span> Referencia sintética':'')+'</p></div>';
+ '<p class="muted small"><span style="color:var(--mint)">━━</span> Estimación/medición'+(referenceKey&&ref.length?' · <span style="color:var(--amber)">┅┅</span> '+(bmsState.dataset.scenarioId?'Referencia sintética':'Referencia declarada (sin verificar)'):'')+'</p></div>';
 }
 function bmsView(){
  const scenario=BMS_SCENARIOS.find(x=>x.id===bmsState.scenarioId);
