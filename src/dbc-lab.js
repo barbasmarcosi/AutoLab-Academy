@@ -20,10 +20,10 @@ export function decodeFramesWithDbc(loaded,frames,limit=400){
  const decoded=[],errors=[],missing=new Set();
  for(const frame of frames.slice(0,Math.max(0,Math.min(limit,400)))){
   try{
-   const raw=loaded.decoder.createFrame(frame.idNumber,frame.bytes);
+   const raw=loaded.decoder.createFrame(frame.idNumber,frame.bytes,Boolean(frame.extended));
    const msg=loaded.decoder.decode(raw);
    if(!msg){missing.add('0x'+frame.id);continue;}
-   let signals=msg.signals;
+   let signals=msg.boundSignals;
    if(signals instanceof Map)signals=[...signals.entries()];
    else if(signals&&typeof signals==='object')signals=Object.entries(signals);
    else signals=[];
