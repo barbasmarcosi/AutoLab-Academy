@@ -4,8 +4,9 @@ PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y
 
 ## Qué está implementado
 
-- Academia con 36 lecciones, 100 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
-- Itinerario de cuatro niveles (fundamentos, diagnóstico aplicado y ECUs), progreso de lectura y evaluación separados, con siguiente lección recomendada.
+- Academia con 41 lecciones, 110 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
+- Itinerario de cinco niveles (fundamentos, diagnóstico aplicado y ECUs), progreso de lectura y evaluación separados, con siguiente lección recomendada.
+- **Diagnóstico diferencial:** tres investigaciones con dos posibles fallas cada una, observaciones/curvas idénticas que requieren pruebas discriminantes, pronósticos previos e informe reproducible, sin diagnósticos OEM.
 - **Banco ECU** con cinco casos sintéticos, pronóstico antes de observar, elección de pruebas confirmatorias, justificación e informe descargable.
 - Taller virtual con 15 casos de una falla y 3 escenarios de **dos fallas simultáneas**; hipótesis previas, evidencias independientes, corrección y exportación de informes. Las cifras son educativas y requieren revisión técnica externa.
 - **Retos de medición:** cinco ejercicios parametrizados, uno por área, con resultados numéricos, elección de mediciones y argumentación técnica; rúbrica objetiva, exportación Markdown e historial en los respaldos. La explicación escrita **no** se evalúa semánticamente.
@@ -57,4 +58,4 @@ Los escenarios son sintéticos y las mediciones no representan especificaciones 
 - La QA completa de interfaz y respaldos en Safari/iPhone sigue pendiente.
 - Falta generar y conservar un lockfile npm para reproducibilidad estricta del build. La versión científica directa está fijada; las dependencias transitivas quedan registradas por ejecución y aún requieren lockfile/constraints reproducibles.
 
-Documentación: [componentes y drivers](docs/COMPONENTS_V1.md), [banco ECU e itinerarios](docs/ECU_PATHS.md), [multifallas y portafolio](docs/MULTIFAULT_PORTFOLIO.md), [contenido y osciloscopio](docs/CURRICULUM_WAVEFORMS.md), [retos cuantitativos](docs/MEASUREMENT_CHALLENGES.md), [retención FSRS y migración](docs/FSRS_E1.md), [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).
+Documentación: [diagnóstico diferencial](docs/DIFFERENTIAL_V1_1.md), [componentes y drivers](docs/COMPONENTS_V1.md), [banco ECU e itinerarios](docs/ECU_PATHS.md), [multifallas y portafolio](docs/MULTIFAULT_PORTFOLIO.md), [contenido y osciloscopio](docs/CURRICULUM_WAVEFORMS.md), [retos cuantitativos](docs/MEASUREMENT_CHALLENGES.md), [retención FSRS y migración](docs/FSRS_E1.md), [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).
