@@ -33,3 +33,11 @@
 .portfolio-entry details{margin-top:10px}
 .portfolio-entry summary{cursor:pointer;color:var(--mint);padding:4px 0}
 .portfolio-entry details p{line-height:1.55;white-space:pre-wrap}
+
+/* v0.9 itinerary: compact, keyboard-reachable lessons and scrollable sidebar */
+.sidebar{overflow-y:auto;overscroll-behavior:contain}
+.path-lessons{display:grid;gap:8px;margin-top:16px}
+.path-lesson{display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid var(--line);border-radius:10px;background:rgba(8,24,39,.4);color:var(--ink);padding:10px 12px}
+.path-lesson:hover{border-color:var(--mint);background:#19354b}
+.path-lesson small{font-size:.75rem;color:var(--sub)}
+@media(max-width:560px){.path-lesson{grid-template-columns:20px minmax(0,1fr)}.path-lesson small{grid-column:2}.sidebar{overflow-y:visible}}
