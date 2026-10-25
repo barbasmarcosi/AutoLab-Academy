@@ -39,6 +39,14 @@ export function calculateCase(caseData,used,diagnosis){const options=used.map(id
 function openDB(){return new Promise((resolve,reject)=>{const request=indexedDB.open('autolab-academy',1);request.onupgradeneeded=()=>{request.result.createObjectStore('data')};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)});}
 async function dbOperation(mode,fn){const db=await openDB();try{return await new Promise((resolve,reject)=>{const tx=db.transaction('data',mode);const store=tx.objectStore('data');const r=fn(store);let value;r.onsuccess=()=>{value=r.result;};r.onerror=()=>reject(r.error);tx.oncomplete=()=>resolve(value);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});}finally{db.close();}}
 export async function loadProgress(){try{const raw=await dbOperation('readonly',s=>s.get('progress'));return raw?validateBackup(raw):emptyProgress();}catch(error){console.warn('No se pudo abrir progreso:',error);throw Error('No fue posible abrir el almacenamiento local. Revisá el modo privado o los permisos del navegador.');}}
-export async function saveProgress(progress){await dbOperation('readwrite',s=>s.put(validateBackup(progress),'progress'));}
+// All writes, including restores, share one FIFO queue. Failed operations do not
+// poison subsequent writes; caller still receives the original rejection.
+let writeQueue=Promise.resolve();
+export function saveProgress(progress){
+ const snapshot=validateBackup(progress);
+ const operation=writeQueue.then(()=>dbOperation('readwrite',s=>s.put(snapshot,'progress')));
+ writeQueue=operation.catch(()=>{});
+ return operation;
+}
 export function serializeBackup(progress){return JSON.stringify({format:'autolab-academy-backup',exportedAt:new Date().toISOString(),payload:validateBackup(progress)},null,2);}
 export function parseBackup(text){if(text.length>MAX_BACKUP_IMPORT_CHARS)throw Error('Archivo demasiado grande');const outer=JSON.parse(text);if(outer.format!=='autolab-academy-backup')throw Error('Formato de respaldo desconocido');return validateBackup(outer.payload);}

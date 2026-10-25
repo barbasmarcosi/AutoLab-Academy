@@ -104,3 +104,6 @@
 #main-content:focus{outline:none}
 #main-content:focus-visible{outline:3px solid var(--mint);outline-offset:-3px}
 @media(prefers-reduced-motion:reduce){.panel,.button{transition:none!important}}
+
+/* Solid color beneath decorative gradient: consistent contrast sampling on mobile WebKit. */
+body{background-color:var(--bg)}

@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.5 (actualización y recuperación): escrituras IndexedDB en secuencia, errores recuperables, upgrade de caché offline v26→v27 comprobado con SW real en navegador y emulación de iPhone/WebKit. Pendiente validación en iPhone físico y VoiceOver. Ver docs/OFFLINE_STORAGE_QA_V1_9_5.md.
+
+
 - v1.9.4 (respaldo y durabilidad): evita que un portafolio legítimo de hasta 500 expedientes choque prematuramente con el límite antiguo de 2 MB; se mantienen barreras de entrada. Guardado explícito de borrador con confirmación solo tras IndexedDB, y reinicio que no anuncia éxito si falló escribir. Ver docs/BACKUP_RELIABILITY_V1_9_4.md.
 
 - v1.9.3 (accesibilidad y compatibilidad de navegador): auditoría automatizada WCAG con axe, navegación por teclado con enlace de salto, retención de foco en formularios, ejecución E2E sobre Chromium y WebKit, y validación de caché PWA v25. Prueba manual Safari/iPhone/VoiceOver sigue pendiente.
