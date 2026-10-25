@@ -4,6 +4,8 @@ import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./
 const lessons=[...baseLessons,...additionalLessons],questions=[...baseQuestions,...additionalQuestions];
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
+import{multiFaultCases,evaluateMultiFault,multiFaultReport}from'./differential-lab.js';
+import{portfolioSnapshot,portfolioMarkdown}from'./portfolio.js';
 import{parseCandump,analyzeCanFrames,sampleCandump,decodeSyntheticSample,MAX_CAN_INPUT}from'./can-lab.js';
 import{loadDbc,decodeFramesWithDbc,MAX_DBC_BYTES}from'./dbc-lab.js';
 import{BMS_SCENARIOS,generateSyntheticBms,parseBmsCsv,formatBmsCsv,analyzeBms,bmsQuestion,capacitySohPct,MAX_BMS_FILE_BYTES}from'./bms-lab.js';
@@ -16,6 +18,7 @@ import{recordReview,selectCumulativeQuestions,reviewOverview}from'./repetition.j
 import{buildQuantitativeSession,parseNumericAnswer,gradeQuantitative,formatQuantitativeReport}from'./measurement-challenges.js';
 const root=document.getElementById('app');
 let quantitative=null;let quantitativeResults=null;
+let multiTraining=null,multiResult=null,portfolioFilter='all';
 let data=emptyProgress();let page='home';let selectedLesson=null;let exam=null;let training=null;let examResult=null;let caseResult=null;
 function esc(value){return String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));}
 function attr(value){return esc(value);}
@@ -23,9 +26,9 @@ function button(text,action,extra='',kind=''){return '<button class="button '+ki
 function link(url,label){return '<a target="_blank" rel="noopener noreferrer" href="'+attr(url)+'">'+esc(label)+'</a>';}
 function toast(message,error=false){document.querySelectorAll('.toast').forEach(n=>n.remove());const node=document.createElement('div');node.className='toast'+(error?' error':'');node.textContent=message;node.role='status';document.body.append(node);setTimeout(()=>node.remove(),4200);}
 async function persist(){try{await saveProgress(data);}catch(e){toast('No se pudieron guardar los cambios: '+e.message,true);}}
-function nav(next){page=next;exam=null;training=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
+function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1>'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const menus=[['home','Panel'],['learn','Academia'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 0.7</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
+function layout(body){const menus=[['home','Panel'],['learn','Academia'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 0.8</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
 function learn(){
  const done=lessons.filter(l=>Boolean(data.notes['lesson-'+l.id])).length;
@@ -183,13 +186,77 @@ function challengeSummary(){
  button('Volver','challenge-quit','','alt')+'</div>';
 }
 
+function multiView(){
+ const c=multiFaultCases.find(c=>c.id===multiTraining?.id);
+ if(!c)return caseMenu();
+ if(multiResult)return multiSummary(c);
+ const selection=(target,values)=>'<div class="stack">'+c.causes.map(([id,label])=>
+ '<label class="option"><input type="checkbox" name="'+target+'" value="'+attr(id)+'" '+(values.includes(id)?'checked':'')+'><span>'+esc(label)+'</span></label>').join('')+'</div>';
+ let html='<div class="row spaced"><span class="eyebrow">CASO MULTIFALLA · 2 CAUSAS SIMULTÁNEAS</span>'+button('Salir','multi-quit','','alt small')+'</div>'+
+ '<h1>'+esc(c.title)+'</h1><div class="panel"><h3>Situación del taller virtual</h3><p>'+esc(c.symptom)+'</p><p class="muted">'+esc(c.context)+'</p>'+
+ '<div class="notice">Todas las mediciones son sintéticas. Ninguna maniobra física ni inyección en vehículo real.</div></div>';
+ if(!multiTraining.started)return html+
+ '<div class="section"><h2>1. Planteá dos hipótesis iniciales</h2></div><div class="panel"><p class="muted">Antes de observar pruebas, elegí exactamente dos causas que podrían coexistir. Después podrás corregirlas al formular tu conclusión.</p>'+
+ selection('multi-initial',multiTraining.hypotheses)+button('Registrar hipótesis y habilitar instrumentos','multi-lock',multiTraining.hypotheses.length!==2?'disabled':'')+'</div>';
+ html+='<div class="section"><h2>2. Reuní pruebas independientes</h2></div><div class="grid two">'+c.probes.map(p=>
+ '<button class="probe panel" data-action="multi-probe" data-id="'+attr(p.id)+'" '+(multiTraining.used.includes(p.id)?'disabled':'')+'>'+esc(p.label)+(multiTraining.used.includes(p.id)?' ✓':'')+'</button>').join('')+'</div>'+
+ '<div class="section"><h2>Registro de mediciones</h2></div><div class="panel">'+(multiTraining.used.length?
+ multiTraining.used.map(id=>{const p=c.probes.find(x=>x.id===id);return '<div class="answer-card"><strong>'+esc(p.label)+'</strong><p class="muted">'+esc(p.result)+'</p></div>';}).join(''):
+ '<p class="muted">Todavía no tenés resultados; elegí las pruebas con mayor capacidad discriminante.</p>')+'</div>'+
+ '<div class="section"><h2>3. Diagnóstico final: dos causas</h2></div><div class="panel"><p>Hipótesis iniciales: '+multiTraining.hypotheses.map(id=>esc(c.causes.find(pair=>pair[0]===id)?.[1])).join(' y ')+'</p>'+
+ selection('multi-final',multiTraining.selected)+
+ '<label for="multi-reason"><strong>Explicá qué resultado respalda cada causa y cuál es el dato distractor</strong></label>'+
+ '<textarea id="multi-reason" class="field" maxlength="3000" rows="6" placeholder="Describe ambas fallas, dos evidencias independientes y por qué ninguna causa única explica todo.">'+esc(multiTraining.reasoning)+'</textarea>'+
+ '<p class="muted small">Mínimo 80 caracteres. La redacción se registra pero no se corrige semánticamente.</p>'+
+ button('Evaluar diagnóstico conjunto','multi-finish',(!multiTraining.used.length||multiTraining.selected.length!==2||multiTraining.reasoning.trim().length<80)?'disabled id="multi-submit"':'id="multi-submit"')+'</div>';
+ return html;
+}
+function multiSummary(c){
+ const r=multiResult;
+ return heading('EVALUACIÓN MULTIFALLA','Resultado: '+r.score+'/100','Se evalúan causas seleccionadas y pruebas independientes, no la calidad semántica de tu explicación.')+
+ '<div class="panel"><span class="tag '+(r.passed?'':'amber')+'">'+(r.passed?'Criterios estructurados alcanzados':'Requiere investigar nuevamente')+'</span>'+
+ '<p><strong>Identificación exacta de las dos causas:</strong> '+(r.exact?'sí':'no')+'</p>'+
+ '<p><strong>Causas respaldadas por evidencia independiente:</strong> '+r.proven.length+' de 2</p>'+
+ '<p><strong>Maniobra insegura:</strong> '+(r.unsafe?'sí':'no')+'</p>'+
+ '<div class="notice">'+esc(c.rationale)+'</div>'+
+ '<h3>Tu explicación</h3><p>'+esc(multiTraining.reasoning)+'</p>'+
+ '<p class="muted small">La explicación no ha sido verificada por un profesional. Esta evaluación no certifica competencia técnica.</p>'+
+ '<div class="row">'+button('Descargar informe de multifalla','multi-export')+
+ button('Volver al taller','multi-quit','','alt')+
+ button('Repetir caso','start-multi','data-id="'+attr(c.id)+'"','alt')+'</div></div>';
+}
+function portfolioView(){
+ const snap=portfolioSnapshot(data,lessons);
+ const visible=snap.events.filter(e=>portfolioFilter==='all'||(portfolioFilter==='exam'?e.kind==='exam':portfolioFilter==='lab'?e.kind==='lab':e.kind!=='exam'&&e.kind!=='lab')).slice(0,40);
+ const num=n=>String(n);
+ return heading('PORTAFOLIO','Evidencias de tu formación','Historial de simulaciones, repasos y lecturas guardado exclusivamente en este navegador; sin certificaciones ni afirmaciones de experiencia real.')+
+ '<div class="grid"><div class="panel"><div class="stat-number">'+num(snap.totals.exams)+'</div><div class="stat-label">Exámenes teóricos</div></div>'+
+ '<div class="panel"><div class="stat-number">'+num(snap.totals.practices)+'</div><div class="stat-label">Prácticas registradas</div></div>'+
+ '<div class="panel"><div class="stat-number">'+num(snap.totals.completedLessons)+'/'+num(snap.totals.knownLessons)+'</div><div class="stat-label">Lecciones registradas</div></div></div>'+
+ '<div class="panel" style="margin-top:14px"><h3>Registro profesional en formación</h3>'+
+ '<p class="muted">Las puntuaciones de exámenes, casos y laboratorios no son comparables y las justificaciones todavía requieren un revisor humano. El informe exporta solo lo registrado localmente.</p>'+
+ '<div class="row">'+button('Descargar portafolio Markdown','portfolio-export')+button('Respaldar JSON completo','nav','data-id="data"','alt')+'</div>'+
+ '<p class="muted small">Estudio estimado registrado: '+snap.totals.studyMinutes+' min · Preguntas programadas: '+snap.totals.reviewItems+' · Tarjetas FSRS: '+snap.totals.fsrsItems+'</p></div>'+
+ '<div class="section"><h2>Actividad reciente</h2></div>'+
+ '<div class="panel"><label for="portfolio-filter">Filtrar registros</label><select id="portfolio-filter" class="field">'+
+ [['all','Todos'],['exam','Exámenes'],['diagnostic','Diagnóstico y retos'],['lab','Laboratorios']].map(([id,label])=>'<option value="'+id+'" '+(portfolioFilter===id?'selected':'')+'>'+label+'</option>').join('')+'</select>'+
+ (visible.length?'<div class="portfolio-list">'+visible.map(e=>
+ '<div class="portfolio-entry"><div class="row spaced"><strong>'+esc(e.title)+'</strong><span class="tag dim">'+e.score+'/100</span></div>'+
+ '<p class="muted small">'+esc(e.at?.slice(0,10)||'sin fecha')+' · '+esc(e.kind)+'</p>'+
+ (e.evidence.length?'<p class="muted small">Pruebas: '+esc(e.evidence.join(', '))+'</p>':'')+
+ (e.reasoning?'<details><summary>Ver razonamiento registrado</summary><p>'+esc(e.reasoning)+'</p></details>':'')+
+ '</div>').join('')+'</div>':'<p class="muted">Todavía no hay actividades para este filtro.</p>')+'</div>'+
+ '<p class="muted small">Para exportar todos los registros disponibles, utilizá Descargar portafolio. El respaldo JSON original conserva el resto de tus datos.</p>';
+}
+
 function caseMenu(){
  const attempts=data.cases.length;
  const best=new Map();
  for(const row of data.cases) best.set(row.id,Math.max(best.get(row.id)||0,row.score));
  return heading('TALLER VIRTUAL','Laboratorio de diagnóstico','15 escenarios sintéticos. Formulá hipótesis ANTES de medir, contrastá evidencias y emití un informe. No equivale a práctica profesional real.')+
  '<div class="panel row spaced"><div><h3>'+cases.length+' casos disponibles</h3><p class="muted">'+attempts+' intentos registrados · Los resultados requieren revisión técnica externa.</p></div><span class="tag dim">Rúbrica por evidencias</span></div>'+
- '<div class="section"><h2>Elegí un problema</h2></div><div class="grid">'+cases.map(c=>
+ '<div class="section"><h2>Casos con dos fallas simultáneas</h2></div><div class="grid">'+multiFaultCases.map(c=>'<article class="panel"><span class="tag amber">Experto · multifalla</span><h3>'+esc(c.title)+'</h3><p class="muted">'+esc(c.symptom)+'</p>'+button('Investigar dos fallas','start-multi','data-id="'+attr(c.id)+'"')+'</article>').join('')+'</div>'+
+ '<div class="section"><h2>Casos de una falla</h2></div><div class="grid">'+cases.map(c=>
  '<article class="panel"><div class="row spaced"><span class="tag amber">'+esc(c.difficulty)+'</span><span class="muted small">'+esc(tracks.find(t=>t.id===c.topic)?.title||c.topic)+'</span></div><h3>'+esc(c.title)+'</h3><p class="muted">'+esc(c.symptom)+'</p>'+(best.has(c.id)?'<p class="muted small">Mejor puntaje: '+best.get(c.id)+'/100</p>':'')+button('Resolver caso','start-case','data-id="'+attr(c.id)+'"')+'</article>').join('')+'</div>';
 }
 function startCase(id){
@@ -419,8 +486,9 @@ body+='<div class="section"><h2>Análisis de mensajes por ID</h2></div><div clas
 
 function resourceView(){return heading('FUENTES Y HERRAMIENTAS','Biblioteca externa','Priorizamos documentación pública y software maduro. Algunos recursos requieren conexión o instalación en PC.')+'<section class="cards">'+resources.map(r=>'<div class="panel"><span class="tag dim">'+esc(r.topic)+'</span><h3>'+esc(r.title)+'</h3>'+link(r.url,'Abrir recurso oficial')+'</div>').join('')+'</section><div class="section"><h2>Laboratorios prácticos</h2></div><div class="panel"><p class="muted">Ya podés importar capturas candump y analizar una muestra CAN sintética; CircuitJS está disponible como herramienta externa integrada bajo demanda. PyBaMM continúa pendiente.</p>'+button('Ir a laboratorios','nav','data-id="labs"')+'</div>';}
 function dataView(){return heading('DATOS PERSONALES','Tu progreso te pertenece','Se guarda en IndexedDB de este navegador. Si cambiás de equipo o borrás datos del sitio, necesitás un respaldo.')+'<div class="grid two"><div class="panel"><h3>Exportar respaldo</h3><p class="muted">Descarga un JSON portable con intentos, resultados de casos, repeticiones y notas.</p>'+button('Descargar respaldo','export')+'</div><div class="panel"><h3>Importar respaldo</h3><p class="muted">Reemplaza el progreso local luego de validar el archivo. Guardá una copia antes de importar.</p><label class="button alt" for="import-file">Elegir archivo JSON</label><input class="sr-only" type="file" id="import-file" accept=".json,application/json"></div></div><div class="section"><h2>Notas privadas</h2></div><div class="panel"><label for="notebook">Hipótesis, dudas y procedimientos aprendidos</label><textarea class="field" id="notebook" maxlength="10000">'+esc(data.notes.general||'')+'</textarea><div class="row" style="margin-top:14px">'+button('Guardar notas','save-notes')+'</div></div><div class="section"><h2>Reinicio</h2></div><div class="panel"><p class="muted">Borrar todo es irreversible si no conservás una exportación.</p>'+button('Borrar progreso local','reset','','danger')+'</div>';}
-function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='cases'?(training?caseView():caseMenu()):page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
-document.addEventListener('input',event=>{
+function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
+document.addEventListener('input',event=>{if(event.target.id==='multi-reason'&&multiTraining){multiTraining.reasoning=event.target.value;const btn=document.getElementById('multi-submit');if(btn)btn.disabled=multiTraining.reasoning.trim().length<80||multiTraining.selected.length!==2||!multiTraining.used.length;return;}
+
  if(event.target.id==='wave-answer'){waveState.answer=event.target.value;return;}
  if(!quantitative||quantitativeResults)return;
  const id=event.target.id;
@@ -430,7 +498,16 @@ document.addEventListener('input',event=>{
  if(id==='quant-value')a.value=event.target.value;
  if(id==='quant-reason')a.reasoning=event.target.value;
 });
-document.addEventListener('change',event=>{if(event.target.id==='wave-scenario'){waveState={id:event.target.value,answer:'',result:null};render();}if(event.target.name==='quant-evidence'&&quantitative&&!quantitativeResults){const q=quantitative.items[quantitative.index];const a=quantitative.answers[q.id]||(quantitative.answers[q.id]={value:'',measurement:'',reasoning:''});a.measurement=event.target.value;}if(event.target.name==='answer'&&exam){exam.answers[exam.questions[exam.at].id]=Number(event.target.value);render();}if(event.target.name==='confidence'&&exam){exam.confidence[exam.questions[exam.at].id]=event.target.value;render();}if(event.target.id==='hypothesis'&&training){training.hypothesis=event.target.value;render();}if(event.target.id==='diagnosis'&&training){training.diagnosis=event.target.value;render();}if(event.target.id==='lab-id-filter'){
+document.addEventListener('change',event=>{if(event.target.id==='portfolio-filter'){portfolioFilter=event.target.value;render();return;}
+if((event.target.name==='multi-initial'||event.target.name==='multi-final')&&multiTraining&&!multiResult){
+ const collection=event.target.name==='multi-initial'?'hypotheses':'selected';
+ const values=new Set(multiTraining[collection]);
+ if(event.target.checked)values.add(event.target.value);else values.delete(event.target.value);
+ multiTraining[collection]=[...values];
+ const btn=document.getElementById(collection==='hypotheses'?'multi-lock':'multi-submit');
+ if(btn)btn.disabled=collection==='hypotheses'?values.size!==2:values.size!==2||multiTraining.reasoning.trim().length<80||!multiTraining.used.length;
+ return;
+}if(event.target.id==='wave-scenario'){waveState={id:event.target.value,answer:'',result:null};render();}if(event.target.name==='quant-evidence'&&quantitative&&!quantitativeResults){const q=quantitative.items[quantitative.index];const a=quantitative.answers[q.id]||(quantitative.answers[q.id]={value:'',measurement:'',reasoning:''});a.measurement=event.target.value;}if(event.target.name==='answer'&&exam){exam.answers[exam.questions[exam.at].id]=Number(event.target.value);render();}if(event.target.name==='confidence'&&exam){exam.confidence[exam.questions[exam.at].id]=event.target.value;render();}if(event.target.id==='hypothesis'&&training){training.hypothesis=event.target.value;render();}if(event.target.id==='diagnosis'&&training){training.diagnosis=event.target.value;render();}if(event.target.id==='lab-id-filter'){
  labState.selectedId=event.target.value;labState.offset=0;render();
 }
 if(event.target.id==='lab-answer'){labState.answer=event.target.value;}
@@ -472,6 +549,43 @@ if(event.target.id==='can-file'){
 }
 if(event.target.id==='import-file'){const file=event.target.files?.[0];if(!file)return;if(file.size>2000000){toast('Archivo demasiado grande',true);return;}file.text().then(async text=>{const recovered=parseBackup(text);if(!confirm('¿Restaurar el respaldo y reemplazar todos los datos actuales?'))return;await saveProgress(recovered);data=recovered;nav('home');toast('Respaldo restaurado correctamente');}).catch(e=>toast('No se pudo importar: '+e.message,true));}});
 document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const act=target.dataset.action;const id=target.dataset.id;switch(act){case'nav':selectedLesson=null;nav(id);break;
+case'portfolio-export':{
+ const file=new Blob([portfolioMarkdown(data,lessons)],{type:'text/markdown;charset=utf-8'});
+ const uri=URL.createObjectURL(file),a=document.createElement('a');
+ a.href=uri;a.download='autolab-portafolio-'+new Date().toISOString().slice(0,10)+'.md';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(uri),2000);
+ break;
+}
+case'start-multi':{
+ const c=multiFaultCases.find(c=>c.id===id);if(!c)return;
+ training=null;caseResult=null;multiTraining={id,started:false,hypotheses:[],selected:[],used:[],reasoning:''};multiResult=null;page='cases';render();break;
+}
+case'multi-lock':
+ if(!multiTraining||multiTraining.hypotheses.length!==2)return;
+ multiTraining.started=true;multiTraining.selected=[...multiTraining.hypotheses];render();break;
+case'multi-probe':
+ if(!multiTraining?.started||multiTraining.used.includes(id))return;
+ if(!multiFaultCases.find(c=>c.id===multiTraining.id)?.probes.some(p=>p.id===id))return;
+ multiTraining.used.push(id);render();break;
+case'multi-finish':{
+ const c=multiFaultCases.find(c=>c.id===multiTraining?.id);
+ if(!c||!multiTraining.started||multiTraining.selected.length!==2||!multiTraining.used.length||multiTraining.reasoning.trim().length<80)return;
+ multiResult=evaluateMultiFault(c,multiTraining);
+ data.cases.push({id:c.id,score:multiResult.score,at:new Date().toISOString(),
+  conclusion:multiTraining.selected.join(','),hypothesis:multiTraining.hypotheses.join(','),
+  used:[...multiTraining.used],reasoning:multiTraining.reasoning,passed:multiResult.passed});
+ data.cases=data.cases.slice(-500);await persist();render();break;
+}
+case'multi-export':{
+ if(!multiTraining||!multiResult)return;
+ const c=multiFaultCases.find(c=>c.id===multiTraining.id);
+ const file=new Blob([multiFaultReport(c,multiTraining,multiResult)],{type:'text/markdown;charset=utf-8'});
+ const uri=URL.createObjectURL(file),a=document.createElement('a');
+ a.href=uri;a.download='autolab-multifalla-'+c.id+'.md';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(uri),2000);break;
+}
+case'multi-quit':multiTraining=null;multiResult=null;render();break;
+
 case'challenge-start':
  quantitative={...buildQuantitativeSession(Date.now()),index:0,answers:{}};
  quantitativeResults=null;page='challenges';render();break;
