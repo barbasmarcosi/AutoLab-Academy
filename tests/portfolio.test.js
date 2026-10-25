@@ -91,3 +91,26 @@ test('misfire por cilindro conserva hipótesis, evidencia y conclusión en respa
  assert.deepEqual(snap.events[0].evidence,['coil','injector']);
  assert.match(portfolioMarkdown(parseBackup(serializeBackup(p)),lessons),/Falla repetida del cilindro 2/);
 });
+
+
+test('v1.5: report de cuatro fuentes queda íntegro en portafolio tras restauración JSON',async()=>{
+ const {INTEGRATIVE_CASES,startIntegrativeCase,evaluateIntegrativeCase,buildIntegrativeReport,EVIDENCE_KIN}=await import('../src/integrative-lab.js');
+ const c=INTEGRATIVE_CASES[0],s=startIntegrativeCase(c.id);
+ s.initial='fuel-delivery';s.final=c.cause;
+ s.reasoning='Se contrastaron OBD, oscilogramas, contexto de demanda y caída de voltaje medida en un circuito de referencia para localizar el origen del fallo simulado.';
+ s.uncertainty='Los valores de instrumento y de las tolerancias OEM no fueron medidos y no acreditan el diagnóstico sobre un vehículo real.';
+ const checks=[...EVIDENCE_KINDS.map(k=>c.readings.find(r=>r.kind===k&&!r.unsafe)),c.readings.find(r=>r.confirm),c.readings.find(r=>r.exclude)];
+ s.observations=[...new Map(checks.map(r=>[r.id,{id:r.id,prediction:r.classification}])).values()];
+ const score=evaluateIntegrativeCase(s),report=buildIntegrativeReport(s,score,new Date('2026-10-25T04:00:00Z'));
+ const p=emptyProgress();
+ p.cases.push({id:c.id,score:score.score,at:'2026-10-25T04:00:00Z',conclusion:s.final,hypothesis:s.initial,
+  used:s.observations.map(o=>o.id),reasoning:s.reasoning,report,passed:score.passed});
+ const recovered=parseBackup(serializeBackup(p));
+ const snap=portfolioSnapshot(recovered,lessons);
+ assert.equal(snap.events[0].kind,'integrative');
+ assert.equal(snap.events[0].title,c.title);
+ assert.equal(snap.events[0].report,report);
+ assert.match(snap.events[0].report,/Procedencia:/);
+ assert.match(portfolioMarkdown(recovered,lessons),/Informe completo de expediente/);
+ assert.match(portfolioMarkdown(recovered,lessons),/Incertidumbres/);
+});
