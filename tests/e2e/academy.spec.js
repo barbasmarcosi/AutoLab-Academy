@@ -92,7 +92,7 @@ test('PWA instalada en scope Pages: funciona sin red y sin datos OEM',async({pag
  await page.goto('./');
  await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
  await page.waitForFunction(()=>Boolean(navigator.serviceWorker?.controller),null,{timeout:30_000});
- expect((await page.evaluate(()=>caches.keys())).includes('autolab-academy-v23')).toBe(true);
+ expect((await page.evaluate(()=>caches.keys())).includes('autolab-academy-v24')).toBe(true);
  await context.setOffline(true);
  await page.reload();
  await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
@@ -101,4 +101,51 @@ test('PWA instalada en scope Pages: funciona sin red y sin datos OEM',async({pag
  await page.locator('[data-action="diagtransfer-start"]').click();
  await expect(page.locator('#diagtransfer-initial')).toBeVisible();
  await context.setOffline(false);
+});
+
+
+test('borrador retoma después de recargar, navegar y recuperar JSON',async({page})=>{
+ await page.goto('./');
+ await page.evaluate(()=>{Date.now=()=>491;});
+ const c=await page.evaluate(async()=>(
+  await import('./src/diagnostic-transfer.js')
+ ).buildDiagnosticTransfer(491).cases[0]);
+ await section(page,'diagtransfer');
+ await page.locator('[data-action="diagtransfer-start"]').click();
+ await page.locator('#diagtransfer-initial').selectOption(c.options[0][0]);
+ await page.locator('[data-action="diagtransfer-lock"]').click();
+ const p=c.probes.find(p=>!p.unsafe);
+ await page.locator('[data-action="diagtransfer-probe"][data-id="'+p.id+'"]').click();
+ await page.locator('#diagtransfer-prediction').selectOption(p.outcome);
+ await page.locator('[data-action="diagtransfer-reveal"]').click();
+ await page.locator('#diagtransfer-reason').fill('Una explicación provisional debe poder seguir disponible después de cerrar la pestaña y retomar las pruebas.');
+ await expect.poll(async()=>(await progress(page)).diagnosticDraft.answers[c.id].observations.length).toBe(1);
+ await expect.poll(async()=>(await progress(page)).diagnosticDraft.answers[c.id].reasoning).toContain('explicación provisional');
+ await page.reload();
+ await section(page,'diagtransfer');
+ await page.locator('[data-action="diagtransfer-resume"]').click();
+ await expect(page.getByRole('heading',{name:c.title})).toBeVisible();
+ await expect(page.locator('.answer-card').filter({hasText:p.label})).toBeVisible();
+ await expect(page.locator('#diagtransfer-reason')).toHaveValue(/explicación provisional/);
+ await section(page,'home');
+ await section(page,'diagtransfer');
+ await page.locator('[data-action="diagtransfer-resume"]').click();
+ await expect(page.locator('.answer-card').filter({hasText:p.label})).toBeVisible();
+ await page.locator('[data-action="diagtransfer-quit"]').click();
+ await section(page,'data');
+ const downloadPromise=page.waitForEvent('download');
+ await page.locator('[data-action="export"]').click();
+ const json=await readFile(await (await downloadPromise).path(),'utf8');
+ expect(JSON.parse(json).payload.diagnosticDraft.answers[c.id].observations).toHaveLength(1);
+ page.on('dialog',d=>d.accept());
+ await page.locator('[data-action="reset"]').click();
+ await expect.poll(async()=>(await progress(page)).diagnosticDraft).toBe(null);
+ await section(page,'data');
+ await page.locator('#import-file').setInputFiles({
+  name:'borrador.json',mimeType:'application/json',buffer:Buffer.from(json)
+ });
+ await expect.poll(async()=>(await progress(page)).diagnosticDraft?.seed).toBe(491);
+ await section(page,'diagtransfer');
+ await page.locator('[data-action="diagtransfer-resume"]').click();
+ await expect(page.locator('.answer-card').filter({hasText:p.label})).toBeVisible();
 });
