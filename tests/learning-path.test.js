@@ -4,10 +4,11 @@ import{learningStages,evaluateLearningPath}from'../src/learning-path.js';
 import{lessons}from'../src/content.js';
 import{additionalLessons}from'../src/curriculum-advanced.js';
 import{ecuLessons}from'../src/ecu-curriculum.js';
+import{componentLessons}from'../src/components-curriculum.js';
 import{emptyProgress}from'../src/core.js';
-const all=[...lessons,...additionalLessons,...ecuLessons];
-test('26 lecturas agrupadas en tres niveles con IDs completos y sin duplicaciones',()=>{
- assert.equal(all.length,26);
+const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons];
+test('36 lecturas agrupadas en cuatro niveles con IDs completos y sin duplicaciones',()=>{
+ assert.equal(all.length,36);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
  assert.equal(new Set(assigned).size,all.length);
