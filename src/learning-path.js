@@ -1,5 +1,5 @@
 /**
- * Seven-stage learning itinerary. Reading and objective exams are shown separately:
+ * Eight-stage learning itinerary. Reading and objective exams are shown separately:
  * neither demonstrates competence on a real vehicle.
  */
 export const learningStages=[
@@ -23,7 +23,10 @@ export const learningStages=[
   goal:'Comparar capturas normales con el evento, seleccionar dos señales y distinguir coincidencia temporal de causa demostrada.'},
  {id:'fuel',order:7,name:'Inyección y diagnóstico OBD',subtitle:'Correcciones de combustible, plausibilidad MAF/MAP y pruebas independientes',
   lessons:['trim-patterns','intake-versus-fuel','maf-plausibility-lambda','fuel-pressure-isolated','injector-leak-model'],
-  goal:'Interpretar las correcciones como respuesta del controlador y corroborar hipótesis con mediciones independientes, sin usar rangos OEM inventados.'}
+  goal:'Interpretar las correcciones como respuesta del controlador y corroborar hipótesis con mediciones independientes, sin usar rangos OEM inventados.'},
+ {id:'misfire',order:8,name:'Combustión y correlación de cilindros',subtitle:'Distinguir encendido, inyección, mecánica y mezcla',
+  lessons:['misfire-evidence','ignition-command-current','relative-compression-limits','network-misfire-context','hev-misfire-context'],
+  goal:'Separar monitor P030x, patrón por cilindro y evidencia instrumental confirmatoria, sin adjudicar culpables por un solo dato.'}
 ];
 export function evaluateLearningPath(progress,lessons){
  const exists=new Set(lessons.map(l=>l.id));
