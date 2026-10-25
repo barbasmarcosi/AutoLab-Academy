@@ -56,6 +56,7 @@ const families=[
        'El registro del controlador virtual señala interlock no autorizado con 12 V estable. No se enseña a acceder, puentear o medir un circuito HV real.'],
   url:'https://www.hse.gov.uk/mvr/topics/electric-hybrid.htm'}
 ];
+export const DIAGNOSTIC_TRANSFER_CASES=families.map(f=>({id:'diagnostic-'+f.id,topic:f.topic,title:f.title}));
 const choose=(r,x)=>x[Math.floor(r()*x.length)];
 function seeded(seed){
  if(!Number.isSafeInteger(seed))throw Error('Semilla no válida');
