@@ -23,9 +23,9 @@ jobs:
         run: npm run build
       - name: Prepare EXACT Pages bundle on PR and main
         run: npm run build:site
-      - name: Install Chromium and OS dependencies
-        run: npx playwright install --with-deps chromium
-      - name: Browser E2E (diagnostics, backup and offline)
+      - name: Install Chromium and WebKit dependencies
+        run: npx playwright install --with-deps chromium webkit
+      - name: Browser E2E (Chromium/WebKit, diagnostics, backup, offline, a11y)
         run: npm run test:e2e
       - name: Upload Playwright artifacts on failure
         if: failure()
