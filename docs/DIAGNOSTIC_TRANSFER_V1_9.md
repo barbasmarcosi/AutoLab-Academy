@@ -36,9 +36,13 @@ La comprobación de interlock del banco HEV es **solo lectura de un estado virtu
 | Evidencia confirmatoria consultada | 20 |
 | Evidencia de descarte consultada | 15 |
 | Lectura contextual consultada | 10 |
-| Algún pronóstico correcto | 5 |
+| Algún pronóstico correcto sobre prueba discriminante (confirmación o descarte) | 5 |
 | Justificación escrita presente y acotada | 5 |
 | Incertidumbres escritas presentes y acotadas | 5 |
+
+La lectura meramente contextual **no** concede los 5 puntos de predicción: al menos un pronóstico debe acertar sobre una prueba que confirme o descarte un mecanismo. La pantalla de resultados muestra pronósticos correctos y emitidos para esas pruebas.
+
+**Corrección de integración posterior al merge:** la interfaz registra lecturas en `observations`; el evaluador y el informe aceptan ese formato real además del alias heredado `probes`. Se agregó una prueba de regresión que emula el flujo de la PWA. Sin este arreglo, el evaluador omitía las lecturas reales y el informe salía sin observaciones.
 
 La aprobación estructurada exige todos los criterios. Seleccionar una acción señalada como insegura **anula puntuación y aprobación**. Los informes registran semilla, escenario, hipótesis inicial, pronósticos, lecturas de banco, causa final, interpretación y límites. Se guardan en Portafolio y respaldo JSON con el esquema local anterior (campo opcional `report`).
 

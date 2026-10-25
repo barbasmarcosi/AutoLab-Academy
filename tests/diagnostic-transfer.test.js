@@ -61,3 +61,56 @@ test('se puede reproducir reporte de las variantes con semilla y límites explí
  assert.match(out,/Medición sintética/);assert.match(out,/Ninguna conclusión acredita/);
  assert.throws(()=>getDiagnosticProbe(s.scenario.cases[0],'fake'));
 });
+
+
+test('regresión PWA: observations, no probes, puntúa y aparece íntegro en Markdown',()=>{
+ for(let seed=1;seed<=80;seed++){
+  const s=createDiagnosticTransferSession(seed);
+  for(const c of s.scenario.cases){
+   const old=good(c);
+   const ui={locked:true,initial:old.initial,final:old.final,
+    reasoning:old.reasoning,limits:old.limits,observations:old.probes};
+   assert.equal(Object.hasOwn(ui,'probes'),false);
+   const grade=gradeDiagnosticTransfer(c,ui);
+   assert.equal(grade.score,100,'semilla '+seed+' / '+c.topic);
+   assert.equal(grade.passed,true);
+   assert.equal(grade.predictionsCorrect,2);
+   const one={scenario:{...s.scenario,cases:[c]},answers:{[c.id]:ui}};
+   const report=diagnosticTransferReport(one,new Date('2026-10-25T20:00:00Z'));
+   for(const p of c.probes.filter(p=>!p.unsafe)){
+    assert(report.includes('- '+p.id+' ['+p.kind+'] '));
+    assert(report.includes(p.provenance));
+   }
+  }
+ }
+});
+test('la etiqueta de contexto no concede el punto de pronóstico discriminante',()=>{
+ const c=buildDiagnosticTransfer(92).cases[0];
+ const a=good(c);
+ a.probes=a.probes.map(o=>({...o,prediction:o.id==='context'?'contexto':'peligrosa'}));
+ const grade=gradeDiagnosticTransfer(c,a);
+ assert.equal(grade.score,95);
+ assert.equal(grade.predicted,false);
+ assert.equal(grade.predictionsCorrect,0);
+ assert.equal(grade.passed,false);
+});
+test('acción insegura registrada por la PWA anula la puntuación',()=>{
+ const c=buildDiagnosticTransfer(99).cases[0],a=good(c);
+ const ui={...a,observations:[...a.probes,{id:'unsafe',prediction:'peligrosa'}]};
+ delete ui.probes;
+ const grade=gradeDiagnosticTransfer(c,ui);
+ assert.equal(grade.score,0);
+ assert.equal(grade.unsafe,true);
+ assert.equal(grade.passed,false);
+ const report=diagnosticTransferReport({scenario:{seed:99,cases:[c]},answers:{[c.id]:ui}});
+ assert(report.includes('- unsafe [hazard] '));
+});
+test('entradas de instrumentos inválidas nunca inventan evidencia',()=>{
+ const c=buildDiagnosticTransfer(110).cases[0],a=good(c);
+ const g=gradeDiagnosticTransfer(c,{...a,observations:[null,{}, {id:'fake',prediction:'anómala'}]});
+ assert.equal(g.confirm,false);
+ assert.equal(g.exclude,false);
+ assert.equal(g.context,false);
+ assert.equal(g.passed,false);
+ assert.equal(g.score,50);
+});
