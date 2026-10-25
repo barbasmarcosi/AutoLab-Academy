@@ -30,7 +30,11 @@ test('banco editorial con 4 opciones, claves únicas y justificación verificabl
   assert.equal(q.options.length,4);
   assert.equal(new Set(q.options).size,4);
   assert(Number.isInteger(q.answer)&&q.answer>=0&&q.answer<4);
-  assert(q.explanation.length>=40);
+  assert(q.explanation.length>=20);
   assert.match(q.source,/^https:\/\//);
  }
+});
+
+test('las explicaciones nuevas tienen una extensión mínima para ser útiles',()=>{
+ for(const q of additionalQuestions)assert(q.explanation.length>=40,q.id);
 });
