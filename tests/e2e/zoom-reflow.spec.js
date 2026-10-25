@@ -16,6 +16,11 @@ for(const width of [320,640]){
     viewportWidth:document.documentElement.clientWidth
    }));
    expect(metrics.documentWidth,view+' causes horizontal document scroll').toBeLessThanOrEqual(metrics.viewportWidth+1);
+   if(view==='home'){
+    const nav=await page.locator('.nav').evaluate(el=>({clientWidth:el.clientWidth,scrollWidth:el.scrollWidth}));
+    expect(nav.clientWidth).toBeLessThanOrEqual(width);
+    expect(nav.scrollWidth).toBeGreaterThan(nav.clientWidth);
+   }
   }
   await page.locator('nav.nav button[data-id="labs"]').click();
   await page.locator('[data-action="lab-mode"][data-id="bms"]').click();

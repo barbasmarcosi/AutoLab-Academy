@@ -107,3 +107,12 @@
 
 /* Solid color beneath decorative gradient: consistent contrast sampling on mobile WebKit. */
 body{background-color:var(--bg)}
+
+/* v1.9.8: 1fr's default auto minimum inherited the unbroken flex navigation
+   and made the entire document thousands of pixels wide at 320px. The
+   scrolling navigation remains independently keyboard/touch scrollable. */
+@media(max-width:900px){
+ .shell{grid-template-columns:minmax(0,1fr)}
+ .sidebar,.main{min-width:0;max-width:100%}
+ .nav{width:100%;max-width:100%;min-width:0}
+}
