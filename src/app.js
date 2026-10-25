@@ -9,7 +9,9 @@ let bmsState={scenarioId:'nominal',dataset:generateSyntheticBms('nominal'),capac
 let labState={mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,circuitLoaded:false,answer:'',feedback:'',dbc:null,dbcLabel:'',dbcError:'',dbcAnswer:'',dbcFeedback:''};
 import{emptyProgress,scoreExam,dueReviews,completedTopics,calculateCase,loadProgress,saveProgress,serializeBackup,parseBackup}from'./core.js';
 import{recordReview,selectCumulativeQuestions,reviewOverview}from'./repetition.js';
+import{buildQuantitativeSession,parseNumericAnswer,gradeQuantitative,formatQuantitativeReport}from'./measurement-challenges.js';
 const root=document.getElementById('app');
+let quantitative=null;let quantitativeResults=null;
 let data=emptyProgress();let page='home';let selectedLesson=null;let exam=null;let training=null;let examResult=null;let caseResult=null;
 function esc(value){return String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));}
 function attr(value){return esc(value);}
@@ -19,8 +21,8 @@ function toast(message,error=false){document.querySelectorAll('.toast').forEach(
 async function persist(){try{await saveProgress(data);}catch(e){toast('No se pudieron guardar los cambios: '+e.message,true);}}
 function nav(next){page=next;exam=null;training=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1>'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const menus=[['home','Panel'],['learn','Academia'],['exams','Exámenes'],['cases','Taller virtual'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 0.5</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
-function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
+function layout(body){const menus=[['home','Panel'],['learn','Academia'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 0.6</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
+function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
 function learn(){return heading('ACADEMIA','Tu biblioteca técnica','Seis lecciones de introducción aplicada, con fuentes públicas. El programa crecerá por etapas.')+'<section class="cards">'+lessons.map(l=>'<article class="panel lesson-card"><div><span class="tag dim">'+esc(tracks.find(t=>t.id===l.topic)?.title)+'</span><h3>'+esc(l.title)+'</h3><p class="muted">'+l.minutes+' minutos estimados</p></div>'+button('Estudiar','lesson','data-id="'+attr(l.id)+'"','alt')+'</article>').join('')+'</section>';}
 function lessonView(){const l=lessons.find(x=>x.id===selectedLesson);if(!l)return learn();return button('← Volver a academia','nav','data-id="learn"','alt small')+'<div class="section"></div>'+heading('LECCIÓN · '+l.topic.toUpperCase(),l.title,'Lectura orientada a diagnóstico y evidencia.')+'<article class="panel lesson-body">'+l.sections.map(([h,t])=>'<h2>'+esc(h)+'</h2><p>'+esc(t)+'</p>').join('')+'<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+link(l.url,'Abrir fuente y lecturas relacionadas')+'<div class="section">'+button('Registrar lectura y volver','complete-lesson','data-id="'+attr(l.id)+'"')+'</div></article>';}
 
@@ -95,6 +97,74 @@ function examSummary(){
   '<p class="muted small">Próximo repaso: '+esc(new Date(data.reviews[q.id].due).toLocaleString('es-AR'))+'</p>'+link(q.source,'Fuente de referencia')+'</div>';
  }).join('')+'</section>';
 }
+
+function challengeMenu(){
+ return heading('RETOS DE MEDICIÓN','Pensar, calcular, justificar','Cinco situaciones sintéticas con parámetros variables. No hay opciones numéricas: escribí un resultado, seleccioná la medición relevante y fundamentá tu decisión.')+
+ '<div class="panel"><span class="tag">Evaluación cuantitativa</span><h2>Una prueba por especialidad</h2>'+
+ '<p class="muted">Entrená caídas de tensión, señales de actuadores, interpretación CKP, ocupación CAN y estado de carga de baterías. Cada intento cambia los valores para evitar responder de memoria.</p>'+
+ '<p class="muted small">70 puntos por el cálculo dentro de la tolerancia; 30 por elegir la medición pertinente. La justificación es obligatoria pero <strong>no se evalúa semánticamente</strong>. Se exige revisión humana para validar el razonamiento.</p>'+
+ button('Iniciar reto técnico','challenge-start')+'</div>';
+}
+function challengeView(){
+ if(!quantitative)return challengeMenu();
+ if(quantitativeResults)return challengeSummary();
+ const q=quantitative.items[quantitative.index];
+ const answer=quantitative.answers[q.id]||{value:'',measurement:'',reasoning:''};
+ return '<div class="row spaced"><div class="eyebrow">ENTRENAMIENTO CUANTITATIVO</div>'+button('Abandonar intento','challenge-quit','','alt small')+'</div>'+
+ '<h1>Reto '+(quantitative.index+1)+' de '+quantitative.items.length+'</h1>'+
+ '<div class="progress"><span style="width:'+quantitative.index/quantitative.items.length*100+'%"></span></div>'+
+ '<article class="panel"><span class="tag dim">'+esc(tracks.find(t=>t.id===q.topic)?.title||q.topic)+'</span><h2 style="margin-top:16px">'+esc(q.title)+'</h2>'+
+ '<p class="muted">'+esc(q.assumption)+'</p><p>'+esc(q.prompt)+'</p>'+
+ '<label for="quant-value"><strong>Resultado numérico ('+esc(q.unit)+')</strong></label>'+
+ '<input id="quant-value" type="text" inputmode="decimal" autocomplete="off" maxlength="32" class="field" placeholder="Ejemplo: 12,5" value="'+attr(answer.value)+'">'+
+ '<p class="muted small">Tolerancia de corrección: ± '+q.tolerance+' '+esc(q.unit)+'. No ingreses unidades en este campo.</p>'+
+ '<hr class="divider"/><fieldset style="border:0;padding:0;margin:0"><legend><strong>¿Qué medición usarías para comprobarlo?</strong></legend>'+
+ q.measurementOptions.map(o=>'<label class="option"><input type="radio" name="quant-evidence" value="'+attr(o.id)+'" '+(answer.measurement===o.id?'checked':'')+'><span>'+esc(o.text)+'</span></label>').join('')+
+ '</fieldset><hr class="divider"/><label for="quant-reason"><strong>Fundamentá la elección y el cálculo</strong></label>'+
+ '<textarea id="quant-reason" class="field" maxlength="2000" rows="5" placeholder="Explicá qué medirías, dónde y por qué el resultado apoya tu hipótesis">'+esc(answer.reasoning)+'</textarea>'+
+ '<p class="muted small">Al menos 70 caracteres. La presencia del texto se controla automáticamente; la validez técnica requiere revisión por un especialista.</p>'+
+ '<div class="row spaced" style="margin-top:15px"><span class="muted small">Los resultados y el desarrollo se guardan al finalizar.</span>'+
+ button(quantitative.index===quantitative.items.length-1?'Corregir sesión':'Siguiente reto','challenge-next')+'</div></article>';
+}
+async function finishQuantitative(){
+ const now=new Date().toISOString();
+ const results=quantitative.items.map(q=>gradeQuantitative(q,quantitative.answers[q.id]));
+ quantitativeResults=results;
+ for(let i=0;i<results.length;i++){
+  const q=quantitative.items[i],r=results[i],a=quantitative.answers[q.id];
+  data.cases.push({id:'measure-'+q.id+'-v1',score:r.score,at:now,conclusion:String(a.value).slice(0,32),
+   hypothesis:a.measurement,reasoning:a.reasoning.slice(0,2000),used:[q.id],
+   passed:r.meetsAutomaticCriteria});
+ }
+ data.cases=data.cases.slice(-500);
+ await persist();
+ render();
+}
+function challengeSummary(){
+ const results=quantitativeResults;
+ const total=results.reduce((sum,x)=>sum+x.score,0);
+ const ready=results.filter(x=>x.meetsAutomaticCriteria).length;
+ return heading('INFORME DE PRÁCTICA','Resultados cuantitativos','Puntuación de cálculos y selección de mediciones. La explicación escrita no fue revisada técnicamente.')+
+ '<div class="grid two"><div class="panel"><div class="stat-number">'+Math.round(total/results.length)+'/100</div><p class="stat-label">Promedio de componentes objetivos</p></div>'+
+ '<div class="panel"><div class="stat-number">'+ready+'/'+results.length+'</div><p class="stat-label">Retos con todos los criterios estructurados cumplidos</p></div></div>'+
+ '<div class="notice" style="margin-top:18px">Una nota alta no es una certificación ni demuestra que la explicación es correcta. Los datos son sintéticos y los informes requieren revisión humana.</div>'+
+ '<div class="section"><h2>Corrección técnica por desafío</h2></div>'+
+ '<div class="cards">'+quantitative.items.map((q,i)=>{
+ const r=results[i],a=quantitative.answers[q.id];
+ return '<article class="panel"><div class="row spaced"><h3>'+esc(q.title)+'</h3><span class="tag '+(r.meetsAutomaticCriteria?'':'amber')+'">'+r.score+'/100</span></div>'+
+ '<p>Ingresaste: <strong>'+esc(a.value)+' '+esc(q.unit)+'</strong> · Referencia: <strong>'+q.expected+' '+esc(q.unit)+'</strong></p>'+
+ '<p class="'+(r.numericCorrect?'outcome-good':'outcome-bad')+'">Cálculo: '+(r.numericCorrect?'dentro de tolerancia':'incorrecto')+'</p>'+
+ '<p class="'+(r.evidenceCorrect?'outcome-good':'outcome-bad')+'">Medición elegida: '+(r.evidenceCorrect?'pertinente':'no confirma lo solicitado')+'</p>'+
+ '<p><strong>Medición de referencia:</strong> '+esc(q.measurementOptions.find(x=>x.id===q.evidenceAnswer)?.text)+'</p>'+
+ '<p><strong>Fórmula:</strong> '+esc(q.formula)+'</p><p class="muted">'+esc(q.assumption)+'</p>'+
+ '<p class="muted small">Tu justificación quedó registrada ('+a.reasoning.trim().length+' caracteres), sin evaluación semántica.</p>'+
+ link(q.source,'Consultar fuente contextual')+'</article>';
+ }).join('')+'</div>'+
+ '<div class="row" style="margin-top:24px">'+button('Exportar informe Markdown','challenge-export')+
+ button('Nuevo intento con otros valores','challenge-start','','alt')+
+ button('Volver','challenge-quit','','alt')+'</div>';
+}
+
 function caseMenu(){
  const attempts=data.cases.length;
  const best=new Map();
@@ -304,8 +374,17 @@ body+='<div class="section"><h2>Análisis de mensajes por ID</h2></div><div clas
 
 function resourceView(){return heading('FUENTES Y HERRAMIENTAS','Biblioteca externa','Priorizamos documentación pública y software maduro. Algunos recursos requieren conexión o instalación en PC.')+'<section class="cards">'+resources.map(r=>'<div class="panel"><span class="tag dim">'+esc(r.topic)+'</span><h3>'+esc(r.title)+'</h3>'+link(r.url,'Abrir recurso oficial')+'</div>').join('')+'</section><div class="section"><h2>Laboratorios prácticos</h2></div><div class="panel"><p class="muted">Ya podés importar capturas candump y analizar una muestra CAN sintética; CircuitJS está disponible como herramienta externa integrada bajo demanda. PyBaMM continúa pendiente.</p>'+button('Ir a laboratorios','nav','data-id="labs"')+'</div>';}
 function dataView(){return heading('DATOS PERSONALES','Tu progreso te pertenece','Se guarda en IndexedDB de este navegador. Si cambiás de equipo o borrás datos del sitio, necesitás un respaldo.')+'<div class="grid two"><div class="panel"><h3>Exportar respaldo</h3><p class="muted">Descarga un JSON portable con intentos, resultados de casos, repeticiones y notas.</p>'+button('Descargar respaldo','export')+'</div><div class="panel"><h3>Importar respaldo</h3><p class="muted">Reemplaza el progreso local luego de validar el archivo. Guardá una copia antes de importar.</p><label class="button alt" for="import-file">Elegir archivo JSON</label><input class="sr-only" type="file" id="import-file" accept=".json,application/json"></div></div><div class="section"><h2>Notas privadas</h2></div><div class="panel"><label for="notebook">Hipótesis, dudas y procedimientos aprendidos</label><textarea class="field" id="notebook" maxlength="10000">'+esc(data.notes.general||'')+'</textarea><div class="row" style="margin-top:14px">'+button('Guardar notas','save-notes')+'</div></div><div class="section"><h2>Reinicio</h2></div><div class="panel"><p class="muted">Borrar todo es irreversible si no conservás una exportación.</p>'+button('Borrar progreso local','reset','','danger')+'</div>';}
-function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='cases'?(training?caseView():caseMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
-document.addEventListener('change',event=>{if(event.target.name==='answer'&&exam){exam.answers[exam.questions[exam.at].id]=Number(event.target.value);render();}if(event.target.name==='confidence'&&exam){exam.confidence[exam.questions[exam.at].id]=event.target.value;render();}if(event.target.id==='hypothesis'&&training){training.hypothesis=event.target.value;render();}if(event.target.id==='diagnosis'&&training){training.diagnosis=event.target.value;render();}if(event.target.id==='lab-id-filter'){
+function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='cases'?(training?caseView():caseMenu()):page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
+document.addEventListener('input',event=>{
+ if(!quantitative||quantitativeResults)return;
+ const id=event.target.id;
+ if(id!=='quant-value'&&id!=='quant-reason')return;
+ const q=quantitative.items[quantitative.index];
+ const a=quantitative.answers[q.id]||(quantitative.answers[q.id]={value:'',measurement:'',reasoning:''});
+ if(id==='quant-value')a.value=event.target.value;
+ if(id==='quant-reason')a.reasoning=event.target.value;
+});
+document.addEventListener('change',event=>{if(event.target.name==='quant-evidence'&&quantitative&&!quantitativeResults){const q=quantitative.items[quantitative.index];const a=quantitative.answers[q.id]||(quantitative.answers[q.id]={value:'',measurement:'',reasoning:''});a.measurement=event.target.value;}if(event.target.name==='answer'&&exam){exam.answers[exam.questions[exam.at].id]=Number(event.target.value);render();}if(event.target.name==='confidence'&&exam){exam.confidence[exam.questions[exam.at].id]=event.target.value;render();}if(event.target.id==='hypothesis'&&training){training.hypothesis=event.target.value;render();}if(event.target.id==='diagnosis'&&training){training.diagnosis=event.target.value;render();}if(event.target.id==='lab-id-filter'){
  labState.selectedId=event.target.value;labState.offset=0;render();
 }
 if(event.target.id==='lab-answer'){labState.answer=event.target.value;}
@@ -346,7 +425,29 @@ if(event.target.id==='can-file'){
  }).catch(error=>toast('No se pudo analizar la captura: '+error.message,true));
 }
 if(event.target.id==='import-file'){const file=event.target.files?.[0];if(!file)return;if(file.size>2000000){toast('Archivo demasiado grande',true);return;}file.text().then(async text=>{const recovered=parseBackup(text);if(!confirm('¿Restaurar el respaldo y reemplazar todos los datos actuales?'))return;await saveProgress(recovered);data=recovered;nav('home');toast('Respaldo restaurado correctamente');}).catch(e=>toast('No se pudo importar: '+e.message,true));}});
-document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const act=target.dataset.action;const id=target.dataset.id;switch(act){case'nav':selectedLesson=null;nav(id);break;case'lab-load-dbc-sample':{
+document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const act=target.dataset.action;const id=target.dataset.id;switch(act){case'nav':selectedLesson=null;nav(id);break;
+case'challenge-start':
+ quantitative={...buildQuantitativeSession(Date.now()),index:0,answers:{}};
+ quantitativeResults=null;page='challenges';render();break;
+case'challenge-quit':quantitative=null;quantitativeResults=null;render();break;
+case'challenge-next':{
+ if(!quantitative||quantitativeResults)return;
+ const q=quantitative.items[quantitative.index],a=quantitative.answers[q.id]||{};
+ try{parseNumericAnswer(a.value);}catch(e){toast(e.message,true);break;}
+ if(!q.measurementOptions.some(o=>o.id===a.measurement)){toast('Elegí una medición para justificar el cálculo.',true);break;}
+ if(String(a.reasoning||'').trim().length<70){toast('Agregá una justificación técnica de al menos 70 caracteres.',true);break;}
+ if(quantitative.index<quantitative.items.length-1){quantitative.index++;render();}
+ else await finishQuantitative();
+ break;
+}
+case'challenge-export':{
+ if(!quantitative||!quantitativeResults)return;
+ const content=formatQuantitativeReport(quantitative,quantitative.answers,quantitativeResults);
+ const file=new Blob([content],{type:'text/markdown;charset=utf-8'}),url=URL.createObjectURL(file),a=document.createElement('a');
+ a.href=url;a.download='autolab-reto-mediciones-'+new Date().toISOString().slice(0,10)+'.md';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);break;
+}
+case'lab-load-dbc-sample':{
  try{
   const r=await fetch('./samples/autolab-synthetic.dbc');
   if(!r.ok)throw Error('No se encuentra el DBC de ejemplo ('+r.status+')');
