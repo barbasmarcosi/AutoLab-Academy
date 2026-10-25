@@ -94,7 +94,7 @@ test('misfire por cilindro conserva hipótesis, evidencia y conclusión en respa
 
 
 test('v1.5: report de cuatro fuentes queda íntegro en portafolio tras restauración JSON',async()=>{
- const {INTEGRATIVE_CASES,startIntegrativeCase,evaluateIntegrativeCase,buildIntegrativeReport,EVIDENCE_KIN}=await import('../src/integrative-lab.js');
+ const {INTEGRATIVE_CASES,startIntegrativeCase,evaluateIntegrativeCase,buildIntegrativeReport,EVIDENCE_KINDS}=await import('../src/integrative-lab.js');
  const c=INTEGRATIVE_CASES[0],s=startIntegrativeCase(c.id);
  s.initial='fuel-delivery';s.final=c.cause;
  s.reasoning='Se contrastaron OBD, oscilogramas, contexto de demanda y caída de voltaje medida en un circuito de referencia para localizar el origen del fallo simulado.';
