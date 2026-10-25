@@ -92,7 +92,7 @@ test('PWA instalada en scope Pages: funciona sin red y sin datos OEM',async({pag
  await page.goto('./');
  await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
  await page.waitForFunction(()=>Boolean(navigator.serviceWorker?.controller),null,{timeout:30_000});
- expect((await page.evaluate(()=>caches.keys())).includes('autolab-academy-v23')).toBe(true);
+ expect((await page.evaluate(()=>caches.keys())).includes('autolab-academy-v24')).toBe(true);
  await context.setOffline(true);
  await page.reload();
  await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
@@ -120,6 +120,7 @@ test('borrador retoma después de recargar, navegar y recuperar JSON',async({pag
  await page.locator('[data-action="diagtransfer-reveal"]').click();
  await page.locator('#diagtransfer-reason').fill('Una explicación provisional debe poder seguir disponible después de cerrar la pestaña y retomar las pruebas.');
  await expect.poll(async()=>(await progress(page)).diagnosticDraft.answers[c.id].observations.length).toBe(1);
+ await expect.poll(async()=>(await progress(page)).diagnosticDraft.answers[c.id].reasoning).toContain('explicación provisional');
  await page.reload();
  await section(page,'diagtransfer');
  await page.locator('[data-action="diagtransfer-resume"]').click();
