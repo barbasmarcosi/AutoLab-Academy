@@ -7,6 +7,8 @@ import{differentialLessons,differentialQuestions}from'./differential-curriculum.
 import{temporalLessons,temporalQuestions}from'./temporal-curriculum.js';
 import{fuelLessons,fuelQuestions}from'./fuel-curriculum.js';
 import{misfireLessons,misfireQuestions}from'./misfire-curriculum.js';
+import{integrativeLessons,integrativeQuestions}from'./integrative-curriculum.js';
+import{INTEGRATIVE_CASES,EVIDENCE_KIN,startIntegrativeCase,integrativeReading,validateObservation,evaluateIntegrativeCase,buildIntegrativeReport}from'./integrative-lab.js';
 import{MISFIRE_CASES,misfireCase,misfireFrame,misfireProbe,newMisfireSession,evaluateMisfire,misfireReport}from'./misfire-lab.js';
 import{FUEL_CASES,createFuelSession,fuelFrame,fuelProbe,gradeFuelSession,fuelReport}from'./fuel-system-lab.js';
 import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSession,generateTrace,traceSummary,gradeTraceSession,traceReport}from'./temporal-trace-lab.js';
@@ -14,7 +16,7 @@ import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDif
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
-const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions];
+const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions];
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{multiFaultCases,evaluateMultiFault,multiFaultReport}from'./differential-lab.js';
@@ -29,6 +31,7 @@ let differentialTraining=null,differentialResult=null;
 let traceTraining=null,traceResult=null,traceChannels=['ckp','cmp'];
 let fuelTraining=null,fuelResult=null;
 let misfireTraining=null,misfireResult=null;
+let integralTraining=null,integralResult=null,integralReport=null;
 let componentState={id:'divider',condition:'nominal',value:'',evidence:'',reasoning:'',result:null};
 let labState={mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,circuitLoaded:false,answer:'',feedback:'',dbc:null,dbcLabel:'',dbcError:'',dbcAnswer:'',dbcFeedback:''};
 import{emptyProgress,scoreExam,dueReviews,completedTopics,calculateCase,loadProgress,saveProgress,serializeBackup,parseBackup}from'./core.js';
@@ -45,9 +48,9 @@ function button(text,action,extra='',kind=''){return '<button class="button '+ki
 function link(url,label){return '<a target="_blank" rel="noopener noreferrer" href="'+attr(url)+'">'+esc(label)+'</a>';}
 function toast(message,error=false){document.querySelectorAll('.toast').forEach(n=>n.remove());const node=document.createElement('div');node.className='toast'+(error?' error':'');node.textContent=message;node.role='status';document.body.append(node);setTimeout(()=>node.remove(),4200);}
 async function persist(){try{await saveProgress(data);}catch(e){toast('No se pudieron guardar los cambios: '+e.message,true);}}
-function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;fuelTraining=null;fuelResult=null;misfireTraining=null;misfireResult=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
+function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;fuelTraining=null;fuelResult=null;misfireTraining=null;misfireResult=null;integralTraining=null;integralResult=null;integralReport=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1>'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['misfire','Balance de cilindros'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.4</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
+function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['misfire','Balance de cilindros'],['integrative','Taller Integrador'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.5</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
 
 
@@ -89,6 +92,103 @@ function traceChannelGraph(c,index,channelId){
  ' · Máx: '+summary.max.toFixed(2)+' '+esc(ch.unit)+' · Transiciones ascendentes: '+summary.rising+'</p></article>';
 }
 
+
+
+const evidenceLabels={context:'Condiciones',obd:'Datos OBD',wave:'Señales',circuit:'Circuito'};
+function integrativeMenu(){
+ return heading('TALLER INTEGRADOR','Un expediente, cuatro fuentes de evidencia',
+ 'Diagnóstico de sistemas completos con hipótesis, mediciones contextualizadas, pruebas de descarte e incertidumbres explícitas.')+
+ '<div class="notice">Todos los expedientes son ficticios. Los datos no están tomados de vehículos ni tienen calibración de fabricante. La puntuación evalúa estructura, no la calidad semántica del razonamiento.</div>'+
+ '<div class="grid">'+INTEGRATIVE_CASES.map(c=>
+ '<article class="panel"><span class="tag dim">'+esc(c.dtc)+'</span><h3>'+esc(c.title)+'</h3>'+
+ '<p class="muted">'+esc(c.symptom)+'</p>'+
+ button('Abrir expediente','integral-start','data-id="'+attr(c.id)+'"')+'</article>').join('')+'</div>';
+}
+function integrativeView(){
+ const a=integralTraining,c=INTEGRATIVE_CASES.find(c=>c.id===a?.caseId);
+ if(!c)return integrativeMenu();
+ if(integralResult)return integrativeSummary(c);
+ const picker=(id,value,label)=>'<label for="'+id+'"><strong>'+label+'</strong></label><select class="field" id="'+id+'"><option value="">Elegí una hipótesis...</option>'+
+ c.alternatives.map(([code,name])=>'<option value="'+attr(code)+'" '+(value===code?'selected':'')+'>'+esc(name)+'</option>').join('')+'</select>';
+ let html='<div class="row spaced"><span class="eyebrow">EXPEDIENTE · BANCO VIRTUAL</span>'+
+ button('Salir','integral-quit','','alt small')+'</div><h1>'+esc(c.title)+'</h1>'+
+ '<div class="panel"><h3>Solicitud de diagnóstico</h3><p>'+esc(c.symptom)+'</p>'+
+ '<p class="muted">Monitor: '+esc(c.dtc)+' · Condiciones, ondas, circuitos y valores definidos por este simulador.</p></div>';
+ if(!a.locked)return html+'<div class="section"><h2>1. Registrá tu hipótesis inicial</h2></div>'+
+ '<div class="panel">'+picker('integral-initial',a.initial,'¿Cuál investigarías primero, antes de ver evidencia?')+
+ '<p class="muted small">Quedará en la cadena de custodia del expediente. Podrás corregir tu diagnóstico al reunir pruebas.</p>'+
+ button('Abrir investigación','integral-lock',a.initial?'':'disabled')+'</div>';
+ const seen=new Set(a.observations.map(o=>o.id)),readings=c.readings.filter(r=>seen.has(r.id));
+ html+='<div class="section"><h2>2. Consultá fuentes y anotá pronósticos</h2></div>'+
+ '<p class="muted">Necesitás evidencia de las cuatro fuentes, una prueba que confirme y otra que contraste una alternativa. Las etiquetas de esos papeles se muestran después de corregir.</p>'+
+ '<div class="integral-sources">'+EVIDENCE_KIN.map(kind=>{
+ const category=c.readings.filter(r=>r.kind===kind);
+ return '<article class="panel"><div class="row spaced"><h3>'+esc(evidenceLabels[kind])+'</h3>'+
+ '<span class="tag dim">'+category.filter(r=>seen.has(r.id)).length+'/'+category.length+' consultas</span></div>'+
+ '<div class="integral-source-items">'+category.map(r=>
+ '<button class="probe integral-item" data-action="integral-probe" data-id="'+attr(r.id)+'" '+(seen.has(r.id)?'disabled':'')+'>'+
+ esc(r.label)+(seen.has(r.id)?' ✓':'')+'</button>').join('')+'</div></article>';
+ }).join('')+'</div>';
+ if(a.pending){
+  const p=integrativeReading(c.id,a.pending);
+  html+='<div class="panel"><h3>Antes de revelar: '+esc(p.label)+'</h3>'+
+ '<p class="muted small">Origen previsto: '+esc(p.provenance)+'. No es una medición física.</p>'+
+ '<label for="integral-prediction">¿Cómo creés que se clasificará esta lectura?</label>'+
+ '<select class="field" id="integral-prediction"><option value="">Elegí un pronóstico...</option>'+
+ [['normal','Normal para el modelo'],['anómala','Anómala para el modelo'],['observación','Solo contexto, sin conclusión'],['peligrosa','Maniobra insegura o prohibida']].map(([value,name])=>
+ '<option value="'+attr(value)+'" '+(a.prediction===value?'selected':'')+'>'+esc(name)+'</option>').join('')+'</select>'+
+ button('Revelar dato sintético','integral-reveal',a.prediction?'':'disabled')+'</div>';
+ }
+ html+='<div class="section"><h2>3. Cadena de evidencia consultada</h2></div>'+
+ '<div class="panel">'+(readings.length?readings.map(r=>{
+  const o=a.observations.find(o=>o.id===r.id);
+  return '<div class="answer-card"><strong>'+esc(r.label)+'</strong>'+
+  '<p class="muted small">Origen: '+esc(evidenceLabels[r.kind])+' · '+esc(r.provenance)+'</p>'+
+  '<p>'+esc(r.value)+'</p>'+
+  '<p class="muted small">Predicción: '+esc(o.prediction)+' · Clasificación observada: '+esc(r.classification)+'</p></div>';
+ }).join(''):'<p class="muted">Todavía no consultaste ninguna fuente.</p>')+'</div>';
+ html+='<div class="section"><h2>4. Conclusión e incertidumbres</h2></div><div class="panel">'+
+ picker('integral-final',a.final,'Diagnóstico principal sustentado por el expediente')+
+ '<label for="integral-reason"><strong>Argumentá: ¿qué prueba confirma y cuál descarta una alternativa?</strong></label>'+
+ '<textarea class="field" id="integral-reason" rows="6" maxlength="3000" placeholder="Mínimo 120 caracteres. Indicá datos, condiciones, contradicciones y relación entre las fuentes.">'+esc(a.reasoning)+'</textarea>'+
+ '<label for="integral-uncertainty"><strong>¿Qué datos faltan? ¿Qué no podés afirmar todavía?</strong></label>'+
+ '<textarea class="field" id="integral-uncertainty" rows="4" maxlength="1200" placeholder="Mínimo 60 caracteres. Ej.: faltan tolerancias OEM o pruebas experimentales...">'+esc(a.uncertainty)+'</textarea>'+
+ '<p class="muted small">La app solo valida criterios estructurados. No comprende ni corrige técnicamente tu explicación.</p>'+
+ button('Corregir expediente','integral-grade',!a.final||!readings.length||a.reasoning.trim().length<120||a.uncertainty.trim().length<60?'disabled id="integral-submit"':'id="integral-submit"')+'</div>';
+ return html;
+}
+function integrativeSummary(c){
+ const a=integralTraining,r=integralResult;
+ return heading('EXPEDIENTE FINAL','Resultado estructurado '+r.score+'/100',
+ 'Conclusión del generador ficticio, no acreditación de diagnóstico o seguridad en taller.')+
+ '<div class="panel"><span class="tag '+(r.passed?'':'amber')+'">'+(r.passed?'Criterios de evidencia cumplidos':'Falta alguna verificación de la rúbrica')+'</span>'+
+ '<h3>Auditoría de la cadena</h3>'+
+ '<p>Hipótesis: '+(r.cause?'correcta':'incorrecta')+' · Prueba confirmatoria: '+(r.confirm?'sí':'no')+
+ ' · Prueba de descarte: '+(r.exclude?'sí':'no')+
+ ' · Cuatro fuentes: '+(r.coverage?'sí':'no')+
+ ' · Pronóstico: '+(r.predicted?'sí':'no')+' · Incertidumbre declarada: '+(r.qualified?'sí':'no')+
+ ' · Acción insegura: '+(r.unsafe?'sí':'no')+'</p>'+
+ '<p class="muted small">Fuentes abiertas: '+esc(r.kinds.map(k=>evidenceLabels[k]).join(', ')||'ninguna')+'</p>'+
+ '<h3>Conclusión del banco</h3><p>'+esc(c.explanation)+'</p>'+
+ '<h3>Papeles de las mediciones</h3>'+
+ a.observations.map(o=>{
+ const p=integrativeReading(c.id,o.id);
+ return '<div class="answer-card"><strong>'+esc(p.label)+'</strong> — '+
+ (p.unsafe?'Acción insegura':p.confirm?'Confirmatoria':p.exclude?'Descarta una alternativa':'Contextual')+
+ '<p class="muted small">'+esc(p.provenance)+' · '+esc(p.value)+'</p></div>';
+ }).join('')+
+ '<h3>Tu razonamiento (sin revisión semántica)</h3><p>'+esc(a.reasoning)+'</p>'+
+ '<h3>Incertidumbres declaradas</h3><p>'+esc(a.uncertainty)+'</p>'+
+ '<div class="row">'+button('Exportar expediente completo (.md)','integral-export')+
+ button('Nuevo intento','integral-start','data-id="'+attr(c.id)+'"','alt')+
+ button('Volver a expedientes','integral-quit','','alt')+'</div></div>';
+}
+function downloadIntegrative(text,id){
+ const blob=new Blob([text],{type:'text/markdown;charset=utf-8'});
+ const uri=URL.createObjectURL(blob),node=document.createElement('a');
+ node.href=uri;node.download='autolab-expediente-'+id+'.md';document.body.append(node);
+ node.click();node.remove();setTimeout(()=>URL.revokeObjectURL(uri),2000);
+}
 
 function misfireMenu(){
  return heading('MONITOR DE COMBUSTIÓN','Balance y diagnóstico por cilindro',
@@ -416,6 +516,7 @@ function pathView(){
  (stage.id==='temporal'?'<div class="row" style="margin-top:16px">'+button('Examinar capturas temporales','nav','data-id="temporal"')+'</div>':'')+
  (stage.id==='fuel'?'<div class="row" style="margin-top:16px">'+button('Investigar sistemas de inyección','nav','data-id="fuel"')+'</div>':'')+
  (stage.id==='misfire'?'<div class="row" style="margin-top:16px">'+button('Practicar balance de cilindros','nav','data-id="misfire"')+'</div>':'')+
+ (stage.id==='integrative'?'<div class="row" style="margin-top:16px">'+button('Abrir Taller Integrador','nav','data-id="integrative"')+'</div>':'')+
  '</article>').join('')+'</div>'+
  '<div class="notice">El avance por lectura no se interpreta como dominio de un tema. El puntaje de selección múltiple tampoco demuestra aptitud para diagnóstico real ni intervención HV.</div>';
 }
@@ -698,6 +799,7 @@ function portfolioView(){
  '<p class="muted small">'+esc(e.at?.slice(0,10)||'sin fecha')+' · '+esc(e.kind)+'</p>'+
  (e.evidence.length?'<p class="muted small">Pruebas: '+esc(e.evidence.join(', '))+'</p>':'')+
  (e.reasoning?'<details><summary>Ver razonamiento registrado</summary><p>'+esc(e.reasoning)+'</p></details>':'')+
+ (e.kind==='integrative'&&e.report?'<div class="row" style="margin-top:8px">'+button('Descargar expediente y fuentes','integral-download','data-id="'+attr(e.id)+'" data-at="'+attr(e.at)+'"','alt small')+'</div>':'')+
  '</div>').join('')+'</div>':'<p class="muted">Todavía no hay actividades para este filtro.</p>')+'</div>'+
  '<p class="muted small">Para exportar todos los registros disponibles, utilizá Descargar portafolio. El respaldo JSON original conserva el resto de tus datos.</p>';
 }
@@ -1003,8 +1105,17 @@ body+='<div class="section"><h2>Análisis de mensajes por ID</h2></div><div clas
 
 function resourceView(){return heading('FUENTES Y HERRAMIENTAS','Biblioteca externa','Priorizamos documentación pública y software maduro. Algunos recursos requieren conexión o instalación en PC.')+'<section class="cards">'+resources.map(r=>'<div class="panel"><span class="tag dim">'+esc(r.topic)+'</span><h3>'+esc(r.title)+'</h3>'+link(r.url,'Abrir recurso oficial')+'</div>').join('')+'</section><div class="section"><h2>Laboratorios prácticos</h2></div><div class="panel"><p class="muted">Ya podés importar capturas candump y analizar una muestra CAN sintética; CircuitJS está disponible como herramienta externa integrada bajo demanda. PyBaMM continúa pendiente.</p>'+button('Ir a laboratorios','nav','data-id="labs"')+'</div>';}
 function dataView(){return heading('DATOS PERSONALES','Tu progreso te pertenece','Se guarda en IndexedDB de este navegador. Si cambiás de equipo o borrás datos del sitio, necesitás un respaldo.')+'<div class="grid two"><div class="panel"><h3>Exportar respaldo</h3><p class="muted">Descarga un JSON portable con intentos, resultados de casos, repeticiones y notas.</p>'+button('Descargar respaldo','export')+'</div><div class="panel"><h3>Importar respaldo</h3><p class="muted">Reemplaza el progreso local luego de validar el archivo. Guardá una copia antes de importar.</p><label class="button alt" for="import-file">Elegir archivo JSON</label><input class="sr-only" type="file" id="import-file" accept=".json,application/json"></div></div><div class="section"><h2>Notas privadas</h2></div><div class="panel"><label for="notebook">Hipótesis, dudas y procedimientos aprendidos</label><textarea class="field" id="notebook" maxlength="10000">'+esc(data.notes.general||'')+'</textarea><div class="row" style="margin-top:14px">'+button('Guardar notas','save-notes')+'</div></div><div class="section"><h2>Reinicio</h2></div><div class="panel"><p class="muted">Borrar todo es irreversible si no conservás una exportación.</p>'+button('Borrar progreso local','reset','','danger')+'</div>';}
-function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='path'?pathView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='temporal'?(traceTraining?temporalView():temporalMenu()):page==='fuel'?(fuelTraining?fuelView():fuelMenu()):page==='misfire'?(misfireTraining?misfireView():misfireMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
+function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='path'?pathView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='temporal'?(traceTraining?temporalView():temporalMenu()):page==='fuel'?(fuelTraining?fuelView():fuelMenu()):page==='misfire'?(misfireTraining?misfireView():misfireMenu()):page==='integrative'?(integralTraining?integrativeView():integrativeMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
 document.addEventListener('input',event=>{
+if(integralTraining&&!integralResult&&['integral-reason','integral-uncertainty'].includes(event.target.id)){
+ const s=integralTraining;
+ if(event.target.id==='integral-reason')s.reasoning=event.target.value;
+ else s.uncertainty=event.target.value;
+ const button=document.getElementById('integral-submit');
+ if(button)button.disabled=!s.final||!s.observations.length||s.reasoning.trim().length<120||s.uncertainty.trim().length<60;
+ return;
+}
+
 if(event.target.id==='misfire-reason'&&misfireTraining&&!misfireResult){
  misfireTraining.reasoning=event.target.value;
  const button=document.getElementById('misfire-submit');
@@ -1054,6 +1165,13 @@ if(event.target.id==='multi-reason'&&multiTraining){multiTraining.reasoning=even
  if(id==='quant-reason')a.reasoning=event.target.value;
 });
 document.addEventListener('change',event=>{
+if(integralTraining&&!integralResult){
+ const session=integralTraining,id=event.target.id;
+ if(id==='integral-initial'){session.initial=event.target.value;render();return;}
+ if(id==='integral-final'){session.final=event.target.value;render();return;}
+ if(id==='integral-prediction'){session.prediction=event.target.value;render();return;}
+}
+
 if(misfireTraining&&!misfireResult){
  const id=event.target.id,session=misfireTraining;
  if(id==='misfire-initial'){session.initial=event.target.value;render();return;}
@@ -1164,6 +1282,45 @@ if(event.target.id==='can-file'){
 }
 if(event.target.id==='import-file'){const file=event.target.files?.[0];if(!file)return;if(file.size>2000000){toast('Archivo demasiado grande',true);return;}file.text().then(async text=>{const recovered=parseBackup(text);if(!confirm('¿Restaurar el respaldo y reemplazar todos los datos actuales?'))return;await saveProgress(recovered);data=recovered;nav('home');toast('Respaldo restaurado correctamente');}).catch(e=>toast('No se pudo importar: '+e.message,true));}});
 document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const act=target.dataset.action;const id=target.dataset.id;switch(act){case'nav':selectedLesson=null;nav(id);break;
+case'integral-start':{
+ if(!INTEGRATIVE_CASES.some(c=>c.id===id))break;
+ integralTraining=startIntegrativeCase(id);integralResult=null;integralReport=null;page='integrative';render();break;
+}
+case'integral-lock':
+ if(!integralTraining?.initial)break;
+ integralTraining.locked=true;render();break;
+case'integral-probe':{
+ const a=integralTraining;
+ if(!a?.locked||a.observations.some(o=>o.id===id))break;
+ if(!INTEGRATIVE_CASES.find(c=>c.id===a.caseId)?.readings.some(r=>r.id===id))break;
+ a.pending=id;a.prediction='';render();break;
+}
+case'integral-reveal':{
+ const a=integralTraining;
+ if(!a?.locked||!a.pending||!a.prediction)break;
+ try{a.observations.push(validateObservation(a,a.pending,a.prediction));}
+ catch(error){toast(error.message,true);break;}
+ a.pending='';a.prediction='';render();break;
+}
+case'integral-grade':{
+ const a=integralTraining;
+ if(!a?.locked||!a.final||!a.observations.length||a.reasoning.trim().length<120||a.uncertainty.trim().length<60)break;
+ integralResult=evaluateIntegrativeCase(a);
+ integralReport=buildIntegrativeReport(a,integralResult);
+ data.cases.push({id:a.caseId,score:integralResult.score,at:new Date().toISOString(),
+  hypothesis:a.initial,conclusion:a.final,used:a.observations.map(o=>o.id),
+  reasoning:a.reasoning,report:integralReport,passed:integralResult.passed});
+ data.cases=data.cases.slice(-500);await persist();render();break;
+}
+case'integral-export':
+ if(integralReport&&integralTraining)downloadIntegrative(integralReport,integralTraining.caseId);
+ break;
+case'integral-quit':
+ integralTraining=null;integralResult=null;integralReport=null;render();break;
+case'integral-download':{
+ const record=data.cases.findLast(c=>c.id===id&&c.at===target.dataset.at&&typeof c.report==='string');
+ if(record)downloadIntegrative(record.report,record.id);break;
+}
 case'misfire-start':{
  if(!MISFIRE_CASES.some(c=>c.id===id))break;
  misfireTraining=newMisfireSession(id);misfireResult=null;page='misfire';render();break;
