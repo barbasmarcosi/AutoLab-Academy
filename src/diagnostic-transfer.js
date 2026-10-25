@@ -60,7 +60,9 @@ export const DIAGNOSTIC_TRANSFER_CASES=families.map(f=>({id:'diagnostic-'+f.id,t
 const choose=(r,x)=>x[Math.floor(r()*x.length)];
 function seeded(seed){
  if(!Number.isSafeInteger(seed))throw Error('Semilla no válida');
- let x=seed>>>0;return ()=>{x=(Math.imul(1664525,x)+1013904223)>>>0;return x/4294967296};
+ let x=seed>>>0;
+ x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;x=Math.imul(x,0x846ca68b);x^=x>>>16;
+ return ()=>{x=(Math.imul(1664525,x)+1013904223)>>>0;return x/4294967296};
 }
 function shuffled(items,r){
  const out=[...items];for(let i=out.length-1;i>0;i--){let j=Math.floor(r()*(i+1));[out[i],out[j]]=[out[j],out[i]]}return out;
