@@ -2,6 +2,8 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.2 (sesiones retomables): borrador pequeño y validado con semilla y respuestas, almacenado en IndexedDB e incluido opcionalmente en JSON schema v1. Retomar tras recargar, pausar y cambiar de sección. Nunca se acreditan mediciones reales. Ver docs/RESUMABLE_DIAGNOSTICS_V1_9_2.md.
+
 - E0 (base): 61 lecciones estructuradas y 150 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
 - E1.9 (transferencia diagnóstica): 5 familias, 2 causas y 2 presentaciones por familia; 20 combinaciones deterministas, predicción de pruebas, confirmación, descarte, contexto, incertidumbres, informe trazable y registro por área. Sin datos OEM. Ver docs/DIAGNOSTIC_TRANSFER_V1_9.md.
 - E1.8 (transferencia entre problemas): cinco pares sintéticos (primero guiado y luego otra variable despejada), generación reproducible por semilla, resultado objetivo por cada área, evidencia, explicación no corregida, informe Markdown y compatibilidad con Portafolio/backup. No prueba transferencia a un vehículo. Ver docs/TRANSFER_V1_8.md.
