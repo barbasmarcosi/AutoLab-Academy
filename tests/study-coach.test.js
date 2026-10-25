@@ -69,3 +69,27 @@ test('lecturas y backup mantienen recomendaciones sin cambiar esquema',()=>{
  assert.match(report,/Caídas de tensión|Diagnóstico de 12 V/);
  assert.match(report,/no demuestran aptitud profesional/i);
 });
+
+
+test('v1.7: fallo concreto en examen acumulativo orienta un área sin atribuirle nota global',()=>{
+ const p=emptyProgress();
+ p.attempts=[{id:'cumulative-1',topic:'cumulative',percentage:90,at:'2026-10-25T10:00:00Z',
+  details:[{id:'m1',selected:0,correct:false,confidence:'high'}]}];
+ const a=analyze(p);
+ const motor=a.topics.find(t=>t.id==='motor');
+ assert.equal(a.excludedAggregateExams,1);
+ assert.equal(motor.latestExamPct,null);
+ assert.equal(motor.observedQuestions,1);
+ assert.equal(motor.activeErrors,1);
+ assert.equal(motor.noEvidence,false);
+ assert.equal(a.focus.id,'motor');
+ assert(motor.signals.some(s=>s.includes('fallada')));
+});
+test('v1.7: evidencia correcta exige pregunta real con clave válida',()=>{
+ const p=emptyProgress();
+ p.attempts=[{id:'cum-2',topic:'cumulative',percentage:100,at:'2026-10-25T10:00:00Z',
+  details:[{id:'m1',selected:0,correct:true,confidence:'low'}]}];
+ const a=analyze(p),motor=a.topics.find(t=>t.id==='motor');
+ assert.equal(motor.observedQuestions,1);assert.equal(motor.activeErrors,1); // m1 no incluye clave: no se debe inferir corrección desde Boolean(correct)
+ 
+});
