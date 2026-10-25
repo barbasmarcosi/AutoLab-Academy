@@ -50,10 +50,11 @@ test('caída local de alimentación coincidente con pérdida de mando',()=>{
 test('sólo aprueba con causa, ventana, dos canales y comparación normal/anómala',()=>{
  for(const c of TRACE_CASES){
   const s=createTraceSession(c.id,13);
-  s.inspected=[0,s.eventWindow];s.selectedWindow=s.eventWindow;s.selectedCause=c.cause;s.evidence=[...c.evidence];s.reasoning=why;
+  s.inspected=[0,s.eventWindow];s.viewed={0:[...c.evidence],[s.eventWindow]:[...c.evidence]};s.selectedWindow=s.eventWindow;s.selectedCause=c.cause;s.evidence=[...c.evidence];s.reasoning=why;
   const grade=gradeTraceSession(s);
   assert.equal(grade.score,100);assert.equal(grade.passed,true);assert.equal(grade.reviewedText,false);
   assert.equal(gradeTraceSession({...s,inspected:[s.eventWindow]}).passed,false);
+  assert.equal(gradeTraceSession({...s,viewed:{}}).passed,false);
   assert.equal(gradeTraceSession({...s,selectedWindow:0}).passed,false);
   assert.equal(gradeTraceSession({...s,evidence:[c.evidence[0]]}).passed,false);
  }
@@ -61,7 +62,7 @@ test('sólo aprueba con causa, ventana, dos canales y comparación normal/anóma
 test('resumen y reporte conservan semilla, ventana y evidencias auditables',()=>{
  const s=createTraceSession('trace-ckp',22),m=traceSummary(s.caseId,s.eventWindow,s.eventWindow);
  assert(m.ckp.max<=5&&m.supply.min===12.4);
- s.inspected=[0,s.eventWindow];s.selectedWindow=s.eventWindow;s.evidence=['ckp','cmp'];s.selectedCause='ckp-wire';s.reasoning=why;
+ s.inspected=[0,s.eventWindow];s.viewed={0:['ckp','cmp'],[s.eventWindow]:['ckp','cmp']};s.selectedWindow=s.eventWindow;s.evidence=['ckp','cmp'];s.selectedCause='ckp-wire';s.reasoning=why;
  const txt=traceReport(s,gradeTraceSession(s),new Date('2026-10-24T12:00:00Z'));
  assert.match(txt,/Semilla reproducible: 22/);assert.match(txt,/revisión humana/);assert.match(txt,/Canales utilizados: ckp, cmp/);
 });
