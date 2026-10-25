@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
-function harness(fetchImpl=async()=>({ok:true,clone(){return this}})){
- const events={},store=new Map([['autolab-academy-v30',new Map([['old','old']])],['unrelated-app',new Map()]]);
+function harness(fetchImpl=async()=>({ok:true,clone(){return this}}),failPut=false){
+ const events={},store=new Map([['autolab-academy-v31',new Map([['old','old']])],['unrelated-app',new Map()]]);
  const writes=[];
  const cacheFor=name=>({
   async addAll(paths){writes.push({name,paths});},
-  async put(path,response){store.get(name).set(path,response);writes.push({name,path});}
+  async put(path,response){if(failPut)throw new DOMException('Cuota agotada','QuotaExceededError');store.get(name).set(path,response);writes.push({name,path});}
  });
  const caches={
   async open(name){if(!store.has(name))store.set(name,new Map());return cacheFor(name);},
@@ -17,12 +17,12 @@ function harness(fetchImpl=async()=>({ok:true,clone(){return this}})){
   async match(path){for(const data of store.values())if(data.has(path))return data.get(path);return undefined;}
  };
  const self={
-  location:{origin:'http://127.0.0.1:4173'},
+  location:{origin:'http://127.0.0.1:4173'},registration:{scope:'http://127.0.0.1:4173/AutoLab-Academy/'},
   clients:{claim:async()=>{}},
   skipWaiting:async()=>{},
   addEventListener(name,handler){events[name]=handler;}
  };
- runInNewContext(readFileSync('sw.js','utf8'),{self,caches,fetch:fetchImpl,URL,Response});
+ runInNewContext(readFileSync('sw.js','utf8'),{self,caches,fetch:fetchImpl,URL,Response,DOMException,console});
  return {events,store,writes};
 }
 async function dispatch(handler,request=null){
@@ -30,14 +30,14 @@ async function dispatch(handler,request=null){
  handler({request,waitUntil(p){promise=p},respondWith(p){promise=p}});
  return await promise;
 }
-test('v1.9.9: activation removes previous AutoLab cache, not unrelated browser data',async()=>{
+test('v1.9.10: activation removes previous AutoLab cache, not unrelated browser data',async()=>{
  const sw=harness();
  await dispatch(sw.events.install);
- assert.equal(sw.store.has('autolab-academy-v31'),true);
+ assert.equal(sw.store.has('autolab-academy-v32'),true);
  assert.equal(sw.writes[0].paths.includes('./src/diagnostic-draft.js'),true);
  await dispatch(sw.events.activate);
- assert.equal(sw.store.has('autolab-academy-v30'),false);
- assert.equal(sw.store.has('autolab-academy-v31'),true);
+ assert.equal(sw.store.has('autolab-academy-v31'),false);
+ assert.equal(sw.store.has('autolab-academy-v32'),true);
  assert.equal(sw.store.has('unrelated-app'),true);
 });
 test('v1.9.3: server failure status never overwrites the offline app shell',async()=>{
@@ -46,4 +46,38 @@ test('v1.9.3: server failure status never overwrites the offline app shell',asyn
  const response=await dispatch(sw.events.fetch,{method:'GET',url:'http://127.0.0.1:4173/AutoLab-Academy/',mode:'navigate'});
  assert.equal(response.status,404);
  assert.equal(sw.writes.some(w=>w.path==='./index.html'),false);
+});
+
+test('v1.9.10: valid HTML network response survives QuotaExceededError in cache.put',async()=>{
+ const page={ok:true,status:200,headers:{get:()=> 'text/html; charset=utf-8'},clone(){return this}};
+ const sw=harness(async()=>page,true);
+ await dispatch(sw.events.install);
+ const result=await dispatch(sw.events.fetch,{method:'GET',url:'http://127.0.0.1:4173/AutoLab-Academy/',mode:'navigate'});
+ assert.equal(result,page);
+ assert.equal(sw.writes.some(w=>w.path==='./index.html'),false);
+});
+test('v1.9.10: JSON is never stored as offline HTML',async()=>{
+ const response={ok:true,status:200,headers:{get:()=> 'application/json'},clone(){throw Error('non-HTML must not be cached')}};
+ const sw=harness(async()=>response);
+ await dispatch(sw.events.install);
+ const result=await dispatch(sw.events.fetch,{method:'GET',url:'http://127.0.0.1:4173/AutoLab-Academy/index.html',mode:'navigate'});
+ assert.equal(result,response);
+ assert.equal(sw.writes.some(w=>w.path==='./index.html'),false);
+});
+test('v1.9.10: unrelated same-origin navigation does not replace shell',async()=>{
+ let calls=0;
+ const sw=harness(async()=>{calls++;return {ok:true}});
+ await dispatch(sw.events.install);
+ const result=await dispatch(sw.events.fetch,{method:'GET',url:'http://127.0.0.1:4173/other-app/',mode:'navigate'});
+ assert.equal(result,undefined);
+ assert.equal(calls,0);
+ assert.equal(sw.writes.some(w=>w.path==='./index.html'),false);
+});
+test('v1.9.10: true network outage restores cached index',async()=>{
+ const sw=harness(async()=>{throw Error('sin internet')});
+ await dispatch(sw.events.install);
+ const shell={status:200};
+ sw.store.get('autolab-academy-v32').set('./index.html',shell);
+ const result=await dispatch(sw.events.fetch,{method:'GET',url:'http://127.0.0.1:4173/AutoLab-Academy/',mode:'navigate'});
+ assert.equal(result,shell);
 });

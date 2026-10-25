@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.10: SW devuelve HTML válida aunque Cache Storage falle; solo el inicio de la PWA actualiza index.html, no páginas ajenas ni JSON. Tests de cuota simulada, navegación ajena, caída real de red y upgrade offline v31→v32. Ver docs/SERVICE_WORKER_RELIABILITY_V1_9_10.md.
+
+
 - v1.9.9: aviso persistente de cambios sin guardar cuando IndexedDB rechaza una transacción, reintento confirmable, sin falsa confirmación de guardado de notas; pruebas E2E de recuperación de notas y finalización de examen. Ver docs/PERSISTENCE_TRUTH_V1_9_9.md.
 
 
