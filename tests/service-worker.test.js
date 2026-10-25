@@ -33,7 +33,7 @@ async function dispatch(handler,request=null){
 test('v1.9.3: activation removes previous AutoLab cache, not unrelated browser data',async()=>{
  const sw=harness();
  await dispatch(sw.events.install);
- assert.equal(sw.store.has('autolab-academy-v26'),true);
+ assert.equal(sw.store.has('autolab-academy-v27'),true);
  assert.equal(sw.writes[0].paths.includes('./src/diagnostic-draft.js'),true);
  await dispatch(sw.events.activate);
  assert.equal(sw.store.has('autolab-academy-v24'),false);
