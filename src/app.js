@@ -82,7 +82,7 @@ function differentialGraph(c,index){
  const guides=[0,.25,.5,.75,1].map(v=>'<line x1="'+left+'" x2="'+(left+w)+'" y1="'+y(v*ceiling).toFixed(1)+'" y2="'+y(v*ceiling).toFixed(1)+'" stroke="#2d4456"/>'+
  '<text x="'+(left-11)+'" y="'+(y(v*ceiling)+4).toFixed(1)+'" fill="#b4cadd" text-anchor="end" font-size="11">'+(v*ceiling).toFixed(1)+' V</text>').join('');
  const line=series.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(2)+' '+y(p.value).toFixed(2)).join(' ');
- return '<div class="wave-chart"><svg role="img" aria-label="'+esc(c.trace.title)+
+ return '<div class="wave-chart" role="region" tabindex="0" aria-label="Diagrama desplazable: señal de osciloscopio"><svg role="img" aria-label="'+esc(c.trace.title)+
  '" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">'+guides+
  '<path d="'+line+'" stroke="#60d9c7" stroke-width="2.8" fill="none" stroke-linejoin="round"/>'+
  '<text x="'+left+'" y="246" fill="#b4cadd" font-size="12">0 '+esc(c.trace.unit)+'</text>'+
@@ -102,7 +102,7 @@ function traceChannelGraph(c,index,channelId){
  '<text x="'+(left-7)+'" y="'+(y(f*ch.max)+4).toFixed(1)+'" text-anchor="end" font-size="11" fill="#b4cadd">'+(f*ch.max).toFixed(1)+' '+esc(ch.unit)+'</text>').join('');
  const points=samples.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(2)+' '+y(p[channelId]).toFixed(2)).join(' ');
  const summary=traceSummary(c.id,traceTraining.eventWindow,index)[channelId];
- return '<article class="panel"><h3>'+esc(ch.label)+'</h3><div class="wave-chart">'+
+ return '<article class="panel"><h3>'+esc(ch.label)+'</h3><div class="wave-chart" role="region" tabindex="0" aria-label="Diagrama desplazable: señal de osciloscopio">'+
  '<svg role="img" aria-label="'+esc(ch.label+' en ventana '+(index+1))+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">'+
  marks+'<path d="'+points+'" fill="none" stroke="#60d9c7" stroke-width="2.6"/>'+
  '<text x="'+left+'" y="198" font-size="12" fill="#b4cadd">0 ms</text>'+
@@ -309,7 +309,7 @@ function fuelChart(c,s){
  '<text x="'+(left-9)+'" y="'+(y(v)+4).toFixed(1)+'" font-size="12" text-anchor="end" fill="#b4cadd">'+(v>0?'+':'')+v+'%</text>').join('');
  const renderSeries=(key,color)=>rows.map((f,i)=>'<circle cx="'+x(f.id).toFixed(1)+'" cy="'+y(f[key]).toFixed(1)+'" r="5" fill="'+color+'"/>'+
  '<text x="'+x(f.id).toFixed(1)+'" y="'+(y(f[key])-10).toFixed(1)+'" fill="'+color+'" text-anchor="middle" font-size="12">'+(f[key]>0?'+':'')+f[key]+'%</text>').join('');
- return '<div class="wave-chart"><svg role="img" aria-label="Comparación STFT y LTFT de condiciones visitadas; no es una serie temporal ni una medición OEM" viewBox="0 0 '+width+' '+height+'">'+
+ return '<div class="wave-chart" role="region" tabindex="0" aria-label="Diagrama desplazable: señal de osciloscopio"><svg role="img" aria-label="Comparación STFT y LTFT de condiciones visitadas; no es una serie temporal ni una medición OEM" viewBox="0 0 '+width+' '+height+'">'+
  guides+renderSeries('stftPct','#60d9c7')+renderSeries('ltftPct','#ffba73')+
  c.frames.map(f=>'<text x="'+x(f.id)+'" y="210" text-anchor="middle" font-size="12" fill="#b4cadd">'+esc(f.label)+'</text>').join('')+'</svg></div>'+
  '<p class="muted small"><span style="color:#60d9c7">●</span> STFT y <span style="color:#ffba73">●</span> LTFT. Se muestran únicamente condiciones inspeccionadas: son puntos de funcionamiento, NO una captura temporal.</p>';
@@ -1258,7 +1258,7 @@ function waveView(){
  '<p class="muted">Gráficos de señales creadas matemáticamente para aprender. No son capturas OEM ni se conectan a un vehículo.</p>'+
  '<label for="wave-scenario">Elegí la señal</label><select class="field" id="wave-scenario">'+WAVEFORM_SCENARIOS.map(p=>'<option value="'+attr(p.id)+'" '+(p.id===waveState.id?'selected':'')+'>'+esc(p.title)+'</option>').join('')+'</select>'+
  '<h3 style="margin-top:18px">'+esc(c.title)+'</h3><p class="muted">'+esc(c.description)+'</p>'+
- '<div class="wave-chart"><svg role="img" aria-label="'+esc(c.title+'; '+c.description)+'" viewBox="0 0 '+width+' '+height+'" preserveAspectRatio="xMidYMid meet"><rect x="'+px+'" y="'+py+'" width="'+pw+'" height="'+ph+'" fill="#081c2b" rx="6"/>'+grid+traces+'</svg></div>'+ 
+ '<div class="wave-chart" role="region" tabindex="0" aria-label="Diagrama desplazable: señal de osciloscopio"><svg role="img" aria-label="'+esc(c.title+'; '+c.description)+'" viewBox="0 0 '+width+' '+height+'" preserveAspectRatio="xMidYMid meet"><rect x="'+px+'" y="'+py+'" width="'+pw+'" height="'+ph+'" fill="#081c2b" rx="6"/>'+grid+traces+'</svg></div>'+ 
  chartEvidenceView(w.series.map(p=>({t:p.t,...Object.fromEntries(w.labels.map((_,i)=>['v'+i,p.values[i]]))})),c.title,'t',c.unit,
  w.labels.map((label,i)=>({key:'v'+i,label,unit:'V'})))+
  '<p class="muted small">'+w.labels.map((l,i)=>'<span class="wave-legend" style="color:'+(i?'var(--amber)':'var(--mint)')+'">━━ '+esc(l)+'</span>').join('')+'</p>'+
@@ -1277,7 +1277,7 @@ function componentDiagram(s){
  const rect=(x,text)=>'<rect x="'+x+'" y="44" width="146" height="72" rx="10" fill="#17374b" stroke="#519d9d" stroke-width="2"/>'+
  '<text x="'+(x+73)+'" y="82" fill="#e9f3fb" font-size="14" text-anchor="middle">'+esc(text)+'</text>';
  const arrow=x=>'<path d="M'+x+' 80 h 30 l -8 -6 m 8 6 l -8 6" stroke="#60d9c7" fill="none" stroke-width="2.5"/>';
- return '<div class="component-diagram"><svg role="img" aria-label="'+esc('Trayecto funcional esquemático: '+s.path.join(', '))+
+ return '<div class="component-diagram" role="region" tabindex="0" aria-label="Diagrama desplazable: circuito de componentes"><svg role="img" aria-label="'+esc('Trayecto funcional esquemático: '+s.path.join(', '))+
  '" viewBox="0 0 780 160" preserveAspectRatio="xMidYMid meet">'+s.path.map((p,i)=>rect(14+i*196,p)+(i<3?arrow(160+i*196):'')).join('')+
  '<text x="14" y="143" fill="#a5bcce" font-size="11">Esquema conceptual de bloques · no es un plano de conexiones</text></svg></div>';
 }
@@ -1287,7 +1287,7 @@ function componentCurve(condition){
  const poly=key=>points.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(2)+' '+y(p[key]).toFixed(2)).join(' ');
  const grid=[0,3,6,9,12].map(v=>'<line x1="'+left+'" x2="'+(left+w)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="#2c465a"/>'+
  '<text x="39" y="'+(y(v)+4)+'" text-anchor="end" fill="#a5bcce" font-size="11">'+v+' V</text>').join('');
- return '<div class="component-diagram"><svg role="img" aria-label="Curva de carga RC ideal; referencia nominal y condición seleccionada durante 200 ms" viewBox="0 0 '+W+' '+H+'">'+
+ return '<div class="component-diagram" role="region" tabindex="0" aria-label="Diagrama desplazable: circuito de componentes"><svg role="img" aria-label="Curva de carga RC ideal; referencia nominal y condición seleccionada durante 200 ms" viewBox="0 0 '+W+' '+H+'">'+
  grid+'<path d="'+poly('nominal')+'" fill="none" stroke="#ffba73" stroke-width="2" stroke-dasharray="6 5"/>'+
  '<path d="'+poly('observed')+'" fill="none" stroke="#60d9c7" stroke-width="3"/>'+
  '<text x="'+left+'" y="229" fill="#a5bcce" font-size="11">0 ms</text><text x="'+(left+w)+'" y="229" text-anchor="end" fill="#a5bcce" font-size="11">200 ms</text></svg>'+
