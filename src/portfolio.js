@@ -1,10 +1,11 @@
 import{differentialCases}from'./fault-discrimination.js';
 import{TRACE_CASES}from'./temporal-trace-lab.js';
+import{FUEL_CASES}from'./fuel-system-lab.js';
 /**
  * Read-only portfolio built exclusively from locally persisted data.
  * No claim that completion or scoring equals supervised qualification.
  */
-const differentialTitles=new Map([...differentialCases,...TRACE_CASES].map(c=>[c.id,c.title]));
+const differentialTitles=new Map([...differentialCases,...TRACE_CASES,...FUEL_CASES].map(c=>[c.id,c.title]));
 const sortDescending=(a,b)=>String(b.at||'').localeCompare(String(a.at||''));
 export function portfolioSnapshot(progress,lessons=[]){
  const attempts=(progress.attempts||[]).map(a=>({
@@ -13,7 +14,7 @@ export function portfolioSnapshot(progress,lessons=[]){
   evidence:[],reasoning:'',passed:a.percentage>=85
  }));
  const cases=(progress.cases||[]).map(c=>({
-  kind:c.id.startsWith('mf-')?'multifault':c.id.startsWith('trace-')?'temporal':c.id.startsWith('di-')?'differential':c.id.startsWith('lab-')?'lab':c.id.startsWith('measure-')?'quantitative':'diagnostic',
+  kind:c.id.startsWith('fuel-')?'injection':c.id.startsWith('mf-')?'multifault':c.id.startsWith('trace-')?'temporal':c.id.startsWith('di-')?'differential':c.id.startsWith('lab-')?'lab':c.id.startsWith('measure-')?'quantitative':'diagnostic',
   id:c.id,topic:c.id.split('-')[1]||'varios',at:c.at,score:c.score,
   title:differentialTitles.get(c.id)||c.id.replace(/^lab-|^measure-/,'').replaceAll('-',' '),
   evidence:Array.isArray(c.used)?c.used:[],
