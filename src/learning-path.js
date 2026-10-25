@@ -11,7 +11,10 @@ export const learningStages=[
   goal:'Elegir pruebas que discriminen hipótesis, explicar resultados y reconocer errores habituales.'},
  {id:'ecu',order:3,name:'Electrónica y ECUs',subtitle:'Alimentación, sensores, actuadores, gateway y DC/DC',
   lessons:['ecu-feed','pullups','sensor-plausibility','actuator-power','scope-reference','actuator-current','can-isolation','uds-session','dcdc-lv','bms-uncertainty'],
-  goal:'Interpretar alimentación y señales del controlador; anticipar resultados en el banco ECU virtual.'}
+  goal:'Interpretar alimentación y señales del controlador; anticipar resultados en el banco ECU virtual.'},
+ {id:'components',order:4,name:'Componentes y drivers',subtitle:'Circuitos, electrónica de potencia básica y energía almacenada',
+  lessons:['voltage-dividers','resistive-loss','mosfet-control','inductive-load','current-shunt','rc-input','transceiver-edges','ground-reference-network','dcdc-switches','hv-boundaries'],
+  goal:'Calcular, interpretar y contrastar tensión y corriente en modelos ideales de baja tensión sin inferir diagnósticos OEM.'}
 ];
 export function evaluateLearningPath(progress,lessons){
  const exists=new Set(lessons.map(l=>l.id));
