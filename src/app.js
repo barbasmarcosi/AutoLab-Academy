@@ -1,7 +1,10 @@
 import{tracks,lessons as baseLessons,questions as baseQuestions,cases as baseCases,resources}from'./content.js';
 import{additionalLessons,additionalQuestions}from'./curriculum-advanced.js';
+import{ecuLessons,ecuQuestions}from'./ecu-curriculum.js';
+import{learningStages,evaluateLearningPath}from'./learning-path.js';
+import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
-const lessons=[...baseLessons,...additionalLessons],questions=[...baseQuestions,...additionalQuestions];
+const lessons=[...baseLessons,...additionalLessons,...ecuLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions];
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{multiFaultCases,evaluateMultiFault,multiFaultReport}from'./differential-lab.js';
@@ -18,6 +21,7 @@ import{recordReview,selectCumulativeQuestions,reviewOverview}from'./repetition.j
 import{buildQuantitativeSession,parseNumericAnswer,gradeQuantitative,formatQuantitativeReport}from'./measurement-challenges.js';
 const root=document.getElementById('app');
 let quantitative=null;let quantitativeResults=null;
+let ecuTraining=null,ecuResult=null;
 let multiTraining=null,multiResult=null,portfolioFilter='all';
 let data=emptyProgress();let page='home';let selectedLesson=null;let exam=null;let training=null;let examResult=null;let caseResult=null;
 function esc(value){return String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));}
@@ -26,10 +30,99 @@ function button(text,action,extra='',kind=''){return '<button class="button '+ki
 function link(url,label){return '<a target="_blank" rel="noopener noreferrer" href="'+attr(url)+'">'+esc(label)+'</a>';}
 function toast(message,error=false){document.querySelectorAll('.toast').forEach(n=>n.remove());const node=document.createElement('div');node.className='toast'+(error?' error':'');node.textContent=message;node.role='status';document.body.append(node);setTimeout(()=>node.remove(),4200);}
 async function persist(){try{await saveProgress(data);}catch(e){toast('No se pudieron guardar los cambios: '+e.message,true);}}
-function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
+function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1>'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const menus=[['home','Panel'],['learn','Academia'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 0.8</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
+function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['ecu','Banco ECU'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 0.9</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
+
+function pathView(){
+ const status=evaluateLearningPath(data,lessons);
+ return heading('ITINERARIO TÉCNICO','Aprendizaje por niveles','Ruta orientativa y accesible sin bloqueo. Las lecturas y los exámenes se cuentan por separado; ninguna etapa acredita experiencia real.')+
+ '<div class="grid two"><div class="panel"><div class="stat-number">'+status.read+'/'+status.total+'</div><p class="stat-label">Lecturas registradas</p></div>'+
+ '<div class="panel"><div class="stat-number">'+status.approvedTopics+'/5</div><p class="stat-label">Áreas con al menos un examen ≥85%</p></div></div>'+
+ '<div class="section"><h2>Tu siguiente contenido sugerido</h2></div><div class="panel">'+(status.nextLesson?
+ '<h3>'+esc(lessons.find(l=>l.id===status.nextLesson)?.title||status.nextLesson)+'</h3>'+
+ '<p class="muted">Podés avanzar a cualquier nivel; la sugerencia se basa exclusivamente en lecturas registradas.</p>'+
+ button('Estudiar siguiente lección','path-lesson','data-id="'+attr(status.nextLesson)+'"'):
+ '<h3>Recorrido de lecturas registrado</h3><p>Podés seguir repasando, rindiendo y realizando prácticas.</p>')+'</div>'+
+ '<div class="section"><h2>Tres etapas del recorrido</h2></div>'+
+ '<div class="stack">'+status.stages.map(stage=>
+ '<article class="panel"><div class="row spaced"><div><span class="tag dim">ETAPA '+stage.order+'</span><h2 style="margin:12px 0 4px">'+esc(stage.name)+'</h2><p class="muted">'+esc(stage.subtitle)+'</p></div>'+
+ '<strong>'+stage.read+'/'+stage.total+' lecturas</strong></div>'+
+ '<div class="progress"><span style="width:'+Math.round(stage.read/stage.total*100)+'%"></span></div>'+
+ '<p class="muted">'+esc(stage.goal)+'</p>'+
+ '<div class="path-lessons">'+stage.lessons.map(id=>{
+  const l=lessons.find(x=>x.id===id),done=Boolean(data.notes['lesson-'+id]);
+  return '<button class="path-lesson" data-action="path-lesson" data-id="'+attr(id)+'"><span aria-hidden="true">'+(done?'✓':'○')+'</span><span>'+esc(l?.title||id)+'</span><small>'+esc(l?.topic||'')+'</small></button>';
+ }).join('')+'</div>'+
+ (stage.id==='ecu'?'<div class="row" style="margin-top:16px">'+button('Practicar en Banco ECU','nav','data-id="ecu"')+'</div>':'')+
+ '</article>').join('')+'</div>'+
+ '<div class="notice">El avance por lectura no se interpreta como dominio de un tema. El puntaje de selección múltiple tampoco demuestra aptitud para diagnóstico real ni intervención HV.</div>';
+}
+function ecuMenu(){
+ return heading('BANCO ECU','Investigar controladores sin cambiarlos a ciegas','Cinco modelos de banco sintético. Anticipá la observación antes de solicitarla y fundamentá por qué confirma o refuta tu diagnóstico.')+
+ '<div class="notice">Los modelos no son especificaciones OEM, no se conectan a vehículos ni energizan componentes. La explicación libre requiere revisión humana.</div>'+
+ '<div class="section"><h2>Elegí un caso</h2></div><div class="grid">'+ecuCases.map(c=>{
+  const attempts=data.cases.filter(x=>x.id===c.id),last=attempts.at(-1);
+  return '<article class="panel"><span class="tag dim">'+esc(tracks.find(t=>t.id===c.topic)?.title||c.topic)+'</span>'+
+  '<h3>'+esc(c.title)+'</h3><p class="muted">'+esc(c.symptom)+'</p>'+
+  (last?'<p class="muted small">Último resultado estructurado: '+last.score+'/100</p>':'')+
+  button('Investigar ECU','ecu-start','data-id="'+attr(c.id)+'"')+'</article>';
+ }).join('')+'</div>';
+}
+function ecuView(){
+ const c=ecuCases.find(x=>x.id===ecuTraining?.id);
+ if(!c)return ecuMenu();
+ if(ecuResult)return ecuSummary(c);
+ const choices=(field,label)=>'<label for="'+field+'"><strong>'+label+'</strong></label><select id="'+field+'" class="field"><option value="">Elegí una causa…</option>'+
+  c.options.map(([id,name])=>'<option value="'+attr(id)+'" '+(ecuTraining[field]===id?'selected':'')+'>'+esc(name)+'</option>').join('')+'</select>';
+ let body='<div class="row spaced"><div class="eyebrow">BANCO ECU VIRTUAL</div>'+button('Salir','ecu-quit','','alt small')+'</div>'+
+ '<h1>'+esc(c.title)+'</h1><div class="panel"><h3>Síntoma</h3><p>'+esc(c.symptom)+'</p><p class="muted">'+esc(c.context)+'</p></div>';
+ if(!ecuTraining.locked)return body+
+ '<div class="section"><h2>1. Hipótesis inicial, antes de medir</h2></div><div class="panel">'+
+ choices('initial','¿Cuál investigarías primero?')+
+ '<p class="muted small">Se conservará tu primera elección aunque luego cambies el diagnóstico final.</p>'+
+ '<div class="row" style="margin-top:14px">'+button('Registrar hipótesis inicial','ecu-lock',ecuTraining.initial?'':'disabled')+'</div></div>';
+ const seen=new Set(ecuTraining.observations.map(o=>o.id));
+ body+='<div class="section"><h2>2. Predecí antes de observar</h2></div>'+
+ '<p class="muted">Elegí una medición, indicá si esperás un resultado normal o anómalo, y recién después revelá el valor simulado.</p>'+
+ '<div class="grid two">'+c.probes.map(p=>
+ '<button class="probe panel" data-action="ecu-probe" data-id="'+attr(p.id)+'" '+(seen.has(p.id)?'disabled':'')+'>'+esc(p.label)+(seen.has(p.id)?' ✓':'')+'</button>'
+ ).join('')+'</div>';
+ if(ecuTraining.pendingProbe){
+  const p=c.probes.find(x=>x.id===ecuTraining.pendingProbe);
+  body+='<div class="panel" style="margin-top:15px"><h3>Pronóstico de la medición</h3><p>'+esc(p.label)+'</p>'+
+  '<label for="ecu-prediction">¿Esperás un valor normal o anómalo?</label><select class="field" id="ecu-prediction">'+
+  '<option value="">Elegí un resultado previsto…</option><option value="normal" '+(ecuTraining.pendingPrediction==='normal'?'selected':'')+'>Normal en las condiciones del banco</option>'+
+  '<option value="abnormal" '+(ecuTraining.pendingPrediction==='abnormal'?'selected':'')+'>Anómalo en las condiciones del banco</option></select>'+
+  '<div class="row" style="margin-top:14px">'+button('Revelar resultado sintético','ecu-reveal',ecuTraining.pendingPrediction?'':'disabled')+'</div></div>';
+ }
+ body+='<div class="section"><h2>Observaciones documentadas</h2></div><div class="panel">'+
+ (ecuTraining.observations.length?ecuTraining.observations.map(o=>{
+  const p=c.probes.find(p=>p.id===o.id);
+  return '<div class="answer-card"><strong>'+esc(p.label)+'</strong><p>Predijiste: '+(o.prediction==='normal'?'normal':'anómalo')+
+  ' · Observación: '+(p.observed==='normal'?'normal':'anómala')+'</p><p class="muted">'+esc(p.result)+'</p></div>';
+ }).join(''):'<p class="muted">Sin observaciones: elegí una prueba discriminante.</p>')+'</div>'+
+ '<div class="section"><h2>3. Diagnóstico argumentado</h2></div><div class="panel">'+choices('final','Causa que mejor explica las evidencias')+
+ '<label for="ecu-reason"><strong>Explicá la medición confirmatoria y qué hipótesis descartaste</strong></label>'+
+ '<textarea id="ecu-reason" class="field" rows="6" maxlength="3000" placeholder="Al menos 80 caracteres.">'+esc(ecuTraining.reasoning)+'</textarea>'+
+ '<p class="muted small">Tu explicación queda registrada; no se revisa semánticamente.</p>'+
+ button('Corregir banco ECU','ecu-grade',!ecuTraining.final||!ecuTraining.observations.length||ecuTraining.reasoning.trim().length<80?'disabled id="ecu-submit"':'id="ecu-submit"')+'</div>';
+ return body;
+}
+function ecuSummary(c){
+ const r=ecuResult;
+ return heading('RESULTADO DE BANCO ECU','Corrección estructurada: '+r.score+'/100','Los datos son ficticios. La calidad técnica de tu razonamiento sigue sin revisión profesional.')+
+ '<div class="panel"><span class="tag '+(r.passed?'':'amber')+'">'+(r.passed?'Rúbrica estructurada cumplida':'Falta evidencia o hay una acción incorrecta')+'</span>'+
+ '<p>Causa correcta: '+(r.correct?'sí':'no')+' · Evidencia confirmatoria: '+(r.evidence?'sí':'no')+
+ ' · Pronóstico correcto: '+(r.prediction?'sí':'no')+' · Maniobra insegura: '+(r.unsafe?'sí':'no')+'</p>'+
+ '<h3>Interpretación del caso</h3><p>'+esc(c.rationale)+'</p>'+
+ '<h3>Tu explicación no revisada</h3><p>'+esc(ecuTraining.reasoning)+'</p>'+
+ '<p class="muted small">Se evalúan causalidad seleccionada, medición discriminante y predicción. El texto no se corrige semánticamente.</p>'+
+ '<div class="row">'+button('Exportar informe (.md)','ecu-export')+button('Repetir caso','ecu-start','data-id="'+attr(c.id)+'"','alt')+
+ button('Volver al banco','ecu-quit','','alt')+'</div></div>';
+}
+
 function learn(){
  const done=lessons.filter(l=>Boolean(data.notes['lesson-'+l.id])).length;
  return heading('ACADEMIA','Biblioteca de diagnóstico aplicado',lessons.length+' lecciones orientadas a interpretar mediciones, diagnosticar sin sustituir piezas al azar y trabajar con evidencia.')+
@@ -486,8 +579,15 @@ body+='<div class="section"><h2>Análisis de mensajes por ID</h2></div><div clas
 
 function resourceView(){return heading('FUENTES Y HERRAMIENTAS','Biblioteca externa','Priorizamos documentación pública y software maduro. Algunos recursos requieren conexión o instalación en PC.')+'<section class="cards">'+resources.map(r=>'<div class="panel"><span class="tag dim">'+esc(r.topic)+'</span><h3>'+esc(r.title)+'</h3>'+link(r.url,'Abrir recurso oficial')+'</div>').join('')+'</section><div class="section"><h2>Laboratorios prácticos</h2></div><div class="panel"><p class="muted">Ya podés importar capturas candump y analizar una muestra CAN sintética; CircuitJS está disponible como herramienta externa integrada bajo demanda. PyBaMM continúa pendiente.</p>'+button('Ir a laboratorios','nav','data-id="labs"')+'</div>';}
 function dataView(){return heading('DATOS PERSONALES','Tu progreso te pertenece','Se guarda en IndexedDB de este navegador. Si cambiás de equipo o borrás datos del sitio, necesitás un respaldo.')+'<div class="grid two"><div class="panel"><h3>Exportar respaldo</h3><p class="muted">Descarga un JSON portable con intentos, resultados de casos, repeticiones y notas.</p>'+button('Descargar respaldo','export')+'</div><div class="panel"><h3>Importar respaldo</h3><p class="muted">Reemplaza el progreso local luego de validar el archivo. Guardá una copia antes de importar.</p><label class="button alt" for="import-file">Elegir archivo JSON</label><input class="sr-only" type="file" id="import-file" accept=".json,application/json"></div></div><div class="section"><h2>Notas privadas</h2></div><div class="panel"><label for="notebook">Hipótesis, dudas y procedimientos aprendidos</label><textarea class="field" id="notebook" maxlength="10000">'+esc(data.notes.general||'')+'</textarea><div class="row" style="margin-top:14px">'+button('Guardar notas','save-notes')+'</div></div><div class="section"><h2>Reinicio</h2></div><div class="panel"><p class="muted">Borrar todo es irreversible si no conservás una exportación.</p>'+button('Borrar progreso local','reset','','danger')+'</div>';}
-function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
-document.addEventListener('input',event=>{if(event.target.id==='multi-reason'&&multiTraining){multiTraining.reasoning=event.target.value;const btn=document.getElementById('multi-submit');if(btn)btn.disabled=multiTraining.reasoning.trim().length<80||multiTraining.selected.length!==2||!multiTraining.used.length;return;}
+function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='path'?pathView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
+document.addEventListener('input',event=>{
+if(event.target.id==='ecu-reason'&&ecuTraining&&!ecuResult){
+ ecuTraining.reasoning=event.target.value;
+ const btn=document.getElementById('ecu-submit');
+ if(btn)btn.disabled=!ecuTraining.final||!ecuTraining.observations.length||ecuTraining.reasoning.trim().length<80;
+ return;
+}
+if(event.target.id==='multi-reason'&&multiTraining){multiTraining.reasoning=event.target.value;const btn=document.getElementById('multi-submit');if(btn)btn.disabled=multiTraining.reasoning.trim().length<80||multiTraining.selected.length!==2||!multiTraining.used.length;return;}
 
  if(event.target.id==='wave-answer'){waveState.answer=event.target.value;return;}
  if(!quantitative||quantitativeResults)return;
@@ -498,7 +598,16 @@ document.addEventListener('input',event=>{if(event.target.id==='multi-reason'&&m
  if(id==='quant-value')a.value=event.target.value;
  if(id==='quant-reason')a.reasoning=event.target.value;
 });
-document.addEventListener('change',event=>{if(event.target.id==='portfolio-filter'){portfolioFilter=event.target.value;render();return;}
+document.addEventListener('change',event=>{
+if(ecuTraining&&!ecuResult&&['initial','final','ecu-prediction'].includes(event.target.id)){
+ const field=event.target.id==='ecu-prediction'?'pendingPrediction':event.target.id;
+ ecuTraining[field]=event.target.value;
+ const id=field==='initial'?'ecu-lock':field==='pendingPrediction'?'ecu-reveal':'ecu-submit';
+ const button=document.querySelector('[data-action="'+id+'"]');
+ if(button)button.disabled=field==='initial'?!ecuTraining.initial:field==='pendingPrediction'?!ecuTraining.pendingPrediction:!ecuTraining.final||!ecuTraining.observations.length||ecuTraining.reasoning.trim().length<80;
+ return;
+}
+if(event.target.id==='portfolio-filter'){portfolioFilter=event.target.value;render();return;}
 if((event.target.name==='multi-initial'||event.target.name==='multi-final')&&multiTraining&&!multiResult){
  const collection=event.target.name==='multi-initial'?'hypotheses':'selected';
  const values=new Set(multiTraining[collection]);
@@ -549,6 +658,49 @@ if(event.target.id==='can-file'){
 }
 if(event.target.id==='import-file'){const file=event.target.files?.[0];if(!file)return;if(file.size>2000000){toast('Archivo demasiado grande',true);return;}file.text().then(async text=>{const recovered=parseBackup(text);if(!confirm('¿Restaurar el respaldo y reemplazar todos los datos actuales?'))return;await saveProgress(recovered);data=recovered;nav('home');toast('Respaldo restaurado correctamente');}).catch(e=>toast('No se pudo importar: '+e.message,true));}});
 document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const act=target.dataset.action;const id=target.dataset.id;switch(act){case'nav':selectedLesson=null;nav(id);break;
+case'path-lesson':{
+ if(!lessons.some(l=>l.id===id))break;
+ selectedLesson=id;page='learn';render();break;
+}
+case'ecu-start':{
+ if(!ecuCases.some(c=>c.id===id))break;
+ ecuTraining={id,initial:'',locked:false,observations:[],pendingProbe:'',pendingPrediction:'',final:'',reasoning:''};
+ ecuResult=null;page='ecu';render();break;
+}
+case'ecu-lock':
+ if(!ecuTraining?.initial)return;
+ ecuTraining.locked=true;render();break;
+case'ecu-probe':{
+ if(!ecuTraining?.locked||ecuTraining.observations.some(o=>o.id===id))break;
+ const c=ecuCases.find(x=>x.id===ecuTraining.id);
+ if(!c?.probes.some(p=>p.id===id))break;
+ ecuTraining.pendingProbe=id;ecuTraining.pendingPrediction='';render();break;
+}
+case'ecu-reveal':{
+ if(!ecuTraining?.locked||!ecuTraining.pendingProbe||!ecuTraining.pendingPrediction)break;
+ ecuTraining.observations.push({id:ecuTraining.pendingProbe,prediction:ecuTraining.pendingPrediction});
+ ecuTraining.pendingProbe='';ecuTraining.pendingPrediction='';render();break;
+}
+case'ecu-grade':{
+ const c=ecuCases.find(x=>x.id===ecuTraining?.id);
+ if(!c||!ecuTraining.locked||!ecuTraining.final||!ecuTraining.observations.length||ecuTraining.reasoning.trim().length<80)break;
+ ecuResult=evaluateEcu(c,ecuTraining);
+ data.cases.push({id:c.id,score:ecuResult.score,at:new Date().toISOString(),
+  conclusion:ecuTraining.final,hypothesis:ecuTraining.initial,
+  used:ecuTraining.observations.map(o=>o.id),reasoning:ecuTraining.reasoning,passed:ecuResult.passed});
+ data.cases=data.cases.slice(-500);await persist();render();break;
+}
+case'ecu-export':{
+ if(!ecuTraining||!ecuResult)break;
+ const c=ecuCases.find(x=>x.id===ecuTraining.id);
+ const file=new Blob([ecuReport(c,ecuTraining,ecuResult)],{type:'text/markdown;charset=utf-8'});
+ const url=URL.createObjectURL(file),a=document.createElement('a');
+ a.href=url;a.download='autolab-ecu-'+c.id+'.md';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);break;
+}
+case'ecu-quit':
+ ecuTraining=null;ecuResult=null;render();break;
+
 case'portfolio-export':{
  const file=new Blob([portfolioMarkdown(data,lessons)],{type:'text/markdown;charset=utf-8'});
  const uri=URL.createObjectURL(file),a=document.createElement('a');
