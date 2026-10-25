@@ -27,7 +27,7 @@ import{parseCandump,analyzeCanFrames,sampleCandump,decodeSyntheticSample,MAX_CAN
 import{loadDbc,decodeFramesWithDbc,MAX_DBC_BYTES}from'./dbc-lab.js';
 import{BMS_SCENARIOS,generateSyntheticBms,parseBmsCsv,formatBmsCsv,analyzeBms,bmsQuestion,capacitySohPct,MAX_BMS_FILE_BYTES}from'./bms-lab.js';
 const cases=[...baseCases,...additionalCases];
-const studyCaseCatalog=[...cases,...multiFaultCases,...ecuCases,...differentialCases,...TRACE_CASES,...FUEL_CASES,...MISFIRE_CASES,...INTEGRATIVE_CASES];
+const studyCaseCatalog=[...cases,...multiFaultCases,...ecuCases,...differentialCases,...TRACE_CASES,...FUEL_CASES,...MISFIRE_CASES,...INTEGRATIVE_CASES,...TRANSFER_CASES];
 let coachFocus='auto',coachMinutes=30;
 let bmsState={scenarioId:'nominal',dataset:generateSyntheticBms('nominal'),capacityAh:60,initialSocPct:100,biasCorrectionA:0,answer:'',feedback:'',name:'Ejemplo nominal',fullCapacityAh:48,baselineCapacityAh:60};
 let waveState={id:'pwm',answer:'',result:null};
@@ -1717,7 +1717,8 @@ case'coach-run':{
  if(type==='practice'){
   const c=studyCaseCatalog.find(c=>c.id===id);
   if(!c)break;
-  if(id.startsWith('integral-')){integralTraining=startIntegrativeCase(id);integralResult=null;integralReport=null;page='integrative';render();}
+  if(id.startsWith('transfer-')){transferTraining={...buildTransferSession(Date.now()),pairIndex:0,stepIndex:0,feedback:false,answers:{}};transferResults=null;page='transfer';render();}
+  else if(id.startsWith('integral-')){integralTraining=startIntegrativeCase(id);integralResult=null;integralReport=null;page='integrative';render();}
   else if(id.startsWith('misfire-')){misfireTraining=newMisfireSession(id);misfireResult=null;page='misfire';render();}
   else if(id.startsWith('fuel-')){fuelTraining=createFuelSession(id);fuelTraining.locked=false;fuelResult=null;page='fuel';render();}
   else if(id.startsWith('trace-')){traceTraining={...createTraceSession(id),locked:false};traceResult=null;traceChannels=['ckp','cmp'];page='temporal';render();}
