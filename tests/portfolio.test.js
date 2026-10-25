@@ -114,3 +114,22 @@ test('v1.5: report de cuatro fuentes queda íntegro en portafolio tras restaurac
  assert.match(portfolioMarkdown(recovered,lessons),/Informe completo de expediente/);
  assert.match(portfolioMarkdown(recovered,lessons),/Incertidumbres/);
 });
+
+
+test('v1.8: práctica de transferencia conserva informe de dos representaciones tras respaldo',async()=>{
+ const{TRANSFER_CASES,buildTransferSession,evaluateTransferSession,transferReport}=await import('../src/transfer-exercises.js');
+ const session=buildTransferSession(44),pair=session.pairs[0],answers={},why='Mediría los parámetros que figuran en el banco bajo la misma condición de carga y compararía las dos formulaciones del principio con sus respectivas unidades.';
+ for(const item of pair.steps)answers[item.id]={value:String(item.expected),evidence:'relevant',reasoning:why};
+ const results=evaluateTransferSession({...session,pairs:[pair]},answers);
+ const report=transferReport({...session,pairs:[pair]},answers,results,new Date('2026-10-25T12:00:00Z'));
+ const p=emptyProgress();
+ p.cases.push({id:'transfer-'+pair.topic,score:100,at:'2026-10-25T12:00:00Z',
+  hypothesis:'relevant',conclusion:String(pair.steps[1].expected),used:pair.steps.map(x=>x.id),
+  reasoning:why,passed:true,report});
+ const restored=parseBackup(serializeBackup(p)),snap=portfolioSnapshot(restored,lessons);
+ assert.equal(snap.events[0].kind,'transfer');
+ assert.equal(snap.events[0].title,TRANSFER_CASES.find(x=>x.topic===pair.topic).title);
+ assert.equal(snap.events[0].report,report);
+ assert.match(portfolioMarkdown(restored,lessons),/Informe completo de expediente/);
+ assert.match(portfolioMarkdown(restored,lessons),/Semilla reproducible/);
+});
