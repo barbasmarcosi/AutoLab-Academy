@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.8 (corrección focalizada): prioridades por área y errores declarados como «Muy seguro» en exámenes completos, acceso directo al repaso del registro real, foco al encabezado de resultados y pruebas de reflow de 320/640 px sobre rutas clave; no infiere comprensión ni cambia notas. Ver docs/EXAM_FEEDBACK_REFLOW_V1_9_8.md.
+
+
 - v1.9.7 (evidencia accesible en gráficos): tablas numéricas desplegables para osciloscopio, SOC/BMS, tensión y RC; mínimo/máximo calculados sobre la totalidad de muestras válidas, tabla acotada para lectores de pantalla, fuente y límites explícitos. Auditoría E2E de estados abiertos en Chromium, WebKit y WebKit móvil. Ver docs/ACCESSIBLE_CHART_EVIDENCE_V1_9_7.md.
 
 
