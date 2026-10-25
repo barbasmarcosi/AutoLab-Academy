@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import{INTEGRATIVE_CASES,EVIDENCE_KIN,validateIntegrativeCase,startIntegrativeCase,integrativeReading,validateObservation,evaluateIntegrativeCase,buildIntegrativeReport}from'../src/integrative-lab.js';
+import{INTEGRATIVE_CASES,EVIDENCE_KINDS,validateIntegrativeCase,startIntegrativeCase,integrativeReading,validateObservation,evaluateIntegrativeCase,buildIntegrativeReport}from'../src/integrative-lab.js';
 const explanation='Las lecturas OBD y de contexto no son concluyentes por sí solas. Contrasté los oscilogramas con la alimentación y una prueba discriminante del circuito, descartando una causa alternativa.';
 const limits='La causa se refiere solo al emulador. No se conocen tolerancias OEM, defectos concurrentes o información experimental que permita reemplazar una pieza real.';
 function complete(c){
  const s=startIntegrativeCase(c.id);s.initial=c.alternatives.find(x=>x[0]!==c.cause)[0];
- const selected=[...EVIDENCE_KIN.map(k=>c.readings.find(r=>r.kind===k&&!r.unsafe)),c.readings.find(r=>r.confirm),c.readings.find(r=>r.exclude)];
+ const selected=[...EVIDENCE_KINDS.map(k=>c.readings.find(r=>r.kind===k&&!r.unsafe)),c.readings.find(r=>r.confirm),c.readings.find(r=>r.exclude)];
  s.observations=[...new Map(selected.map(r=>[r.id,{id:r.id,prediction:r.classification}])).values()];
  s.final=c.cause;s.reasoning=explanation;s.uncertainty=limits;return s;
 }
@@ -20,7 +20,7 @@ test('los expedientes contienen 4 fuentes, confirmación, descarte y alternativa
 test('solo cuatro fuentes y cadena confirmatoria completa alcanzan rúbrica de 100',()=>{
  for(const c of INTEGRATIVE_CASES){const s=complete(c),r=evaluateIntegrativeCase(s);
   assert.equal(r.score,100);assert.equal(r.passed,true);assert.equal(r.textReviewed,false);
-  assert(EVIDENCE_KIN.every(k=>r.kinds.includes(k)));
+  assert(EVIDENCE_KINDS.every(k=>r.kinds.includes(k)));
  }
 });
 test('acertar causa sin confirmación o prueba negativa no aprueba',()=>{
