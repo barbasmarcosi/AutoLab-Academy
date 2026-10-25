@@ -1,8 +1,9 @@
 # AutoLab Academy — Plan de implementación
 
-## Estado real al 24/10/2026
+## Estado real al 25/10/2026
 
-- E0 (base): 26 lecciones estructuradas y 80 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
+- E0 (base): 36 lecciones estructuradas y 100 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
+- E1.0 (componentes): seis circuitos algebraicos sintéticos de baja tensión (divisor, caída en línea, MOSFET, shunt, RC, energía inductiva), resultados con tolerancia, evidencia y reportes. Se suman 10 lecciones y 20 preguntas; itinerario de cuatro etapas. **No es simulador SPICE ni instrumento real.** Ver docs/COMPONENTS_V1.md.
 - E0.9 (recorrido ECU): 3 etapas de aprendizaje, banco ECU con 5 escenarios de instrumentación virtual, pronósticos previos a revelar mediciones, 10 lecciones y 20 preguntas nuevas. Los indicadores distinguen lecturas de exámenes. Quedan pendientes validación externa y E2E iPhone.
 - E1 (PWA): implementación MVP en GitHub Pages por Actions, exámenes, repaso con FSRS (ts-fsrs 5.4.2) basado en respuesta objetiva + confianza, evaluación acumulativa por cinco áreas, progreso local IndexedDB y backup JSON compatible con los intervalos anteriores. **Pendiente QA E2E iOS y revisión de calidad editorial de preguntas.** Ver docs/FSRS_E1.md.
 - E2 (taller virtual): **incremento v0.8:** 3 casos multifalla adicionales (18 casos en total), exigen dos causas con evidencia confirmatoria independiente para cada una; bloquean acciones inseguras y exportan informe. Razonamiento libre no evaluado semánticamente. Incremento cuantitativo v0.6: cinco retos nuevos con valores variables, mediciones justificadas, puntuación determinista y exportación de resultados; argumentos registrados para revisión humana. El banco actual aún requiere revisión de expertos. Primera versión ampliada con 15 casos deterministas, hipótesis inicial, pruebas, razonamiento escrito, informes Markdown, nota con reglas y tests. **Faltan revisión externa de expertos, instrumentación calibrada, múltiples fallas y QA E2E. No hay motor físico automotriz, telemetría real ni DTC OEM.**
