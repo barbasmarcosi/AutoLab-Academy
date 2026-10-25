@@ -8,10 +8,11 @@ import{componentLessons}from'../src/components-curriculum.js';
 import{differentialLessons}from'../src/differential-curriculum.js';
 import{temporalLessons}from'../src/temporal-curriculum.js';
 import{fuelLessons}from'../src/fuel-curriculum.js';
+import{misfireLessons}from'../src/misfire-curriculum.js';
 import{emptyProgress}from'../src/core.js';
-const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons];
-test('51 lecturas agrupadas en siete niveles con IDs completos y sin duplicaciones',()=>{
- assert.equal(all.length,51);
+const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons];
+test('56 lecturas agrupadas en ocho niveles con IDs completos y sin duplicaciones',()=>{
+ assert.equal(all.length,56);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
  assert.equal(new Set(assigned).size,all.length);
