@@ -4,14 +4,14 @@ PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y
 
 ## Qué está implementado
 
-- Academia con 6 lecciones, 30 preguntas, repaso e historial de resultados.
+- Academia con 6 lecciones, 30 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
 - Taller virtual con 15 casos sintéticos, pruebas reproducibles, justificación e informes.
 - Analizador CAN clásico: lectura local de archivos `candump` y captura de ejemplo.
 - **Decodificación DBC:** importación local de un `.dbc`, interpretación de las primeras 400 tramas usando [Candied](https://github.com/bit-dream/candied), tabla de señales físicas y ejercicio de factor/offset. El ejemplo AutoLab usa únicamente identificadores y escalas ficticios.
 - Laboratorio BMS con curvas, integración de corriente, importación/exportación CSV, estimación de SOC, cálculo ilustrativo SOH y desafíos sintéticos.
 - Exportador científico complementario `tools/pybamm_export.py` para generar CSV con PyBaMM real en computadora propia, con metadatos de modelo, versión y SHA-256; los modelos SPM y DFN se validan en una [CI científica separada](.github/workflows/science-pybamm.yml) y producen CSV descargables. No se ejecuta el solver en Pages.
 - CircuitJS original desde iframe externo bajo demanda; requiere Internet.
-- IndexedDB y respaldos JSON, sin backend ni sincronización automática.
+- IndexedDB y respaldos JSON, sin backend ni sincronización automática. La migración de los antiguos intervalos conserva sus fechas, sin reconstruir un historial ficticio.
 
 La aplicación no transmite datos CAN, no se conecta a ECUs, no realiza intervenciones HV y **no acredita competencia práctica**.
 
@@ -51,4 +51,4 @@ Los escenarios son sintéticos y las mediciones no representan especificaciones 
 - La QA completa de interfaz y respaldos en Safari/iPhone sigue pendiente.
 - Falta generar y conservar un lockfile npm para reproducibilidad estricta del build. La versión científica directa está fijada; las dependencias transitivas quedan registradas por ejecución y aún requieren lockfile/constraints reproducibles.
 
-Documentación: [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).
+Documentación: [retención FSRS y migración](docs/FSRS_E1.md), [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).

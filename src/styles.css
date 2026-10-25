@@ -13,3 +13,9 @@
 /* E4 battery laboratory: fluid scientific charts; keep input controls usable on iPhone */
 .bms-chart{display:block;width:100%;height:auto;max-height:280px;margin:8px auto 0;overflow:visible}
 @media(max-width:540px){.bms-chart{max-height:230px}.panel .row>.button{max-width:100%}}
+
+/* E1 retention: confidence calibration controls and responsive cumulative exams */
+.confidence-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+.confidence-options .option{margin:0;display:flex;align-items:center;line-height:1.35}
+.confidence-options input{flex:0 0 auto}
+@media(max-width:560px){.confidence-options{grid-template-columns:1fr}}
