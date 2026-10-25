@@ -77,3 +77,17 @@ test('inyección: respaldo JSON conserva hipótesis y prueba independiente en po
  assert.deepEqual(snap.events[0].evidence,['isolate','pressure']);
  assert.match(portfolioMarkdown(recovered,lessons),/Correcciones elevadas al ralentí/);
 });
+
+
+test('misfire por cilindro conserva hipótesis, evidencia y conclusión en respaldo',()=>{
+ const p=emptyProgress();
+ p.cases.push({id:'misfire-ignition',at:'2026-10-25T12:00:00Z',score:100,
+  hypothesis:'injector-open',conclusion:'coil-feed',used:['coil','injector'],
+  reasoning:'Comparé la corriente primaria de la bobina con otra carga y verifiqué la corriente del inyector para descartar una alternativa.',passed:true});
+ const snap=portfolioSnapshot(parseBackup(serializeBackup(p)),lessons);
+ assert.equal(snap.events[0].kind,'combustion');
+ assert.equal(snap.events[0].title,'Falla repetida del cilindro 2: mando sin corriente primaria');
+ assert.equal(snap.events[0].hypothesis,'injector-open');
+ assert.deepEqual(snap.events[0].evidence,['coil','injector']);
+ assert.match(portfolioMarkdown(parseBackup(serializeBackup(p)),lessons),/Falla repetida del cilindro 2/);
+});
