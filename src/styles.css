@@ -89,3 +89,6 @@
 .coach-signals + .button{margin-top:12px}
 .cards .tag.amber{max-width:100%}
 @media(max-width:600px){.cards .row.spaced{flex-wrap:wrap;gap:8px}}
+
+/* v1.8 guided-to-transfer numeric practice */
+@media(max-width:600px){.panel fieldset{max-width:100%;min-width:0}.panel fieldset .option{overflow-wrap:anywhere}}
