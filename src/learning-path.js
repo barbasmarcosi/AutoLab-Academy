@@ -1,5 +1,5 @@
 /**
- * Eight-stage learning itinerary. Reading and objective exams are shown separately:
+ * Nine-stage learning itinerary. Reading and objective exams are shown separately:
  * neither demonstrates competence on a real vehicle.
  */
 export const learningStages=[
@@ -26,7 +26,10 @@ export const learningStages=[
   goal:'Interpretar las correcciones como respuesta del controlador y corroborar hipótesis con mediciones independientes, sin usar rangos OEM inventados.'},
  {id:'misfire',order:8,name:'Combustión y correlación de cilindros',subtitle:'Distinguir encendido, inyección, mecánica y mezcla',
   lessons:['misfire-evidence','ignition-command-current','relative-compression-limits','network-misfire-context','hev-misfire-context'],
-  goal:'Separar monitor P030x, patrón por cilindro y evidencia instrumental confirmatoria, sin adjudicar culpables por un solo dato.'}
+  goal:'Separar monitor P030x, patrón por cilindro y evidencia instrumental confirmatoria, sin adjudicar culpables por un solo dato.'},
+ {id:'integrative',order:9,name:'Taller Integrador',subtitle:'Cruzar OBD, oscilogramas, circuitos y condiciones de funcionamiento',
+  lessons:['chain-of-evidence','obd-context-provenance','multichannel-crosschecks','mixture-closed-loop-inference','professional-diagnostic-report'],
+  goal:'Documentar procedencia, confirmación, descarte e incertidumbres con un expediente reproducible; jamás equiparar la nota con una certificación de taller.'}
 ];
 export function evaluateLearningPath(progress,lessons){
  const exists=new Set(lessons.map(l=>l.id));
