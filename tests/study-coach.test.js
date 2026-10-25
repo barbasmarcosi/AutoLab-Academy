@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import{emptyProgress,parseBackup,serializeBackup}from'../src/core.js';
 import{tracks}from'../src/content.js';
 import{analyzeStudyEvidence,makeDailyStudyPlan,formatStudyPlan}from'../src/study-coach.js';
-const questions=[{id:'e1',topic:'electricidad'},{id:'e2',topic:'electricidad'},{id:'m1',topic:'motor'},{id:'s1',topic:'senales'},{id:'r1',topic:'redes'},{id:'v1',topic:'ev'}];
+const questions=[{id:'e1',topic:'electricidad'},{id:'e2',topic:'electricidad'},{id:'m1',topic:'motor'},{id:'s1',topic:'senales'},{id:'r1',topic:'redes'},{id:'v1',topic:'ev'}].map(q=>({...q,options:['a','b','c','d'],answer:1,question:'Pregunta '+q.id,explanation:'Referencia',source:'https://example.com'}));
 const lessons=[{id:'lesson-e',topic:'electricidad',title:'Caídas de tensión'},{id:'lesson-m',topic:'motor',title:'Lazo cerrado'}];
 const cases=[{id:'case-e',topic:'electricidad'},{id:'case-m',topic:'motor'},{id:'case-v',topic:'ev'}];
 const now=new Date('2026-10-25T12:00:00.000Z');
@@ -68,4 +68,28 @@ test('lecturas y backup mantienen recomendaciones sin cambiar esquema',()=>{
  const report=formatStudyPlan(prior,makeDailyStudyPlan(prior,'electricidad',45),now);
  assert.match(report,/Caídas de tensión|Diagnóstico de 12 V/);
  assert.match(report,/no demuestran aptitud profesional/i);
+});
+
+
+test('v1.7: fallo concreto en examen acumulativo orienta un área sin atribuirle nota global',()=>{
+ const p=emptyProgress();
+ p.attempts=[{id:'cumulative-1',topic:'cumulative',percentage:90,at:'2026-10-25T10:00:00Z',
+  details:[{id:'m1',selected:0,correct:false,confidence:'high'}]}];
+ const a=analyze(p);
+ const motor=a.topics.find(t=>t.id==='motor');
+ assert.equal(a.excludedAggregateExams,1);
+ assert.equal(motor.latestExamPct,null);
+ assert.equal(motor.observedQuestions,1);
+ assert.equal(motor.activeErrors,1);
+ assert.equal(motor.noEvidence,false);
+ assert.equal(a.focus.id,'motor');
+ assert(motor.signals.some(s=>s.includes('fallada')));
+});
+test('v1.7: acierto con opciones válidas se registra sin crear errores activos',()=>{
+ const p=emptyProgress();
+ p.attempts=[{id:'cum-2',topic:'cumulative',percentage:100,at:'2026-10-25T10:00:00Z',
+  details:[{id:'m1',selected:1,correct:true,confidence:'low'}]}];
+ const a=analyze(p),motor=a.topics.find(t=>t.id==='motor');
+ assert.equal(motor.observedQuestions,1);assert.equal(motor.activeErrors,0);
+ 
 });

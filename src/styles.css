@@ -84,3 +84,8 @@
 .coach-signals{padding-left:20px;color:var(--muted);line-height:1.5}
 .coach-signals li{margin:6px 0}
 @media(max-width:560px){.coach-step .row{align-items:flex-start;gap:8px;flex-wrap:wrap}}
+
+/* v1.7: question-level evidence review */
+.coach-signals + .button{margin-top:12px}
+.cards .tag.amber{max-width:100%}
+@media(max-width:600px){.cards .row.spaced{flex-wrap:wrap;gap:8px}}

@@ -59,3 +59,29 @@ test('v1.5: respaldos antiguos sin report son compatibles y no se inventan infor
  assert.deepEqual(restored.cases[0],p.cases[0]);
  assert.equal('report' in restored.cases[0],false);
 });
+
+
+test('v1.7: persiste evidencia por pregunta sin alterar intentos históricos ni esquema',()=>{
+ const p=emptyProgress();
+ p.attempts.push({id:'old',topic:'all',percentage:60,at:'2025-01-01'});
+ p.attempts.push({id:'new',topic:'cumulative',percentage:50,at:'2026-10-25T14:00:00Z',
+  details:[{id:'fuel-q-motor-1',selected:2,correct:false,confidence:'high'},
+   {id:'integral-q-senales-1',selected:0,correct:true,confidence:'low'}]});
+ const restored=parseBackup(serializeBackup(p));
+ assert.equal(restored.schema,1);
+ assert.equal(restored.attempts[0].details,undefined);
+ assert.deepEqual(restored.attempts[1].details,p.attempts[1].details);
+});
+test('v1.7: las respuestas se validan por longitud, ID, selección y confianza',()=>{
+ const p=emptyProgress();
+ p.attempts.push({id:'adversarial',topic:'motor',at:'2026-10-25',percentage:33,
+  details:[{id:'safe-id',selected:5,correct:false,confidence:'unknown',extra:'ignored'},
+   {id:'BAD ID!',selected:0,correct:true,confidence:'high'},
+   {id:'okay',selected:1,correct:false,confidence:'normal'}]});
+ const saved=validateBackup(p);
+ assert.deepEqual(saved.attempts[0].details,[
+  {id:'safe-id',selected:null,correct:false,confidence:'normal'},
+  {id:'okay',selected:1,correct:false,confidence:'normal'}
+ ]);
+ assert.equal(saved.attempts[0].details.length,2);
+});

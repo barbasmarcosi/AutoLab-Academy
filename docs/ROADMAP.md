@@ -3,6 +3,7 @@
 ## Estado real al 25/10/2026
 
 - E0 (base): 61 lecciones estructuradas y 150 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
+- E1.7 (evidencia por pregunta): nuevos intentos guardan respuestas/opciones/confianza y análisis de errores activos/repetidos, conceptos con etiquetas editoriales, repetición focalizada y exportación. El orientador usa fallos realmente observados sin atribuir notas globales a áreas. Ver docs/ANSWER_EVIDENCE_V1_7.md.
 - E1.6 (orientación formativa): módulo offline de prioridad por datos reales FSRS/exámenes específicos/prácticas sintéticas, planes de 15/30/45 min, acceso a actividad y descarga de plan. No interpreta semántica ni infiere aptitud. Ver docs/STUDY_COACH_V1_6.md.
 - E1.5 (taller integrador): tres casos multifuente sintéticos, hipótesis previa, evidencia de contexto/OBD/ondas/circuitos, confirmación, descarte e incertidumbre escrita. Informe completo persistido en respaldo y Portafolio sin cambiar esquema. Cinco lecciones, diez preguntas y noveno nivel. Ver docs/INTEGRATIVE_V1_5.md.
 - E1.4 (combustión y balance): 4 modelos sintéticos de P030x, tabla de cilindros y dos condiciones, 2 pruebas independientes para cada hipótesis y octavo nivel de enseñanza. +5 lecciones/+10 preguntas. No hay contadores OEM ni presión real. Ver docs/MISFIRE_V1_4.md.
