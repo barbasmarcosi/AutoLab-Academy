@@ -92,3 +92,6 @@
 
 /* v1.8 guided-to-transfer numeric practice */
 @media(max-width:600px){.panel fieldset{max-width:100%;min-width:0}.panel fieldset .option{overflow-wrap:anywhere}}
+
+/* v1.9 staged hypothesis and measurement collection */
+@media(max-width:600px){.panel textarea.field{max-width:100%;min-width:0}.grid.two>.panel{min-width:0;overflow-wrap:anywhere}}

@@ -3,6 +3,7 @@
 ## Estado real al 25/10/2026
 
 - E0 (base): 61 lecciones estructuradas y 150 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
+- E1.9 (transferencia diagnóstica): 5 familias, 2 causas y 2 presentaciones por familia; 20 combinaciones deterministas, predicción de pruebas, confirmación, descarte, contexto, incertidumbres, informe trazable y registro por área. Sin datos OEM. Ver docs/DIAGNOSTIC_TRANSFER_V1_9.md.
 - E1.8 (transferencia entre problemas): cinco pares sintéticos (primero guiado y luego otra variable despejada), generación reproducible por semilla, resultado objetivo por cada área, evidencia, explicación no corregida, informe Markdown y compatibilidad con Portafolio/backup. No prueba transferencia a un vehículo. Ver docs/TRANSFER_V1_8.md.
 - E1.7 (evidencia por pregunta): nuevos intentos guardan respuestas/opciones/confianza y análisis de errores activos/repetidos, conceptos con etiquetas editoriales, repetición focalizada y exportación. El orientador usa fallos realmente observados sin atribuir notas globales a áreas. Ver docs/ANSWER_EVIDENCE_V1_7.md.
 - E1.6 (orientación formativa): módulo offline de prioridad por datos reales FSRS/exámenes específicos/prácticas sintéticas, planes de 15/30/45 min, acceso a actividad y descarga de plan. No interpreta semántica ni infiere aptitud. Ver docs/STUDY_COACH_V1_6.md.

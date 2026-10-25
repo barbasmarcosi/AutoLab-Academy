@@ -133,3 +133,24 @@ test('v1.8: práctica de transferencia conserva informe de dos representaciones 
  assert.match(portfolioMarkdown(restored,lessons),/Informe completo de expediente/);
  assert.match(portfolioMarkdown(restored,lessons),/Semilla reproducible/);
 });
+
+
+test('v1.9: diagnóstico por evidencia conserva hipótesis, descartes e informe después de importar backup',async()=>{
+ const {buildDiagnosticTransfer,gradeDiagnosticTransfer,diagnosticTransferReport,DIAGNOSTIC_TRANSFER_CASES}=await import('../src/diagnostic-transfer.js');
+ const s=buildDiagnosticTransfer(291),c=s.cases[0];
+ const initial=c.options.find(x=>x[0]!==c.cause)[0],reasoning='Elegí una prueba confirmatoria y otra de descarte con el mismo contexto; comparé lecturas ficticias independientes y evité inferir una pieza física desde el síntoma.';
+ const limits='No conozco especificaciones del fabricante, pruebas en vehículo ni tolerancias reales de estos instrumentos simulados.';
+ const a={initial,final:c.cause,reasoning,limits,
+  probes:c.probes.filter(p=>!p.unsafe).map(p=>({id:p.id,prediction:p.outcome}))};
+ const score=gradeDiagnosticTransfer(c,a),report=diagnosticTransferReport({scenario:{...s,cases:[c]},answers:{[c.id]:a}},new Date('2026-10-25T16:00:00Z'));
+ const p=emptyProgress();
+ p.cases.push({id:c.id,at:'2026-10-25T16:00:00Z',score:score.score,passed:score.passed,
+  hypothesis:a.initial,conclusion:a.final,reasoning,used:a.probes.map(x=>x.id),report});
+ const restored=parseBackup(serializeBackup(p)),snapshot=portfolioSnapshot(restored,lessons);
+ assert.equal(snapshot.events[0].kind,'diagnostic-transfer');
+ assert.equal(snapshot.events[0].title,DIAGNOSTIC_TRANSFER_CASES.find(x=>x.id===c.id).title);
+ assert.equal(snapshot.events[0].report,report);
+ assert.deepEqual(snapshot.events[0].evidence,a.probes.map(x=>x.id));
+ assert.match(portfolioMarkdown(restored,lessons),/Semilla reproducible: 291/);
+ assert.match(portfolioMarkdown(restored,lessons),/Puntuación: 100\/100/);
+});
