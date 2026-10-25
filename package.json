@@ -1,6 +1,6 @@
 {
   "name": "autolab-academy",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "esbuild": "0.25.12",
-    "@playwright/test": "1.64.1"
+    "@playwright/test": "1.64.1",
+    "@axe-core/playwright": "4.14.0"
   }
 }

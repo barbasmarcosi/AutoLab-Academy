@@ -95,3 +95,12 @@
 
 /* v1.9 staged hypothesis and measurement collection */
 @media(max-width:600px){.panel textarea.field{max-width:100%;min-width:0}.grid.two>.panel{min-width:0;overflow-wrap:anywhere}}
+
+
+/* v1.9.3: keyboard/screen reader affordances; skip navigation appears on focus. */
+.skip-link{position:fixed;left:12px;top:10px;z-index:1000;background:var(--mint);color:#072b35;
+ padding:12px 16px;border:3px solid #072b35;border-radius:9px;font-weight:800;transform:translateY(-180%)}
+.skip-link:focus{transform:translateY(0)}
+#main-content:focus{outline:none}
+#main-content:focus-visible{outline:3px solid var(--mint);outline-offset:-3px}
+@media(prefers-reduced-motion:reduce){.panel,.button{transition:none!important}}
