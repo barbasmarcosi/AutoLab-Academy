@@ -25,3 +25,11 @@
 .wave-chart svg{display:block;width:100%;height:auto;max-height:340px}
 .wave-legend{display:inline-block;margin:4px 16px 4px 0;font-weight:650}
 @media(max-width:560px){.wave-chart{overflow-x:auto}.wave-chart svg{min-width:540px}}
+
+/* v0.8 offline learning portfolio and multiple-fault problem UX */
+.portfolio-list{margin-top:18px;display:flex;flex-direction:column;gap:12px}
+.portfolio-entry{border:1px solid var(--line);background:rgba(8,24,39,.48);padding:16px;border-radius:12px;overflow-wrap:anywhere}
+.portfolio-entry p{margin:5px 0}
+.portfolio-entry details{margin-top:10px}
+.portfolio-entry summary{cursor:pointer;color:var(--mint);padding:4px 0}
+.portfolio-entry details p{line-height:1.55;white-space:pre-wrap}
