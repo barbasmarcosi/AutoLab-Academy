@@ -54,3 +54,8 @@
 .trace-windows{display:flex;flex-wrap:wrap;gap:8px}
 .trace-windows .button{flex:1 1 132px}
 @media(max-width:650px){.trace-windows .button{flex:1 1 calc(50% - 8px)}}
+
+/* v1.3: multi-condition OBD readings scroll as a single table on small screens */
+.table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.table-scroll table{min-width:650px}
+.table-scroll td,.table-scroll th{padding:9px 12px;white-space:nowrap}

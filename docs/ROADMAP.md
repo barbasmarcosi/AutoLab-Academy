@@ -2,7 +2,8 @@
 
 ## Estado real al 25/10/2026
 
-- E0 (base): 46 lecciones estructuradas y 120 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
+- E0 (base): 51 lecciones estructuradas y 130 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
+- E1.3 (inyección y combustible): 4 casos sintéticos MPI, condiciones de ralentí/crucero/carga, STFT/LTFT, MAP/MAF y lambda ilustrativa, pruebas confirmatorias independientes y siete niveles. +5 lecciones / +10 preguntas. No valores OEM ni intervención física. Ver docs/FUEL_V1_3.md.
 - E1.2 (diagnóstico temporal): seis capturas por escenario con falla única intermitente en 4 bancos ficticios (CKP, CMP, inyección y alimentación ECU), comparación multicanal y documentación de fuentes. +5 lecciones, +10 preguntas, sexto nivel. PWA sin hardware ni validación profesional. Ver docs/TEMPORAL_V1_2.md.
 - E1.1 (diagnóstico diferencial): 3 prácticas con dos causas distintas para una misma lectura o curva (MOSFET, RC y caída bajo carga), evidencia discriminante y predicciones previas, quinto nivel de itinerario, 5 lecciones y 10 preguntas nuevas. Datos únicamente sintéticos. Ver docs/DIFFERENTIAL_V1_1.md.
 - E1.0 (componentes): seis circuitos algebraicos sintéticos de baja tensión (divisor, caída en línea, MOSFET, shunt, RC, energía inductiva), resultados con tolerancia, evidencia y reportes. Se suman 10 lecciones y 20 preguntas; itinerario de cuatro etapas. **No es simulador SPICE ni instrumento real.** Ver docs/COMPONENTS_V1.md.

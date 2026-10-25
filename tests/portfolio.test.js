@@ -62,3 +62,18 @@ test('el caso temporal conserva hipótesis, canales y título tras restauración
  assert.deepEqual(snap.events[0].evidence,['ckp','cmp']);
  assert.match(portfolioMarkdown(loaded,lessons),/Pérdida esporádica de CKP/);
 });
+
+
+test('inyección: respaldo JSON conserva hipótesis y prueba independiente en portafolio',()=>{
+ const p=emptyProgress();
+ p.cases.push({id:'fuel-air-leak',at:'2026-10-24T22:00:00Z',score:100,
+  hypothesis:'pressure',conclusion:'air',used:['isolate','pressure'],
+  reasoning:'Contrasté ralentí y crucero, añadí una prueba independiente y descarté presión baja en el banco.',passed:true});
+ const recovered=parseBackup(serializeBackup(p));
+ const snap=portfolioSnapshot(recovered,lessons);
+ assert.equal(snap.events[0].kind,'injection');
+ assert.equal(snap.events[0].title,'Correcciones elevadas al ralentí');
+ assert.equal(snap.events[0].hypothesis,'pressure');
+ assert.deepEqual(snap.events[0].evidence,['isolate','pressure']);
+ assert.match(portfolioMarkdown(recovered,lessons),/Correcciones elevadas al ralentí/);
+});

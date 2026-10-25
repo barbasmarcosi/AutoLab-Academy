@@ -5,12 +5,14 @@ import{componentLessons,componentQuestions}from'./components-curriculum.js';
 import{componentScenarios,componentModel,gradeComponent,componentReport,parseComponentNumber,rcSamples}from'./component-lab.js';
 import{differentialLessons,differentialQuestions}from'./differential-curriculum.js';
 import{temporalLessons,temporalQuestions}from'./temporal-curriculum.js';
+import{fuelLessons,fuelQuestions}from'./fuel-curriculum.js';
+import{FUEL_CASES,createFuelSession,fuelFrame,fuelProbe,gradeFuelSession,fuelReport}from'./fuel-system-lab.js';
 import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSession,generateTrace,traceSummary,gradeTraceSession,traceReport}from'./temporal-trace-lab.js';
 import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDifferential,differentialTrace,differentialReport}from'./fault-discrimination.js';
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
-const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions];
+const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions];
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{multiFaultCases,evaluateMultiFault,multiFaultReport}from'./differential-lab.js';
@@ -23,6 +25,7 @@ let bmsState={scenarioId:'nominal',dataset:generateSyntheticBms('nominal'),capac
 let waveState={id:'pwm',answer:'',result:null};
 let differentialTraining=null,differentialResult=null;
 let traceTraining=null,traceResult=null,traceChannels=['ckp','cmp'];
+let fuelTraining=null,fuelResult=null;
 let componentState={id:'divider',condition:'nominal',value:'',evidence:'',reasoning:'',result:null};
 let labState={mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,circuitLoaded:false,answer:'',feedback:'',dbc:null,dbcLabel:'',dbcError:'',dbcAnswer:'',dbcFeedback:''};
 import{emptyProgress,scoreExam,dueReviews,completedTopics,calculateCase,loadProgress,saveProgress,serializeBackup,parseBackup}from'./core.js';
@@ -39,9 +42,9 @@ function button(text,action,extra='',kind=''){return '<button class="button '+ki
 function link(url,label){return '<a target="_blank" rel="noopener noreferrer" href="'+attr(url)+'">'+esc(label)+'</a>';}
 function toast(message,error=false){document.querySelectorAll('.toast').forEach(n=>n.remove());const node=document.createElement('div');node.className='toast'+(error?' error':'');node.textContent=message;node.role='status';document.body.append(node);setTimeout(()=>node.remove(),4200);}
 async function persist(){try{await saveProgress(data);}catch(e){toast('No se pudieron guardar los cambios: '+e.message,true);}}
-function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
+function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;fuelTraining=null;fuelResult=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1>'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.2</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
+function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.3</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
 
 
@@ -82,6 +85,90 @@ function traceChannelGraph(c,index,channelId){
  '<p class="muted small">Mín: '+summary.min.toFixed(2)+' '+esc(ch.unit)+
  ' · Máx: '+summary.max.toFixed(2)+' '+esc(ch.unit)+' · Transiciones ascendentes: '+summary.rising+'</p></article>';
 }
+
+function fuelMenu(){
+ return heading('INYECCIÓN Y OBD-II','Investigar la mezcla, no cambiar piezas por un DTC',
+ 'Cuatro investigaciones sintéticas de motores MPI en lazo cerrado: correcciones de combustible, aire medido y verificaciones independientes.')+
+ '<div class="notice">STFT/LTFT describen correcciones del control, no prueban una falla concreta. MAP, MAF, lambda y presión de combustible tienen supuestos de banco; la presión no se declara como PID genérico garantizado.</div>'+
+ '<div class="grid">'+FUEL_CASES.map(c=>
+ '<article class="panel"><span class="tag dim">INYECCIÓN · MODELO DIDÁCTICO</span><h3>'+esc(c.title)+'</h3><p class="muted">'+esc(c.symptom)+'</p>'+
+ button('Investigar sistema','fuel-start','data-id="'+attr(c.id)+'"')+'</article>').join('')+'</div>';
+}
+function fuelChart(c,s){
+ const rows=c.frames.filter(f=>s.opened.includes(f.id)),width=670,height=228,left=60,right=615,top=22,bottom=182;
+ const y=v=>top+(40-v)/80*(bottom-top);
+ const x=id=>left+(['idle','cruise','load'].indexOf(id)+.5)*(right-left)/3;
+ const guides=[-40,-20,0,20,40].map(v=>'<line x1="'+left+'" x2="'+right+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'" stroke="#304957"/>'+
+ '<text x="'+(left-9)+'" y="'+(y(v)+4).toFixed(1)+'" font-size="12" text-anchor="end" fill="#b4cadd">'+(v>0?'+':'')+v+'%</text>').join('');
+ const renderSeries=(key,color)=>rows.map((f,i)=>'<circle cx="'+x(f.id).toFixed(1)+'" cy="'+y(f[key]).toFixed(1)+'" r="5" fill="'+color+'"/>'+
+ '<text x="'+x(f.id).toFixed(1)+'" y="'+(y(f[key])-10).toFixed(1)+'" fill="'+color+'" text-anchor="middle" font-size="12">'+(f[key]>0?'+':'')+f[key]+'%</text>').join('');
+ return '<div class="wave-chart"><svg role="img" aria-label="Comparación STFT y LTFT de condiciones visitadas; no es una serie temporal ni una medición OEM" viewBox="0 0 '+width+' '+height+'">'+
+ guides+renderSeries('stftPct','#60d9c7')+renderSeries('ltftPct','#ffba73')+
+ c.frames.map(f=>'<text x="'+x(f.id)+'" y="210" text-anchor="middle" font-size="12" fill="#b4cadd">'+esc(f.label)+'</text>').join('')+'</svg></div>'+
+ '<p class="muted small"><span style="color:#60d9c7">●</span> STFT y <span style="color:#ffba73">●</span> LTFT. Se muestran únicamente condiciones inspeccionadas: son puntos de funcionamiento, NO una captura temporal.</p>';
+}
+function fuelView(){
+ const s=fuelTraining,c=FUEL_CASES.find(x=>x.id===s?.caseId);
+ if(!c)return fuelMenu();
+ if(fuelResult)return fuelSummary(c);
+ const options=(id,value,label)=>'<label for="'+id+'"><strong>'+label+'</strong></label><select class="field" id="'+id+'"><option value="">Elegí una hipótesis</option>'+
+ c.options.map(([valueId,name])=>'<option value="'+attr(valueId)+'" '+(valueId===value?'selected':'')+'>'+esc(name)+'</option>').join('')+'</select>';
+ let html='<div class="row spaced"><span class="eyebrow">MPI EN LAZO CERRADO · SOLO DATOS FICTICIOS</span>'+button('Salir','fuel-quit','','alt small')+'</div>'+
+ '<h1>'+esc(c.title)+'</h1><div class="panel"><h3>Síntoma</h3><p>'+esc(c.symptom)+'</p><p class="muted">Las tres condiciones pertenecen al mismo motor didáctico, no a un automóvil real.</p></div>';
+ if(!s.locked)return html+'<div class="section"><h2>1. Hipótesis antes de abrir las condiciones</h2></div><div class="panel">'+
+ options('fuel-initial',s.initial,'¿Qué causa investigarías primero?')+
+ '<p class="muted small">Se registra la hipótesis inicial, incluso si la cambiás al obtener evidencia.</p>'+
+ button('Registrar hipótesis inicial','fuel-lock',s.initial?'':'disabled')+'</div>';
+ html+='<div class="section"><h2>2. Compará ralentí, crucero y carga</h2></div>'+
+ '<p class="muted">Tenés que abrir al menos ralentí y crucero para comparar sus correcciones.</p>'+
+ '<div class="row trace-windows">'+c.frames.map(f=>button(f.label+(s.opened.includes(f.id)?' ✓':''),'fuel-open',
+ 'data-id="'+attr(f.id)+'"',s.opened.includes(f.id)?'':'alt')).join('')+'</div>';
+ if(s.opened.length){
+  html+='<div class="panel"><h3>Parámetros OBD simulados</h3>'+
+ '<div class="table-scroll"><table><thead><tr><th>Condición</th><th>RPM</th><th>Carga</th><th>STFT</th><th>LTFT</th><th>MAP</th><th>MAF</th><th>λ</th></tr></thead><tbody>'+
+ c.frames.filter(f=>s.opened.includes(f.id)).map(f=>'<tr><td>'+esc(f.label)+'</td><td>'+f.rpm+'</td><td>'+f.loadPct+'%</td><td>'+f.stftPct+'%</td><td>'+f.ltftPct+'%</td><td>'+f.mapKpa+' kPa</td><td>'+f.mafGps+' g/s</td><td>'+f.lambda+'</td></tr>').join('')+
+ '</tbody></table></div>'+fuelChart(c,s)+
+ '<p class="muted small">λ aquí representa un resultado ilustrativo de control en lazo cerrado; puede permanecer cercana a 1 porque la ECU está compensando. Las cifras y referencias no son especificaciones OEM.</p></div>';
+ }
+ html+='<div class="section"><h2>3. Elegí una prueba que diferencie causas</h2></div>'+
+ '<div class="grid two">'+c.probes.map(p=>
+ '<button class="probe panel" data-action="fuel-probe" data-id="'+attr(p.id)+'" '+(s.probes.some(o=>o.id===p.id)?'disabled':'')+'>'+esc(p.label)+(s.probes.some(o=>o.id===p.id)?' ✓':'')+'</button>').join('')+'</div>';
+ if(s.pending){
+  const p=fuelProbe(c.id,s.pending);
+  html+='<div class="panel"><h3>Pronóstico previo</h3><p>'+esc(p.label)+'</p>'+
+ '<label for="fuel-prediction">¿Qué resultado esperás de esta prueba?</label>'+
+ '<select class="field" id="fuel-prediction"><option value="">Elegí antes de revelar</option>'+
+ [['normal','Normal según referencia del banco'],['anormal','Anómalo respecto del banco'],['peligrosa','Acción insegura, no permitida']].map(([v,label])=>
+ '<option value="'+v+'" '+(s.prediction===v?'selected':'')+'>'+label+'</option>').join('')+'</select>'+
+ button('Revelar lectura virtual','fuel-reveal',s.prediction?'':'disabled')+'</div>';
+ }
+ if(s.probes.length)html+='<div class="panel"><h3>Registro de pruebas</h3>'+
+ s.probes.map(o=>{const p=fuelProbe(c.id,o.id);return '<div class="answer-card"><strong>'+esc(p.label)+'</strong>'+
+ '<p>Previsto: '+esc(o.prediction)+' · Observado: '+esc(p.classification)+'</p><p class="muted">'+esc(p.reading)+'</p></div>';}).join('')+'</div>';
+ html+='<div class="section"><h2>4. Conclusión contrastada</h2></div><div class="panel">'+
+ options('fuel-final',s.final,'Causa que mejor explica las pruebas')+
+ '<label for="fuel-reason"><strong>Describí cómo variaron STFT/LTFT entre regímenes y qué medición confirmó tu hipótesis</strong></label>'+
+ '<textarea class="field" rows="6" maxlength="3000" id="fuel-reason" placeholder="Explicá qué patrón observaste, cuál descartaste y por qué. Al menos 90 caracteres.">'+esc(s.reasoning)+'</textarea>'+
+ '<p class="muted small">La calidad técnica del texto no es corregida por IA ni por un experto en esta versión.</p>'+
+ button('Evaluar diagnóstico','fuel-grade',!s.final||!s.probes.length||s.reasoning.trim().length<90?'disabled id="fuel-submit"':'id="fuel-submit"')+'</div>';
+ return html;
+}
+function fuelSummary(c){
+ const s=fuelTraining,r=fuelResult;
+ return heading('CORRECCIÓN DE INYECCIÓN','Resultado estructurado: '+r.score+'/100',
+  'No se ha evaluado semánticamente tu explicación. Las mediciones son solo las de este banco simulado.')+
+ '<div class="panel"><span class="tag '+(r.passed?'':'amber')+'">'+(r.passed?'Se cumplieron los criterios objetivos':'Faltan criterios o hay una elección incorrecta')+'</span>'+
+ '<p><strong>Causa:</strong> '+(r.correct?'correcta':'incorrecta')+' · Prueba discriminante: '+(r.confirmed?'sí':'no')+
+ ' · Comparaste ralentí y crucero: '+(r.compared?'sí':'no')+' · Pronóstico acertado: '+(r.predicted?'sí':'no')+
+ ' · Acción insegura: '+(r.unsafe?'sí':'no')+'</p>'+
+ '<h3>Interpretación del banco</h3><p>'+esc(c.explanation)+'</p>'+
+ '<h3>Tu justificación sin revisión</h3><p>'+esc(s.reasoning)+'</p>'+
+ '<p class="muted small">No constituye reparación, diagnóstico OEM ni certificación profesional.</p>'+
+ '<div class="row">'+button('Descargar informe Markdown','fuel-export')+
+ button('Nuevo intento','fuel-start','data-id="'+attr(c.id)+'"','alt')+
+ button('Volver a inyección','fuel-quit','','alt')+'</div></div>';
+}
+
 function temporalMenu(){
  return heading('CORRELACIÓN TEMPORAL','El problema aparece y desaparece',
  'Revisá un buffer de seis capturas de 120 ms. La anomalía aparece en una sola ventana y exige comparar al menos dos canales con una captura normal.')+
@@ -239,6 +326,7 @@ function pathView(){
  (stage.id==='components'?'<div class="row" style="margin-top:16px">'+button('Abrir laboratorio de componentes','open-components')+'</div>':'')+
  (stage.id==='differential'?'<div class="row" style="margin-top:16px">'+button('Practicar diagnóstico diferencial','nav','data-id="differential"')+'</div>':'')+
  (stage.id==='temporal'?'<div class="row" style="margin-top:16px">'+button('Examinar capturas temporales','nav','data-id="temporal"')+'</div>':'')+
+ (stage.id==='fuel'?'<div class="row" style="margin-top:16px">'+button('Investigar sistemas de inyección','nav','data-id="fuel"')+'</div>':'')+
  '</article>').join('')+'</div>'+
  '<div class="notice">El avance por lectura no se interpreta como dominio de un tema. El puntaje de selección múltiple tampoco demuestra aptitud para diagnóstico real ni intervención HV.</div>';
 }
@@ -826,8 +914,15 @@ body+='<div class="section"><h2>Análisis de mensajes por ID</h2></div><div clas
 
 function resourceView(){return heading('FUENTES Y HERRAMIENTAS','Biblioteca externa','Priorizamos documentación pública y software maduro. Algunos recursos requieren conexión o instalación en PC.')+'<section class="cards">'+resources.map(r=>'<div class="panel"><span class="tag dim">'+esc(r.topic)+'</span><h3>'+esc(r.title)+'</h3>'+link(r.url,'Abrir recurso oficial')+'</div>').join('')+'</section><div class="section"><h2>Laboratorios prácticos</h2></div><div class="panel"><p class="muted">Ya podés importar capturas candump y analizar una muestra CAN sintética; CircuitJS está disponible como herramienta externa integrada bajo demanda. PyBaMM continúa pendiente.</p>'+button('Ir a laboratorios','nav','data-id="labs"')+'</div>';}
 function dataView(){return heading('DATOS PERSONALES','Tu progreso te pertenece','Se guarda en IndexedDB de este navegador. Si cambiás de equipo o borrás datos del sitio, necesitás un respaldo.')+'<div class="grid two"><div class="panel"><h3>Exportar respaldo</h3><p class="muted">Descarga un JSON portable con intentos, resultados de casos, repeticiones y notas.</p>'+button('Descargar respaldo','export')+'</div><div class="panel"><h3>Importar respaldo</h3><p class="muted">Reemplaza el progreso local luego de validar el archivo. Guardá una copia antes de importar.</p><label class="button alt" for="import-file">Elegir archivo JSON</label><input class="sr-only" type="file" id="import-file" accept=".json,application/json"></div></div><div class="section"><h2>Notas privadas</h2></div><div class="panel"><label for="notebook">Hipótesis, dudas y procedimientos aprendidos</label><textarea class="field" id="notebook" maxlength="10000">'+esc(data.notes.general||'')+'</textarea><div class="row" style="margin-top:14px">'+button('Guardar notas','save-notes')+'</div></div><div class="section"><h2>Reinicio</h2></div><div class="panel"><p class="muted">Borrar todo es irreversible si no conservás una exportación.</p>'+button('Borrar progreso local','reset','','danger')+'</div>';}
-function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='path'?pathView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='temporal'?(traceTraining?temporalView():temporalMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
+function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='path'?pathView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='temporal'?(traceTraining?temporalView():temporalMenu()):page==='fuel'?(fuelTraining?fuelView():fuelMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
 document.addEventListener('input',event=>{
+if(event.target.id==='fuel-reason'&&fuelTraining&&!fuelResult){
+ fuelTraining.reasoning=event.target.value;
+ const node=document.getElementById('fuel-submit');
+ if(node)node.disabled=!fuelTraining.final||!fuelTraining.probes.length||fuelTraining.reasoning.trim().length<90;
+ return;
+}
+
 if(event.target.id==='trace-reason'&&traceTraining&&!traceResult){
  traceTraining.reasoning=event.target.value;
  const btn=document.getElementById('trace-submit');
@@ -863,6 +958,13 @@ if(event.target.id==='multi-reason'&&multiTraining){multiTraining.reasoning=even
  if(id==='quant-reason')a.reasoning=event.target.value;
 });
 document.addEventListener('change',event=>{
+if(fuelTraining&&!fuelResult){
+ const id=event.target.id,s=fuelTraining;
+ if(id==='fuel-initial'){s.initial=event.target.value;render();return;}
+ if(id==='fuel-final'){s.final=event.target.value;render();return;}
+ if(id==='fuel-prediction'){s.prediction=event.target.value;render();return;}
+}
+
 if(traceTraining&&!traceResult){
  const s=traceTraining,id=event.target.id;
  if(id==='trace-initial'){s.initial=event.target.value;render();return;}
@@ -959,6 +1061,49 @@ if(event.target.id==='can-file'){
 }
 if(event.target.id==='import-file'){const file=event.target.files?.[0];if(!file)return;if(file.size>2000000){toast('Archivo demasiado grande',true);return;}file.text().then(async text=>{const recovered=parseBackup(text);if(!confirm('¿Restaurar el respaldo y reemplazar todos los datos actuales?'))return;await saveProgress(recovered);data=recovered;nav('home');toast('Respaldo restaurado correctamente');}).catch(e=>toast('No se pudo importar: '+e.message,true));}});
 document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const act=target.dataset.action;const id=target.dataset.id;switch(act){case'nav':selectedLesson=null;nav(id);break;
+case'fuel-start':{
+ if(!FUEL_CASES.some(c=>c.id===id))break;
+ fuelTraining={...createFuelSession(id),locked:false};
+ fuelResult=null;page='fuel';render();break;
+}
+case'fuel-lock':
+ if(!fuelTraining?.initial)break;
+ fuelTraining.locked=true;render();break;
+case'fuel-open':{
+ if(!fuelTraining?.locked)break;
+ if(!FUEL_CASES.find(c=>c.id===fuelTraining.caseId)?.frames.some(f=>f.id===id))break;
+ if(!fuelTraining.opened.includes(id))fuelTraining.opened.push(id);
+ render();break;
+}
+case'fuel-probe':{
+ if(!fuelTraining?.locked||fuelTraining.probes.some(o=>o.id===id))break;
+ if(!FUEL_CASES.find(c=>c.id===fuelTraining.caseId)?.probes.some(p=>p.id===id))break;
+ fuelTraining.pending=id;fuelTraining.prediction='';render();break;
+}
+case'fuel-reveal':{
+ const s=fuelTraining;
+ if(!s?.locked||!s.pending||!s.prediction)break;
+ s.probes.push({id:s.pending,prediction:s.prediction});
+ s.pending='';s.prediction='';render();break;
+}
+case'fuel-grade':{
+ const s=fuelTraining;
+ if(!s?.locked||!s.final||!s.probes.length||s.reasoning.trim().length<90)break;
+ fuelResult=gradeFuelSession(s);
+ data.cases.push({id:s.caseId,score:fuelResult.score,at:new Date().toISOString(),
+  hypothesis:s.initial,conclusion:s.final,used:s.probes.map(o=>o.id),
+  reasoning:s.reasoning,passed:fuelResult.passed});
+ data.cases=data.cases.slice(-500);await persist();render();break;
+}
+case'fuel-export':{
+ if(!fuelTraining||!fuelResult)break;
+ const blob=new Blob([fuelReport(fuelTraining,fuelResult)],{type:'text/markdown;charset=utf-8'});
+ const url=URL.createObjectURL(blob),node=document.createElement('a');
+ node.href=url;node.download='autolab-inyeccion-'+fuelTraining.caseId+'.md';
+ document.body.append(node);node.click();node.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);break;
+}
+case'fuel-quit':
+ fuelTraining=null;fuelResult=null;render();break;
 case'trace-start':{
  if(!TRACE_CASES.some(c=>c.id===id))break;
  traceTraining={...createTraceSession(id),locked:false};

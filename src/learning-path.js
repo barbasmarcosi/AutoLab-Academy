@@ -1,5 +1,5 @@
 /**
- * Six-stage learning itinerary. Reading and objective exams are shown separately:
+ * Seven-stage learning itinerary. Reading and objective exams are shown separately:
  * neither demonstrates competence on a real vehicle.
  */
 export const learningStages=[
@@ -20,7 +20,10 @@ export const learningStages=[
   goal:'Escoger pruebas discriminantes, anticipar resultados y distinguir observaciones idénticas de causas comprobadas.'},
  {id:'temporal',order:6,name:'Señales y fallas intermitentes',subtitle:'Correlación multicanal y revisión de buffers temporales',
   lessons:['transient-supply','injector-dual-channel','ckp-cmp-correlation-buffer','can-intermittent-events','bms-intermittent-sensors'],
-  goal:'Comparar capturas normales con el evento, seleccionar dos señales y distinguir coincidencia temporal de causa demostrada.'}
+  goal:'Comparar capturas normales con el evento, seleccionar dos señales y distinguir coincidencia temporal de causa demostrada.'},
+ {id:'fuel',order:7,name:'Inyección y diagnóstico OBD',subtitle:'Correcciones de combustible, plausibilidad MAF/MAP y pruebas independientes',
+  lessons:['trim-patterns','intake-versus-fuel','maf-plausibility-lambda','fuel-pressure-isolated','injector-leak-model'],
+  goal:'Interpretar las correcciones como respuesta del controlador y corroborar hipótesis con mediciones independientes, sin usar rangos OEM inventados.'}
 ];
 export function evaluateLearningPath(progress,lessons){
  const exists=new Set(lessons.map(l=>l.id));
