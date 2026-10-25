@@ -1,5 +1,5 @@
 /**
- * Five-stage learning itinerary. Reading and objective exams are shown separately:
+ * Six-stage learning itinerary. Reading and objective exams are shown separately:
  * neither demonstrates competence on a real vehicle.
  */
 export const learningStages=[
@@ -17,7 +17,10 @@ export const learningStages=[
   goal:'Calcular, interpretar y contrastar tensión y corriente en modelos ideales de baja tensión sin inferir diagnósticos OEM.'},
  {id:'differential',order:5,name:'Diagnóstico diferencial',subtitle:'Distinguir causas que producen el mismo síntoma u oscilograma',
   lessons:['same-symptom','power-driver','wave-identifiability','can-physical-differential','bms-observability'],
-  goal:'Escoger pruebas discriminantes, anticipar resultados y distinguir observaciones idénticas de causas comprobadas.'}
+  goal:'Escoger pruebas discriminantes, anticipar resultados y distinguir observaciones idénticas de causas comprobadas.'},
+ {id:'temporal',order:6,name:'Señales y fallas intermitentes',subtitle:'Correlación multicanal y revisión de buffers temporales',
+  lessons:['transient-supply','injector-dual-channel','ckp-cmp-correlation-buffer','can-intermittent-events','bms-intermittent-sensors'],
+  goal:'Comparar capturas normales con el evento, seleccionar dos señales y distinguir coincidencia temporal de causa demostrada.'}
 ];
 export function evaluateLearningPath(progress,lessons){
  const exists=new Set(lessons.map(l=>l.id));

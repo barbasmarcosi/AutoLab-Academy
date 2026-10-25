@@ -47,3 +47,18 @@ test('historial diferencial conserva hipótesis y medición tras restaurar JSON'
  assert.match(report,/Misma curva RC/);
  assert.match(report,/capacitance-low/);
 });
+
+
+test('el caso temporal conserva hipótesis, canales y título tras restauración JSON',()=>{
+ const p=emptyProgress();
+ p.cases.push({id:'trace-ckp',at:'2026-10-25T12:00:00Z',score:100,
+  hypothesis:'cmp-wire',conclusion:'ckp-wire',used:['ckp','cmp'],
+  reasoning:'Se compararon capturas de CKP y CMP con marcas temporales y se identificó un evento limitado a una ventana.',passed:true});
+ const loaded=parseBackup(serializeBackup(p));
+ const snap=portfolioSnapshot(loaded,lessons);
+ assert.equal(snap.events[0].kind,'temporal');
+ assert.equal(snap.events[0].title,'Pérdida esporádica de CKP');
+ assert.equal(snap.events[0].hypothesis,'cmp-wire');
+ assert.deepEqual(snap.events[0].evidence,['ckp','cmp']);
+ assert.match(portfolioMarkdown(loaded,lessons),/Pérdida esporádica de CKP/);
+});

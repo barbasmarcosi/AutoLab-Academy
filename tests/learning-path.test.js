@@ -6,10 +6,11 @@ import{additionalLessons}from'../src/curriculum-advanced.js';
 import{ecuLessons}from'../src/ecu-curriculum.js';
 import{componentLessons}from'../src/components-curriculum.js';
 import{differentialLessons}from'../src/differential-curriculum.js';
+import{temporalLessons}from'../src/temporal-curriculum.js';
 import{emptyProgress}from'../src/core.js';
-const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons];
-test('41 lecturas agrupadas en cinco niveles con IDs completos y sin duplicaciones',()=>{
- assert.equal(all.length,41);
+const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons];
+test('46 lecturas agrupadas en seis niveles con IDs completos y sin duplicaciones',()=>{
+ assert.equal(all.length,46);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
  assert.equal(new Set(assigned).size,all.length);

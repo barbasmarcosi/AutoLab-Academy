@@ -49,3 +49,8 @@
 .component-options legend{padding:6px 0}
 .component-options .option{margin-bottom:9px}
 @media(max-width:560px){.component-diagram svg{min-width:600px}}
+
+/* v1.2 multi-window instrument bench: readable controls and bounded graphs */
+.trace-windows{display:flex;flex-wrap:wrap;gap:8px}
+.trace-windows .button{flex:1 1 132px}
+@media(max-width:650px){.trace-windows .button{flex:1 1 calc(50% - 8px)}}
