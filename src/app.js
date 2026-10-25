@@ -43,10 +43,11 @@ import{recordReview,selectCumulativeQuestions,reviewOverview}from'./repetition.j
 import{buildQuantitativeSession,parseNumericAnswer,gradeQuantitative,formatQuantitativeReport}from'./measurement-challenges.js';
 import{TRANSFER_CASES,buildTransferSession,parseTransferNumber,gradeTransfer,evaluateTransferSession,transferReport}from'./transfer-exercises.js';
 import{DIAGNOSTIC_TRANSFER_CASES,createDiagnosticTransferSession,gradeDiagnosticTransfer,getDiagnosticProbe,diagnosticTransferReport}from'./diagnostic-transfer.js';
+import{captureDiagnosticDraft,restoreDiagnosticDraft}from'./diagnostic-draft.js';
 const root=document.getElementById('app');
 let quantitative=null;let quantitativeResults=null;
 let transferTraining=null,transferResults=null;
-let diagnosticTransferTraining=null,diagnosticTransferGrades=null;
+let diagnosticTransferTraining=null,diagnosticTransferGrades=null,diagnosticDraftTimer=null;
 let ecuTraining=null,ecuResult=null;
 let multiTraining=null,multiResult=null,portfolioFilter='all';
 let data=emptyProgress();let page='home';let selectedLesson=null;let exam=null;let training=null;let examResult=null;let caseResult=null;
@@ -56,9 +57,16 @@ function button(text,action,extra='',kind=''){return '<button class="button '+ki
 function link(url,label){return '<a target="_blank" rel="noopener noreferrer" href="'+attr(url)+'">'+esc(label)+'</a>';}
 function toast(message,error=false){document.querySelectorAll('.toast').forEach(n=>n.remove());const node=document.createElement('div');node.className='toast'+(error?' error':'');node.textContent=message;node.role='status';document.body.append(node);setTimeout(()=>node.remove(),4200);}
 async function persist(){try{await saveProgress(data);}catch(e){toast('No se pudieron guardar los cambios: '+e.message,true);}}
-function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;fuelTraining=null;fuelResult=null;misfireTraining=null;misfireResult=null;integralTraining=null;integralResult=null;integralReport=null;examResult=null;caseResult=null;transferTraining=null;transferResults=null;diagnosticTransferTraining=null;diagnosticTransferGrades=null;render();window.scrollTo({top:0,behavior:'instant'});}
+function saveDiagnosticDraft(immediate=false){
+ if(!diagnosticTransferTraining||diagnosticTransferGrades)return;
+ data.diagnosticDraft=captureDiagnosticDraft(diagnosticTransferTraining);
+ clearTimeout(diagnosticDraftTimer);
+ if(immediate){diagnosticDraftTimer=null;void persist();}
+ else diagnosticDraftTimer=setTimeout(()=>{diagnosticDraftTimer=null;void persist();},250);
+}
+function nav(next){if(diagnosticTransferTraining&&!diagnosticTransferGrades)saveDiagnosticDraft(true);page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;fuelTraining=null;fuelResult=null;misfireTraining=null;misfireResult=null;integralTraining=null;integralResult=null;integralReport=null;examResult=null;caseResult=null;transferTraining=null;transferResults=null;diagnosticTransferTraining=null;diagnosticTransferGrades=null;render();window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1>'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['coach','Plan de estudio'],['exams','Exámenes'],['analytics','Errores por pregunta'],['challenges','Retos medidos'],['transfer','Transferencia'],['diagtransfer','Transferencia diagnóstica'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['misfire','Balance de cilindros'],['integrative','Taller Integrador'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.9.1</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
+function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['coach','Plan de estudio'],['exams','Exámenes'],['analytics','Errores por pregunta'],['challenges','Retos medidos'],['transfer','Transferencia'],['diagtransfer','Transferencia diagnóstica'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['misfire','Balance de cilindros'],['integrative','Taller Integrador'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.9.2</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Mi plan de estudio','nav','data-id="coach"','alt')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Practicar transferencia','nav','data-id="transfer"','alt')+button('Diagnóstico en situaciones nuevas','nav','data-id="diagtransfer"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
 
 
@@ -778,6 +786,7 @@ function diagnosticTransferMenu(){
  '<h3>'+esc(c.title)+'</h3><p class="muted small">Cada intento cambia el contexto y la causa dentro del emulador.</p></article>').join('')+'</div>'+
  '<div class="panel"><h3>Cómo se evalúa</h3><p>40 puntos por causa identificada, 20 por prueba confirmatoria, 15 por descarte, 10 por contexto, 5 por predicción y 10 por dos textos obligatorios. Acción insegura: 0 puntos.</p>'+
  '<p class="muted small">Tu texto no se comprende ni califica semánticamente. Los criterios solo constatan su presencia y extensión.</p>'+
+ (data.diagnosticDraft?'<div class="notice">Tenés una investigación sin terminar guardada en este dispositivo. Podés retomarla donde la dejaste.</div>'+button('Retomar investigación guardada','diagtransfer-resume','','alt'):'')+
  button('Iniciar investigación multifuente','diagtransfer-start')+'</div>';
 }
 function diagnosticTransferView(){
@@ -788,7 +797,7 @@ function diagnosticTransferView(){
  '<select class="field" id="diagtransfer-'+field+'"><option value="">Elegí una hipótesis</option>'+
  c.options.map(([id,title])=>'<option value="'+attr(id)+'" '+(value===id?'selected':'')+'>'+esc(title)+'</option>').join('')+'</select>';
  let html='<div class="row spaced"><div class="eyebrow">INVESTIGACIÓN '+(s.index+1)+' / '+s.scenario.cases.length+' · '+esc(c.topic)+'</div>'+
- button('Salir','diagtransfer-quit','','alt small')+'</div>'+
+ button('Pausar y salir','diagtransfer-quit','','alt small')+'</div>'+
  '<h1>'+esc(c.title)+'</h1><div class="panel"><h3>Pedido de diagnóstico</h3><p>'+esc(c.scenario)+'</p>'+
  '<p class="muted small">No se revela cuál de las causas del modelo está activa. Solo se simula una por caso; en un vehículo real podrían coexistir varias.</p></div>';
  if(!a.locked)return html+'<div class="section"><h2>1. Hipótesis antes de consultar instrumentos</h2></div>'+
@@ -859,7 +868,7 @@ async function finishDiagnosticTransfer(){
    hypothesis:a.initial,conclusion:a.final,used:a.observations.map(o=>o.id),reasoning:a.reasoning,
    report:diagnosticTransferReport(single,now).slice(0,10000)});
  }
- data.cases=data.cases.slice(-500);await persist();render();
+ data.cases=data.cases.slice(-500);clearTimeout(diagnosticDraftTimer);diagnosticDraftTimer=null;data.diagnosticDraft=null;await persist();render();
 }
 
 function transferMenu(){
@@ -1369,6 +1378,7 @@ document.addEventListener('input',event=>{
 if(diagnosticTransferTraining&&!diagnosticTransferGrades&&['diagtransfer-reason','diagtransfer-limits'].includes(event.target.id)){
  const s=diagnosticTransferTraining,c=s.scenario.cases[s.index],a=s.answers[c.id];
  if(event.target.id==='diagtransfer-reason')a.reasoning=event.target.value;else a.limits=event.target.value;
+ saveDiagnosticDraft();
  const button=document.getElementById('diagtransfer-submit');
  if(button)button.disabled=!a.final||!a.observations.length||a.reasoning.trim().length<100||a.limits.trim().length<60;
  return;
@@ -1443,7 +1453,7 @@ if(diagnosticTransferTraining&&!diagnosticTransferGrades&&['diagtransfer-initial
  if(event.target.id==='diagtransfer-initial')a.initial=event.target.value;
  else if(event.target.id==='diagtransfer-final')a.final=event.target.value;
  else a.prediction=event.target.value;
- render();return;
+ saveDiagnosticDraft(true);render();return;
 }
 
 if(event.target.name==='transfer-evidence'&&transferTraining&&!transferResults&&!transferTraining.feedback){
@@ -1931,31 +1941,37 @@ case'multi-export':{
 case'multi-quit':multiTraining=null;multiResult=null;render();break;
 
 case'diagtransfer-start':
+ if(data.diagnosticDraft&&!confirm('Hay un borrador sin terminar. ¿Descartarlo y comenzar otro?'))break;
  diagnosticTransferTraining=createDiagnosticTransferSession(Date.now());diagnosticTransferGrades=null;
- page='diagtransfer';render();break;
+ page='diagtransfer';saveDiagnosticDraft(true);render();break;
+case'diagtransfer-resume':{
+ const resumed=restoreDiagnosticDraft(data.diagnosticDraft);
+ if(!resumed){toast('No se pudo recuperar este borrador.',true);break;}
+ diagnosticTransferTraining=resumed;diagnosticTransferGrades=null;page='diagtransfer';render();break;
+}
 case'diagtransfer-lock':{
  const s=diagnosticTransferTraining;if(!s||diagnosticTransferGrades)break;
  const a=s.answers[s.scenario.cases[s.index].id];if(!a?.initial)break;
- a.locked=true;render();break;
+ a.locked=true;saveDiagnosticDraft(true);render();break;
 }
 case'diagtransfer-probe':{
  const s=diagnosticTransferTraining;if(!s||diagnosticTransferGrades)break;
  const c=s.scenario.cases[s.index],a=s.answers[c.id];
  if(!a?.locked||a.observations.some(o=>o.id===id)||!c.probes.some(p=>p.id===id))break;
- a.pending=id;a.prediction='';render();break;
+ a.pending=id;a.prediction='';saveDiagnosticDraft(true);render();break;
 }
 case'diagtransfer-reveal':{
  const s=diagnosticTransferTraining;if(!s||diagnosticTransferGrades)break;
  const c=s.scenario.cases[s.index],a=s.answers[c.id];
  if(!a?.locked||!a.pending||!a.prediction)break;
  a.observations.push({id:a.pending,prediction:a.prediction});
- a.pending='';a.prediction='';render();break;
+ a.pending='';a.prediction='';saveDiagnosticDraft(true);render();break;
 }
 case'diagtransfer-next':{
  const s=diagnosticTransferTraining;if(!s||diagnosticTransferGrades)break;
  const a=s.answers[s.scenario.cases[s.index].id];
  if(!a?.locked||!a.final||!a.observations.length||a.reasoning.trim().length<100||a.limits.trim().length<60)break;
- if(s.index<s.scenario.cases.length-1)s.index++,render();
+ if(s.index<s.scenario.cases.length-1){s.index++;saveDiagnosticDraft(true);render();}
  else await finishDiagnosticTransfer();
  break;
 }
@@ -1966,7 +1982,9 @@ case'diagtransfer-export':{
  a.href=url;a.download='autolab-transferencia-diagnostica-'+new Date().toISOString().slice(0,10)+'.md';
  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);break;
 }
-case'diagtransfer-quit':diagnosticTransferTraining=null;diagnosticTransferGrades=null;render();break;
+case'diagtransfer-quit':
+ if(diagnosticTransferTraining&&!diagnosticTransferGrades)saveDiagnosticDraft(true);
+ diagnosticTransferTraining=null;diagnosticTransferGrades=null;render();break;
 case'transfer-start':
  transferTraining={...buildTransferSession(Date.now()),pairIndex:0,stepIndex:0,feedback:false,answers:{}};
  transferResults=null;page='transfer';render();break;
