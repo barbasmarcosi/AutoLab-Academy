@@ -5,7 +5,7 @@ PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y
 ## Qué está implementado
 
 - Academia con 16 lecciones, 60 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
-- Taller virtual con 15 casos sintéticos, pruebas reproducibles, justificación e informes.
+- Taller virtual con 15 casos de una falla y 3 escenarios de **dos fallas simultáneas**; hipótesis previas, evidencias independientes, corrección y exportación de informes. Las cifras son educativas y requieren revisión técnica externa.
 - **Retos de medición:** cinco ejercicios parametrizados, uno por área, con resultados numéricos, elección de mediciones y argumentación técnica; rúbrica objetiva, exportación Markdown e historial en los respaldos. La explicación escrita **no** se evalúa semánticamente.
 - Analizador CAN clásico: lectura local de archivos `candump` y captura de ejemplo.
 - **Decodificación DBC:** importación local de un `.dbc`, interpretación de las primeras 400 tramas usando [Candied](https://github.com/bit-dream/candied), tabla de señales físicas y ejercicio de factor/offset. El ejemplo AutoLab usa únicamente identificadores y escalas ficticios.
@@ -13,6 +13,7 @@ PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y
 - Laboratorio BMS con curvas, integración de corriente, importación/exportación CSV, estimación de SOC, cálculo ilustrativo SOH y desafíos sintéticos.
 - Exportador científico complementario `tools/pybamm_export.py` para generar CSV con PyBaMM real en computadora propia, con metadatos de modelo, versión y SHA-256; los modelos SPM y DFN se validan en una [CI científica separada](.github/workflows/science-pybamm.yml) y producen CSV descargables. No se ejecuta el solver en Pages.
 - CircuitJS original desde iframe externo bajo demanda; requiere Internet.
+- **Portafolio offline** de exámenes, laboratorios, prácticas y lecturas con filtro y descarga Markdown, derivado del historial en IndexedDB. No representa experiencia profesional acreditada.
 - IndexedDB y respaldos JSON, sin backend ni sincronización automática. La migración de los antiguos intervalos conserva sus fechas, sin reconstruir un historial ficticio.
 
 La aplicación no transmite datos CAN, no se conecta a ECUs, no realiza intervenciones HV y **no acredita competencia práctica**.
@@ -53,4 +54,4 @@ Los escenarios son sintéticos y las mediciones no representan especificaciones 
 - La QA completa de interfaz y respaldos en Safari/iPhone sigue pendiente.
 - Falta generar y conservar un lockfile npm para reproducibilidad estricta del build. La versión científica directa está fijada; las dependencias transitivas quedan registradas por ejecución y aún requieren lockfile/constraints reproducibles.
 
-Documentación: [contenido y osciloscopio](docs/CURRICULUM_WAVEFORMS.md), [retos cuantitativos](docs/MEASUREMENT_CHALLENGES.md), [retención FSRS y migración](docs/FSRS_E1.md), [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).
+Documentación: [multifallas y portafolio](docs/MULTIFAULT_PORTFOLIO.md), [contenido y osciloscopio](docs/CURRICULUM_WAVEFORMS.md), [retos cuantitativos](docs/MEASUREMENT_CHALLENGES.md), [retención FSRS y migración](docs/FSRS_E1.md), [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).
