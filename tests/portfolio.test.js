@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {emptyProgress,serializeBackup,parseBackup} from '../src/core.js';
+import {portfolioSnapshot,portfolioMarkdown} from '../src/portfolio.js';
+import {lessons} from '../src/content.js';
+test('portafolio vacío no inventa experiencia ni horas',()=>{
+ const snap=portfolioSnapshot(emptyProgress(),lessons);
+ assert.equal(snap.totals.practices,0);assert.equal(snap.totals.exams,0);assert.equal(snap.totals.studyMinutes,0);
+ assert.match(portfolioMarkdown(emptyProgress(),lessons),/NO acredita competencias/);
+});
+test('agrega exámenes, talleres, multifalla y lecturas, ordenados por fecha',()=>{
+ const p=emptyProgress();p.attempts.push({id:'exam-1',topic:'redes',at:'2026-10-20T00:00:00Z',percentage:90});
+ p.cases.push({id:'mf-ground-ckp',at:'2026-10-22T00:00:00Z',score:100,used:['ground-drop','ecu-wave'],reasoning:'Una explicación registrada',conclusion:'ground,ckp-open',hypothesis:'multi-fault',passed:true});
+ p.notes['lesson-'+lessons[0].id]='2026-10-21T00:00:00Z';
+ const snap=portfolioSnapshot(p,lessons);
+ assert.deepEqual([snap.totals.exams,snap.totals.practices,snap.totals.completedLessons],[1,1,1]);
+ assert.equal(snap.events[0].kind,'multifault');
+ assert.equal(snap.events[0].evidence.length,2);
+ assert.match(portfolioMarkdown(p,lessons),/ground-drop/);
+});
+test('es estable tras exportación e importación del respaldo sin alterar datos',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-wave-pwm-v1',score:100,at:'2026-10-24T00:00:00Z',conclusion:'25',used:['pwm'],reasoning:'Prueba simulada',passed:true});
+ const before=portfolioSnapshot(p,lessons),after=portfolioSnapshot(parseBackup(serializeBackup(p)),lessons);
+ assert.deepEqual(after,before);
+});
+test('portafolio usa vista recortada sin mutar el respaldo local',()=>{
+ const p=emptyProgress();
+ for(let i=0;i<510;i++)p.cases.push({id:'lab-wave-pwm-v1',score:0,at:'2026-10-24T00:00:00Z',conclusion:'',used:[],reasoning:''});
+ const s=portfolioSnapshot(p,lessons);
+ assert.equal(s.events.length,500);assert.equal(p.cases.length,510);
+ assert.equal(s.totals.practices,510);
+});
