@@ -12,12 +12,12 @@ export const differentialCases=[
   circuit:['+12 V','Carga 8 Ω','Drenador MOSFET','Fuente/masa'],
   variants:[
    {id:'load-open',label:'Circuito abierto en carga',reason:'La puerta conmuta, pero la carga abierta impide corriente. Una sola captura del mando no distingue carga de driver.'},
-   {id:'driver-loss',label:'Resistencia de conducción elevada',reason:'La puerta sigue conmutando, pero la resistencia equivalente de 1,2 Ω produce caída VDS y menor corriente; no permite localizar defecto físico sin otras pruebas.'}
+   {id:'driver-loss',label:'Resistencia de conducción elevada',reason:'La puerta sigue conmutando, pero la resistencia equivalente de 12 Ω produce caída VDS y menor corriente; no permite localizar defecto físico sin otras pruebas.'}
   ],
   probes:[
    {id:'gate',label:'Registrar PWM en puerta',classification:'normal',discriminating:false,values:['5 V; 100 Hz; duty 30%','5 V; 100 Hz; duty 30%'],unit:'onda lógica'},
-   {id:'current',label:'Medir corriente de carga durante estado ON',classification:'abnormal',discriminating:true,values:['0 A',round(12/(8+1.2),3)+' A'],unit:'A'},
-   {id:'vds',label:'Medir VDS en conducción durante estado ON',classification:'abnormal',discriminating:true,values:['0 V (sin corriente en la carga)',round(12*1.2/(8+1.2),3)+' V'],unit:'V'},
+   {id:'current',label:'Medir corriente de carga durante estado ON',classification:'abnormal',discriminating:true,values:['0 A',round(12/(8+12),3)+' A'],unit:'A'},
+   {id:'vds',label:'Medir VDS en conducción durante estado ON',classification:'abnormal',discriminating:true,values:['0 V (sin corriente en la carga)',round(12*12/(8+12),3)+' V'],unit:'V'},
    {id:'unsafe',label:'Puenteo improvisado del transistor sin protección',classification:'unsafe',discriminating:false,values:['Maniobra bloqueada','Maniobra bloqueada'],unsafe:true}
   ],
   trace:{type:'pwm',duration:20,unit:'ms',title:'Puerta MOSFET: misma forma de onda en ambas fallas'},
