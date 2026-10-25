@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.6 (auditoría transversal): chequeos axe WCAG 2.1 A/AA sobre 17 nuevas secciones, cinco modos de laboratorio y formularios activos, con Chromium/WebKit/WebKit móvil; guía formativa por omisiones observables en la rúbrica sin evaluar semánticamente el texto. Ver docs/QUALITY_AND_FORMATIVE_REVIEW_V1_9_6.md.
+
+
 - v1.9.5 (actualización y recuperación): escrituras IndexedDB en secuencia, errores recuperables, upgrade de caché offline v26→v27 comprobado con SW real en navegador y emulación de iPhone/WebKit. Pendiente validación en iPhone físico y VoiceOver. Ver docs/OFFLINE_STORAGE_QA_V1_9_5.md.
 
 
