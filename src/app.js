@@ -8,7 +8,7 @@ import{temporalLessons,temporalQuestions}from'./temporal-curriculum.js';
 import{fuelLessons,fuelQuestions}from'./fuel-curriculum.js';
 import{misfireLessons,misfireQuestions}from'./misfire-curriculum.js';
 import{integrativeLessons,integrativeQuestions}from'./integrative-curriculum.js';
-import{INTEGRATIVE_CASES,EVIDENCE_KIN,startIntegrativeCase,integrativeReading,validateObservation,evaluateIntegrativeCase,buildIntegrativeReport}from'./integrative-lab.js';
+import{INTEGRATIVE_CASES,EVIDENCE_KINDS,startIntegrativeCase,integrativeReading,validateObservation,evaluateIntegrativeCase,buildIntegrativeReport}from'./integrative-lab.js';
 import{MISFIRE_CASES,misfireCase,misfireFrame,misfireProbe,newMisfireSession,evaluateMisfire,misfireReport}from'./misfire-lab.js';
 import{FUEL_CASES,createFuelSession,fuelFrame,fuelProbe,gradeFuelSession,fuelReport}from'./fuel-system-lab.js';
 import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSession,generateTrace,traceSummary,gradeTraceSession,traceReport}from'./temporal-trace-lab.js';
@@ -121,7 +121,7 @@ function integrativeView(){
  const seen=new Set(a.observations.map(o=>o.id)),readings=c.readings.filter(r=>seen.has(r.id));
  html+='<div class="section"><h2>2. Consultá fuentes y anotá pronósticos</h2></div>'+
  '<p class="muted">Necesitás evidencia de las cuatro fuentes, una prueba que confirme y otra que contraste una alternativa. Las etiquetas de esos papeles se muestran después de corregir.</p>'+
- '<div class="integral-sources">'+EVIDENCE_KIN.map(kind=>{
+ '<div class="integral-sources">'+EVIDENCE_KINDS.map(kind=>{
  const category=c.readings.filter(r=>r.kind===kind);
  return '<article class="panel"><div class="row spaced"><h3>'+esc(evidenceLabels[kind])+'</h3>'+
  '<span class="tag dim">'+category.filter(r=>seen.has(r.id)).length+'/'+category.length+' consultas</span></div>'+
