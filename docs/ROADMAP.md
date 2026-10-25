@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.7 (evidencia accesible en gráficos): tablas numéricas desplegables para osciloscopio, SOC/BMS, tensión y RC; mínimo/máximo calculados sobre la totalidad de muestras válidas, tabla acotada para lectores de pantalla, fuente y límites explícitos. Auditoría E2E de estados abiertos en Chromium, WebKit y WebKit móvil. Ver docs/ACCESSIBLE_CHART_EVIDENCE_V1_9_7.md.
+
+
 - v1.9.6 (auditoría transversal): chequeos axe WCAG 2.1 A/AA sobre 17 nuevas secciones, cinco modos de laboratorio y formularios activos, con Chromium/WebKit/WebKit móvil; guía formativa por omisiones observables en la rúbrica sin evaluar semánticamente el texto. Ver docs/QUALITY_AND_FORMATIVE_REVIEW_V1_9_6.md.
 
 
