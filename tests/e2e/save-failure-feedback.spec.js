@@ -25,7 +25,7 @@ test('notas: no confirmar guardado falso, mostrar alerta y reintentar',async({pa
  await page.locator('[data-action="save-notes"]').click();
  await expect(page.locator('.storage-unsaved')).toContainText('Cambios sin guardar');
  await expect(page.locator('.toast.error')).toContainText('No se pudo guardar');
- expect((await stored(page)).notes.general).toBe('');
+ expect((await stored(page)).notes.general??'').toBe('');
  await page.evaluate(()=>{window.__failWrites=false;});
  await page.locator('[data-action="retry-save"]').click();
  await expect(page.locator('.storage-unsaved')).toHaveCount(0);
