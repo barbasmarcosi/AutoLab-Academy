@@ -1,7 +1,9 @@
+import{differentialCases}from'./fault-discrimination.js';
 /**
  * Read-only portfolio built exclusively from locally persisted data.
  * No claim that completion or scoring equals supervised qualification.
  */
+const differentialTitles=new Map(differentialCases.map(c=>[c.id,c.title]));
 const sortDescending=(a,b)=>String(b.at||'').localeCompare(String(a.at||''));
 export function portfolioSnapshot(progress,lessons=[]){
  const attempts=(progress.attempts||[]).map(a=>({
@@ -10,9 +12,9 @@ export function portfolioSnapshot(progress,lessons=[]){
   evidence:[],reasoning:'',passed:a.percentage>=85
  }));
  const cases=(progress.cases||[]).map(c=>({
-  kind:c.id.startsWith('mf-')?'multifault':c.id.startsWith('lab-')?'lab':c.id.startsWith('measure-')?'quantitative':'diagnostic',
+  kind:c.id.startsWith('mf-')?'multifault':c.id.startsWith('di-')?'differential':c.id.startsWith('lab-')?'lab':c.id.startsWith('measure-')?'quantitative':'diagnostic',
   id:c.id,topic:c.id.split('-')[1]||'varios',at:c.at,score:c.score,
-  title:c.id.replace(/^lab-|^measure-/,'').replaceAll('-',' '),
+  title:differentialTitles.get(c.id)||c.id.replace(/^lab-|^measure-/,'').replaceAll('-',' '),
   evidence:Array.isArray(c.used)?c.used:[],
   reasoning:String(c.reasoning||''),
   hypothesis:String(c.hypothesis||''),conclusion:String(c.conclusion||''),
