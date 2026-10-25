@@ -6,13 +6,15 @@ import{componentScenarios,componentModel,gradeComponent,componentReport,parseCom
 import{differentialLessons,differentialQuestions}from'./differential-curriculum.js';
 import{temporalLessons,temporalQuestions}from'./temporal-curriculum.js';
 import{fuelLessons,fuelQuestions}from'./fuel-curriculum.js';
+import{misfireLessons,misfireQuestions}from'./misfire-curriculum.js';
+import{MISFIRE_CASES,misfireCase,misfireFrame,misfireProbe,newMisfireSession,evaluateMisfire,misfireReport}from'./misfire-lab.js';
 import{FUEL_CASES,createFuelSession,fuelFrame,fuelProbe,gradeFuelSession,fuelReport}from'./fuel-system-lab.js';
 import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSession,generateTrace,traceSummary,gradeTraceSession,traceReport}from'./temporal-trace-lab.js';
 import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDifferential,differentialTrace,differentialReport}from'./fault-discrimination.js';
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
-const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions];
+const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions];
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{multiFaultCases,evaluateMultiFault,multiFaultReport}from'./differential-lab.js';
@@ -26,6 +28,7 @@ let waveState={id:'pwm',answer:'',result:null};
 let differentialTraining=null,differentialResult=null;
 let traceTraining=null,traceResult=null,traceChannels=['ckp','cmp'];
 let fuelTraining=null,fuelResult=null;
+let misfireTraining=null,misfireResult=null;
 let componentState={id:'divider',condition:'nominal',value:'',evidence:'',reasoning:'',result:null};
 let labState={mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,circuitLoaded:false,answer:'',feedback:'',dbc:null,dbcLabel:'',dbcError:'',dbcAnswer:'',dbcFeedback:''};
 import{emptyProgress,scoreExam,dueReviews,completedTopics,calculateCase,loadProgress,saveProgress,serializeBackup,parseBackup}from'./core.js';
@@ -42,9 +45,9 @@ function button(text,action,extra='',kind=''){return '<button class="button '+ki
 function link(url,label){return '<a target="_blank" rel="noopener noreferrer" href="'+attr(url)+'">'+esc(label)+'</a>';}
 function toast(message,error=false){document.querySelectorAll('.toast').forEach(n=>n.remove());const node=document.createElement('div');node.className='toast'+(error?' error':'');node.textContent=message;node.role='status';document.body.append(node);setTimeout(()=>node.remove(),4200);}
 async function persist(){try{await saveProgress(data);}catch(e){toast('No se pudieron guardar los cambios: '+e.message,true);}}
-function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;fuelTraining=null;fuelResult=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
+function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;fuelTraining=null;fuelResult=null;misfireTraining=null;misfireResult=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1>'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.3</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
+function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['misfire','Balance de cilindros'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.4</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
 
 
@@ -84,6 +87,91 @@ function traceChannelGraph(c,index,channelId){
  '<text x="'+(left+pw)+'" y="198" text-anchor="end" font-size="12" fill="#b4cadd">'+TRACE_DURATION_MS+' ms</text></svg></div>'+
  '<p class="muted small">Mín: '+summary.min.toFixed(2)+' '+esc(ch.unit)+
  ' · Máx: '+summary.max.toFixed(2)+' '+esc(ch.unit)+' · Transiciones ascendentes: '+summary.rising+'</p></article>';
+}
+
+
+function misfireMenu(){
+ return heading('MONITOR DE COMBUSTIÓN','Balance y diagnóstico por cilindro',
+  'Cuatro casos sintéticos: circuito de bobina, inyector sin corriente, compresión reducida y mezcla con aporte irregular de varios cilindros.')+
+ '<div class="notice">Los códigos P030x, los contadores por cilindro y los índices de aporte de estos ejercicios son inventados. Los monitores reales dependen del fabricante y no identifican por sí solos una pieza.</div>'+
+ '<div class="grid">'+MISFIRE_CASES.map(c=>
+ '<article class="panel"><span class="tag dim">MONITOR DIDÁCTICO '+esc(c.dtc)+'</span><h3>'+esc(c.title)+'</h3>'+
+ '<p class="muted">'+esc(c.symptom)+'</p>'+
+ button('Investigar cilindros','misfire-start','data-id="'+attr(c.id)+'"')+'</article>').join('')+'</div>';
+}
+function cylinderTable(c,session){
+ const frames=c.frames.filter(f=>session.viewed.includes(f.id));
+ if(!frames.length)return '';
+ const table=frames.map(f=>
+ '<article class="panel"><h3>'+esc(f.label)+' · '+f.rpm+' RPM</h3>'+
+ '<p class="muted small">STFT '+(f.stftPct>0?'+':'')+f.stftPct+'% / LTFT '+(f.ltftPct>0?'+':'')+f.ltftPct+'%. El monitor y los índices no expresan mediciones de presión absoluta ni contribución real de torque.</p>'+
+ '<div class="table-scroll"><table class="cylinder-table"><thead><tr><th>Cilindro</th><th>Eventos ficticios</th><th>Índice de aporte</th></tr></thead><tbody>'+
+ f.contribution.map((v,i)=>'<tr><th scope="row">C'+(i+1)+'</th><td>'+f.misfires[i]+'</td><td>'+
+ '<div class="cylinder-bar"><span style="width:'+Math.max(0,Math.min(100,v))+'%"></span></div>'+
+ '<span class="muted small">'+v+'/100 arbitrario</span></td></tr>').join('')+
+ '</tbody></table></div></article>').join('');
+ return '<div class="grid two">'+table+'</div>';
+}
+function misfireView(){
+ const s=misfireTraining,c=MISFIRE_CASES.find(x=>x.id===s?.caseId);
+ if(!c)return misfireMenu();
+ if(misfireResult)return misfireSummary(c);
+ const picker=(id,value,label)=>'<label for="'+id+'"><strong>'+label+'</strong></label>'+
+ '<select class="field" id="'+id+'"><option value="">Elegí una hipótesis</option>'+
+ c.hypotheses.map(([code,desc])=>'<option value="'+attr(code)+'" '+(code===value?'selected':'')+'>'+esc(desc)+'</option>').join('')+'</select>';
+ let html='<div class="row spaced"><span class="eyebrow">MONITOR Y CILINDROS · MOTOR MPI FICTICIO</span>'+
+ button('Salir','misfire-quit','','alt small')+'</div><h1>'+esc(c.title)+'</h1>'+
+ '<div class="panel"><h3>Situación del banco</h3><p>'+esc(c.symptom)+'</p>'+
+ '<p class="muted">Código del monitor inventado: '+esc(c.dtc)+
+ '. Los valores representan una misma instalación sintética de cuatro cilindros, no un motor OEM.</p></div>';
+ if(!s.locked)return html+'<div class="section"><h2>1. Elegí hipótesis antes de mirar las mediciones</h2></div>'+
+ '<div class="panel">'+picker('misfire-initial',s.initial,'¿Qué causa investigarías primero?')+
+ '<p class="muted small">Tu selección previa queda registrada aunque decidas corregirla tras investigar.</p>'+
+ button('Registrar hipótesis previa','misfire-lock',s.initial?'':'disabled')+'</div>';
+ html+='<div class="section"><h2>2. Comprobá el monitor en dos regímenes</h2></div>'+
+ '<p class="muted">Compará ralentí y una demanda moderada. Los recuentos son arbitrarios, no el algoritmo real de un monitor OBD.</p>'+
+ '<div class="row trace-windows">'+c.frames.map(f=>button(f.label+(s.viewed.includes(f.id)?' ✓':''),
+  'misfire-frame','data-id="'+attr(f.id)+'"',s.viewed.includes(f.id)?'':'alt')).join('')+'</div>'+
+ cylinderTable(c,s);
+ html+='<div class="section"><h2>3. Buscá confirmación y descartá una alternativa</h2></div>'+
+ '<p class="muted">Necesitás una medición confirmatoria y otra independiente para contrastar hipótesis; no basta con acertar el P030x.</p>'+
+ '<div class="grid two">'+c.probes.map(p=>'<button class="probe panel" data-action="misfire-probe" data-id="'+attr(p.id)+'" '+
+ (s.observations.some(o=>o.id===p.id)?'disabled':'')+'>'+esc(p.label)+(s.observations.some(o=>o.id===p.id)?' ✓':'')+'</button>').join('')+'</div>';
+ if(s.pending){
+  const p=misfireProbe(c.id,s.pending);
+  html+='<div class="panel"><h3>Anticipá el resultado</h3><p>'+esc(p.label)+'</p>'+
+ '<label for="misfire-prediction">¿Qué lectura esperás?</label>'+
+ '<select class="field" id="misfire-prediction"><option value="">Elegí antes de revelar</option>'+
+ [['normal','Normal respecto de este modelo'],['anómala','Anómala respecto de este modelo'],['peligrosa','Prueba insegura / prohibida']].map(([id,label])=>
+ '<option value="'+attr(id)+'" '+(s.prediction===id?'selected':'')+'>'+label+'</option>').join('')+'</select>'+
+ button('Revelar resultado virtual','misfire-reveal',s.prediction?'':'disabled')+'</div>';
+ }
+ if(s.observations.length)html+='<div class="panel"><h3>Registro instrumental sintético</h3>'+
+ s.observations.map(o=>{const p=misfireProbe(c.id,o.id);return '<div class="answer-card"><strong>'+esc(p.label)+'</strong>'+
+ '<p>Predijiste: '+esc(o.prediction)+' · Resultado: '+esc(p.classify)+'</p><p class="muted">'+esc(p.reading)+'</p></div>';}).join('')+'</div>';
+ html+='<div class="section"><h2>4. Conclusión razonada</h2></div><div class="panel">'+
+ picker('misfire-final',s.final,'¿Qué causa está respaldada por las pruebas del modelo?')+
+ '<label for="misfire-reason"><strong>Explicá los patrones por cilindro, la evidencia confirmatoria y la alternativa descartada</strong></label>'+
+ '<textarea class="field" rows="6" maxlength="3000" id="misfire-reason" placeholder="Al menos 100 caracteres de razonamiento.">'+esc(s.reasoning)+'</textarea>'+
+ '<p class="muted small">El texto se registra, pero no se evalúa semánticamente.</p>'+
+ button('Corregir diagnóstico de cilindros','misfire-grade',!s.final||!s.observations.length||s.reasoning.trim().length<100?'disabled id="misfire-submit"':'id="misfire-submit"')+'</div>';
+ return html;
+}
+function misfireSummary(c){
+ const s=misfireTraining,r=misfireResult;
+ return heading('RESULTADO DE BALANCE','Diagnóstico estructurado: '+r.score+'/100',
+  'La puntuación refleja una rúbrica de datos ficticios, no una verificación de diagnóstico físico.')+
+ '<div class="panel"><span class="tag '+(r.passed?'':'amber')+'">'+(r.passed?'Evidencias estructuradas completas':'Se requieren más pruebas o una conclusión distinta')+'</span>'+
+ '<p><strong>Causa elegida:</strong> '+(r.correct?'correcta':'incorrecta')+
+ ' · Confirmación: '+(r.confirming?'sí':'no')+' · Contraste: '+(r.contrary?'sí':'no')+
+ ' · Comparación de regímenes: '+(r.compared?'sí':'no')+' · Pronóstico: '+(r.predicted?'sí':'no')+
+ ' · Acción insegura: '+(r.unsafe?'sí':'no')+'</p>'+
+ '<h3>Interpretación de referencia</h3><p>'+esc(c.explanation)+'</p>'+
+ '<h3>Tu justificación, sin revisión profesional</h3><p>'+esc(s.reasoning)+'</p>'+
+ '<p class="muted small">Una compresión relativa baja, un P030x o una diferencia de corriente no identifican necesariamente una pieza OEM. Este informe no constituye reparación ni certificación.</p>'+
+ '<div class="row">'+button('Exportar informe (.md)','misfire-export')+
+ button('Repetir investigación','misfire-start','data-id="'+attr(c.id)+'"','alt')+
+ button('Volver a casos','misfire-quit','','alt')+'</div></div>';
 }
 
 function fuelMenu(){
@@ -327,6 +415,7 @@ function pathView(){
  (stage.id==='differential'?'<div class="row" style="margin-top:16px">'+button('Practicar diagnóstico diferencial','nav','data-id="differential"')+'</div>':'')+
  (stage.id==='temporal'?'<div class="row" style="margin-top:16px">'+button('Examinar capturas temporales','nav','data-id="temporal"')+'</div>':'')+
  (stage.id==='fuel'?'<div class="row" style="margin-top:16px">'+button('Investigar sistemas de inyección','nav','data-id="fuel"')+'</div>':'')+
+ (stage.id==='misfire'?'<div class="row" style="margin-top:16px">'+button('Practicar balance de cilindros','nav','data-id="misfire"')+'</div>':'')+
  '</article>').join('')+'</div>'+
  '<div class="notice">El avance por lectura no se interpreta como dominio de un tema. El puntaje de selección múltiple tampoco demuestra aptitud para diagnóstico real ni intervención HV.</div>';
 }
@@ -914,8 +1003,15 @@ body+='<div class="section"><h2>Análisis de mensajes por ID</h2></div><div clas
 
 function resourceView(){return heading('FUENTES Y HERRAMIENTAS','Biblioteca externa','Priorizamos documentación pública y software maduro. Algunos recursos requieren conexión o instalación en PC.')+'<section class="cards">'+resources.map(r=>'<div class="panel"><span class="tag dim">'+esc(r.topic)+'</span><h3>'+esc(r.title)+'</h3>'+link(r.url,'Abrir recurso oficial')+'</div>').join('')+'</section><div class="section"><h2>Laboratorios prácticos</h2></div><div class="panel"><p class="muted">Ya podés importar capturas candump y analizar una muestra CAN sintética; CircuitJS está disponible como herramienta externa integrada bajo demanda. PyBaMM continúa pendiente.</p>'+button('Ir a laboratorios','nav','data-id="labs"')+'</div>';}
 function dataView(){return heading('DATOS PERSONALES','Tu progreso te pertenece','Se guarda en IndexedDB de este navegador. Si cambiás de equipo o borrás datos del sitio, necesitás un respaldo.')+'<div class="grid two"><div class="panel"><h3>Exportar respaldo</h3><p class="muted">Descarga un JSON portable con intentos, resultados de casos, repeticiones y notas.</p>'+button('Descargar respaldo','export')+'</div><div class="panel"><h3>Importar respaldo</h3><p class="muted">Reemplaza el progreso local luego de validar el archivo. Guardá una copia antes de importar.</p><label class="button alt" for="import-file">Elegir archivo JSON</label><input class="sr-only" type="file" id="import-file" accept=".json,application/json"></div></div><div class="section"><h2>Notas privadas</h2></div><div class="panel"><label for="notebook">Hipótesis, dudas y procedimientos aprendidos</label><textarea class="field" id="notebook" maxlength="10000">'+esc(data.notes.general||'')+'</textarea><div class="row" style="margin-top:14px">'+button('Guardar notas','save-notes')+'</div></div><div class="section"><h2>Reinicio</h2></div><div class="panel"><p class="muted">Borrar todo es irreversible si no conservás una exportación.</p>'+button('Borrar progreso local','reset','','danger')+'</div>';}
-function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='path'?pathView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='temporal'?(traceTraining?temporalView():temporalMenu()):page==='fuel'?(fuelTraining?fuelView():fuelMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
+function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='path'?pathView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='temporal'?(traceTraining?temporalView():temporalMenu()):page==='fuel'?(fuelTraining?fuelView():fuelMenu()):page==='misfire'?(misfireTraining?misfireView():misfireMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
 document.addEventListener('input',event=>{
+if(event.target.id==='misfire-reason'&&misfireTraining&&!misfireResult){
+ misfireTraining.reasoning=event.target.value;
+ const button=document.getElementById('misfire-submit');
+ if(button)button.disabled=!misfireTraining.final||!misfireTraining.observations.length||misfireTraining.reasoning.trim().length<100;
+ return;
+}
+
 if(event.target.id==='fuel-reason'&&fuelTraining&&!fuelResult){
  fuelTraining.reasoning=event.target.value;
  const node=document.getElementById('fuel-submit');
@@ -958,6 +1054,13 @@ if(event.target.id==='multi-reason'&&multiTraining){multiTraining.reasoning=even
  if(id==='quant-reason')a.reasoning=event.target.value;
 });
 document.addEventListener('change',event=>{
+if(misfireTraining&&!misfireResult){
+ const id=event.target.id,session=misfireTraining;
+ if(id==='misfire-initial'){session.initial=event.target.value;render();return;}
+ if(id==='misfire-final'){session.final=event.target.value;render();return;}
+ if(id==='misfire-prediction'){session.prediction=event.target.value;render();return;}
+}
+
 if(fuelTraining&&!fuelResult){
  const id=event.target.id,s=fuelTraining;
  if(id==='fuel-initial'){s.initial=event.target.value;render();return;}
@@ -1061,6 +1164,48 @@ if(event.target.id==='can-file'){
 }
 if(event.target.id==='import-file'){const file=event.target.files?.[0];if(!file)return;if(file.size>2000000){toast('Archivo demasiado grande',true);return;}file.text().then(async text=>{const recovered=parseBackup(text);if(!confirm('¿Restaurar el respaldo y reemplazar todos los datos actuales?'))return;await saveProgress(recovered);data=recovered;nav('home');toast('Respaldo restaurado correctamente');}).catch(e=>toast('No se pudo importar: '+e.message,true));}});
 document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const act=target.dataset.action;const id=target.dataset.id;switch(act){case'nav':selectedLesson=null;nav(id);break;
+case'misfire-start':{
+ if(!MISFIRE_CASES.some(c=>c.id===id))break;
+ misfireTraining=newMisfireSession(id);misfireResult=null;page='misfire';render();break;
+}
+case'misfire-lock':
+ if(!misfireTraining?.initial)break;
+ misfireTraining.locked=true;render();break;
+case'misfire-frame':{
+ const session=misfireTraining;
+ if(!session?.locked||!misfireCase(session.caseId).frames.some(f=>f.id===id))break;
+ if(!session.viewed.includes(id))session.viewed.push(id);
+ render();break;
+}
+case'misfire-probe':{
+ const session=misfireTraining;
+ if(!session?.locked||session.observations.some(o=>o.id===id))break;
+ if(!misfireCase(session.caseId).probes.some(p=>p.id===id))break;
+ session.pending=id;session.prediction='';render();break;
+}
+case'misfire-reveal':{
+ const session=misfireTraining;
+ if(!session?.locked||!session.pending||!session.prediction)break;
+ session.observations.push({id:session.pending,prediction:session.prediction});
+ session.pending='';session.prediction='';render();break;
+}
+case'misfire-grade':{
+ const session=misfireTraining;
+ if(!session?.locked||!session.final||!session.observations.length||session.reasoning.trim().length<100)break;
+ misfireResult=evaluateMisfire(session);
+ data.cases.push({id:session.caseId,score:misfireResult.score,at:new Date().toISOString(),
+  hypothesis:session.initial,conclusion:session.final,
+  used:session.observations.map(o=>o.id),reasoning:session.reasoning,passed:misfireResult.passed});
+ data.cases=data.cases.slice(-500);await persist();render();break;
+}
+case'misfire-export':{
+ if(!misfireTraining||!misfireResult)break;
+ const blob=new Blob([misfireReport(misfireTraining,misfireResult)],{type:'text/markdown;charset=utf-8'});
+ const url=URL.createObjectURL(blob),element=document.createElement('a');
+ element.href=url;element.download='autolab-balance-'+misfireTraining.caseId+'.md';
+ document.body.append(element);element.click();element.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);break;
+}
+case'misfire-quit':misfireTraining=null;misfireResult=null;render();break;
 case'fuel-start':{
  if(!FUEL_CASES.some(c=>c.id===id))break;
  fuelTraining={...createFuelSession(id),locked:false};
