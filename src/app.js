@@ -963,8 +963,7 @@ case'trace-start':{
  if(!TRACE_CASES.some(c=>c.id===id))break;
  traceTraining={...createTraceSession(id),locked:false};
  traceResult=null;
- const c=TRACE_CASES.find(c=>c.id===id);
- traceChannels=[...c.evidence];page='temporal';render();break;
+ traceChannels=['ckp','cmp'];page='temporal';render();break;
 }
 case'trace-lock':if(!traceTraining?.initial)break;traceTraining.locked=true;render();break;
 case'trace-capture':{
