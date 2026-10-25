@@ -251,7 +251,7 @@ export const additionalQuestions=[
       "20 V"
     ],
     "answer": 1,
-    "explanation": "Por la ley de Ohm: 20 A × 0,05 Ω = 1 V.",
+    "explanation": "Por la ley de Ohm: 20 A × 0,05 Ω = 1 V de caída en ese tramo cuando circula la corriente indicada.",
     "source": "https://www.picoauto.com/library/automotive-guided-tests/"
   },
   {
@@ -391,7 +391,7 @@ export const additionalQuestions=[
       "75%"
     ],
     "answer": 1,
-    "explanation": "2/8 × 100 = 25%.",
+    "explanation": "El duty representa la fracción activa del período: 2 ms / 8 ms × 100 = 25%, independientemente de la amplitud.",
     "source": "https://www.picoauto.com/library/automotive-guided-tests/"
   },
   {
@@ -559,7 +559,7 @@ export const additionalQuestions=[
       "5 Ah"
     ],
     "answer": 1,
-    "explanation": "0,5 A × 2 h = 1 Ah de error acumulado.",
+    "explanation": "Un sesgo sostenido se integra con el tiempo: 0,5 A × 2 h = 1 Ah de error acumulado en la estimación.",
     "source": "https://www.hse.gov.uk/mvr/topics/electric-hybrid.htm"
   },
   {
@@ -573,7 +573,7 @@ export const additionalQuestions=[
       "90%"
     ],
     "answer": 2,
-    "explanation": "100 − 10/50 × 100 = 80%.",
+    "explanation": "La descarga de 10 Ah representa el 20% de una capacidad supuesta de 50 Ah: SOC final = 100% − 20% = 80%.",
     "source": "https://www.hse.gov.uk/mvr/topics/electric-hybrid.htm"
   },
   {
