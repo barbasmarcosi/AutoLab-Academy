@@ -4,7 +4,9 @@ PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y
 
 ## Qué está implementado
 
-- Academia con 16 lecciones, 60 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
+- Academia con 26 lecciones, 80 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
+- Itinerario de tres niveles (fundamentos, diagnóstico aplicado y ECUs), progreso de lectura y evaluación separados, con siguiente lección recomendada.
+- **Banco ECU** con cinco casos sintéticos, pronóstico antes de observar, elección de pruebas confirmatorias, justificación e informe descargable.
 - Taller virtual con 15 casos de una falla y 3 escenarios de **dos fallas simultáneas**; hipótesis previas, evidencias independientes, corrección y exportación de informes. Las cifras son educativas y requieren revisión técnica externa.
 - **Retos de medición:** cinco ejercicios parametrizados, uno por área, con resultados numéricos, elección de mediciones y argumentación técnica; rúbrica objetiva, exportación Markdown e historial en los respaldos. La explicación escrita **no** se evalúa semánticamente.
 - Analizador CAN clásico: lectura local de archivos `candump` y captura de ejemplo.
@@ -54,4 +56,4 @@ Los escenarios son sintéticos y las mediciones no representan especificaciones 
 - La QA completa de interfaz y respaldos en Safari/iPhone sigue pendiente.
 - Falta generar y conservar un lockfile npm para reproducibilidad estricta del build. La versión científica directa está fijada; las dependencias transitivas quedan registradas por ejecución y aún requieren lockfile/constraints reproducibles.
 
-Documentación: [multifallas y portafolio](docs/MULTIFAULT_PORTFOLIO.md), [contenido y osciloscopio](docs/CURRICULUM_WAVEFORMS.md), [retos cuantitativos](docs/MEASUREMENT_CHALLENGES.md), [retención FSRS y migración](docs/FSRS_E1.md), [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).
+Documentación: [banco ECU e itinerarios](docs/ECU_PATHS.md), [multifallas y portafolio](docs/MULTIFAULT_PORTFOLIO.md), [contenido y osciloscopio](docs/CURRICULUM_WAVEFORMS.md), [retos cuantitativos](docs/MEASUREMENT_CHALLENGES.md), [retención FSRS y migración](docs/FSRS_E1.md), [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).
