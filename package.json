@@ -1,11 +1,11 @@
 {
   "name": "autolab-academy",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "check": "node --check src/app.js && node --check src/core.js && node --check src/content.js && node --check src/cases-advanced.js && node --check src/workshop-engine.js && node --check src/can-lab.js && node --check src/dbc-lab.js && node --check src/bms-lab.js && node --check src/repetition.js && node --check src/measurement-challenges.js && node --check src/curriculum-advanced.js && node --check src/waveform-lab.js && node --test",
+    "check": "node --check src/app.js && node --check src/core.js && node --check src/content.js && node --check src/cases-advanced.js && node --check src/workshop-engine.js && node --check src/can-lab.js && node --check src/dbc-lab.js && node --check src/bms-lab.js && node --check src/repetition.js && node --check src/measurement-challenges.js && node --check src/curriculum-advanced.js && node --check src/waveform-lab.js && node --check src/differential-lab.js && node --check src/portfolio.js && node --test",
     "build": "npm run check && node scripts/verify-static.js"
   },
   "engines": {
