@@ -78,7 +78,7 @@ test('regresión PWA: observations, no probes, puntúa y aparece íntegro en Mar
    const one={scenario:{...s.scenario,cases:[c]},answers:{[c.id]:ui}};
    const report=diagnosticTransferReport(one,new Date('2026-10-25T20:00:00Z'));
    for(const p of c.probes.filter(p=>!p.unsafe)){
-    assert.match(report,new RegExp('\\\\b'+p.id+' \\\\['));
+    assert(report.includes('- '+p.id+' ['+p.kind+'] '));
     assert(report.includes(p.provenance));
    }
   }
@@ -103,7 +103,7 @@ test('acción insegura registrada por la PWA anula la puntuación',()=>{
  assert.equal(grade.unsafe,true);
  assert.equal(grade.passed,false);
  const report=diagnosticTransferReport({scenario:{seed:99,cases:[c]},answers:{[c.id]:ui}});
- assert.match(report,/unsafe \\[hazard\\]/);
+ assert(report.includes('- unsafe [hazard] '));
 });
 test('entradas de instrumentos inválidas nunca inventan evidencia',()=>{
  const c=buildDiagnosticTransfer(110).cases[0],a=good(c);
