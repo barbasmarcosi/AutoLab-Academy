@@ -1,3 +1,4 @@
+import{summarizeAnswerEvidence}from'./answer-analytics.js';
 /**
  * Explainable study suggestions based solely on local records; not a mastery model.
  * Aggregate exams are excluded from topic-specific performance claims.
@@ -12,6 +13,7 @@ export function analyzeStudyEvidence(progress,questions,lessons,tracks,caseCatal
  const reviews=Object.entries(progress.reviews||{}).filter(([id,r])=>questionById.has(id)&&r&&validDate(r.due));
  const attempts=(progress.attempts||[]).filter(a=>topicIds.has(a.topic)&&Number.isInteger(a.percentage)&&a.percentage>=0&&a.percentage<=100);
  const typedCases=(progress.cases||[]).map(record=>({record,definition:caseById.get(record.id)})).filter(item=>item.definition);
+ const itemEvidence=summarizeAnswerEvidence(progress,questions);
  const topics=tracks.map((track,order)=>{
   const qs=questions.filter(q=>q.topic===track.id);
   const cards=reviews.filter(([id])=>questionById.get(id).topic===track.id);
@@ -22,20 +24,23 @@ export function analyzeStudyEvidence(progress,questions,lessons,tracks,caseCatal
   const practices=typedCases.filter(x=>x.definition.topic===track.id).map(x=>x.record).sort(newest);
   const latestExam=exams[0]||null,latestPractice=practices[0]||null;
   const nextLesson=lessons.find(l=>l.topic===track.id&&!progress.notes?.['lesson-'+l.id])||null;
-  const noEvidence=cards.length===0&&exams.length===0&&practices.length===0;
+  const observedQuestions=itemEvidence.answeredByTopic[track.id]||0;
+  const activeErrors=itemEvidence.missed.filter(x=>x.topic===track.id).length;
+  const noEvidence=cards.length===0&&exams.length===0&&practices.length===0&&observedQuestions===0;
   const signals=[];
   if(due)signals.push(due+' pregunta(s) de repaso vencida(s)');
   if(incorrect)signals.push(incorrect+' última(s) respuesta(s) incorrecta(s) en repaso');
+  if(activeErrors)signals.push(activeErrors+' pregunta(s) fallada(s) en su último intento detallado');
   if(latestExam&&latestExam.percentage<85)signals.push('último examen del área: '+latestExam.percentage+'% (umbral interno 85%)');
   if(latestPractice&&!latestPractice.passed)signals.push('última práctica ficticia sin criterios completos');
   if(noEvidence)signals.push('sin evaluaciones específicas ni repasos registrados');
   if(!signals.length)signals.push('sin alertas registradas; esto no demuestra dominio');
   const priority=due*5+incorrect*3+(latestExam&&latestExam.percentage<85?8:0)+
-   (latestPractice&&!latestPractice.passed?6:0)+(noEvidence?2:0);
+   (latestPractice&&!latestPractice.passed?6:0)+(noEvidence?2:0)+Math.min(activeErrors,3)*4;
   const catalog=caseCatalog.filter(c=>c.topic===track.id);
   const untried=catalog.find(c=>!practices.some(p=>p.id===c.id));
   return {id:track.id,title:track.title,order,questionCount:qs.length,
-   reviewed:cards.length,untested:Math.max(0,qs.length-cards.length),due,future,incorrect,
+   reviewed:cards.length,untested:Math.max(0,qs.length-cards.length),due,future,incorrect,observedQuestions,activeErrors,
    examCount:exams.length,latestExamPct:latestExam?.percentage??null,
    practiceCount:practices.length,latestPracticePassed:latestPractice?.passed??null,
    noEvidence,signals,priority,nextLessonId:nextLesson?.id??null,nextLessonTitle:nextLesson?.title??null,
@@ -46,7 +51,7 @@ export function analyzeStudyEvidence(progress,questions,lessons,tracks,caseCatal
   knownQuestions:topics.reduce((s,x)=>s+x.questionCount,0),reviewedQuestions:topics.reduce((s,x)=>s+x.reviewed,0),
   knownCaseRecords:typedCases.length,excludedCaseRecords:(progress.cases||[]).length-typedCases.length,
   excludedAggregateExams:(progress.attempts||[]).filter(a=>!topicIds.has(a.topic)).length,
-  explanation:'Prioridad = 5×repasos vencidos + 3×últimas respuestas incorrectas + 8 si el último examen específico es menor al umbral interno + 6 si la última práctica ficticia no cumplió criterios + 2 si no hay evidencia. Los empates siguen el orden de áreas. Solo organiza actividades; no estima competencia.'};
+  explanation:'Prioridad = 5×repasos vencidos + 3×últimas respuestas incorrectas + 8 si el último examen específico es menor al umbral interno + 6 si la última práctica ficticia no cumplió criterios + 2 si no hay evidencia + 4 por pregunta con último intento detallado incorrecto (hasta tres). Los empates siguen el orden de áreas. Solo organiza actividades; no estima competencia.'};
 }
 export function makeDailyStudyPlan(analysis,topicId='auto',minutes=30){
  if(!STUDY_PLAN_MINUTES.includes(minutes))throw Error('Duración inválida');
