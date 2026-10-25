@@ -100,10 +100,19 @@ export function getDiagnosticProbe(caseItem,id){
  const p=caseItem.probes.find(p=>p.id===id);
  if(!p)throw Error('Prueba desconocida');return p;
 }
+/**
+ * The PWA records revealed instruments under "observations". The older
+ * programmatic/tests shape is "probes"; support both without merging them.
+ * Only revealed, named instruments from the current case can affect the score.
+ */
+function recordedProbes(answer){
+ return Array.isArray(answer?.observations)?answer.observations:
+  Array.isArray(answer?.probes)?answer.probes:[];
+}
 export function gradeDiagnosticTransfer(caseItem,answer={}){
  const seen=new Set(),probes=[];
- for(const record of answer.probes||[]){
-  if(seen.has(record.id))continue;
+ for(const record of recordedProbes(answer)){
+  if(!record||typeof record.id!=='string'||seen.has(record.id))continue;
   seen.add(record.id);
   const p=caseItem.probes.find(p=>p.id===record.id);
   if(p)probes.push({p,prediction:record.prediction});
@@ -113,13 +122,17 @@ export function gradeDiagnosticTransfer(caseItem,answer={}){
  const exclude=probes.some(x=>x.p.role==='exclude');
  const context=probes.some(x=>x.p.role==='context');
  const unsafe=probes.some(x=>x.p.unsafe);
- const predicted=probes.some(x=>!x.p.unsafe&&x.prediction===x.p.outcome);
+ // A contextual label is predictable by inspection and cannot credit diagnosis.
+ const discriminating=probes.filter(x=>x.p.role==='confirm'||x.p.role==='exclude');
+ const predictionsCorrect=discriminating.filter(x=>x.prediction===x.p.outcome).length;
+ const predictionsMade=discriminating.filter(x=>typeof x.prediction==='string'&&x.prediction.length>0).length;
+ const predicted=predictionsCorrect>0;
  const reasoning=String(answer.reasoning||'').trim(),limits=String(answer.limits||'').trim();
  const documented=reasoning.length>=100&&reasoning.length<=2000;
  const uncertain=limits.length>=60&&limits.length<=1200;
  const score=unsafe?0:(correct?40:0)+(confirm?20:0)+(exclude?15:0)+(context?10:0)+(predicted?5:0)+(documented?5:0)+(uncertain?5:0);
  return {score,passed:!unsafe&&correct&&confirm&&exclude&&context&&predicted&&documented&&uncertain,
-  correct,confirm,exclude,context,predicted,documented,uncertain,unsafe,
+  correct,confirm,exclude,context,predicted,predictionsCorrect,predictionsMade,documented,uncertain,unsafe,
   explanationReviewed:false,expected:caseItem.cause};
 }
 export function diagnosticTransferReport(session,date=new Date()){
@@ -131,7 +144,8 @@ export function diagnosticTransferReport(session,date=new Date()){
   lines.push('## '+(i+1)+'. '+c.title,c.scenario,
    'Hipótesis inicial: '+(c.options.find(o=>o[0]===a.initial)?.[1]||'—'),
    '### Observaciones y predicciones');
-  for(const o of a.probes||[]){
+  for(const o of recordedProbes(a)){
+   if(!o||typeof o.id!=='string'||!c.probes.some(p=>p.id===o.id))continue;
    const p=getDiagnosticProbe(c,o.id);
    lines.push('- '+p.id+' ['+p.kind+'] '+p.label,'  - Procedencia: '+p.provenance,
     '  - Pronosticado: '+o.prediction+'; observado: '+p.outcome,

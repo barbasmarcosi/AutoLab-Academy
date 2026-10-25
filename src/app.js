@@ -798,7 +798,7 @@ function diagnosticTransferView(){
  html+='<div class="section"><h2>2. Seleccioná evidencia y anticipá el resultado</h2></div>'+
  '<p class="muted">Consultá una prueba para la hipótesis y otra que pudiera refutar una explicación rival. Elegí el resultado esperado <strong>antes</strong> de abrirlo.</p>'+
  '<div class="grid two">'+c.probes.map(p=>'<button class="probe panel" data-action="diagtransfer-probe" data-id="'+attr(p.id)+'" '+
- (a.observations.some(o=>o.id===p.id)?'disabled':'')+'>'+esc(p.label)+(a.observations.some(o=>o.id===p.id)?' ✓':'')+'</button>').join('')+'</div>';
+ (a.observations.some(o=>o.id===p.id)?'disabled':'')+'>'+esc(p.label)+(p.unsafe?' · NO realizar (acción bloqueada)':'')+(a.observations.some(o=>o.id===p.id)?' ✓':'')+'</button>').join('')+'</div>';
  if(a.pending){
   const p=getDiagnosticProbe(c,a.pending);
   html+='<div class="panel"><h3>Pronóstico previo</h3><p>'+esc(p.label)+'</p>'+
@@ -839,6 +839,8 @@ function diagnosticTransferSummary(){
   '<p>Diagnóstico: '+(g.correct?'coincide con el modelo':'no coincide con el modelo')+
   ' · Confirmación '+(g.confirm?'sí':'no')+' · Descarte '+(g.exclude?'sí':'no')+
   ' · Contexto '+(g.context?'sí':'no')+'</p>'+
+  '<p class="muted small">Pronósticos discriminantes correctos: '+g.predictionsCorrect+' / '+g.predictionsMade+'. La observación de contexto no suma puntos por predicción.</p>'+
+  (g.unsafe?'<p class="outcome-bad"><strong>Acción insegura elegida:</strong> resultado anulado (0 puntos). No se ejecutó ninguna intervención física.</p>':'')+
   '<p><strong>Explicación de referencia:</strong> '+esc(c.debrief)+'</p>'+
   '<p class="muted small">Tu hipótesis inicial: '+esc(c.options.find(o=>o[0]===a.initial)?.[1]||'—')+'</p>'+
   '<p class="muted small">El razonamiento guardado no fue evaluado por significado.</p></article>';
