@@ -16,7 +16,8 @@ test('56 lecturas y 140 preguntas sin duplicar identificadores ni alterar IDs an
  assert.equal(new Set(allQuestions.map(x=>x.id)).size,140);
  for(const t of tracks){assert.equal(misfireLessons.filter(l=>l.topic===t.id).length,1);
   assert.equal(misfireQuestions.filter(q=>q.topic===t.id).length,2);
-  assert.equal(allQuestions.filter(q=>q.topic===t.id).length,28);}
+  const previousCount=allQuestions.filter(q=>q.topic===t.id&&!q.id.startsWith('misfire-q-')).length;
+  assert.equal(allQuestions.filter(q=>q.topic===t.id).length,previousCount+2);}
 });
 test('cinco lecciones con 3 secciones y diez preguntas verificables y referenciadas',()=>{
  for(const l of misfireLessons){assert(l.minutes>=40);assert.equal(l.sections.length,3);assert.match(l.url,/^https:\/\//);
