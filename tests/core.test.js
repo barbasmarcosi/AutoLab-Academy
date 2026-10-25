@@ -36,3 +36,26 @@ test('E1 FSRS: malformed engine card fails closed rather than silently discardin
  p.reviews.e01={algorithm:'ts-fsrs-5',due:'2026-10-24T12:00:00Z',card:{state:2,stability:'bad'}};
  assert.throws(()=>validateBackup(p),/FSRS incompatible/);
 });
+
+
+test('v1.5: reporte de expediente extenso se conserva al respaldar y se limita el tamaño',()=>{
+ const progress=emptyProgress();
+ const report='# Informe con trazabilidad\n'+'Dato de banco ficticio, referencia y límite.\n'.repeat(45);
+ progress.cases.push({id:'integral-power',score:100,at:'2026-10-25T03:00:00Z',conclusion:'ecu-supply',
+  hypothesis:'fuel-delivery',used:['power-obd','power-supply','power-fuel','power-wave','power-context'],
+  reasoning:'Se utilizaron varias fuentes y una prueba que descarta una explicación alternativa.',
+  report,passed:true});
+ const after=parseBackup(serializeBackup(progress));
+ assert.equal(after.cases[0].report,report);
+ assert.deepEqual(validateBackup(after).cases[0],after.cases[0]);
+ progress.cases[0].report='x'.repeat(15000);
+ assert.equal(validateBackup(progress).cases[0].report.length,10000);
+});
+test('v1.5: respaldos antiguos sin report son compatibles y no se inventan informes',()=>{
+ const p=emptyProgress();
+ p.cases.push({id:'case-simple',score:50,at:'2026-10-24T00:00:00Z',conclusion:'unknown',hypothesis:'unknown',
+  used:[],reasoning:'',passed:false});
+ const restored=parseBackup(serializeBackup(p));
+ assert.deepEqual(restored.cases[0],p.cases[0]);
+ assert.equal('report' in restored.cases[0],false);
+});

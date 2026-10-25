@@ -2,7 +2,8 @@
 
 ## Estado real al 25/10/2026
 
-- E0 (base): 56 lecciones estructuradas y 140 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
+- E0 (base): 61 lecciones estructuradas y 150 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
+- E1.5 (taller integrador): tres casos multifuente sintéticos, hipótesis previa, evidencia de contexto/OBD/ondas/circuitos, confirmación, descarte e incertidumbre escrita. Informe completo persistido en respaldo y Portafolio sin cambiar esquema. Cinco lecciones, diez preguntas y noveno nivel. Ver docs/INTEGRATIVE_V1_5.md.
 - E1.4 (combustión y balance): 4 modelos sintéticos de P030x, tabla de cilindros y dos condiciones, 2 pruebas independientes para cada hipótesis y octavo nivel de enseñanza. +5 lecciones/+10 preguntas. No hay contadores OEM ni presión real. Ver docs/MISFIRE_V1_4.md.
 - E1.3 (inyección y combustible): 4 casos sintéticos MPI, condiciones de ralentí/crucero/carga, STFT/LTFT, MAP/MAF y lambda ilustrativa, pruebas confirmatorias independientes y siete niveles. +5 lecciones / +10 preguntas. No valores OEM ni intervención física. Ver docs/FUEL_V1_3.md.
 - E1.2 (diagnóstico temporal): seis capturas por escenario con falla única intermitente en 4 bancos ficticios (CKP, CMP, inyección y alimentación ECU), comparación multicanal y documentación de fuentes. +5 lecciones, +10 preguntas, sexto nivel. PWA sin hardware ni validación profesional. Ver docs/TEMPORAL_V1_2.md.

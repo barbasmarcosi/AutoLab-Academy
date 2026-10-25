@@ -2,11 +2,12 @@ import{differentialCases}from'./fault-discrimination.js';
 import{TRACE_CASES}from'./temporal-trace-lab.js';
 import{FUEL_CASES}from'./fuel-system-lab.js';
 import{MISFIRE_CASES}from'./misfire-lab.js';
+import{INTEGRATIVE_CASES}from'./integrative-lab.js';
 /**
  * Read-only portfolio built exclusively from locally persisted data.
  * No claim that completion or scoring equals supervised qualification.
  */
-const differentialTitles=new Map([...differentialCases,...TRACE_CASES,...FUEL_CASES,...MISFIRE_CASES].map(c=>[c.id,c.title]));
+const differentialTitles=new Map([...differentialCases,...TRACE_CASES,...FUEL_CASES,...MISFIRE_CASES,...INTEGRATIVE_CASES].map(c=>[c.id,c.title]));
 const sortDescending=(a,b)=>String(b.at||'').localeCompare(String(a.at||''));
 export function portfolioSnapshot(progress,lessons=[]){
  const attempts=(progress.attempts||[]).map(a=>({
@@ -15,13 +16,13 @@ export function portfolioSnapshot(progress,lessons=[]){
   evidence:[],reasoning:'',passed:a.percentage>=85
  }));
  const cases=(progress.cases||[]).map(c=>({
-  kind:c.id.startsWith('misfire-')?'combustion':c.id.startsWith('fuel-')?'injection':c.id.startsWith('mf-')?'multifault':c.id.startsWith('trace-')?'temporal':c.id.startsWith('di-')?'differential':c.id.startsWith('lab-')?'lab':c.id.startsWith('measure-')?'quantitative':'diagnostic',
+  kind:c.id.startsWith('integral-')?'integrative':c.id.startsWith('misfire-')?'combustion':c.id.startsWith('fuel-')?'injection':c.id.startsWith('mf-')?'multifault':c.id.startsWith('trace-')?'temporal':c.id.startsWith('di-')?'differential':c.id.startsWith('lab-')?'lab':c.id.startsWith('measure-')?'quantitative':'diagnostic',
   id:c.id,topic:c.id.split('-')[1]||'varios',at:c.at,score:c.score,
   title:differentialTitles.get(c.id)||c.id.replace(/^lab-|^measure-/,'').replaceAll('-',' '),
   evidence:Array.isArray(c.used)?c.used:[],
   reasoning:String(c.reasoning||''),
   hypothesis:String(c.hypothesis||''),conclusion:String(c.conclusion||''),
-  passed:!!c.passed
+  passed:!!c.passed,report:typeof c.report==='string'?c.report:''
  }));
  const events=[...attempts,...cases].sort(sortDescending).slice(0,500);
  const completed=lessons.filter(l=>Boolean(progress.notes?.['lesson-'+l.id]));
@@ -57,6 +58,7 @@ export function portfolioMarkdown(progress,lessons=[],date=new Date()){
    '- Hipótesis: '+(e.hypothesis||'no registrada'),
    '- Conclusión: '+(e.conclusion||'no registrada'),
    '- Justificación de estudiante (sin evaluación semántica): '+(e.reasoning||'sin registro'),'');
+  if(e.kind==='integrative'&&e.report)lines.push('#### Informe completo de expediente','',e.report,'');
  }
  if(!snapshot.events.length)lines.push('(Sin evaluaciones registradas.)','');
  lines.push('---','La experiencia práctica solo puede ser acreditada mediante criterios, observación y supervisión profesionales.','');
