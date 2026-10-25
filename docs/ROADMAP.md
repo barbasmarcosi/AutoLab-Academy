@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.9: aviso persistente de cambios sin guardar cuando IndexedDB rechaza una transacción, reintento confirmable, sin falsa confirmación de guardado de notas; pruebas E2E de recuperación de notas y finalización de examen. Ver docs/PERSISTENCE_TRUTH_V1_9_9.md.
+
+
 - v1.9.8 (corrección focalizada): prioridades por área y errores declarados como «Muy seguro» en exámenes completos, acceso directo al repaso del registro real, foco al encabezado de resultados y pruebas de reflow de 320/640 px sobre rutas clave; no infiere comprensión ni cambia notas. Ver docs/EXAM_FEEDBACK_REFLOW_V1_9_8.md.
 
 
