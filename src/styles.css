@@ -19,3 +19,9 @@
 .confidence-options .option{margin:0;display:flex;align-items:center;line-height:1.35}
 .confidence-options input{flex:0 0 auto}
 @media(max-width:560px){.confidence-options{grid-template-columns:1fr}}
+
+/* Synthetic waveform training: fluid plot and accessible color/label pairing */
+.wave-chart{width:100%;border:1px solid var(--line);background:#081b2b;border-radius:12px;overflow:hidden;margin:18px 0 10px}
+.wave-chart svg{display:block;width:100%;height:auto;max-height:340px}
+.wave-legend{display:inline-block;margin:4px 16px 4px 0;font-weight:650}
+@media(max-width:560px){.wave-chart{overflow-x:auto}.wave-chart svg{min-width:540px}}
