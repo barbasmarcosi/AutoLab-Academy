@@ -10,7 +10,7 @@ test('error de cuota: no afirma guardado y permite recuperar la sesión anterior
  await page.locator('#diagtransfer-initial').selectOption({index:1});
  await page.locator('[data-action="diagtransfer-lock"]').click();
  await page.locator('[data-action="diagtransfer-save"]').click();
- await expect(page.getByRole('status',{name:/Borrador guardado/})).toBeVisible();
+ await expect(page.getByRole('status').filter({hasText:'Borrador guardado en este dispositivo.'})).toBeVisible();
  await page.evaluate(()=>{
   const old=IDBObjectStore.prototype.put;
   IDBObjectStore.prototype.put=function(...args){
