@@ -18,7 +18,7 @@ async function progress(page){
  }));
 }
 async function section(page,id){
- await page.locator('button[data-action="nav"][data-id="'+id+'"]').click();
+ await page.locator('nav.nav button[data-action="nav"][data-id="'+id+'"]').click();
 }
 
 test('diagnóstico en navegador → informe → IndexedDB → JSON → restauración',async({page})=>{
