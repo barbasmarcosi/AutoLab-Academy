@@ -11,3 +11,28 @@ test('E2: backup mantiene hipótesis, pruebas y explicación para revisión exte
   const restored=parseBackup(serializeBackup(p));
   assert.deepEqual(restored.cases[0],p.cases[0]);
 });
+
+
+test('E1 FSRS: backup JSON round-trips versioned card, timestamps and ratings',async()=>{
+ const {recordReview}=await import('../src/repetition.js');
+ const p=emptyProgress();
+ p.reviews.e01=recordReview(null,true,'high',new Date('2026-10-24T09:00:00Z'));
+ const recovered=parseBackup(serializeBackup(p));
+ assert.deepEqual(recovered.reviews.e01,p.reviews.e01);
+ const second=recordReview(recovered.reviews.e01,false,'high',new Date('2026-10-25T09:00:00Z'));
+ assert.equal(second.history.length,2);
+ assert.equal(second.history[1].correct,false);
+});
+test('E1 FSRS: legacy schedule survives backup and remains due on original date',()=>{
+ const p=emptyProgress();
+ p.reviews.e01={level:3,due:'2026-11-01T10:00:00.000Z',last:'2026-10-20T10:00:00.000Z',correct:true};
+ const loaded=parseBackup(serializeBackup(p));
+ assert.deepEqual(loaded.reviews.e01,p.reviews.e01);
+ assert.deepEqual(dueReviews(loaded,new Date('2026-10-31T10:00:00.000Z')),[]);
+ assert.deepEqual(dueReviews(loaded,new Date('2026-11-02T10:00:00.000Z')),['e01']);
+});
+test('E1 FSRS: malformed engine card fails closed rather than silently discarding it',()=>{
+ const p=emptyProgress();
+ p.reviews.e01={algorithm:'ts-fsrs-5',due:'2026-10-24T12:00:00Z',card:{state:2,stability:'bad'}};
+ assert.throws(()=>validateBackup(p),/FSRS incompatible/);
+});
