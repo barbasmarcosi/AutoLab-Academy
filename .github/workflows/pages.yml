@@ -15,33 +15,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install verified dependencies
+      - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Validate PyBaMM companion syntax (physics runs separately)
+      - name: Validate PyBaMM companion syntax
         run: python3 -m py_compile tools/pybamm_export.py
-      - name: Tests and static checks
+      - name: Unit tests and static checks
         run: npm run build
-      - name: Verify browser bundle on PR and main
-        run: ./node_modules/.bin/esbuild src/app.js --bundle --format=esm --target=es2020 --outfile=/tmp/autolab-app.js
-      - name: Prepare public site (exclude repository metadata)
-        if: github.event_name != 'pull_request'
-        run: |
-          mkdir site
-          cp index.html manifest.webmanifest sw.js site/
-          cp -R src icons site/
-          mkdir -p site/samples
-          cp samples/autolab-synthetic.dbc site/samples/
-          mkdir -p site/third-party
-          cp node_modules/candied/LICENSE site/third-party/CANDIED-LICENSE.txt
-          cp node_modules/ts-fsrs/LICENSE site/third-party/TS-FSRS-LICENSE.txt
-      - name: Bundle web modules with Candied for offline Pages
-        if: github.event_name != 'pull_request'
-        run: ./node_modules/.bin/esbuild src/app.js --bundle --format=esm --target=es2020 --minify --outfile=site/src/app.js
+      - name: Prepare EXACT Pages bundle on PR and main
+        run: npm run build:site
+      - name: Install Chromium and OS dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Browser E2E (diagnostics, backup and offline)
+        run: npm run test:e2e
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autolab-playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./site
+          path: ./site/AutoLab-Academy
   deploy:
     if: github.event_name != 'pull_request'
     needs: verify
