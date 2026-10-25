@@ -61,7 +61,7 @@ test('planes de 15, 30 y 45 minutos nunca exceden presupuesto',()=>{
  assert.throws(()=>makeDailyStudyPlan(a,'inventado',30));assert.throws(()=>makeDailyStudyPlan(a,'auto',5));
 });
 test('lecturas y backup mantienen recomendaciones sin cambiar esquema',()=>{
- const p=emptyProgress();p.notes['lesson-e']='2026-10-24T00:00:00Z';
+ const p=emptyProgress();p.notes['lesson-lesson-e']='2026-10-24T00:00:00Z';
  p.attempts.push({id:'exam-1',topic:'electricidad',percentage:65,at:'2026-10-24T12:00:00Z'});
  const prior=analyze(p),restored=analyze(parseBackup(serializeBackup(p)));
  assert.deepEqual(restored,prior);assert.equal(prior.topics[0].nextLessonId,null);
