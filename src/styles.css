@@ -76,3 +76,11 @@
 .integral-item:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
 .integral-item:disabled{opacity:.72;cursor:default}
 @media(max-width:730px){.integral-sources{grid-template-columns:minmax(0,1fr)}}
+
+/* v1.6 transparent study coach */
+.coach-step{padding:16px 0;border-top:1px solid var(--line)}
+.coach-step:first-of-type{border-top:0}
+.coach-step p{max-width:75ch}
+.coach-signals{padding-left:20px;color:var(--muted);line-height:1.5}
+.coach-signals li{margin:6px 0}
+@media(max-width:560px){.coach-step .row{align-items:flex-start;gap:8px;flex-wrap:wrap}}
