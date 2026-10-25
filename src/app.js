@@ -4,11 +4,13 @@ import{ecuLessons,ecuQuestions}from'./ecu-curriculum.js';
 import{componentLessons,componentQuestions}from'./components-curriculum.js';
 import{componentScenarios,componentModel,gradeComponent,componentReport,parseComponentNumber,rcSamples}from'./component-lab.js';
 import{differentialLessons,differentialQuestions}from'./differential-curriculum.js';
+import{temporalLessons,temporalQuestions}from'./temporal-curriculum.js';
+import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSession,generateTrace,traceSummary,gradeTraceSession,traceReport}from'./temporal-trace-lab.js';
 import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDifferential,differentialTrace,differentialReport}from'./fault-discrimination.js';
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
-const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions];
+const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions];
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{multiFaultCases,evaluateMultiFault,multiFaultReport}from'./differential-lab.js';
@@ -20,6 +22,7 @@ const cases=[...baseCases,...additionalCases];
 let bmsState={scenarioId:'nominal',dataset:generateSyntheticBms('nominal'),capacityAh:60,initialSocPct:100,biasCorrectionA:0,answer:'',feedback:'',name:'Ejemplo nominal',fullCapacityAh:48,baselineCapacityAh:60};
 let waveState={id:'pwm',answer:'',result:null};
 let differentialTraining=null,differentialResult=null;
+let traceTraining=null,traceResult=null,traceChannels=['ckp','cmp'];
 let componentState={id:'divider',condition:'nominal',value:'',evidence:'',reasoning:'',result:null};
 let labState={mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,circuitLoaded:false,answer:'',feedback:'',dbc:null,dbcLabel:'',dbcError:'',dbcAnswer:'',dbcFeedback:''};
 import{emptyProgress,scoreExam,dueReviews,completedTopics,calculateCase,loadProgress,saveProgress,serializeBackup,parseBackup}from'./core.js';
@@ -36,9 +39,9 @@ function button(text,action,extra='',kind=''){return '<button class="button '+ki
 function link(url,label){return '<a target="_blank" rel="noopener noreferrer" href="'+attr(url)+'">'+esc(label)+'</a>';}
 function toast(message,error=false){document.querySelectorAll('.toast').forEach(n=>n.remove());const node=document.createElement('div');node.className='toast'+(error?' error':'');node.textContent=message;node.role='status';document.body.append(node);setTimeout(()=>node.remove(),4200);}
 async function persist(){try{await saveProgress(data);}catch(e){toast('No se pudieron guardar los cambios: '+e.message,true);}}
-function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
+function nav(next){page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1>'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.1</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
+function layout(body){const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.2</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
 
 
@@ -58,6 +61,90 @@ function differentialGraph(c,index){
  '<text x="'+(left+w)+'" y="246" fill="#b4cadd" text-anchor="end" font-size="12">'+c.trace.duration+' '+esc(c.trace.unit)+'</text></svg></div>'+
  '<p class="muted small">'+esc(c.trace.title)+'. La captura es una curva matemática sintética, no una forma de onda OEM.</p>';
 }
+
+function traceChannelGraph(c,index,channelId){
+ const ch=TRACE_CHANNELS.find(x=>x.id===channelId);
+ if(!ch)return '';
+ const samples=generateTrace(c.id,traceTraining.eventWindow,index);
+ const W=700,H=210,left=54,top=16,pw=606,ph=152;
+ const x=t=>left+(t/TRACE_DURATION_MS)*pw;
+ const y=v=>top+ph-(v/ch.max)*ph;
+ const marks=[0,.25,.5,.75,1].map(f=>
+ '<line x1="'+left+'" x2="'+(left+pw)+'" y1="'+y(f*ch.max).toFixed(1)+'" y2="'+y(f*ch.max).toFixed(1)+'" stroke="#2d4456"/>'+
+ '<text x="'+(left-7)+'" y="'+(y(f*ch.max)+4).toFixed(1)+'" text-anchor="end" font-size="11" fill="#b4cadd">'+(f*ch.max).toFixed(1)+' '+esc(ch.unit)+'</text>').join('');
+ const points=samples.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(2)+' '+y(p[channelId]).toFixed(2)).join(' ');
+ const summary=traceSummary(c.id,traceTraining.eventWindow,index)[channelId];
+ return '<article class="panel"><h3>'+esc(ch.label)+'</h3><div class="wave-chart">'+
+ '<svg role="img" aria-label="'+esc(ch.label+' en ventana '+(index+1))+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">'+
+ marks+'<path d="'+points+'" fill="none" stroke="#60d9c7" stroke-width="2.6"/>'+
+ '<text x="'+left+'" y="198" font-size="12" fill="#b4cadd">0 ms</text>'+
+ '<text x="'+(left+pw)+'" y="198" text-anchor="end" font-size="12" fill="#b4cadd">'+TRACE_DURATION_MS+' ms</text></svg></div>'+
+ '<p class="muted small">Mín: '+summary.min.toFixed(2)+' '+esc(ch.unit)+
+ ' · Máx: '+summary.max.toFixed(2)+' '+esc(ch.unit)+' · Transiciones ascendentes: '+summary.rising+'</p></article>';
+}
+function temporalMenu(){
+ return heading('CORRELACIÓN TEMPORAL','El problema aparece y desaparece',
+ 'Revisá un buffer de seis capturas de 120 ms. La anomalía aparece en una sola ventana y exige comparar al menos dos canales con una captura normal.')+
+ '<div class="notice">Todas las señales son sintéticas y didácticas. CKP/CMP no se traducen a grados reales OEM y las rampas de inyección no representan todos los inyectores.</div>'+
+ '<div class="grid">'+TRACE_CASES.map(c=>
+ '<article class="panel"><span class="tag dim">'+esc(tracks.find(t=>t.id===c.topic)?.title||c.topic)+'</span>'+
+ '<h3>'+esc(c.title)+'</h3><p class="muted">'+esc(c.symptom)+'</p>'+
+ button('Analizar buffer','trace-start','data-id="'+attr(c.id)+'"')+'</article>').join('')+'</div>';
+}
+function temporalView(){
+ const s=traceTraining,c=TRACE_CASES.find(x=>x.id===s?.caseId);
+ if(!c)return temporalMenu();
+ if(traceResult)return temporalSummary(c);
+ const choices=(elementId,value,label)=>'<label for="'+elementId+'"><strong>'+label+'</strong></label>'+
+ '<select class="field" id="'+elementId+'"><option value="">Elegí causa…</option>'+
+ c.causes.map(([id,title])=>'<option value="'+attr(id)+'" '+(id===value?'selected':'')+'>'+esc(title)+'</option>').join('')+'</select>';
+ let html='<div class="row spaced"><div class="eyebrow">BUFFER TEMPORAL · SEÑALES SINTÉTICAS</div>'+
+ button('Salir','trace-quit','','alt small')+'</div><h1>'+esc(c.title)+'</h1>'+
+ '<div class="panel"><h3>Síntoma del banco</h3><p>'+esc(c.symptom)+'</p>'+
+ '<p class="muted">'+esc(c.cue)+'</p><p class="muted small">Disponibles: CKP, CMP, comando de inyector, corriente de inyector y alimentación ECU. Intervalos y magnitudes ficticios.</p></div>';
+ if(!s.locked)return html+'<div class="section"><h2>1. Hipótesis previa</h2></div><div class="panel">'+
+ choices('trace-initial',s.initial,'Antes de abrir el buffer: ¿qué circuito sospechás?')+
+ '<p class="muted small">La primera elección se conservará en el informe, incluso si luego descubrís otra causa.</p>'+
+ button('Registrar hipótesis inicial','trace-lock',s.initial?'':'disabled')+'</div>';
+ html+='<div class="section"><h2>2. Explorá las seis ventanas del buffer</h2></div>'+
+ '<p class="muted">La ventana defectuosa no está marcada. Abrí distintas capturas y compará los canales con el mismo eje temporal.</p>'+
+ '<div class="row trace-windows">'+Array.from({length:TRACE_WINDOWS},(_,i)=>button('Ventana '+(i+1)+(s.inspected.includes(i)?' ✓':''),'trace-capture',
+ 'data-id="'+i+'"',s.active===i?'':'alt')).join('')+'</div>'+
+ '<div class="panel"><div class="grid two">'+[0,1].map(i=>
+ '<div><label for="trace-channel-'+i+'">Canal '+(i+1)+'</label><select class="field" id="trace-channel-'+i+'">'+
+ TRACE_CHANNELS.map(ch=>'<option value="'+attr(ch.id)+'" '+(traceChannels[i]===ch.id?'selected':'')+'>'+esc(ch.label)+'</option>').join('')+
+ '</select></div>').join('')+'</div>'+
+ '<p class="muted small">Para puntuar la comparación, ambos canales elegidos deben haberse visualizado en una ventana sana y la ventana de evento. Podés cambiar los canales y volver a capturar.</p></div>';
+ if(s.active!==null)html+='<div class="section"><h2>Ventana '+(s.active+1)+' — oscilogramas</h2></div>'+
+ '<div class="grid two">'+traceChannels.map(ch=>traceChannelGraph(c,s.active,ch)).join('')+'</div>';
+ html+='<div class="section"><h2>3. Identificá el instante y la causa</h2></div><div class="panel">'+
+ '<label for="trace-window"><strong>¿En cuál ventana ocurrió el evento?</strong></label>'+
+ '<select class="field" id="trace-window"><option value="">Elegí ventana</option>'+
+ Array.from({length:TRACE_WINDOWS},(_,i)=>'<option value="'+i+'" '+(s.selectedWindow===i?'selected':'')+'>Ventana '+(i+1)+'</option>').join('')+'</select>'+
+ choices('trace-final',s.selectedCause,'Causa final: contrastá las alternativas')+
+ '<fieldset class="component-options"><legend><strong>¿Qué dos señales permitieron comprobar tu conclusión?</strong></legend>'+
+ TRACE_CHANNELS.map(ch=>'<label class="option"><input type="checkbox" name="trace-evidence" value="'+attr(ch.id)+'" '+
+ (s.evidence.includes(ch.id)?'checked':'')+'><span>'+esc(ch.label)+'</span></label>').join('')+'</fieldset>'+
+ '<label for="trace-reason"><strong>Explicá en qué ventanas y tiempos cambia cada canal, y qué causa descartás</strong></label>'+
+ '<textarea class="field" rows="6" id="trace-reason" maxlength="3000" placeholder="Compará dos canales en una ventana normal y la de evento; fundamentá al menos 100 caracteres.">'+esc(s.reasoning)+'</textarea>'+
+ '<p class="muted small">Se califica identificación de causa, ventana, pareja de canales efectivamente inspeccionados y existencia de justificación. No se corrige el texto por su significado.</p>'+
+ button('Evaluar correlación','trace-grade',s.selectedWindow===null||!s.selectedCause||s.evidence.length!==2||s.reasoning.trim().length<100?'disabled id="trace-submit"':'id="trace-submit"')+'</div>';
+ return html;
+}
+function temporalSummary(c){
+ const s=traceTraining,r=traceResult;
+ return heading('RESULTADO TEMPORAL','Correlación: '+r.score+'/100','La revisión se limita a evidencia estructurada y valores sintéticos. La explicación todavía requiere evaluación de un especialista.')+
+ '<div class="panel"><span class="tag '+(r.passed?'':'amber')+'">'+(r.passed?'Criterios estructurados completos':'Faltan evidencias o hay una conclusión incorrecta')+'</span>'+
+ '<p><strong>Ventana del evento:</strong> '+(r.expectedWindow+1)+' · La identificaste: '+(r.correctWindow?'sí':'no')+'</p>'+
+ '<p><strong>Causa final:</strong> '+(r.correctCause?'correcta':'incorrecta')+' · Comparaste ambos canales de referencia en una ventana sana y otra con evento: '+(r.compared?'sí':'no')+'</p>'+
+ '<p><strong>Pareja de referencia:</strong> '+esc(r.expectedEvidence.map(id=>TRACE_CHANNELS.find(x=>x.id===id)?.label||id).join(' / '))+'</p>'+
+ '<div class="notice"><strong>Interpretación sintética:</strong> '+esc(c.explanation)+'</div>'+
+ '<p><strong>Tu justificación (sin corrección semántica):</strong> '+esc(s.reasoning)+'</p>'+
+ '<div class="row">'+button('Exportar informe Markdown','trace-export')+
+ button('Nuevo buffer','trace-start','data-id="'+attr(c.id)+'"','alt')+
+ button('Volver a casos','trace-quit','','alt')+'</div></div>';
+}
+
 function differentialMenu(){
  return heading('DIAGNÓSTICO DIFERENCIAL','Mismo síntoma, distinta causa',
   'Aprendé a identificar qué medición distingue dos hipótesis compatibles con la misma observación inicial.')+
@@ -151,6 +238,7 @@ function pathView(){
  (stage.id==='ecu'?'<div class="row" style="margin-top:16px">'+button('Practicar en Banco ECU','nav','data-id="ecu"')+'</div>':'')+
  (stage.id==='components'?'<div class="row" style="margin-top:16px">'+button('Abrir laboratorio de componentes','open-components')+'</div>':'')+
  (stage.id==='differential'?'<div class="row" style="margin-top:16px">'+button('Practicar diagnóstico diferencial','nav','data-id="differential"')+'</div>':'')+
+ (stage.id==='temporal'?'<div class="row" style="margin-top:16px">'+button('Examinar capturas temporales','nav','data-id="temporal"')+'</div>':'')+
  '</article>').join('')+'</div>'+
  '<div class="notice">El avance por lectura no se interpreta como dominio de un tema. El puntaje de selección múltiple tampoco demuestra aptitud para diagnóstico real ni intervención HV.</div>';
 }
@@ -738,8 +826,15 @@ body+='<div class="section"><h2>Análisis de mensajes por ID</h2></div><div clas
 
 function resourceView(){return heading('FUENTES Y HERRAMIENTAS','Biblioteca externa','Priorizamos documentación pública y software maduro. Algunos recursos requieren conexión o instalación en PC.')+'<section class="cards">'+resources.map(r=>'<div class="panel"><span class="tag dim">'+esc(r.topic)+'</span><h3>'+esc(r.title)+'</h3>'+link(r.url,'Abrir recurso oficial')+'</div>').join('')+'</section><div class="section"><h2>Laboratorios prácticos</h2></div><div class="panel"><p class="muted">Ya podés importar capturas candump y analizar una muestra CAN sintética; CircuitJS está disponible como herramienta externa integrada bajo demanda. PyBaMM continúa pendiente.</p>'+button('Ir a laboratorios','nav','data-id="labs"')+'</div>';}
 function dataView(){return heading('DATOS PERSONALES','Tu progreso te pertenece','Se guarda en IndexedDB de este navegador. Si cambiás de equipo o borrás datos del sitio, necesitás un respaldo.')+'<div class="grid two"><div class="panel"><h3>Exportar respaldo</h3><p class="muted">Descarga un JSON portable con intentos, resultados de casos, repeticiones y notas.</p>'+button('Descargar respaldo','export')+'</div><div class="panel"><h3>Importar respaldo</h3><p class="muted">Reemplaza el progreso local luego de validar el archivo. Guardá una copia antes de importar.</p><label class="button alt" for="import-file">Elegir archivo JSON</label><input class="sr-only" type="file" id="import-file" accept=".json,application/json"></div></div><div class="section"><h2>Notas privadas</h2></div><div class="panel"><label for="notebook">Hipótesis, dudas y procedimientos aprendidos</label><textarea class="field" id="notebook" maxlength="10000">'+esc(data.notes.general||'')+'</textarea><div class="row" style="margin-top:14px">'+button('Guardar notas','save-notes')+'</div></div><div class="section"><h2>Reinicio</h2></div><div class="panel"><p class="muted">Borrar todo es irreversible si no conservás una exportación.</p>'+button('Borrar progreso local','reset','','danger')+'</div>';}
-function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='path'?pathView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
+function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='path'?pathView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='temporal'?(traceTraining?temporalView():temporalMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
 document.addEventListener('input',event=>{
+if(event.target.id==='trace-reason'&&traceTraining&&!traceResult){
+ traceTraining.reasoning=event.target.value;
+ const btn=document.getElementById('trace-submit');
+ if(btn)btn.disabled=traceTraining.selectedWindow===null||!traceTraining.selectedCause||traceTraining.evidence.length!==2||traceTraining.reasoning.trim().length<100;
+ return;
+}
+
 if(event.target.id==='diff-reason'&&differentialTraining&&!differentialResult){
  differentialTraining.reasoning=event.target.value;
  const node=document.getElementById('diff-submit');
@@ -768,6 +863,22 @@ if(event.target.id==='multi-reason'&&multiTraining){multiTraining.reasoning=even
  if(id==='quant-reason')a.reasoning=event.target.value;
 });
 document.addEventListener('change',event=>{
+if(traceTraining&&!traceResult){
+ const s=traceTraining,id=event.target.id;
+ if(id==='trace-initial'){s.initial=event.target.value;render();return;}
+ if(id==='trace-final'){s.selectedCause=event.target.value;render();return;}
+ if(id==='trace-window'){s.selectedWindow=event.target.value===''?null:Number(event.target.value);render();return;}
+ if(id==='trace-channel-0'||id==='trace-channel-1'){
+  traceChannels[id==='trace-channel-0'?0:1]=event.target.value;
+  if(s.active!==null){const seen=new Set(s.viewed[s.active]||[]);traceChannels.forEach(ch=>seen.add(ch));s.viewed[s.active]=[...seen];}
+  render();return;
+ }
+ if(event.target.name==='trace-evidence'){
+  const seen=new Set(s.evidence);if(event.target.checked)seen.add(event.target.value);else seen.delete(event.target.value);
+  s.evidence=[...seen];render();return;
+ }
+}
+
 if(differentialTraining&&!differentialResult&&['diff-initial','diff-final','diff-prediction'].includes(event.target.id)){
  const field=event.target.id==='diff-initial'?'initial':event.target.id==='diff-final'?'final':'pendingPrediction';
  differentialTraining[field]=event.target.value;
@@ -848,6 +959,44 @@ if(event.target.id==='can-file'){
 }
 if(event.target.id==='import-file'){const file=event.target.files?.[0];if(!file)return;if(file.size>2000000){toast('Archivo demasiado grande',true);return;}file.text().then(async text=>{const recovered=parseBackup(text);if(!confirm('¿Restaurar el respaldo y reemplazar todos los datos actuales?'))return;await saveProgress(recovered);data=recovered;nav('home');toast('Respaldo restaurado correctamente');}).catch(e=>toast('No se pudo importar: '+e.message,true));}});
 document.addEventListener('click',async event=>{const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const act=target.dataset.action;const id=target.dataset.id;switch(act){case'nav':selectedLesson=null;nav(id);break;
+case'trace-start':{
+ if(!TRACE_CASES.some(c=>c.id===id))break;
+ traceTraining={...createTraceSession(id),locked:false};
+ traceResult=null;
+ const c=TRACE_CASES.find(c=>c.id===id);
+ traceChannels=[...c.evidence];page='temporal';render();break;
+}
+case'trace-lock':if(!traceTraining?.initial)break;traceTraining.locked=true;render();break;
+case'trace-capture':{
+ if(!traceTraining?.locked)break;
+ const index=Number(id);
+ if(!Number.isInteger(index)||index<0||index>=TRACE_WINDOWS)break;
+ traceTraining.active=index;
+ if(!traceTraining.inspected.includes(index))traceTraining.inspected.push(index);
+ const viewed=new Set(traceTraining.viewed[index]||[]);
+ traceChannels.forEach(ch=>viewed.add(ch));
+ traceTraining.viewed[index]=[...viewed];
+ render();break;
+}
+case'trace-grade':{
+ const s=traceTraining;
+ if(!s?.locked||s.selectedWindow===null||!s.selectedCause||s.evidence.length!==2||s.reasoning.trim().length<100)break;
+ traceResult=gradeTraceSession(s);
+ data.cases.push({id:s.caseId,score:traceResult.score,at:new Date().toISOString(),
+  hypothesis:s.initial,conclusion:s.selectedCause,used:s.evidence,
+  reasoning:s.reasoning,passed:traceResult.passed});
+ data.cases=data.cases.slice(-500);await persist();render();break;
+}
+case'trace-export':{
+ if(!traceTraining||!traceResult)break;
+ const content=traceReport(traceTraining,traceResult);
+ const file=new Blob([content],{type:'text/markdown;charset=utf-8'});
+ const url=URL.createObjectURL(file),link=document.createElement('a');
+ link.href=url;link.download='autolab-captura-temporal-'+traceTraining.caseId+'.md';
+ document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);break;
+}
+case'trace-quit':traceTraining=null;traceResult=null;render();break;
+
 case'diff-start':{
  if(!differentialCases.some(c=>c.id===id))break;
  differentialTraining={...createDifferentialSession(id),locked:false,pending:'',pendingPrediction:''};
