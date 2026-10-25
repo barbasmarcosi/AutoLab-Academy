@@ -24,5 +24,5 @@ En CI se instalan también las bibliotecas de Chromium con --with-deps.
 - Solo cubre Chromium desktop automatizado, no Safari/iPhone ni VoiceOver en un teléfono real.
 - La comprobación offline valida instalación y uso con la app precargada; la actualización entre versiones distintas aún no se prueba.
 - Los escenarios no realizan mediciones físicas ni usan valores OEM. La revisión de contenido por expertos sigue pendiente.
-- El avance de una sesión parcial no se persiste hasta terminar las cinco investigaciones: se pierde si el usuario recarga antes.
+- Desde v1.9.2, el avance parcial se guarda de manera validada en IndexedDB, se incluye opcionalmente en JSON schema v1 y se puede retomar tras recarga.
 - El respaldo JSON es manual y no cifrado. IndexedDB no sustituye una copia segura externa.

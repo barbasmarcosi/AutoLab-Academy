@@ -85,3 +85,29 @@ test('v1.7: las respuestas se validan por longitud, ID, selección y confianza',
  ]);
  assert.equal(saved.attempts[0].details.length,2);
 });
+
+
+test('v1.9.2: borrador de investigación compatible con backup, evidencia válida únicamente',async()=>{
+ const {createDiagnosticTransferSession}=await import('../src/diagnostic-transfer.js');
+ const {captureDiagnosticDraft,restoreDiagnosticDraft}=await import('../src/diagnostic-draft.js');
+ const session=createDiagnosticTransferSession(291),item=session.scenario.cases[0];
+ const valid=item.probes.find(p=>!p.unsafe);
+ session.answers[item.id]={initial:item.options[0][0],locked:true,observations:[
+  {id:'inventada',prediction:'normal'},
+  {id:valid.id,prediction:valid.outcome},
+  {id:valid.id,prediction:valid.outcome}
+ ],pending:'inventada',prediction:'peligrosa',final:item.cause,
+ reasoning:'Texto de razonamiento técnico incompleto',limits:'Aún falta evidencia física'};
+ const p=emptyProgress();p.diagnosticDraft=captureDiagnosticDraft(session);
+ const raw=serializeBackup(p),loaded=parseBackup(raw),restored=restoreDiagnosticDraft(loaded.diagnosticDraft);
+ assert.equal(restored.scenario.seed,291);
+ assert.equal(restored.scenario.cases[0].id,item.id);
+ assert.deepEqual(restored.answers[item.id].observations,[{id:valid.id,prediction:valid.outcome}]);
+ assert.equal(restored.answers[item.id].pending,'');
+ assert.equal(restored.answers[item.id].final,item.cause);
+ assert.equal(restored.index,0);
+ const old=emptyProgress();delete old.diagnosticDraft;
+ assert.equal(validateBackup(old).diagnosticDraft,null);
+ const invalid=emptyProgress();invalid.diagnosticDraft={seed:'incorrecto',index:0,answers:{}};
+ assert.throws(()=>validateBackup(invalid),/borrador diagnóstico incompatible/);
+});
