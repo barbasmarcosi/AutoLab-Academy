@@ -3,6 +3,14 @@
  * Numerical answers and choice of evidence are deterministic; free text is NOT semantically graded.
  */
 const choose=(rand,list)=>list[Math.floor(rand()*list.length)];
+function seededShuffle(items,rand){
+ const copy=[...items];
+ for(let i=copy.length-1;i>0;i--){
+  const j=Math.floor(rand()*(i+1));
+  const tmp=copy[i];copy[i]=copy[j];copy[j]=tmp;
+ }
+ return copy;
+}
 function seeded(seed){
  if(!Number.isSafeInteger(seed))throw Error('Semilla inválida');
  let x=seed>>>0;
@@ -75,9 +83,9 @@ export const QUANTITATIVE_TOPICS=['electricidad','motor','senales','redes','ev']
 export function buildQuantitativeSession(seed=Date.now()){
  const rand=seeded(seed);
  const items=QUANTITATIVE_TOPICS.map(topic=>templates[topic==='electricidad'?'voltage':topic==='motor'?'motor':topic==='senales'?'scope':topic==='redes'?'can':'soc'](rand));
- for(const q of items)q.measurementOptions=q.measurementOptions.map(x=>({x,rank:rand()})).sort((a,b)=>a.rank-b.rank).map(o=>o.x);
- items.sort(()=>rand()-0.5);
- return {version:'quant-v1',seed,items};
+ for(const q of items)q.measurementOptions=seededShuffle(q.measurementOptions,rand);
+ const shuffled=seededShuffle(items,rand);
+ return {version:'quant-v1',seed,items:shuffled};
 }
 export function parseNumericAnswer(value){
  if(typeof value!=='string'||value.length>32||!/^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)$/.test(value.trim()))throw Error('Ingresá un número, usando punto o coma decimal.');
