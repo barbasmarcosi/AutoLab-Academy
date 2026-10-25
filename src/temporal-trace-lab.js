@@ -50,7 +50,7 @@ export function createTraceSession(caseId,seed=Date.now()){
  definition(caseId);
  if(!Number.isSafeInteger(seed))throw Error('Semilla no válida');
  const eventWindow=1+(Math.imul(seed|0,1664525)+1013904223>>>0)%(TRACE_WINDOWS-2);
- return {caseId,seed,eventWindow,inspected:[],active:null,evidence:[],selectedWindow:null,selectedCause:'',reasoning:''};
+ return {caseId,seed,eventWindow,inspected:[],viewed:{},active:null,initial:'',evidence:[],selectedWindow:null,selectedCause:'',reasoning:''};
 }
 /**
  * 0..120ms; 60-2 digital CKP, isolated CMP pulse, simulated command and current.
@@ -91,7 +91,9 @@ export function gradeTraceSession(session){
  const c=definition(session?.caseId);
  safeIndex(session.eventWindow);
  const inspected=[...new Set(session.inspected||[])].filter(i=>Number.isInteger(i)&&i>=0&&i<TRACE_WINDOWS);
- const compared=inspected.includes(session.eventWindow)&&inspected.some(i=>i!==session.eventWindow);
+ const compared=inspected.includes(session.eventWindow)&&inspected.some(i=>i!==session.eventWindow&&
+  c.evidence.every(channel=>Array.isArray(session.viewed?.[session.eventWindow])&&session.viewed[session.eventWindow].includes(channel)&&
+    Array.isArray(session.viewed?.[i])&&session.viewed[i].includes(channel)));
  const correctWindow=session.selectedWindow===session.eventWindow;
  const correctCause=session.selectedCause===c.cause;
  const evidence=[...new Set(session.evidence||[])];
@@ -108,6 +110,7 @@ export function traceReport(session,result,date=new Date()){
   'Caso: '+c.title,'Semilla reproducible: '+session.seed,
   'Ventanas de 120 ms: '+TRACE_WINDOWS,
   'Ventanas realmente inspeccionadas: '+(session.inspected||[]).map(i=>i+1).join(', '),
+  'Hipótesis inicial: '+String(session.initial||'No registrada'),
   'Ventana identificada: '+(session.selectedWindow===null?'No registrada':session.selectedWindow+1),
   'Causa seleccionada: '+session.selectedCause,
   'Canales utilizados: '+(session.evidence||[]).join(', '),
