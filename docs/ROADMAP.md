@@ -2,6 +2,8 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.4 (respaldo y durabilidad): evita que un portafolio legítimo de hasta 500 expedientes choque prematuramente con el límite antiguo de 2 MB; se mantienen barreras de entrada. Guardado explícito de borrador con confirmación solo tras IndexedDB, y reinicio que no anuncia éxito si falló escribir. Ver docs/BACKUP_RELIABILITY_V1_9_4.md.
+
 - v1.9.3 (accesibilidad y compatibilidad de navegador): auditoría automatizada WCAG con axe, navegación por teclado con enlace de salto, retención de foco en formularios, ejecución E2E sobre Chromium y WebKit, y validación de caché PWA v25. Prueba manual Safari/iPhone/VoiceOver sigue pendiente.
 
 - v1.9.2 (sesiones retomables): borrador pequeño y validado con semilla y respuestas, almacenado en IndexedDB e incluido opcionalmente en JSON schema v1. Retomar tras recargar, pausar y cambiar de sección. Nunca se acreditan mediciones reales. Ver docs/RESUMABLE_DIAGNOSTICS_V1_9_2.md.
