@@ -1,5 +1,5 @@
 /**
- * Three-stage learning itinerary. Reading and objective exams are shown separately:
+ * Five-stage learning itinerary. Reading and objective exams are shown separately:
  * neither demonstrates competence on a real vehicle.
  */
 export const learningStages=[
@@ -14,7 +14,10 @@ export const learningStages=[
   goal:'Interpretar alimentación y señales del controlador; anticipar resultados en el banco ECU virtual.'},
  {id:'components',order:4,name:'Componentes y drivers',subtitle:'Circuitos, electrónica de potencia básica y energía almacenada',
   lessons:['voltage-dividers','resistive-loss','mosfet-control','inductive-load','current-shunt','rc-input','transceiver-edges','ground-reference-network','dcdc-switches','hv-boundaries'],
-  goal:'Calcular, interpretar y contrastar tensión y corriente en modelos ideales de baja tensión sin inferir diagnósticos OEM.'}
+  goal:'Calcular, interpretar y contrastar tensión y corriente en modelos ideales de baja tensión sin inferir diagnósticos OEM.'},
+ {id:'differential',order:5,name:'Diagnóstico diferencial',subtitle:'Distinguir causas que producen el mismo síntoma u oscilograma',
+  lessons:['same-symptom','power-driver','wave-identifiability','can-physical-differential','bms-observability'],
+  goal:'Escoger pruebas discriminantes, anticipar resultados y distinguir observaciones idénticas de causas comprobadas.'}
 ];
 export function evaluateLearningPath(progress,lessons){
  const exists=new Set(lessons.map(l=>l.id));

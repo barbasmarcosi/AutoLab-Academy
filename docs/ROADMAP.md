@@ -2,7 +2,8 @@
 
 ## Estado real al 25/10/2026
 
-- E0 (base): 36 lecciones estructuradas y 100 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
+- E0 (base): 41 lecciones estructuradas y 110 preguntas con fuentes contextuales distribuidas en cinco especialidades (incremento v0.7); quedan pendientes revisión experta y ampliar progresión a itinerarios profesionales completos.
+- E1.1 (diagnóstico diferencial): 3 prácticas con dos causas distintas para una misma lectura o curva (MOSFET, RC y caída bajo carga), evidencia discriminante y predicciones previas, quinto nivel de itinerario, 5 lecciones y 10 preguntas nuevas. Datos únicamente sintéticos. Ver docs/DIFFERENTIAL_V1_1.md.
 - E1.0 (componentes): seis circuitos algebraicos sintéticos de baja tensión (divisor, caída en línea, MOSFET, shunt, RC, energía inductiva), resultados con tolerancia, evidencia y reportes. Se suman 10 lecciones y 20 preguntas; itinerario de cuatro etapas. **No es simulador SPICE ni instrumento real.** Ver docs/COMPONENTS_V1.md.
 - E0.9 (recorrido ECU): 3 etapas de aprendizaje, banco ECU con 5 escenarios de instrumentación virtual, pronósticos previos a revelar mediciones, 10 lecciones y 20 preguntas nuevas. Los indicadores distinguen lecturas de exámenes. Quedan pendientes validación externa y E2E iPhone.
 - E1 (PWA): implementación MVP en GitHub Pages por Actions, exámenes, repaso con FSRS (ts-fsrs 5.4.2) basado en respuesta objetiva + confianza, evaluación acumulativa por cinco áreas, progreso local IndexedDB y backup JSON compatible con los intervalos anteriores. **Pendiente QA E2E iOS y revisión de calidad editorial de preguntas.** Ver docs/FSRS_E1.md.
