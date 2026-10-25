@@ -44,6 +44,7 @@ import{buildQuantitativeSession,parseNumericAnswer,gradeQuantitative,formatQuant
 import{TRANSFER_CASES,buildTransferSession,parseTransferNumber,gradeTransfer,evaluateTransferSession,transferReport}from'./transfer-exercises.js';
 import{DIAGNOSTIC_TRANSFER_CASES,createDiagnosticTransferSession,gradeDiagnosticTransfer,getDiagnosticProbe,diagnosticTransferReport}from'./diagnostic-transfer.js';
 import{diagnosticReview}from'./diagnostic-review.js';
+import{examLearningPlan}from'./exam-learning-plan.js';
 import{chartEvidence}from'./chart-accessibility.js';
 import{captureDiagnosticDraft,restoreDiagnosticDraft}from'./diagnostic-draft.js';
 const root=document.getElementById('app');
@@ -68,7 +69,7 @@ function saveDiagnosticDraft(immediate=false){
 }
 function nav(next){if(diagnosticTransferTraining&&!diagnosticTransferGrades)saveDiagnosticDraft(true);page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;fuelTraining=null;fuelResult=null;misfireTraining=null;misfireResult=null;integralTraining=null;integralResult=null;integralReport=null;examResult=null;caseResult=null;transferTraining=null;transferResults=null;diagnosticTransferTraining=null;diagnosticTransferGrades=null;render();document.getElementById('main-content')?.focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1 tabindex="-1">'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const focusId=root.contains(document.activeElement)?document.activeElement.id:'';const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['coach','Plan de estudio'],['exams','Exámenes'],['analytics','Errores por pregunta'],['challenges','Retos medidos'],['transfer','Transferencia'],['diagtransfer','Transferencia diagnóstica'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['misfire','Balance de cilindros'],['integrative','Taller Integrador'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<a class="skip-link" href="#main-content">Saltar al contenido principal</a><div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.9.7</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main" id="main-content" tabindex="-1"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';if(focusId)document.getElementById(focusId)?.focus({preventScroll:true});}
+function layout(body){const focusId=root.contains(document.activeElement)?document.activeElement.id:'';const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['coach','Plan de estudio'],['exams','Exámenes'],['analytics','Errores por pregunta'],['challenges','Retos medidos'],['transfer','Transferencia'],['diagtransfer','Transferencia diagnóstica'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['misfire','Balance de cilindros'],['integrative','Taller Integrador'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<a class="skip-link" href="#main-content">Saltar al contenido principal</a><div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.9.8</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main" id="main-content" tabindex="-1"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';if(focusId)document.getElementById(focusId)?.focus({preventScroll:true});}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Mi plan de estudio','nav','data-id="coach"','alt')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Practicar transferencia','nav','data-id="transfer"','alt')+button('Diagnóstico en situaciones nuevas','nav','data-id="diagtransfer"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
 
 
@@ -81,7 +82,7 @@ function differentialGraph(c,index){
  const guides=[0,.25,.5,.75,1].map(v=>'<line x1="'+left+'" x2="'+(left+w)+'" y1="'+y(v*ceiling).toFixed(1)+'" y2="'+y(v*ceiling).toFixed(1)+'" stroke="#2d4456"/>'+
  '<text x="'+(left-11)+'" y="'+(y(v*ceiling)+4).toFixed(1)+'" fill="#b4cadd" text-anchor="end" font-size="11">'+(v*ceiling).toFixed(1)+' V</text>').join('');
  const line=series.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(2)+' '+y(p.value).toFixed(2)).join(' ');
- return '<div class="wave-chart"><svg role="img" aria-label="'+esc(c.trace.title)+
+ return '<div class="wave-chart" role="region" tabindex="0" aria-label="Diagrama desplazable: señal de osciloscopio"><svg role="img" aria-label="'+esc(c.trace.title)+
  '" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">'+guides+
  '<path d="'+line+'" stroke="#60d9c7" stroke-width="2.8" fill="none" stroke-linejoin="round"/>'+
  '<text x="'+left+'" y="246" fill="#b4cadd" font-size="12">0 '+esc(c.trace.unit)+'</text>'+
@@ -101,7 +102,7 @@ function traceChannelGraph(c,index,channelId){
  '<text x="'+(left-7)+'" y="'+(y(f*ch.max)+4).toFixed(1)+'" text-anchor="end" font-size="11" fill="#b4cadd">'+(f*ch.max).toFixed(1)+' '+esc(ch.unit)+'</text>').join('');
  const points=samples.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(2)+' '+y(p[channelId]).toFixed(2)).join(' ');
  const summary=traceSummary(c.id,traceTraining.eventWindow,index)[channelId];
- return '<article class="panel"><h3>'+esc(ch.label)+'</h3><div class="wave-chart">'+
+ return '<article class="panel"><h3>'+esc(ch.label)+'</h3><div class="wave-chart" role="region" tabindex="0" aria-label="Diagrama desplazable: señal de osciloscopio">'+
  '<svg role="img" aria-label="'+esc(ch.label+' en ventana '+(index+1))+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">'+
  marks+'<path d="'+points+'" fill="none" stroke="#60d9c7" stroke-width="2.6"/>'+
  '<text x="'+left+'" y="198" font-size="12" fill="#b4cadd">0 ms</text>'+
@@ -308,7 +309,7 @@ function fuelChart(c,s){
  '<text x="'+(left-9)+'" y="'+(y(v)+4).toFixed(1)+'" font-size="12" text-anchor="end" fill="#b4cadd">'+(v>0?'+':'')+v+'%</text>').join('');
  const renderSeries=(key,color)=>rows.map((f,i)=>'<circle cx="'+x(f.id).toFixed(1)+'" cy="'+y(f[key]).toFixed(1)+'" r="5" fill="'+color+'"/>'+
  '<text x="'+x(f.id).toFixed(1)+'" y="'+(y(f[key])-10).toFixed(1)+'" fill="'+color+'" text-anchor="middle" font-size="12">'+(f[key]>0?'+':'')+f[key]+'%</text>').join('');
- return '<div class="wave-chart"><svg role="img" aria-label="Comparación STFT y LTFT de condiciones visitadas; no es una serie temporal ni una medición OEM" viewBox="0 0 '+width+' '+height+'">'+
+ return '<div class="wave-chart" role="region" tabindex="0" aria-label="Diagrama desplazable: señal de osciloscopio"><svg role="img" aria-label="Comparación STFT y LTFT de condiciones visitadas; no es una serie temporal ni una medición OEM" viewBox="0 0 '+width+' '+height+'">'+
  guides+renderSeries('stftPct','#60d9c7')+renderSeries('ltftPct','#ffba73')+
  c.frames.map(f=>'<text x="'+x(f.id)+'" y="210" text-anchor="middle" font-size="12" fill="#b4cadd">'+esc(f.label)+'</text>').join('')+'</svg></div>'+
  '<p class="muted small"><span style="color:#60d9c7">●</span> STFT y <span style="color:#ffba73">●</span> LTFT. Se muestran únicamente condiciones inspeccionadas: son puntos de funcionamiento, NO una captura temporal.</p>';
@@ -756,10 +757,11 @@ async function finishExam(){
   data.reviews[row.id]=recordReview(data.reviews[row.id],row.correct,current.confidence[row.id]||'normal',at);
  }
  examResult=graded;
- await persist();render();
+ await persist();render();document.querySelector('#main-content h1')?.focus({preventScroll:true});
 }
 function examSummary(){
  const graded=examResult;
+ const plan=examLearningPlan(exam.questions,graded.details,exam.confidence);
  const topics=[...new Set(exam.questions.map(q=>q.topic))];
  const breakdown=topics.map(topic=>{const selected=exam.questions.filter(q=>q.topic===topic);const ids=new Set(selected.map(q=>q.id));const hit=graded.details.filter(d=>ids.has(d.id)&&d.correct).length;return {topic,correct:hit,total:selected.length};});
  return heading('RESULTADOS','Evaluación finalizada','El resultado es una medición teórica y no constituye una acreditación profesional.')+
@@ -769,6 +771,17 @@ function examSummary(){
  '<div class="row" style="margin-top:16px">'+button('Volver a evaluaciones','quit-exam')+button('Estudiar módulos','nav','data-id="learn"','alt')+'</div></div>'+
  '<div class="section"><h2>Resultado por especialidad</h2></div><div class="grid">'+breakdown.map(x=>'<div class="panel"><strong>'+esc(tracks.find(t=>t.id===x.topic)?.title||x.topic)+'</strong><div class="stat-number">'+x.correct+'/'+x.total+'</div><div class="stat-label">Respuestas correctas</div></div>').join('')+'</div>'+
  '<div class="panel"><div class="row spaced"><div><h3>Aprender de estas respuestas</h3><p class="muted">Cada pregunta queda registrada con su respuesta y confianza; el análisis no inventa registros anteriores ni interpreta textos.</p></div>'+button('Ver errores por pregunta','nav','data-id="analytics"','alt')+'</div></div>'+
+ '<section class="panel" id="exam-review-plan" aria-labelledby="exam-review-title" style="margin-top:18px"><h2 id="exam-review-title">Prioridades para el próximo estudio</h2>'+
+ (plan.needsReview?
+ '<p>Errores observados: <strong>'+plan.incorrect+'</strong> · Errores con «Muy seguro»: <strong>'+plan.highConfidenceWrong+'</strong>. Revisá estos últimos primero porque tu confianza declarada no coincidió con la respuesta.</p>'+
+ '<ol class="exam-priority-list">'+plan.topics.map(item=>'<li><strong>'+esc(tracks.find(t=>t.id===item.topic)?.title||item.topic)+'</strong>: '+
+ item.missed+' respuesta(s) incorrecta(s)'+(item.highConfidenceWrong?' · '+item.highConfidenceWrong+' con «Muy seguro»':'')+
+ '. Releé sus explicaciones y verificá las fuentes antes de reintentar.</li>').join('')+'</ol>'+
+ '<div class="row">'+button('Repasar errores registrados','start-exam','data-topic="targeted"','alt')+
+ button('Ver evolución de errores','nav','data-id="analytics"','alt')+'</div>':
+ '<p>En este intento no se registraron respuestas incorrectas. Para desafiar este resultado, estudiá un caso sintético diferente y buscá evidencia que distinga hipótesis alternativas.</p>'+
+ '<div class="row">'+button('Practicar diagnóstico diferencial','nav','data-id="diagtransfer"','alt')+'</div>')+
+ '<p class="muted small">Las prioridades se derivan únicamente de respuestas y confianza de este examen; no describen qué pensaste ni demuestran competencias físicas. El repaso focalizado usa el registro de errores más reciente de toda tu actividad.</p></section>'+
  '<div class="section"><h2>Corrección razonada</h2></div><section class="cards">'+exam.questions.map((q,i)=>{
   const answer=graded.details[i];
   return '<div class="panel"><div class="row spaced"><span class="tag dim">'+esc(q.topic)+'</span><strong class="'+(answer.correct?'outcome-good':'outcome-bad')+'">'+(answer.correct?'Correcta':'Incorrecta')+'</strong></div>'+
@@ -871,7 +884,7 @@ async function finishDiagnosticTransfer(){
    hypothesis:a.initial,conclusion:a.final,used:a.observations.map(o=>o.id),reasoning:a.reasoning,
    report:diagnosticTransferReport(single,now).slice(0,10000)});
  }
- data.cases=data.cases.slice(-500);clearTimeout(diagnosticDraftTimer);diagnosticDraftTimer=null;data.diagnosticDraft=null;await persist();render();
+ data.cases=data.cases.slice(-500);clearTimeout(diagnosticDraftTimer);diagnosticDraftTimer=null;data.diagnosticDraft=null;await persist();render();document.querySelector('#main-content h1')?.focus({preventScroll:true});
 }
 
 function transferMenu(){
@@ -1245,7 +1258,7 @@ function waveView(){
  '<p class="muted">Gráficos de señales creadas matemáticamente para aprender. No son capturas OEM ni se conectan a un vehículo.</p>'+
  '<label for="wave-scenario">Elegí la señal</label><select class="field" id="wave-scenario">'+WAVEFORM_SCENARIOS.map(p=>'<option value="'+attr(p.id)+'" '+(p.id===waveState.id?'selected':'')+'>'+esc(p.title)+'</option>').join('')+'</select>'+
  '<h3 style="margin-top:18px">'+esc(c.title)+'</h3><p class="muted">'+esc(c.description)+'</p>'+
- '<div class="wave-chart"><svg role="img" aria-label="'+esc(c.title+'; '+c.description)+'" viewBox="0 0 '+width+' '+height+'" preserveAspectRatio="xMidYMid meet"><rect x="'+px+'" y="'+py+'" width="'+pw+'" height="'+ph+'" fill="#081c2b" rx="6"/>'+grid+traces+'</svg></div>'+ 
+ '<div class="wave-chart" role="region" tabindex="0" aria-label="Diagrama desplazable: señal de osciloscopio"><svg role="img" aria-label="'+esc(c.title+'; '+c.description)+'" viewBox="0 0 '+width+' '+height+'" preserveAspectRatio="xMidYMid meet"><rect x="'+px+'" y="'+py+'" width="'+pw+'" height="'+ph+'" fill="#081c2b" rx="6"/>'+grid+traces+'</svg></div>'+ 
  chartEvidenceView(w.series.map(p=>({t:p.t,...Object.fromEntries(w.labels.map((_,i)=>['v'+i,p.values[i]]))})),c.title,'t',c.unit,
  w.labels.map((label,i)=>({key:'v'+i,label,unit:'V'})))+
  '<p class="muted small">'+w.labels.map((l,i)=>'<span class="wave-legend" style="color:'+(i?'var(--amber)':'var(--mint)')+'">━━ '+esc(l)+'</span>').join('')+'</p>'+
@@ -1264,7 +1277,7 @@ function componentDiagram(s){
  const rect=(x,text)=>'<rect x="'+x+'" y="44" width="146" height="72" rx="10" fill="#17374b" stroke="#519d9d" stroke-width="2"/>'+
  '<text x="'+(x+73)+'" y="82" fill="#e9f3fb" font-size="14" text-anchor="middle">'+esc(text)+'</text>';
  const arrow=x=>'<path d="M'+x+' 80 h 30 l -8 -6 m 8 6 l -8 6" stroke="#60d9c7" fill="none" stroke-width="2.5"/>';
- return '<div class="component-diagram"><svg role="img" aria-label="'+esc('Trayecto funcional esquemático: '+s.path.join(', '))+
+ return '<div class="component-diagram" role="region" tabindex="0" aria-label="Diagrama desplazable: circuito de componentes"><svg role="img" aria-label="'+esc('Trayecto funcional esquemático: '+s.path.join(', '))+
  '" viewBox="0 0 780 160" preserveAspectRatio="xMidYMid meet">'+s.path.map((p,i)=>rect(14+i*196,p)+(i<3?arrow(160+i*196):'')).join('')+
  '<text x="14" y="143" fill="#a5bcce" font-size="11">Esquema conceptual de bloques · no es un plano de conexiones</text></svg></div>';
 }
@@ -1274,7 +1287,7 @@ function componentCurve(condition){
  const poly=key=>points.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(2)+' '+y(p[key]).toFixed(2)).join(' ');
  const grid=[0,3,6,9,12].map(v=>'<line x1="'+left+'" x2="'+(left+w)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="#2c465a"/>'+
  '<text x="39" y="'+(y(v)+4)+'" text-anchor="end" fill="#a5bcce" font-size="11">'+v+' V</text>').join('');
- return '<div class="component-diagram"><svg role="img" aria-label="Curva de carga RC ideal; referencia nominal y condición seleccionada durante 200 ms" viewBox="0 0 '+W+' '+H+'">'+
+ return '<div class="component-diagram" role="region" tabindex="0" aria-label="Diagrama desplazable: circuito de componentes"><svg role="img" aria-label="Curva de carga RC ideal; referencia nominal y condición seleccionada durante 200 ms" viewBox="0 0 '+W+' '+H+'">'+
  grid+'<path d="'+poly('nominal')+'" fill="none" stroke="#ffba73" stroke-width="2" stroke-dasharray="6 5"/>'+
  '<path d="'+poly('observed')+'" fill="none" stroke="#60d9c7" stroke-width="3"/>'+
  '<text x="'+left+'" y="229" fill="#a5bcce" font-size="11">0 ms</text><text x="'+(left+w)+'" y="229" text-anchor="end" fill="#a5bcce" font-size="11">200 ms</text></svg>'+
