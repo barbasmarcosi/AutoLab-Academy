@@ -66,3 +66,13 @@
 .cylinder-table .cylinder-bar{display:inline-block;vertical-align:middle;width:min(170px,50%);height:8px;margin:0 10px 0 0;border-radius:9px;background:#213f50;overflow:hidden}
 .cylinder-table .cylinder-bar span{display:block;height:100%;border-radius:9px;background:#60d9c7}
 .cylinder-table tbody tr+tr{border-top:1px solid var(--line)}
+
+/* v1.5 integrative case library: evidence categories and provenance entries */
+.integral-sources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.integral-sources .panel{min-width:0}
+.integral-source-items{display:grid;gap:8px}
+.integral-item{width:100%;padding:12px;text-align:left;border:1px solid var(--line);border-radius:10px;color:var(--ink);background:rgba(10,35,53,.7);line-height:1.35;cursor:pointer}
+.integral-item:not(:disabled):hover{border-color:var(--mint)}
+.integral-item:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+.integral-item:disabled{opacity:.72;cursor:default}
+@media(max-width:730px){.integral-sources{grid-template-columns:minmax(0,1fr)}}
