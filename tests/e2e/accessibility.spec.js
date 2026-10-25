@@ -14,6 +14,9 @@ for(const view of ['home','diagtransfer','data']){
 }
 test('keyboard skip link leads into main content',async({page})=>{
  await page.goto('./');
+ await expect(page.locator('#main-content')).toBeVisible();
+ // Start keyboard traversal at the document, not an incidental browser focus.
+ await page.evaluate(()=>{document.body.tabIndex=-1;document.body.focus();});
  await page.keyboard.press('Tab');
  const skip=page.getByRole('link',{name:'Saltar al contenido principal'});
  await expect(skip).toBeFocused();
