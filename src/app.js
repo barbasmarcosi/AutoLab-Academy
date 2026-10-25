@@ -1,4 +1,7 @@
-import{tracks,lessons,questions,cases as baseCases,resources}from'./content.js';
+import{tracks,lessons as baseLessons,questions as baseQuestions,cases as baseCases,resources}from'./content.js';
+import{additionalLessons,additionalQuestions}from'./curriculum-advanced.js';
+import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
+const lessons=[...baseLessons,...additionalLessons],questions=[...baseQuestions,...additionalQuestions];
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{parseCandump,analyzeCanFrames,sampleCandump,decodeSyntheticSample,MAX_CAN_INPUT}from'./can-lab.js';
@@ -6,6 +9,7 @@ import{loadDbc,decodeFramesWithDbc,MAX_DBC_BYTES}from'./dbc-lab.js';
 import{BMS_SCENARIOS,generateSyntheticBms,parseBmsCsv,formatBmsCsv,analyzeBms,bmsQuestion,capacitySohPct,MAX_BMS_FILE_BYTES}from'./bms-lab.js';
 const cases=[...baseCases,...additionalCases];
 let bmsState={scenarioId:'nominal',dataset:generateSyntheticBms('nominal'),capacityAh:60,initialSocPct:100,biasCorrectionA:0,answer:'',feedback:'',name:'Ejemplo nominal',fullCapacityAh:48,baselineCapacityAh:60};
+let waveState={id:'pwm',answer:'',result:null};
 let labState={mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,circuitLoaded:false,answer:'',feedback:'',dbc:null,dbcLabel:'',dbcError:'',dbcAnswer:'',dbcFeedback:''};
 import{emptyProgress,scoreExam,dueReviews,completedTopics,calculateCase,loadProgress,saveProgress,serializeBackup,parseBackup}from'./core.js';
 import{recordReview,selectCumulativeQuestions,reviewOverview}from'./repetition.js';
@@ -21,9 +25,23 @@ function toast(message,error=false){document.querySelectorAll('.toast').forEach(
 async function persist(){try{await saveProgress(data);}catch(e){toast('No se pudieron guardar los cambios: '+e.message,true);}}
 function nav(next){page=next;exam=null;training=null;examResult=null;caseResult=null;render();window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1>'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const menus=[['home','Panel'],['learn','Academia'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 0.6</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
+function layout(body){const menus=[['home','Panel'],['learn','Academia'],['exams','Exámenes'],['challenges','Retos medidos'],['cases','Taller virtual'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 0.7</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
-function learn(){return heading('ACADEMIA','Tu biblioteca técnica','Seis lecciones de introducción aplicada, con fuentes públicas. El programa crecerá por etapas.')+'<section class="cards">'+lessons.map(l=>'<article class="panel lesson-card"><div><span class="tag dim">'+esc(tracks.find(t=>t.id===l.topic)?.title)+'</span><h3>'+esc(l.title)+'</h3><p class="muted">'+l.minutes+' minutos estimados</p></div>'+button('Estudiar','lesson','data-id="'+attr(l.id)+'"','alt')+'</article>').join('')+'</section>';}
+function learn(){
+ const done=lessons.filter(l=>Boolean(data.notes['lesson-'+l.id])).length;
+ return heading('ACADEMIA','Biblioteca de diagnóstico aplicado',lessons.length+' lecciones orientadas a interpretar mediciones, diagnosticar sin sustituir piezas al azar y trabajar con evidencia.')+
+ '<div class="panel row spaced"><div><strong>'+done+' de '+lessons.length+' lecturas registradas</strong><p class="muted small">El registro es de lectura, no acredita dominio técnico.</p></div><span class="tag dim">Cinco especialidades</span></div>'+
+ tracks.map(t=>{
+  const group=lessons.filter(l=>l.topic===t.id),completed=group.filter(l=>data.notes['lesson-'+l.id]).length;
+  return '<div class="section"><h2>'+esc(t.title)+'</h2><span class="tag dim">'+completed+'/'+group.length+' lecturas</span></div>'+
+  '<div class="cards">'+group.map(l=>{
+   const completed=Boolean(data.notes['lesson-'+l.id]);
+   return '<article class="panel lesson-card"><div><span class="tag '+(completed?'':'dim')+'">'+(completed?'Lectura registrada':'Por estudiar')+'</span>'+
+   '<h3 style="margin-top:12px">'+esc(l.title)+'</h3><p class="muted">'+l.minutes+' minutos sugeridos · '+l.sections.length+' temas</p></div>'+
+   button(completed?'Revisar contenido':'Estudiar','lesson','data-id="'+attr(l.id)+'"','alt')+'</article>';
+  }).join('')+'</div>';
+ }).join('');
+}
 function lessonView(){const l=lessons.find(x=>x.id===selectedLesson);if(!l)return learn();return button('← Volver a academia','nav','data-id="learn"','alt small')+'<div class="section"></div>'+heading('LECCIÓN · '+l.topic.toUpperCase(),l.title,'Lectura orientada a diagnóstico y evidencia.')+'<article class="panel lesson-body">'+l.sections.map(([h,t])=>'<h2>'+esc(h)+'</h2><p>'+esc(t)+'</p>').join('')+'<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+link(l.url,'Abrir fuente y lecturas relacionadas')+'<div class="section">'+button('Registrar lectura y volver','complete-lesson','data-id="'+attr(l.id)+'"')+'</div></article>';}
 
 function examMenu(){
@@ -294,11 +312,38 @@ function bmsView(){
  return body;
 }
 
+
+function waveView(){
+ const c=WAVEFORM_SCENARIOS.find(s=>s.id===waveState.id),w=generateWaveform(waveState.id);
+ const width=760,height=276,px=58,py=24,pw=664,ph=196;
+ const y=v=>py+ph-(v/c.yMax)*ph,x=t=>px+(t/c.duration)*pw;
+ const traces=w.labels.map((label,index)=>'<path d="'+w.series.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(2)+' '+y(p.values[index]).toFixed(2)).join(' ')+'" fill="none" stroke="'+(index===0?'#60d9c7':'#ffba73')+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>').join('');
+ const grid=[0,1,2,3,4].map(n=>{const val=c.yMax*n/4,yy=y(val);return '<line x1="'+px+'" x2="'+(px+pw)+'" y1="'+yy.toFixed(1)+'" y2="'+yy.toFixed(1)+'" stroke="#345065" stroke-width="1"/>'+
+  '<text x="'+(px-9)+'" y="'+(yy+4).toFixed(1)+'" text-anchor="end" font-size="12" fill="#b4cadd">'+val.toFixed(1)+' V</text>';}).join('')+
+ [0,1,2,3,4].map(n=>{const t=c.duration*n/4,xx=x(t);return '<line x1="'+xx.toFixed(1)+'" x2="'+xx.toFixed(1)+'" y1="'+py+'" y2="'+(py+ph)+'" stroke="#213949" stroke-width="1"/>'+
+ '<text x="'+xx.toFixed(1)+'" y="'+(height-15)+'" text-anchor="middle" font-size="12" fill="#b4cadd">'+t.toFixed(1)+' '+c.unit+'</text>';}).join('');
+ return '<div class="panel"><h2>Osciloscopio didáctico</h2>'+
+ '<p class="muted">Gráficos de señales creadas matemáticamente para aprender. No son capturas OEM ni se conectan a un vehículo.</p>'+
+ '<label for="wave-scenario">Elegí la señal</label><select class="field" id="wave-scenario">'+WAVEFORM_SCENARIOS.map(p=>'<option value="'+attr(p.id)+'" '+(p.id===waveState.id?'selected':'')+'>'+esc(p.title)+'</option>').join('')+'</select>'+
+ '<h3 style="margin-top:18px">'+esc(c.title)+'</h3><p class="muted">'+esc(c.description)+'</p>'+
+ '<div class="wave-chart"><svg role="img" aria-label="'+esc(c.title+'; '+c.description)+'" viewBox="0 0 '+width+' '+height+'" preserveAspectRatio="xMidYMid meet"><rect x="'+px+'" y="'+py+'" width="'+pw+'" height="'+ph+'" fill="#081c2b" rx="6"/>'+grid+traces+'</svg></div>'+
+ '<p class="muted small">'+w.labels.map((l,i)=>'<span class="wave-legend" style="color:'+(i?'var(--amber)':'var(--mint)')+'">━━ '+esc(l)+'</span>').join('')+'</p>'+
+ '<div class="notice">La amplitud, los tiempos y la topología son supuestos del ejercicio; no los utilices como rangos universales de diagnóstico.</div>'+
+ '<hr class="divider"/><h3>Interpretá la medición</h3><p>'+esc(c.question)+'</p>'+
+ '<label for="wave-answer">Respuesta en '+esc(c.answerUnit)+'</label><input id="wave-answer" type="text" inputmode="decimal" maxlength="30" autocomplete="off" class="field" placeholder="Escribí un número" value="'+attr(waveState.answer)+'"/>'+
+ '<div class="row" style="margin-top:15px">'+button('Corregir interpretación','wave-grade')+'</div>'+
+ (waveState.result?'<div class="result"><strong class="'+(waveState.result.success?'outcome-good':'outcome-bad')+'">'+(waveState.result.success?'Correcto':'Fuera de tolerancia')+'</strong>'+
+ '<p>Esperado: '+c.target+' '+esc(c.answerUnit)+' · '+esc(c.formula)+'</p>'+
+ '<p class="muted small">La puntuación verifica solo el resultado numérico de este ejemplo. La interpretación de una captura real necesita documentación, instrumental y un especialista.</p></div>':'')+
+ '<div class="section">'+link(c.source,'Consultar la referencia técnica')+'</div></div>';
+}
+
 function labView(){
  const mode=labState.mode;
  let body=heading('LABORATORIOS','Instrumentación y simulación','Entornos de entrenamiento. CAN es lectura de archivos sin conexión; CircuitJS es una herramienta externa y requiere Internet.');
- body+='<div class="row" style="margin:0 0 22px">'+button('Analizador CAN','lab-mode','data-id="can"',mode==='can'?'':'alt')+button('Baterías / BMS','lab-mode','data-id="bms"',mode==='bms'?'':'alt')+button('Circuitos con CircuitJS','lab-mode','data-id="circuit"',mode==='circuit'?'':'alt')+'</div>';
+ body+='<div class="row" style="margin:0 0 22px">'+button('Analizador CAN','lab-mode','data-id="can"',mode==='can'?'':'alt')+button('Osciloscopio','lab-mode','data-id="wave"',mode==='wave'?'':'alt')+button('Baterías / BMS','lab-mode','data-id="bms"',mode==='bms'?'':'alt')+button('Circuitos con CircuitJS','lab-mode','data-id="circuit"',mode==='circuit'?'':'alt')+'</div>';
  if(mode==='bms')return body+bmsView();
+ if(mode==='wave')return body+waveView();
  if(mode==='circuit'){
   body+='<div class="panel"><span class="tag dim">HERRAMIENTA EXISTENTE · EXTERNA</span><h2>Simulador CircuitJS1 / Falstad</h2>'+
   '<p class="muted">Estudiá circuitos de 12 V, divisores resistivos, transistores y señales. El motor pertenece a CircuitJS; AutoLab no lo reimplementa.</p>'+
@@ -376,6 +421,7 @@ function resourceView(){return heading('FUENTES Y HERRAMIENTAS','Biblioteca exte
 function dataView(){return heading('DATOS PERSONALES','Tu progreso te pertenece','Se guarda en IndexedDB de este navegador. Si cambiás de equipo o borrás datos del sitio, necesitás un respaldo.')+'<div class="grid two"><div class="panel"><h3>Exportar respaldo</h3><p class="muted">Descarga un JSON portable con intentos, resultados de casos, repeticiones y notas.</p>'+button('Descargar respaldo','export')+'</div><div class="panel"><h3>Importar respaldo</h3><p class="muted">Reemplaza el progreso local luego de validar el archivo. Guardá una copia antes de importar.</p><label class="button alt" for="import-file">Elegir archivo JSON</label><input class="sr-only" type="file" id="import-file" accept=".json,application/json"></div></div><div class="section"><h2>Notas privadas</h2></div><div class="panel"><label for="notebook">Hipótesis, dudas y procedimientos aprendidos</label><textarea class="field" id="notebook" maxlength="10000">'+esc(data.notes.general||'')+'</textarea><div class="row" style="margin-top:14px">'+button('Guardar notas','save-notes')+'</div></div><div class="section"><h2>Reinicio</h2></div><div class="panel"><p class="muted">Borrar todo es irreversible si no conservás una exportación.</p>'+button('Borrar progreso local','reset','','danger')+'</div>';}
 function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='cases'?(training?caseView():caseMenu()):page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
 document.addEventListener('input',event=>{
+ if(event.target.id==='wave-answer'){waveState.answer=event.target.value;return;}
  if(!quantitative||quantitativeResults)return;
  const id=event.target.id;
  if(id!=='quant-value'&&id!=='quant-reason')return;
@@ -384,7 +430,7 @@ document.addEventListener('input',event=>{
  if(id==='quant-value')a.value=event.target.value;
  if(id==='quant-reason')a.reasoning=event.target.value;
 });
-document.addEventListener('change',event=>{if(event.target.name==='quant-evidence'&&quantitative&&!quantitativeResults){const q=quantitative.items[quantitative.index];const a=quantitative.answers[q.id]||(quantitative.answers[q.id]={value:'',measurement:'',reasoning:''});a.measurement=event.target.value;}if(event.target.name==='answer'&&exam){exam.answers[exam.questions[exam.at].id]=Number(event.target.value);render();}if(event.target.name==='confidence'&&exam){exam.confidence[exam.questions[exam.at].id]=event.target.value;render();}if(event.target.id==='hypothesis'&&training){training.hypothesis=event.target.value;render();}if(event.target.id==='diagnosis'&&training){training.diagnosis=event.target.value;render();}if(event.target.id==='lab-id-filter'){
+document.addEventListener('change',event=>{if(event.target.id==='wave-scenario'){waveState={id:event.target.value,answer:'',result:null};render();}if(event.target.name==='quant-evidence'&&quantitative&&!quantitativeResults){const q=quantitative.items[quantitative.index];const a=quantitative.answers[q.id]||(quantitative.answers[q.id]={value:'',measurement:'',reasoning:''});a.measurement=event.target.value;}if(event.target.name==='answer'&&exam){exam.answers[exam.questions[exam.at].id]=Number(event.target.value);render();}if(event.target.name==='confidence'&&exam){exam.confidence[exam.questions[exam.at].id]=event.target.value;render();}if(event.target.id==='hypothesis'&&training){training.hypothesis=event.target.value;render();}if(event.target.id==='diagnosis'&&training){training.diagnosis=event.target.value;render();}if(event.target.id==='lab-id-filter'){
  labState.selectedId=event.target.value;labState.offset=0;render();
 }
 if(event.target.id==='lab-answer'){labState.answer=event.target.value;}
@@ -502,7 +548,18 @@ case'bms-export':{
  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);break;
 }
 
-case'lab-mode':labState.mode=id==='circuit'?'circuit':id==='bms'?'bms':'can';render();break;
+case'wave-grade':{
+ if(labState.mode!=='wave')break;
+ try{
+  const result=gradeWaveform(waveState.id,waveState.answer);
+  waveState.result=result;
+  data.cases.push({id:'lab-wave-'+waveState.id+'-v1',score:result.score,at:new Date().toISOString(),conclusion:String(result.entered),
+   hypothesis:'synthetic-waveform',used:[waveState.id],reasoning:'Resultado numérico contrastado contra el escenario sintético',passed:result.success});
+  data.cases=data.cases.slice(-500);await persist();render();
+ }catch(error){toast(String(error.message||error),true);}
+ break;
+}
+case'lab-mode':labState.mode=id==='circuit'?'circuit':id==='bms'?'bms':id==='wave'?'wave':'can';render();break;
 case'lab-toggle-circuit':labState.circuitLoaded=!labState.circuitLoaded;render();break;
 case'lab-sample':labState={...labState,mode:'can',sample:true,capture:parseCandump(sampleCandump()),selectedId:'all',offset:0,answer:'',feedback:''};render();break;
 case'lab-prev':labState.offset=Math.max(0,labState.offset-80);render();break;
@@ -513,7 +570,7 @@ case'lab-grade':
  labState.feedback=labState.answer==='120'?'Correcto: el ID 0x120 presenta una separación mayor que su intervalo habitual. Eso no determina causa real.':'Revisá los intervalos medianos y máximos. La muestra inserta una pausa mayor en 0x120.';
  data.cases.push({id:'lab-can-periodicity-v1',score:labState.answer==='120'?100:0,at:new Date().toISOString(),conclusion:labState.answer});
  data.cases=data.cases.slice(-500);await persist();render();break;
-case'lesson':selectedLesson=id;page='learn';render();break;case'complete-lesson':{const l=lessons.find(x=>x.id===id);if(l)data.studyMinutes+=l.minutes;await persist();selectedLesson=null;nav('learn');toast('Lectura registrada');break;}case'start-exam':startExam(target.dataset.topic);break;case'review':startExam('all',true);break;case'advance-exam':if(!exam)return;if(exam.at<exam.questions.length-1){exam.at++;render();}else finishExam();break;case'quit-exam':exam=null;examResult=null;render();break;case'start-case':startCase(id);break;case'probe':{if(!training||!training.hypothesis||training.used.includes(id))return;training.used.push(id);render();break;}case'finish-case':{
+case'lesson':selectedLesson=id;page='learn';render();break;case'complete-lesson':{const l=lessons.find(x=>x.id===id);if(l&&!data.notes['lesson-'+l.id]){data.notes['lesson-'+l.id]=new Date().toISOString();data.studyMinutes+=l.minutes;await persist();}selectedLesson=null;nav('learn');toast('Lectura registrada');break;}case'start-exam':startExam(target.dataset.topic);break;case'review':startExam('all',true);break;case'advance-exam':if(!exam)return;if(exam.at<exam.questions.length-1){exam.at++;render();}else finishExam();break;case'quit-exam':exam=null;examResult=null;render();break;case'start-case':startCase(id);break;case'probe':{if(!training||!training.hypothesis||training.used.includes(id))return;training.used.push(id);render();break;}case'finish-case':{
  const c=cases.find(c=>c.id===training?.id);
  if(!c||!training.used.length||!training.hypothesis||!training.diagnosis||training.reasoning.trim().length<60)return;
  caseResult=assessCase(c,training);
