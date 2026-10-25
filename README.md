@@ -4,13 +4,14 @@ PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y
 
 ## Qué está implementado
 
-- Academia con 26 lecciones, 80 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
-- Itinerario de tres niveles (fundamentos, diagnóstico aplicado y ECUs), progreso de lectura y evaluación separados, con siguiente lección recomendada.
+- Academia con 36 lecciones, 100 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
+- Itinerario de cuatro niveles (fundamentos, diagnóstico aplicado y ECUs), progreso de lectura y evaluación separados, con siguiente lección recomendada.
 - **Banco ECU** con cinco casos sintéticos, pronóstico antes de observar, elección de pruebas confirmatorias, justificación e informe descargable.
 - Taller virtual con 15 casos de una falla y 3 escenarios de **dos fallas simultáneas**; hipótesis previas, evidencias independientes, corrección y exportación de informes. Las cifras son educativas y requieren revisión técnica externa.
 - **Retos de medición:** cinco ejercicios parametrizados, uno por área, con resultados numéricos, elección de mediciones y argumentación técnica; rúbrica objetiva, exportación Markdown e historial en los respaldos. La explicación escrita **no** se evalúa semánticamente.
 - Analizador CAN clásico: lectura local de archivos `candump` y captura de ejemplo.
 - **Decodificación DBC:** importación local de un `.dbc`, interpretación de las primeras 400 tramas usando [Candied](https://github.com/bit-dream/candied), tabla de señales físicas y ejercicio de factor/offset. El ejemplo AutoLab usa únicamente identificadores y escalas ficticios.
+- **Banco de componentes:** seis circuitos ideales de baja tensión (divisor, cable, MOSFET, shunt, RC, bobina) con esquemas SVG, fallas simuladas, respuestas numéricas, evidencias y exportación de informe. No es un solver SPICE; CircuitJS permanece como herramienta externa.
 - Laboratorio de osciloscopio con cuatro señales sintéticas (PWM, CKP, CAN diferencial y senoidal), visualización SVG y desafíos de cálculo. No conecta instrumentos reales.
 - Laboratorio BMS con curvas, integración de corriente, importación/exportación CSV, estimación de SOC, cálculo ilustrativo SOH y desafíos sintéticos.
 - Exportador científico complementario `tools/pybamm_export.py` para generar CSV con PyBaMM real en computadora propia, con metadatos de modelo, versión y SHA-256; los modelos SPM y DFN se validan en una [CI científica separada](.github/workflows/science-pybamm.yml) y producen CSV descargables. No se ejecuta el solver en Pages.
@@ -56,4 +57,4 @@ Los escenarios son sintéticos y las mediciones no representan especificaciones 
 - La QA completa de interfaz y respaldos en Safari/iPhone sigue pendiente.
 - Falta generar y conservar un lockfile npm para reproducibilidad estricta del build. La versión científica directa está fijada; las dependencias transitivas quedan registradas por ejecución y aún requieren lockfile/constraints reproducibles.
 
-Documentación: [banco ECU e itinerarios](docs/ECU_PATHS.md), [multifallas y portafolio](docs/MULTIFAULT_PORTFOLIO.md), [contenido y osciloscopio](docs/CURRICULUM_WAVEFORMS.md), [retos cuantitativos](docs/MEASUREMENT_CHALLENGES.md), [retención FSRS y migración](docs/FSRS_E1.md), [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).
+Documentación: [componentes y drivers](docs/COMPONENTS_V1.md), [banco ECU e itinerarios](docs/ECU_PATHS.md), [multifallas y portafolio](docs/MULTIFAULT_PORTFOLIO.md), [contenido y osciloscopio](docs/CURRICULUM_WAVEFORMS.md), [retos cuantitativos](docs/MEASUREMENT_CHALLENGES.md), [retención FSRS y migración](docs/FSRS_E1.md), [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).
