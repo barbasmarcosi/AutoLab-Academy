@@ -357,7 +357,7 @@ export function evaluateIntegrativeCase(session){
  const confirm=seen.some(p=>p.confirm&&!p.unsafe);
  const exclude=seen.some(p=>p.exclude&&!p.unsafe);
  const kinds=[...new Set(seen.filter(p=>!p.unsafe).map(p=>p.kind))];
- const coverage=EVIDENCE_KIN.every(k=>kinds.includes(k));
+ const coverage=EVIDENCE_KINDS.every(k=>kinds.includes(k));
  const predicted=obs.some(o=>{const p=integrativeReading(c.id,o.id);return !p.unsafe&&o.prediction===p.classification;});
  const reasoning=String(session.reasoning||'').trim();
  const uncertainty=String(session.uncertainty||'').trim();
@@ -366,7 +366,7 @@ export function evaluateIntegrativeCase(session){
  const score=unsafe?0:(cause?35:0)+(confirm?20:0)+(exclude?15:0)+(coverage?15:0)+(predicted?5:0)+(documented?5:0)+(qualified?5:0);
  return {score,passed:!unsafe&&cause&&confirm&&exclude&&coverage&&predicted&&documented&&qualified,
   cause,confirm,exclude,coverage,kinds,predicted,documented,qualified,unsafe,textReviewed:false,
-  expectedCause:c.cause,sourceCounts:Object.fromEntries(EVIDENCE_KIN.map(k=>[k,seen.filter(p=>p.kind===k).length]))};
+  expectedCause:c.cause,sourceCounts:Object.fromEntries(EVIDENCE_KINDS.map(k=>[k,seen.filter(p=>p.kind===k).length]))};
 }
 export function buildIntegrativeReport(session,result,date=new Date()){
  const c=findCase(session.caseId);
