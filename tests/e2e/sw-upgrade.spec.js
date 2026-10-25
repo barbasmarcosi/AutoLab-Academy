@@ -5,12 +5,12 @@ import {join} from 'node:path';
 // A real versioned worker from the previous release, installed and activated
 // in the same browser origin/scope before upgrading to the current release.
 // Fixture files exist only while tests run and are deleted before artifacts.
-test('actualización v27 → v28 conserva IndexedDB y reabre la PWA sin red',async({page,context},testInfo)=>{
+test('actualización v28 → v29 conserva IndexedDB y reabre la PWA sin red',async({page,context},testInfo)=>{
  const stem='sw-legacy-'+testInfo.project.name.replace(/[^a-z0-9-]/ig,'-');
  const workerName=stem+'.js',htmlName=stem+'.html';
  const folder=join('site','AutoLab-Academy');
  const workerPath=join(folder,workerName),htmlPath=join(folder,htmlName);
- writeFileSync(workerPath,readFileSync(join('tests','fixtures','sw-v27.js')));
+ writeFileSync(workerPath,readFileSync(join('tests','fixtures','sw-v28.js')));
  writeFileSync(htmlPath,'<!doctype html><html lang="es"><title>SW fixture</title><body>Preparar migración</body></html>');
  try{
   await page.goto('./'+htmlName);
@@ -23,7 +23,7 @@ test('actualización v27 → v28 conserva IndexedDB y reabre la PWA sin red',asy
     candidate.addEventListener('statechange',()=>{if(candidate.state==='activated')resolve();});
    });
   },workerName);
-  await expect.poll(()=>page.evaluate(async()=>await caches.keys())).toContain('autolab-academy-v27');
+  await expect.poll(()=>page.evaluate(async()=>await caches.keys())).toContain('autolab-academy-v28');
   await page.evaluate(async()=>{
    const {emptyProgress,saveProgress}=await import('./src/core.js');
    const progress=emptyProgress();
@@ -36,8 +36,8 @@ test('actualización v27 → v28 conserva IndexedDB y reabre la PWA sin red',asy
    await navigator.serviceWorker.register('./sw.js',{scope:'./'});
   });
   await page.waitForFunction(()=>navigator.serviceWorker.controller?.scriptURL.endsWith('/sw.js'),null,{timeout:30_000});
-  await expect.poll(()=>page.evaluate(()=>caches.keys())).toContain('autolab-academy-v28');
-  await expect.poll(()=>page.evaluate(()=>caches.keys())).not.toContain('autolab-academy-v27');
+  await expect.poll(()=>page.evaluate(()=>caches.keys())).toContain('autolab-academy-v29');
+  await expect.poll(()=>page.evaluate(()=>caches.keys())).not.toContain('autolab-academy-v28');
   await context.setOffline(true);
   await page.goto('./');
   await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
