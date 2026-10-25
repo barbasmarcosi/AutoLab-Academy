@@ -92,7 +92,7 @@ test('PWA instalada en scope Pages: funciona sin red y sin datos OEM',async({pag
  await page.goto('./');
  await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
  await page.waitForFunction(()=>Boolean(navigator.serviceWorker?.controller),null,{timeout:30_000});
- expect((await page.evaluate(()=>caches.keys())).includes('autolab-academy-v25')).toBe(true);
+ expect((await page.evaluate(()=>caches.keys())).includes('autolab-academy-v26')).toBe(true);
  await context.setOffline(true);
  await page.reload();
  await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
@@ -148,4 +148,24 @@ test('borrador retoma después de recargar, navegar y recuperar JSON',async({pag
  await section(page,'diagtransfer');
  await page.locator('[data-action="diagtransfer-resume"]').click();
  await expect(page.locator('.answer-card').filter({hasText:p.label})).toBeVisible();
+});
+
+
+test('guardado explícito del borrador espera a IndexedDB y confirma éxito',async({page})=>{
+ await page.goto('./');
+ await section(page,'diagtransfer');
+ await page.locator('[data-action="diagtransfer-start"]').click();
+ await page.locator('#diagtransfer-initial').selectOption({index:1});
+ await page.locator('[data-action="diagtransfer-lock"]').click();
+ await page.locator('#diagtransfer-reason').fill('Se registra una hipótesis provisional antes de proseguir con el descarte de causas alternativas.');
+ await page.locator('[data-action="diagtransfer-save"]').click();
+ await expect(page.getByRole('status').filter({hasText:'Borrador guardado en este dispositivo'})).toBeVisible();
+ const before=await progress(page);
+ expect(before.diagnosticDraft).toBeTruthy();
+ const first=before.diagnosticDraft.answers[Object.keys(before.diagnosticDraft.answers)[0]];
+ expect(first.reasoning).toContain('hipótesis provisional');
+ await page.reload();
+ await section(page,'diagtransfer');
+ await page.locator('[data-action="diagtransfer-resume"]').click();
+ await expect(page.locator('#diagtransfer-reason')).toHaveValue(/hipótesis provisional/);
 });

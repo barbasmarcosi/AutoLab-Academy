@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import{emptyProgress,gradeQuestion,scoreExam,scheduleReview,dueReviews,validateBackup,serializeBackup,parseBackup,calculateCase}from'../src/core.js';
+import test from 'node:test';import assert from 'node:assert/strict';import{emptyProgress,gradeQuestion,scoreExam,scheduleReview,dueReviews,validateBackup,serializeBackup,parseBackup,calculateCase,MAX_BACKUP_PAYLOAD_CHARS,MAX_BACKUP_IMPORT_CHARS,MAX_BACKUP_FILE_BYTES}from'../src/core.js';
 const q=[{id:'a',answer:1},{id:'b',answer:0}];
 test('califica sin dar crédito a respuestas omitidas',()=>{assert.equal(gradeQuestion(q[0],undefined),false);assert.deepEqual(scoreExam(q,[1,undefined]).percentage,50)});
 test('repaso adelantado tras acierto y reiniciado tras fallo',()=>{const now=new Date('2026-10-24T12:00:00Z');const good=scheduleReview(null,true,now);assert.equal(good.level,1);assert.equal(dueReviews({reviews:{a:good}},now).length,0);const bad=scheduleReview(good,false,now);assert.equal(bad.level,0)});
@@ -110,4 +110,28 @@ test('v1.9.2: borrador de investigación compatible con backup, evidencia válid
  assert.equal(validateBackup(old).diagnosticDraft,null);
  const invalid=emptyProgress();invalid.diagnosticDraft={seed:'incorrecto',index:0,answers:{}};
  assert.throws(()=>validateBackup(invalid),/borrador diagnóstico incompatible/);
+});
+
+
+test('v1.9.4: 500 expedientes completos exportan, importan y conservan informes',()=>{
+ assert.equal(MAX_BACKUP_PAYLOAD_CHARS,12_000_000);
+ assert.equal(MAX_BACKUP_IMPORT_CHARS,16_000_000);
+ assert.equal(MAX_BACKUP_FILE_BYTES,24_000_000);
+ const p=emptyProgress();
+ const report='# Evidencia sintética; SIN captura física\n'+'Prueba ficticia y límite de interpretación.\n'.repeat(190);
+ for(let i=0;i<500;i++)p.cases.push({id:'diagnostic-control',at:'2026-10-25T06:00:00Z',
+  score:95,passed:true,used:['context','confirm','exclude'],report,
+  hypothesis:'alternative',conclusion:'cause',reasoning:'Registro de ejemplo'});
+ const json=serializeBackup(p);
+ assert(json.length>2_000_000,'El portfolio debe exceder el antiguo límite');
+ const restored=parseBackup(json);
+ assert.equal(restored.cases.length,500);
+ assert.equal(restored.cases[499].report,report.slice(0,10000));
+ assert.equal(restored.cases[0].hypothesis,'alternative');
+});
+test('v1.9.4: entradas sobredimensionadas siguen rechazadas',()=>{
+ const p=emptyProgress();
+ p.notes.general='x'.repeat(12_000_010);
+ assert.throws(()=>validateBackup(p),/límites de seguridad/);
+ assert.throws(()=>parseBackup('x'.repeat(16_000_001)),/demasiado grande/);
 });
