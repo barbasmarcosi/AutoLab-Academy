@@ -30,3 +30,20 @@ test('portafolio usa vista recortada sin mutar el respaldo local',()=>{
  assert.equal(s.events.length,500);assert.equal(p.cases.length,510);
  assert.equal(s.totals.practices,510);
 });
+
+
+test('historial diferencial conserva hipótesis y medición tras restaurar JSON',()=>{
+ const p=emptyProgress();
+ p.cases.push({id:'di-rc',score:100,at:'2026-10-25T12:00:00.000Z',
+  conclusion:'capacitance-low',hypothesis:'resistance-low',
+  used:['waveform','capacitance'],reasoning:'La onda sola no identifica el componente. Una medida independiente de C diferencia las dos explicaciones de tau.',passed:true});
+ const recovered=parseBackup(serializeBackup(p));
+ const portfolio=portfolioSnapshot(recovered,lessons);
+ assert.equal(portfolio.events[0].kind,'differential');
+ assert.equal(portfolio.events[0].title,'Misma curva RC, dos componentes distintos');
+ assert.equal(portfolio.events[0].hypothesis,'resistance-low');
+ assert.deepEqual(portfolio.events[0].evidence,['waveform','capacitance']);
+ const report=portfolioMarkdown(recovered,lessons);
+ assert.match(report,/Misma curva RC/);
+ assert.match(report,/capacitance-low/);
+});
