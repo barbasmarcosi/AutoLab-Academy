@@ -54,3 +54,24 @@ test('examen con cuota agotada muestra resultado sin afirmar persistencia',async
  await page.reload();
  expect((await stored(page)).attempts.length).toBe(1);
 });
+
+test('autoguardado fallido informa inmediatamente sin quitar foco ni reescribir texto',async({page})=>{
+ await page.goto('./');
+ await page.locator('nav.nav button[data-id="diagtransfer"]').click();
+ await page.locator('[data-action="diagtransfer-start"]').click();
+ await page.locator('#diagtransfer-initial').selectOption({index:1});
+ await page.locator('[data-action="diagtransfer-lock"]').click();
+ await injectQuota(page);
+ const field=page.locator('#diagtransfer-reason');
+ await field.fill('Explicación en curso; el sistema debe conservar la edición incluso cuando falla la escritura automática en IndexedDB.');
+ await expect(page.locator('.storage-unsaved')).toContainText('Cambios sin guardar');
+ await expect(field).toBeFocused();
+ await expect(field).toHaveValue(/Explicación en curso/);
+ await page.evaluate(()=>{window.__failWrites=false;});
+ await page.locator('[data-action="retry-save"]').click();
+ await expect(page.locator('.storage-unsaved')).toHaveCount(0);
+ await page.reload();
+ await page.locator('nav.nav button[data-id="diagtransfer"]').click();
+ await page.locator('[data-action="diagtransfer-resume"]').click();
+ await expect(page.locator('#diagtransfer-reason')).toHaveValue(/Explicación en curso/);
+});
