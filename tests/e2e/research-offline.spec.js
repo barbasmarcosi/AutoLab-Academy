@@ -55,6 +55,12 @@ test('MC01 + RW4+ + MC08 function completely offline after service-worker activa
   await page.locator('#eb-real').selectOption('no');
   await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
   await expect(page.getByText('Factibilidad adimensional nominal y ante límites adversos ±0,03')).toBeVisible();
+  await page.locator('nav.nav button[data-id="rotary-aperture"]').click();
+  await expect(page.getByRole('heading',{name:'Port Aperture Geometry Lab'})).toBeVisible();
+  await page.locator('#ra-predict').selectOption('rectangular');
+  await page.locator('#ra-physical').selectOption('no');
+  await page.getByRole('button',{name:'Congelar hipótesis y medir apertura'}).click();
+  await expect(page.getByText('Geometría plana: áreas de puertos de igual superficie máxima')).toBeVisible();
   await page.locator('nav.nav button[data-id="brakes"]').click();
   await expect(page.getByRole('heading',{name:'Brake Energy Research Lab'})).toBeVisible();
   await page.locator('#br-energy').selectOption('quadruple');

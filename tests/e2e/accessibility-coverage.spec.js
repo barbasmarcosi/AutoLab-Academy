@@ -154,3 +154,13 @@ test('WCAG 2.1 AA RW8+ robustness hypotheses, scenario edge and Pareto tables',a
  await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
  await audit(page,'RW8+ robust result and Pareto comparison');
 });
+
+test('WCAG 2.1 AA RW6+ planar port area and numerical convergence tables',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-aperture"]').click();
+ await expect(page.getByRole('heading',{name:'Port Aperture Geometry Lab'})).toBeVisible();
+ await audit(page,'RW6+ initial');
+ await page.locator('#ra-predict').selectOption('rectangular');
+ await page.locator('#ra-physical').selectOption('no');
+ await page.getByRole('button',{name:'Congelar hipótesis y medir apertura'}).click();
+ await audit(page,'RW6+ geometry and independent numerical integration');
+});

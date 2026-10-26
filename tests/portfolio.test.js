@@ -231,3 +231,10 @@ test('RW8+: worst-case Pareto research persists through schema 1 backup',()=>{
  assert.equal(snap.events[0].title,'RW8+ — Robustez y Pareto ECU');
  assert.match(portfolioMarkdown(restored,lessons),/synthetic_bounded_indices_not_probabilities/);
 });
+
+test('RW6+: 2D aperture report survives schema-1 JSON backup and portfolio title',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-aperture-v1',at:'2026-10-26T09:00:00Z',score:100,passed:true,hypothesis:'rectangular',conclusion:'2D only',used:['circular-segment-integral','midpoint-convergence'],reasoning:'La apertura parcial difiere con igual área máxima.',report:'# RW6+\nModelo: rw6-planar-port-aperture-ideal-v1\nProcedencia: analytical_2d_occlusion_geometry'});
+ const recovered=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(recovered,lessons);
+ assert.equal(snap.events[0].title,'RW6+ — Geometría y apertura de puertos');
+ assert.match(portfolioMarkdown(recovered,lessons),/analytical_2d_occlusion_geometry/);
+});

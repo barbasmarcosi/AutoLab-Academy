@@ -88,3 +88,9 @@ Dos lecciones adicionales (`rw8-robust-uncertainty` y `rw8-pareto-frontier`) y o
 - La rúbrica estructural requiere cuatro predicciones previas, dos respuestas discriminantes sobre mecanismo y conjunto de Pareto, razonamiento y límites. Solo valida respuestas objetivas y longitud de texto, no su semántica profunda.
 - Rango adversarial: los intervalos ±0,03 y barrido de techo ±0,04 son ficticios, acotados y deterministas. Una solución robusta no acredita una calibración válida ni un margen físico. En ausencia de alternativa viable se informa `failClosed=true`.
 - Conteo de primera cobertura: **87 lecciones, 250 preguntas, 16 niveles**; mantiene IndexedDB respaldo JSON esquema 1 y actualización de service worker v60. No se fusionó `main`.
+
+### RW6+ — Apertura efectiva geométrica, sin flujo físico (nuevo)
+
+`rotary-aperture.js` y `rotary-aperture-view.js` incorporan área analítica exacta de segmento circular ante un borde móvil, comparada con un rectángulo de igual área nominal. Rango de estudio: radio 10/20/30 mm ficticio y coordenada normalizada u∈{0,25;0,50;0,75}, que **NO corresponde a grados del eje ni a la trayectoria de un rotor real**. Una cuadratura independiente de punto medio ofrece estudio de convergencia (N y 2N), con tests de unidades, simetría, monotonicidad y cierre de área. Se integra con hipótesis congeladas, evaluación estructural, informe/portafolio, recuperación JSON y PWA offline v61; la CI final queda sujeta a aceptación.
+
+**No hay puertos CAD ni carcasa OEM; no se calcula área efectiva 3D, coeficientes de descarga, presión diferencial, flujo compresible, VE, potencia ni eficiencia.** La fuente contextual es un estudio de [puertos Wankel](https://pmc.ncbi.nlm.nih.gov/articles/PMC10658253/), no el origen de las dimensiones inventadas.
