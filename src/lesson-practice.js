@@ -1,0 +1,46 @@
+/**
+ * Explicit, auditable links between theory and *existing* practical engines.
+ * Never invent a lab for a lesson or infer mastery from simply reading.
+ * mode=embedded mounts the real simulator in the lesson; linked opens its
+ * existing lab, while preserving the learner's theory reading marker.
+ */
+export const LESSON_PRACTICES=Object.freeze([
+ {lessonId:'mc06-dual-fault-instrumentation',page:'powertrain',kind:'embedded',caseId:'lab-powertrain-mc06-v1',
+  title:'Investigá las tres causas de una misma RPM',prompt:'Antes de revelar la lectura, planteá una causa alternativa y anticipá qué pasaría en un tacómetro independiente y en una referencia de sensor.'},
+ {lessonId:'mc14-blackbox-identification',page:'inventor',kind:'embedded',caseId:'lab-inventor-blackbox-v1',
+  title:'Identificá un modelo con datos retenidos',prompt:'Predecí qué entrada separará los modelos indistinguibles y comprobá tu hipótesis con otra entrada que no hayas usado para elegirla.'},
+ {lessonId:'rw1-analytic-geometry-validation',page:'rotary',kind:'embedded',caseId:'lab-rotary-geometry-v1',
+  title:'Contrastá integral exacta y polígono',prompt:'Antes de aumentar la resolución, estimá si el error de aproximación debería disminuir y verificá la conservación de área sin confundir precisión numérica con validez física.'},
+ {lessonId:'rw8-factorial-coupled-design',page:'ecu-robust',kind:'embedded',caseId:'lab-ecu-robust-v1',
+  title:'Contrastá cuatro esquinas factoriales',prompt:'Formulá una predicción sobre qué perfiles pasarán todas las esquinas y luego intentá refutarla; cuatro ensayos sintéticos no son una probabilidad.'},
+ {lessonId:'mc06-gears-powertrain',page:'powertrain',kind:'linked',caseId:'lab-powertrain-mc06-v1',title:'Causas mecánicas y medición independiente',prompt:'Una sola lectura de RPM no alcanza. Contrastá pérdida mecánica con un canal sesgado.'},
+ {lessonId:'mc01-measurement-uncertainty',page:'metrology',kind:'linked',caseId:'lab-metrology-uncertainty-v1',title:'Presupuesto de incertidumbre',prompt:'Antes de medir, diferenciá variación de lecturas, resolución y sesgo de calibración común.'},
+ {lessonId:'mc08-brakes-abs',page:'brakes',kind:'linked',caseId:'lab-brake-energy-v1',title:'Energía y límites de adherencia',prompt:'Predecí cómo cambia la energía al duplicar la velocidad y explicá por qué no resulta una distancia de frenado real.'},
+ {lessonId:'rw3-energy-losses',page:'rotary-thermal',kind:'linked',caseId:'lab-rotary-thermal-v1',title:'Balance de pérdidas',prompt:'Anticipá qué ocurre al cambiar las pérdidas modeladas y distinguí balances ideales de observaciones físicas.'},
+ {lessonId:'rw5-convection-limits',page:'rotary-heat',kind:'linked',caseId:'lab-rotary-convection-v1',title:'Transferencia térmica ficticia',prompt:'Contrastá sensibilidad a parámetros térmicos sin inferir coeficientes físicos medidos.'},
+ {lessonId:'rw6-port-phase-tradeoffs',page:'rotary-ports',kind:'linked',caseId:'lab-rotary-port-burn-v1',title:'Fases de puertos y combustión conceptual',prompt:'Planteá hipótesis sobre el efecto de cambiar fases de apertura y distinguilas de caudal físico real.'},
+ {lessonId:'rw7-burn-shape-literacy',page:'rotary-ports',kind:'linked',caseId:'lab-rotary-port-burn-v1',title:'Interpretar perfiles de liberación de calor',prompt:'Anticipá un cambio de forma de combustión del modelo sin confundirlo con emisiones o knock medidos.'},
+ {lessonId:'rw6-aperture-area-study',page:'rotary-aperture',kind:'linked',caseId:'lab-rotary-aperture-v1',title:'Geometría de apertura',prompt:'Predecí la apertura de dos figuras a igual desplazamiento de máscara.'},
+ {lessonId:'rw6-inverse-area-metrology',page:'rotary-inverse',kind:'linked',caseId:'lab-rotary-aperture-inverse-v1',title:'Inversión geométrica de área',prompt:'Estudiá qué geometrías podrían producir el mismo dato y cómo discriminarlas.'},
+ {lessonId:'rw6-radius-identifiability',page:'rotary-inverse',kind:'linked',caseId:'lab-rotary-aperture-inverse-v1',title:'Identificabilidad del radio',prompt:'Proponé una medición adicional de radio antes de concluir una apertura única.'},
+ {lessonId:'rw8-robust-uncertainty',page:'ecu-robust',kind:'linked',caseId:'lab-ecu-robust-v1',title:'Robustez frente a incertidumbre',prompt:'Diferenciá factibilidad nominal, robustez de caja y perturbaciones acopladas.'},
+ {lessonId:'rw8-pareto-frontier',page:'ecu-robust',kind:'linked',caseId:'lab-ecu-robust-v1',title:'Optimización bajo restricciones',prompt:'Antes de mirar el conjunto de Pareto, compará factibilidad y preferencias.'}
+].map(x=>Object.freeze(x)));
+const byLesson=new Map(LESSON_PRACTICES.map(x=>[x.lessonId,x]));
+export function lessonPractice(lessonId){return byLesson.get(lessonId)??null;}
+export function practiceProgress(progress,lessonId){
+ const p=lessonPractice(lessonId);
+ if(!p)return {status:'unmapped',attempts:0,passed:false};
+ const cases=Array.isArray(progress?.cases)?progress.cases.filter(x=>x&&x.id===p.caseId):[];
+ return {status:cases.some(x=>x.passed===true)?'passed':cases.length?'attempted':'not-started',
+  attempts:cases.length,passed:cases.some(x=>x.passed===true)};
+}
+export function practiceCoverage(lessons){
+ const known=new Set(lessons.map(x=>x.id)),duplicate=new Set(),unknown=[];
+ for(const p of LESSON_PRACTICES){
+  if(!known.has(p.lessonId)||duplicate.has(p.lessonId))unknown.push(p.lessonId);
+  duplicate.add(p.lessonId);
+ }
+ return {total:known.size,mapped:LESSON_PRACTICES.length,embedded:LESSON_PRACTICES.filter(x=>x.kind==='embedded').length,
+  linked:LESSON_PRACTICES.filter(x=>x.kind==='linked').length,unmapped:known.size-LESSON_PRACTICES.length,invalid:unknown};
+}
