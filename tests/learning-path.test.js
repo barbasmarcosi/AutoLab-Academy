@@ -19,9 +19,10 @@ import{rotaryThermalLessons}from'../src/rotary-thermal-curriculum.js';
 import{rotaryHeatLessons}from'../src/rotary-heat-curriculum.js';
 import{rotaryPortBurnLessons}from'../src/rotary-port-burn-curriculum.js';
 import{ecuOptimizationLessons}from'../src/ecu-optimization-curriculum.js';
-const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons];
-test('85 lecturas agrupadas en dieciséis niveles con IDs completos y sin duplicaciones',()=>{
- assert.equal(all.length,85);
+import{ecuRobustLessons}from'../src/ecu-robust-curriculum.js';
+const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons];
+test('87 lecturas agrupadas en dieciséis niveles con IDs completos y sin duplicaciones',()=>{
+ assert.equal(all.length,87);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
  assert.equal(new Set(assigned).size,all.length);
@@ -71,7 +72,7 @@ test('RW2/RW3 bridge is its own stage and no foundation lesson is orphaned',()=>
 
 test('RW8 optimizer is level 16 and preserves the prior rotary-science sequence',()=>{
  const stage=learningStages.at(-1);assert.equal(stage.id,'rotary-control');assert.equal(stage.order,16);
- assert.deepEqual(stage.lessons,ecuOptimizationLessons.map(x=>x.id));
+ assert.deepEqual(stage.lessons,[...ecuOptimizationLessons,...ecuRobustLessons].map(x=>x.id));
  const p=emptyProgress();for(const s of learningStages.slice(0,-1))for(const id of s.lessons)p.notes['lesson-'+id]='2026-10-26T00:00:00Z';
  const status=evaluateLearningPath(p,all);
  assert.equal(status.nextStage,'rotary-control');

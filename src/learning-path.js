@@ -48,8 +48,8 @@ export const learningStages=[
  {id:'rotary-science',order:15,name:'Ingeniería rotativa: termodinámica',subtitle:'RW2/RW3/RW5/RW6/RW7 · Energía, puertos y combustión conceptual',
   lessons:['rw2-ideal-versus-architecture','rw3-energy-losses','rw5-convection-limits','rw6-port-phase-tradeoffs','rw7-burn-shape-literacy'],
   goal:'Distinguir ciclo termodinámico de arquitectura mecánica y exigir ensayos antes de inferir rendimiento Wankel.'},
- {id:'rotary-control',order:16,name:'Ingeniería rotativa: control y optimización',subtitle:'RW8 · Restricciones ECU, perfiles virtuales y evaluación de riesgo',
-  lessons:['rw8-controller-boundaries','rw8-constrained-experiment'],
+ {id:'rotary-control',order:16,name:'Ingeniería rotativa: control y optimización',subtitle:'RW8/RW8+ · Restricciones, incertidumbre y Pareto',
+  lessons:['rw8-controller-boundaries','rw8-constrained-experiment','rw8-robust-uncertainty','rw8-pareto-frontier'],
   goal:'Elegir estrategias solo entre alternativas factibles, documentar descartes y rechazar extrapolación a calibraciones OEM.'}
 ];
 export function evaluateLearningPath(progress,lessons){
