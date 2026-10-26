@@ -28,3 +28,28 @@ test('candump: sin marcas temporales no se inventan frecuencia ni gaps',()=>{
  assert.equal(stats.ids[0].medianGapMs,null);
  assert.equal(stats.ids[0].gapCandidate,false);
 });
+
+test('candump: timestamps extremos se omiten y no introducen Infinity/NaN en estadísticas',()=>{
+ const tooLong='9'.repeat(350);
+ const p=parseCandump(
+  '('+tooLong+') vcan0 123#00\n'+
+  '(9999999999999.001) vcan0 123#02\n'+
+  '(1720000000.000) vcan0 123#03\n'+
+  '(1720000000.020) vcan0 123#04');
+ assert.equal(p.skipped,2);
+ assert.equal(p.frames.length,2);
+ assert(p.frames.every(f=>Number.isFinite(f.time)));
+ const stats=analyzeCanFrames(p.frames);
+ assert(Number.isFinite(stats.durationSeconds));
+ assert(Math.abs(stats.durationSeconds-0.020)<0.001);
+ assert(Number.isFinite(stats.ids[0].medianGapMs));
+});
+test('candump: el analizador ignora tiempos corruptos en filas externas en vez de contaminar el rango',()=>{
+ const rows=parseCandump('can0 123#01\ncan0 123#02').frames;
+ rows[0].time=Infinity;
+ rows[1].time=NaN;
+ const stats=analyzeCanFrames(rows);
+ assert.equal(stats.durationSeconds,null);
+ assert.equal(stats.ids[0].medianGapMs,null);
+ assert.equal(stats.suspectedGaps,0);
+});
