@@ -6,6 +6,7 @@ test('RW8+ study teaches interval uncertainty and nondominance inside control le
  await expect(page.getByRole('heading',{name:'RW8+ — Incertidumbre, peor caso y factibilidad robusta'})).toBeVisible();
  await page.getByRole('button',{name:'Registrar lectura y volver'}).click();
  await expect(page.locator('article.lesson-card').filter({hasText:'RW8+ — Incertidumbre'})).toContainText('Lectura registrada');
+ await page.getByRole('button',{name:'Registrar lectura y volver'}).click();
  await page.locator('nav.nav button[data-id="path"]').click();
  await expect(page.getByText('Ingeniería rotativa: control y optimización')).toBeVisible();
 });
