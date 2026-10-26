@@ -1,5 +1,5 @@
 /**
- * Ten-stage learning itinerary. Reading and objective exams are shown separately:
+ * Fourteen-stage learning itinerary. Reading and objective exams are shown separately:
  * neither demonstrates competence on a real vehicle.
  */
 export const learningStages=[
@@ -30,9 +30,21 @@ export const learningStages=[
  {id:'integrative',order:9,name:'Taller Integrador',subtitle:'Cruzar OBD, oscilogramas, circuitos y condiciones de funcionamiento',
   lessons:['chain-of-evidence','obd-context-provenance','multichannel-crosschecks','mixture-closed-loop-inference','professional-diagnostic-report'],
   goal:'Documentar procedencia, confirmación, descarte e incertidumbres con un expediente reproducible; jamás equiparar la nota con una certificación de taller.'},
- {id:'mechanics',order:10,name:'Mecánica integral — fundamentos',subtitle:'MC00–MC14: mecánica, control, seguridad HV e investigación',
-  lessons:['mc00-risk-assessment','mc01-measurement-uncertainty','mc01-torque-preload','mc03-cycle-vs-architecture','mc02-energy-path','mc03-piston-cinematics','mc04-diesel-commonrail','mc05-cooling-lubrication','mc06-gears-powertrain','mc07-chassis-geometry','mc08-brakes-abs','mc09-hvac-loop','mc10-electronic-architecture','mc11-engine-control','mc12-hybrid-energy','mc13-diagnostic-method','mc14-research-doe'],
-  goal:'Reconocer límites de seguridad, documentar mensurandos y comparar motores sin confundir cinemática con rendimiento real.'}
+ {id:'mechanics',order:10,name:'Mecánica integral — fundamentos',subtitle:'MC00–MC01 · Seguridad de taller, física y metrología',
+  lessons:['mc00-risk-assessment','mc01-measurement-uncertainty','mc01-torque-preload'],
+  goal:'Identificar riesgos, evaluar límites de competencia y justificar mediciones e incertidumbre antes de diagnosticar.'},
+ {id:'engine-core',order:11,name:'Arquitectura y motores',subtitle:'MC02–MC05 · Tren motriz, motores, diésel, lubricación y térmica',
+  lessons:['mc02-energy-path','mc03-cycle-vs-architecture','mc03-piston-cinematics','mc04-diesel-commonrail','mc05-cooling-lubrication'],
+  goal:'Distinguir arquitecturas mecánicas, ciclos, relación de compresión y síntomas mecánicos de lecturas indirectas.'},
+ {id:'chassis-core',order:12,name:'Chasis, transmisión y seguridad',subtitle:'MC06–MC09 · Caja, dirección, ruedas, frenos y climatización',
+  lessons:['mc06-gears-powertrain','mc07-chassis-geometry','mc08-brakes-abs','mc09-hvac-loop'],
+  goal:'Interpretar tren motriz, adherencia, controles de estabilidad y climatización sin atribuirle al modelo capacidades físicas que no tiene.'},
+ {id:'control-core',order:13,name:'Control e híbridos',subtitle:'MC10–MC12 · Señales, ECUs y seguridad eléctrica',
+  lessons:['mc10-electronic-architecture','mc11-engine-control','mc12-hybrid-energy'],
+  goal:'Relacionar mediciones y control con la mecánica, conservar límites HV y contrastar arquitecturas energéticas.'},
+ {id:'research-core',order:14,name:'Diagnóstico e investigación',subtitle:'MC13–MC14 · Hipótesis, diseño experimental e invención',
+  lessons:['mc13-diagnostic-method','mc14-research-doe'],
+  goal:'Formular hipótesis alternativas, diseñar pruebas discriminantes, estimar incertidumbre y entregar evidencia reproducible.'}
 ];
 export function evaluateLearningPath(progress,lessons){
  const exists=new Set(lessons.map(l=>l.id));

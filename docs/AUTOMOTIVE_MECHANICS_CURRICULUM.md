@@ -142,3 +142,7 @@ Para experiencia física, mantener la distinción clara entre **prácticas posib
 7. Trazabilidad a referencias INET/ASE como *benchmark*, sin pretender aval oficial.
 
 **Resultado deseado:** un profesional que, al ver una señal eléctrica anómala, también se pregunte por presión, temperatura, fricción, lubricación, holguras, esfuerzos y transmisión de energía antes de culpar a una ECU.
+
+### Implementación pedagógica inicial
+
+Las 17 lecciones MC00–MC14 están agrupadas en cinco niveles progresivos (órdenes 10–14) y las preguntas se incorporan al área `motor`, con repaso FSRS. Se requiere desarrollar pruebas de desempeño aplicadas por módulo; aprobar preguntas no valida manejo de herramientas físicas o alta tensión.

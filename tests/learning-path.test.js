@@ -16,7 +16,7 @@ import{mechanicsSystemsLessons}from'../src/mechanics-systems-curriculum.js';
 import{chassisSystemsLessons}from'../src/chassis-systems-curriculum.js';
 import{engineeringBridgeLessons}from'../src/engineering-bridge-curriculum.js';
 const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons];
-test('78 lecturas agrupadas en diez niveles con IDs completos y sin duplicaciones',()=>{
+test('78 lecturas agrupadas en catorce niveles con IDs completos y sin duplicaciones',()=>{
  assert.equal(all.length,78);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
@@ -43,4 +43,14 @@ test('la nota aprobada se mide separada de lecturas y sin certificación',()=>{
  p.attempts.push({topic:'motor',percentage:84});
  const s=evaluateLearningPath(p,all);
  assert.equal(s.approvedTopics,1);assert.equal(s.read,0);
+});
+
+test('MC00–MC14 avanza en cinco niveles ordenados con toda la cobertura, sin preacreditar práctica física',()=>{
+ const ids=learningStages.slice(9).map(x=>x.id);
+ assert.deepEqual(ids,['mechanics','engine-core','chassis-core','control-core','research-core']);
+ assert.deepEqual(learningStages.map(x=>x.order),Array.from({length:14},(_,i)=>i+1));
+ assert.equal(learningStages.slice(9).reduce((n,x)=>n+x.lessons.length,0),17);
+ const p=emptyProgress();for(const stage of learningStages.slice(0,10))for(const id of stage.lessons)p.notes['lesson-'+id]='2026-10-26T00:00:00Z';
+ const s=evaluateLearningPath(p,all);
+ assert.equal(s.nextStage,'engine-core');assert.equal(s.nextLesson,'mc02-energy-path');
 });
