@@ -1,5 +1,9 @@
 # AutoLab Academy — Plan de implementación
 
+## Extensión de visión — Diagnostic Engineering + Automotive R&D (propuesta)
+
+AutoLab evoluciona también hacia la **ingeniería inversa, optimización multiobjetivo e invención de herramientas**, en paralelo con el diagnóstico basado en evidencia. El documento [ENGINEERING_MINDSET_RD_VISION.md](ENGINEERING_MINDSET_RD_VISION.md) define el perfil profesional objetivo, itinerarios, experimentos, roadmap R0–R5, criterios de aceptación, validación y límites de seguridad. **Es planificación: no son funcionalidades implementadas.** Se priorizará sin desplazar la estabilización y calidad de la PWA existente.
+
 ## Estado real al 25/10/2026
 
 - v1.9.17 (candidato en validación): saneamiento de timestamps de candump no finitos o excesivos, cálculos estadísticos finitos ante entradas externas corruptas, dos regresiones unitarias y SW v38→v39. Ver docs/CAN_INPUT_HARDENING_V1_9_17.md.
