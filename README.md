@@ -14,13 +14,15 @@ Además del diagnóstico basado en evidencias, aspiramos a formar profesionales 
 
 El laboratorio **RW0/RW1 (Rotary Geometry Explorer)** ahora tiene cinemática Wankel simplificada, animación offline, cámaras y predicciones con evidencia persistida. El primer Rotary Research Bench compara la sensibilidad geométrica A/B frente a cambios sintéticos de excentricidad, sin atribuir mejoras de rendimiento. No simula combustión ni representa volúmenes OEM. Los restantes RW2–RW10 y el currículo MC siguen en planificación. [Modelo, fuentes y limitaciones](docs/ROTARY_GEOMETRY_MODEL.md).
 
+**Incremento MC-P1 / RW-P2 inicial:** cuatro lecciones de seguridad, metrología, torque y ciclos (MC00/MC01/MC03), doce preguntas incorporadas a los exámenes y al repaso. RW4 ofrece diagnóstico diferencial sintético entre pérdidas de estanqueidad e ignición, con semillas reproducibles, predicción de dos pruebas, incertidumbre e informe en portafolio. No corresponde a mediciones reales de compresión o calibraciones OEM.
+
 ## Qué está implementado
 
 - **Transferencia diagnóstica:** cinco familias con causas y síntomas alternativos: ECU/CKP, presión/MAF, CKP/CMP, CAN terminación/saturación y HEV auxiliar/interlock virtual. Exige hipótesis previa, prueba confirmatoria, descarte, contexto, pronóstico y límites; 20 combinaciones de casos ficticios reproducibles.
 - **Transferencia entre problemas:** cinco pares parametrizados con solución guiada seguida de una situación distinta (ley de Ohm inversa, PWM, CKP, carga CAN y SOC). Los resultados de la segunda situación se registran independientemente y se exportan; no demuestran generalización profesional.
 - **Errores por pregunta y reentrenamiento:** a partir de v1.7 cada nuevo examen guarda opción elegida, corrección y confianza; detecta últimas respuestas incorrectas, errores repetidos y exceso de confianza, permite repasar preguntas falladas y exportar evidencia. Nunca reconstruye artificialmente exámenes antiguos.
 - **Plan de estudio personalizable y local:** detecta repaso FSRS vencido, últimos exámenes por área, prácticas ficticias pendientes y lecciones no leídas. Permite sesiones de 15/30/45 minutos, acceso a la actividad y exportación Markdown; no inventa dominio o califica texto libre.
-- Academia con 61 lecciones, 150 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
+- Academia con 65 lecciones, 162 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
 - Itinerario de nueve niveles (fundamentos, diagnóstico aplicado y ECUs), progreso de lectura y evaluación separados, con siguiente lección recomendada.
 - **Taller Integrador:** tres expedientes multifuente (OBD, oscilogramas, circuitos y contexto) con hipótesis inicial, confirmación y descarte, incertidumbres, cadena auditada de evidencias e informes completos persistidos en backup/Portafolio. Solo datos sintéticos.
 - **Balance de cilindros:** 4 investigaciones de monitor P030x sintético: bobina primaria sin corriente, inyector abierto, compresión comparativa baja y aporte irregular por mezcla. Requiere comparar regímenes y obtener medición confirmatoria más prueba de contraste, sin algoritmos OEM.

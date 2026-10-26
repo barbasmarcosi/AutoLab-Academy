@@ -57,3 +57,12 @@ test('WCAG 2.1 A/AA Rotary Geometry Explorer y laboratorio A/B',async({page})=>{
  await expect(page.getByRole('heading',{name:'Rotary Geometry Explorer'})).toBeVisible();
  await audit(page,'RW0/RW1 experimental, diagramas SVG y formularios de predicción');
 });
+
+test('WCAG 2.1 AA RW4 differential investigation',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-seals"]').click();
+ await expect(page.getByRole('heading',{name:'Rotary Diagnostic Research'})).toBeVisible();
+ await audit(page,'RW4 research');
+ await page.getByRole('button',{name:'Crear caso reproducible'}).click();
+ await page.locator('#rw4-initial').selectOption('sealing');await page.getByRole('button',{name:'Congelar hipótesis inicial'}).click();
+ await audit(page,'RW4 probes and hypothesis');
+});

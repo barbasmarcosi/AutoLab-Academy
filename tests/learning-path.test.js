@@ -11,9 +11,10 @@ import{fuelLessons}from'../src/fuel-curriculum.js';
 import{misfireLessons}from'../src/misfire-curriculum.js';
 import{integrativeLessons}from'../src/integrative-curriculum.js';
 import{emptyProgress}from'../src/core.js';
-const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons];
-test('61 lecturas agrupadas en nueve niveles con IDs completos y sin duplicaciones',()=>{
- assert.equal(all.length,61);
+import{mechanicsLessons}from'../src/mechanics-curriculum.js';
+const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons];
+test('65 lecturas agrupadas en diez niveles con IDs completos y sin duplicaciones',()=>{
+ assert.equal(all.length,65);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
  assert.equal(new Set(assigned).size,all.length);

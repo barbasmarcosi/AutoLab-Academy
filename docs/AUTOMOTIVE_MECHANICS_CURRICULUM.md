@@ -1,6 +1,6 @@
 # Automotive Mechanics Core — formación mecánica integral
 
-> **Estado:** propuesta de currículo transversal; no son lecciones ni simuladores implementados.
+> **Estado:** primer incremento MC00/MC01/MC03 disponible como cuatro lecciones y doce preguntas; MC02 y MC04–MC14 continúan planificados. No hay certificación de taller.
 > **Articula con:** [ENGINEERING_MINDSET_RD_VISION.md](ENGINEERING_MINDSET_RD_VISION.md) y [ROTARY_ENGINEERING_LAB.md](ROTARY_ENGINEERING_LAB.md).
 > **Objetivo:** que AutoLab no produzca únicamente usuarios de escáneres o programadores de ECUs, sino profesionales que entiendan el **vehículo completo** y puedan diagnosticar, intervenir con criterio, investigar y diseñar soluciones.
 
