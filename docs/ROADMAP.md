@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.13 (candidato en validación): dependencias transitivas bloqueadas en package-lock v3 (Node 22); CI npm ci reproduce el árbol sin nuevas resoluciones, verificación del lockfile y SW v34→v35. Workflow temporal para generar el lock eliminado. Ver docs/REPRODUCIBLE_BUILD_V1_9_13.md.
+
+
 - v1.9.12 (candidato en validación): exige predecir correctamente resultados tanto de confirmación como de descarte para acreditar los 5 puntos discriminantes; revisión formativa explica los aciertos parciales sin afirmar comprensión textual. Regresión de 100 semillas × 5 familias × 2 errores y SW upgrade v33→v34. Ver docs/DIAGNOSTIC_PREDICTION_INTEGRITY_V1_9_12.md.
 
 

@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Validate PyBaMM companion syntax
         run: python3 -m py_compile tools/pybamm_export.py
       - name: Unit tests and static checks
