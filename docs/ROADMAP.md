@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.14 (candidato en validación): auditoría global de IDs/temas/validador de 13 catálogos de escenarios, reusa verificadores de ECU, multifallas, inyección, misfire, diferenciales e integrador; gate en npm build, regression SW v35→v36. Ver docs/SCENARIO_AUDIT_V1_9_14.md.
+
+
 - v1.9.13 (candidato en validación): dependencias transitivas bloqueadas en package-lock v3 (Node 22); CI npm ci reproduce el árbol sin nuevas resoluciones, verificación del lockfile y SW v34→v35. Workflow temporal para generar el lock eliminado. Ver docs/REPRODUCIBLE_BUILD_V1_9_13.md.
 
 
