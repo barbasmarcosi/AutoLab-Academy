@@ -210,3 +210,10 @@ test('RW5: convection evidence survives JSON export and portfolio recovery',()=>
  assert.equal(s.events[0].title,'RW5 — Sensibilidad de transferencia térmica');
  assert.match(portfolioMarkdown(recovered,lessons),/derived_from_lumped_heat_transfer/);
 });
+
+test('RW6/RW7: reports survive JSON backup round-trip and portfolio metadata',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-port-burn-v1',at:'2026-10-26T07:00:00Z',score:100,passed:true,hypothesis:'aumenta / disminuye',conclusion:'Ventanas ficticias y Wiebe',used:['cyclic-port-window','normalized-wiebe-shape'],reasoning:'Grados de apertura no determinan rendimiento ni emisiones.',report:'# RW6/RW7\nModelo: rw6-rw7-disconnected-conceptual-v1\nProcedencia: synthetic_ports_and_assumed_heat_release'});
+ const restored=parseBackup(serializeBackup(p));const snapshot=portfolioSnapshot(restored,lessons);
+ assert.equal(snapshot.events[0].title,'RW6/RW7 — Puertos y combustión conceptual');
+ assert.match(portfolioMarkdown(restored,lessons),/synthetic_ports_and_assumed_heat_release/);
+});

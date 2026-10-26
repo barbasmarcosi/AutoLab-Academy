@@ -119,3 +119,16 @@ test('WCAG 2.1 AA RW5 heat-transfer physics, predictions and result',async({page
  await page.getByRole('button',{name:'Congelar hipótesis y revelar'}).click();
  await audit(page,'RW5 heat-transfer result');
 });
+
+test('WCAG 2.1 AA RW6/RW7 port timing and fictional burn result',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-ports"]').click();
+ await expect(page.getByRole('heading',{name:'Rotary Ports & Combustion Lab'})).toBeVisible();
+ await audit(page,'RW6/RW7 initial hypotheses');
+ await page.locator('#rp-port').selectOption('advance');
+ await page.locator('#rp-port-pred').selectOption('aumenta');
+ await page.locator('#rp-burn').selectOption('later');
+ await page.locator('#rp-burn-pred').selectOption('disminuye');
+ await page.locator('#rp-real').selectOption('no');
+ await page.getByRole('button',{name:'Congelar tres hipótesis y contrastar'}).click();
+ await audit(page,'RW6/RW7 result tables and chart');
+});

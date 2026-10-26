@@ -34,6 +34,13 @@ test('MC01 + RW4+ + MC08 function completely offline after service-worker activa
   await page.locator('#rh-real').selectOption('no');
   await page.getByRole('button',{name:'Congelar hipótesis y revelar'}).click();
   await expect(page.getByText('Convección ideal uniforme: valores sintéticos y dimensionalmente consistentes')).toBeVisible();
+  await page.locator('nav.nav button[data-id="rotary-ports"]').click();
+  await expect(page.getByRole('heading',{name:'Rotary Ports & Combustion Lab'})).toBeVisible();
+  await page.locator('#rp-port-pred').selectOption('disminuye');
+  await page.locator('#rp-burn-pred').selectOption('disminuye');
+  await page.locator('#rp-real').selectOption('no');
+  await page.getByRole('button',{name:'Congelar tres hipótesis y contrastar'}).click();
+  await expect(page.getByText('Calendario sintético de puertos, sin máscaras geométricas ni caudal')).toBeVisible();
   await page.locator('nav.nav button[data-id="brakes"]').click();
   await expect(page.getByRole('heading',{name:'Brake Energy Research Lab'})).toBeVisible();
   await page.locator('#br-energy').selectOption('quadruple');
