@@ -37,7 +37,7 @@ export const learningStages=[
   lessons:['mc02-energy-path','mc03-cycle-vs-architecture','mc03-piston-cinematics','mc04-diesel-commonrail','mc05-cooling-lubrication'],
   goal:'Distinguir arquitecturas mecánicas, ciclos, relación de compresión y síntomas mecánicos de lecturas indirectas.'},
  {id:'chassis-core',order:12,name:'Chasis, transmisión y seguridad',subtitle:'MC06–MC09 · Caja, dirección, ruedas, frenos y climatización',
-  lessons:['mc06-gears-powertrain','mc07-chassis-geometry','mc08-brakes-abs','mc09-hvac-loop'],
+  lessons:['mc06-gears-powertrain','mc06-dual-fault-instrumentation','mc07-chassis-geometry','mc08-brakes-abs','mc09-hvac-loop'],
   goal:'Interpretar tren motriz, adherencia, controles de estabilidad y climatización sin atribuirle al modelo capacidades físicas que no tiene.'},
  {id:'control-core',order:13,name:'Control e híbridos',subtitle:'MC10–MC12 · Señales, ECUs y seguridad eléctrica',
   lessons:['mc10-electronic-architecture','mc11-engine-control','mc12-hybrid-energy'],

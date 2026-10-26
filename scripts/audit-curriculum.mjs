@@ -16,6 +16,7 @@ import{engineeringBridgeLessons as l12,engineeringBridgeQuestions as q12}from'..
 import{rotaryThermalLessons as l13,rotaryThermalQuestions as q13}from'../src/rotary-thermal-curriculum.js';
 import{rotaryGeometryLessons as l20,rotaryGeometryQuestions as q20}from'../src/rotary-geometry-curriculum.js';
 import{inventorLessons as l21,inventorQuestions as q21}from'../src/inventor-curriculum.js';
+import{powertrainLessons as l22,powertrainQuestions as q22}from'../src/powertrain-curriculum.js';
 import{rotaryHeatLessons as l14,rotaryHeatQuestions as q14}from'../src/rotary-heat-curriculum.js';
 import{rotaryPortBurnLessons as l15,rotaryPortBurnQuestions as q15}from'../src/rotary-port-burn-curriculum.js';
 import{ecuOptimizationLessons as l16,ecuOptimizationQuestions as q16}from'../src/ecu-optimization-curriculum.js';
@@ -23,7 +24,7 @@ import{ecuRobustLessons as l17,ecuRobustQuestions as q17}from'../src/ecu-robust-
 import{rotaryApertureLessons as l18,rotaryApertureQuestions as q18}from'../src/rotary-aperture-curriculum.js';
 import{rotaryInverseLessons as l19,rotaryInverseQuestions as q19}from'../src/rotary-aperture-inverse-curriculum.js';
 import{auditCurriculum}from'../src/curriculum-audit.js';
-const report=auditCurriculum({tracks,lessons:[...l0,...l1,...l2,...l3,...l4,...l5,...l6,...l7,...l8,...l9,...l10,...l11,...l12,...l13,...l14,...l15,...l16,...l17,...l18,...l19,...l20,...l21],questions:[...q0,...q1,...q2,...q3,...q4,...q5,...q6,...q7,...q8,...q9,...q10,...q11,...q12,...q13,...q14,...q15,...q16,...q17,...q18,...q19,...q20,...q21],cases:[...c0,...additionalCases],learningStages});
+const report=auditCurriculum({tracks,lessons:[...l0,...l1,...l2,...l3,...l4,...l5,...l6,...l7,...l8,...l9,...l10,...l11,...l12,...l13,...l14,...l15,...l16,...l17,...l18,...l19,...l20,...l21,...l22],questions:[...q0,...q1,...q2,...q3,...q4,...q5,...q6,...q7,...q8,...q9,...q10,...q11,...q12,...q13,...q14,...q15,...q16,...q17,...q18,...q19,...q20,...q21,...q22],cases:[...c0,...additionalCases],learningStages});
 console.log('Auditoría curricular estructural integral (no equivale a revisión técnica de fuentes):\n'+JSON.stringify(report.summary,null,2));
 for(const w of report.warnings)console.warn('ADVERTENCIA:',w);
 for(const e of report.errors)console.error('ERROR:',e);
