@@ -12,7 +12,7 @@ test('MC01 laboratorio reproducible guarda informe de incertidumbre y persiste',
  await page.locator('#mc-tool').selectOption('micro');
  await page.locator('#mc-prediction').selectOption(expected.conclusion);
  await page.getByRole('button',{name:'Congelar pronóstico y medir'}).click();
- await expect(page.getByText('Presupuesto de incertidumbre')).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Presupuesto de incertidumbre'})).toBeVisible();
  await expect(page.getByText('Series simuladas en mm, por repetición')).toBeVisible();
  await page.locator('#mc-decision').selectOption(expected.conclusion);
  await page.locator('#mc-reason').fill('La diferencia B menos A debe superar dos veces la incertidumbre combinada. El sesgo instrumental compartido no se suma dos veces y cancela entre series.');
