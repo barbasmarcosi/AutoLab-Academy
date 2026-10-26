@@ -4,23 +4,23 @@
 
 | Bloque | Alcance | Estado al 26/10 | Gate siguiente |
 | --- | --- | --- | --- |
-| G0 | Asegurar CI, protección de main y retrocompatibilidad | CI previa `40270981241` y `40270365868` en verde. RW2/RW3/RW5 agregados con últimas CI completas pendientes de verificación | Build, auditorías, E2E Chromium/WebKit/móvil, IndexedDB y offline |
+| G0 | Asegurar CI, protección de main y retrocompatibilidad | RW6/RW7, RW8 y RW8+ integrados: CI verificadas verdes #40274432465, #40275295198 y #40276446700 (249 E2E). Última integración RW8+ de rúbrica/currículo aún bajo CI | Build, auditorías, E2E Chromium/WebKit/móvil, IndexedDB y offline |
 | G1 / RW1 | Epitrocoide y cinemática offline, predicción y evidencia | Implementación inicial + A/B geométrico | Validación independiente del modelo y sensibilidad numérica |
 | G2 / MC-P1 | MC00 seguridad, MC01 metrología/torque y MC03 comparación de arquitecturas | MC00–MC14 cubre inicialmente 17 lecciones, 64 preguntas y cinco exámenes por nivel; MC01 metrología Tipo A/B y MC08 frenado ideal integrados, no acreditan práctica real | Nuevos casos aplicados, evaluación de medición e incertidumbre, revisión curricular experta |
 | G3 / RW4-P2 | Diferenciar falla sintética de sellado vs. encendido | Modelo de dos hipótesis con dos pruebas más RW4+ adversarial de sesgo instrumental (400 semillas), UI, respaldo, accesibilidad y E2E integrados con CI previa verde | Revisar validez técnica del diseño de pruebas y sumar ruido adversarial/instrumental |
 | G4 | MC02–MC14: automóvil completo | MC00–MC14: primer recorrido conceptual (17 lecciones, 64 preguntas), con laboratorios MC01/MC08. El tronco inicial está implementado, pero simuladores específicos por módulo, revisión técnica externa y práctica física continúan pendientes. | Lecciones, casos, simuladores necesarios y examen por módulo |
-| G5 | RW2/3/5/6/7/8: respiración, térmica, combustión, ECU y eficiencia | RW2 ciclo Otto ideal, RW3 balance ficticio y RW5 convección lumped: tres lecciones, doce preguntas y dos laboratorios. RW6/RW7: primera comparativa conceptual de ventanas de puertos (solapamiento angular exacto) y curva Wiebe supuesta independiente, con hipótesis, informe y tests (CI pendiente). RW8, CFD, portado real, combustión validada y OEM siguen pendientes | Modelos revisados, balances/limitaciones, nunca datos OEM inventados |
-| G6 | Diagnostic Engineering + ECU profiles ECO/DAILY/SPORT/DIAGNOSTIC | RW8: primer catálogo de cuatro perfiles sintéticos (ECO/DAILY/SPORT/DIAGNOSTIC) con verificación fail-closed de respuesta, calor, emisión, detonación y observabilidad. UI, portafolio, E2E/offline y CI pendientes de confirmar. Ninguna escritura ECU. | Baselines, restricciones térmicas/emisiones fail-closed y pruebas adversariales |
+| G5 | RW2/3/5/6/7/8: respiración, térmica, combustión, ECU y eficiencia | RW2 ciclo Otto ideal, RW3 balance sintético, RW5 convección lumped, RW6 solapamiento exacto de ventanas inventadas, RW7 curva Wiebe normalizada ficticia y RW8 selección de perfiles virtuales. Iniciales implementados con tests/CI verdes; CFD, puertos reales, combustión calibrada y datos OEM siguen pendientes | Modelos revisados, balances/limitaciones, nunca datos OEM inventados |
+| G6 | Diagnostic Engineering + ECU profiles ECO/DAILY/SPORT/DIAGNOSTIC | RW8 y RW8+: selección de perfiles, restricciones duras, Pareto robusto, sensibilidad térmica, casos adversariales, portafolio/offline. 249 E2E RW8+ inicial en verde; CI posterior de rúbrica y currículo pendiente | Modelos físicos calibrados, incertidumbre medida y validación experimental por expertos |
 | G7 | Herramientas/instrumentación propia y arquitectura híbrida generadora | Planificado | Prototipos simulados, licencia/software reutilizable, pruebas reproducibles |
 | G8 | Proyectos integradores y validación 10/10 interna | Pendiente | CI repetible, recuperación completa, accesibilidad, trazabilidad, seguridad, revisión científica |
 
 ## Siguiente secuencia concreta
 
-1. Cerrar CI de `rotary-science` RW2/RW3/RW5 (`npm run build`, Playwright Chromium/WebKit/móvil, offline, Axe y respaldos), corrigiendo cualquier fallo real.
-2. Ampliar RW6/RW7 con hipótesis controladas sobre admisión/escape y pérdidas, distinguiendo teoría de CFD o mapas reales de puertos.
-3. Crear investigaciones de optimización de control ECO/DAILY/SPORT/DIAGNOSTIC con restricciones explícitas y fallas cerradas, sin escritura ECU.
-4. Reforzar MC02–MC14 con casos simulados y rúbricas de evidencia más profundas; revisar fuentes y errores conceptuales.
-5. Repetir recuperación offline, regresiones y seguridad; documentar validación física/científica independiente como pendiente, no como realizada.
+1. Cerrar la CI HEAD RW8+ tras las mejoras de rúbrica y el currículo, incluyendo Chromium/WebKit/móvil, Axe, pruebas adversariales, exportación y offline.
+2. Auditar las fuentes científicas e implementar un modelo progresivo y físicamente fundamentado de apertura efectiva de puertos Wankel (área descubierta vs ángulo, condiciones de frontera y parámetros explícitos); distinguir magnitud calculada de caudal medido y NO simular flujo CFD inventado.
+3. Profundizar investigaciones RW8+ con perturbaciones correlacionadas basadas en datos trazables solo cuando existan; la versión actual usa intervalos rectangulares ficticios, no probabilidades ni garantías físicas.
+4. Integrar casos aplicados de MC02–MC14 con pruebas discriminantes, observabilidad y evaluación de evidencias, separando práctica virtual de certificación de taller.
+5. Verificar integridad de IndexedDB, recuperación offline, seguridad de importación y criterios de aceptación reproducibles; mantener pruebas físicas y revisión experta externa como entregables independientes.
 
 ## Contratos de evidencias
 
@@ -81,3 +81,10 @@ Fuentes del concepto matemático: [Pareto](https://pmc.ncbi.nlm.nih.gov/articles
 ### Formación RW8+ y evaluación discriminante
 
 Dos lecciones adicionales (`rw8-robust-uncertainty` y `rw8-pareto-frontier`) y ocho preguntas vinculan métodos de peor caso, límite nominal vs robusto y no dominancia con la investigación. Recuento inicial de AutoLab: **87 lecciones, 250 preguntas y 16 niveles**. La rúbrica RW8+ ahora requiere dos decisiones conceptuales específicas (mecanismo de fallo y frontera dentro del conjunto admisible), además de pronósticos, razonamiento y limitaciones; **no** pretende valorar semánticamente el texto libre ni validar un controlador físico.
+
+### Revisión de calidad RW8+ (26/10/2026)
+
+- CI #40276446700 en verde: **249 E2E** para la primera integración (PWA, portfolio, Axe y offline); revisiones posteriores de conceptos, lecciones y selector siguen bajo validación.
+- La rúbrica estructural requiere cuatro predicciones previas, dos respuestas discriminantes sobre mecanismo y conjunto de Pareto, razonamiento y límites. Solo valida respuestas objetivas y longitud de texto, no su semántica profunda.
+- Rango adversarial: los intervalos ±0,03 y barrido de techo ±0,04 son ficticios, acotados y deterministas. Una solución robusta no acredita una calibración válida ni un margen físico. En ausencia de alternativa viable se informa `failClosed=true`.
+- Conteo de primera cobertura: **87 lecciones, 250 preguntas, 16 niveles**; mantiene IndexedDB respaldo JSON esquema 1 y actualización de service worker v60. No se fusionó `main`.
