@@ -1,4 +1,4 @@
-import{RW8_ROBUST_SCENARIOS,robustAnalysis,thermalSensitivity,gradeRobustExercise,robustResearchReport,
+import{RW8_ROBUST_SCENARIOS,robustAnalysis,thermalSensitivity,factorialStressStudy,gradeRobustExercise,robustResearchReport,
  PARETO_REFERENCE,UNCERTAINTY_REFERENCE}from'./ecu-robust-analysis.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;'}[c]));
 const chooser=(id,label,options,current,allowBlank=true)=>'<label for="'+id+'">'+esc(label)+'</label><select class="field" id="'+id+'">'+(allowBlank?'<option value="">Seleccioná…</option>':'')+options.map(([v,l])=>'<option value="'+v+'" '+(String(v)===String(current)?'selected':'')+'>'+esc(l)+'</option>').join('')+'</select>';
@@ -14,7 +14,7 @@ export function robustResearchShell(){
 export function mountRobustResearch(root,{record}){
  if(!root||typeof record!=='function')throw Error('RW8+ exige registrador de evidencia');
  const state={scenarioId:'edge',predictedNominal:null,predictedRobust:null,predictedFrontier:null,
-  realWorldPrediction:'',criticalEvidence:'',paretoEvidence:'',reasoning:'',limits:'',result:null,grade:null,saved:false,saving:false,error:''};
+  predictedDailyCorners:null,realWorldPrediction:'',criticalEvidence:'',paretoEvidence:'',reasoning:'',limits:'',result:null,grade:null,saved:false,saving:false,error:''};
  const readPrediction=x=>x===''?null:Number(x);
  function render(){
   const s=state;
@@ -32,12 +32,13 @@ export function mountRobustResearch(root,{record}){
    html+=chooser('eb-nominal','Pronóstico: perfiles admisibles nominalmente',counts,s.predictedNominal);
    html+=chooser('eb-robust','Pronóstico: perfiles admisibles con margen adverso',counts,s.predictedRobust);
    html+=chooser('eb-frontier','Pronóstico: perfiles en la frontera de Pareto robusta',counts,s.predictedFrontier);
+   html+=chooser('eb-factorial','RW8++: ¿En cuántas de las cuatro esquinas factoriales es elegible DAILY?',counts,s.predictedDailyCorners);
    html+=chooser('eb-real','¿Se pueden trasladar directamente estos límites a una ECU real?',
     [['si','Sí, calibrar sin más ensayos'],['no','No, los índices carecen de validación física']],s.realWorldPrediction);
    html+='<button class="button" type="button" data-eb="reveal">Congelar pronósticos y comparar</button>';
   }else{
    const a=s.result;
-   html+='<p><strong>Predicción congelada:</strong> nominal '+s.predictedNominal+', robusta '+s.predictedRobust+', Pareto '+s.predictedFrontier+'; aplicabilidad real '+esc(s.realWorldPrediction)+'.</p>';
+   html+='<p><strong>Predicción congelada:</strong> nominal '+s.predictedNominal+', robusta '+s.predictedRobust+', Pareto '+s.predictedFrontier+', esquinas DAILY '+s.predictedDailyCorners+'/4; aplicabilidad real '+esc(s.realWorldPrediction)+'.</p>';
    html+='<table class="rw-table" style="width:100%"><caption>Factibilidad adimensional nominal y ante límites adversos ±0,03</caption><thead><tr><th scope="col">Perfil</th><th scope="col">Nominal</th><th scope="col">Robusto</th><th scope="col">No dominado</th></tr></thead><tbody>';
    for(const row of a.rows){
     html+='<tr><th scope="row">'+esc(row.id)+'</th><td>'+(row.nominal.feasible?'Sí':'No')+
@@ -55,6 +56,12 @@ export function mountRobustResearch(root,{record}){
      '</td><td>'+row.robustCount+'</td><td>'+row.frontierCount+'</td></tr>';
    }
    html+='</tbody></table><p>El frente de Pareto usa seis objetivos en su valor nominal, exclusivamente dentro del conjunto robustamente factible; no se considera incertidumbre de objetivos ni probabilidades.</p>';
+   const factorial=factorialStressStudy(s.scenarioId);
+   html+='<h3>RW8++ · Diseño factorial 2², perturbaciones acopladas</h3>'+
+    '<p>Dos factores abstractos toman niveles −1 y +1. Cada indicador cambia mediante una combinación lineal acotada dentro de ±0,03, con compromisos diferentes entre restricciones. Los cuatro casos son esquinas elegidas, <strong>no cuatro observaciones aleatorias ni probabilidades</strong>.</p>'+
+    '<table class="rw-table" style="width:100%"><caption>Esquinas factoriales ficticias y perfiles que superan cinco restricciones</caption><thead><tr><th scope="col">Carga abstracta</th><th scope="col">Compensación abstracta</th><th scope="col">DAILY</th><th scope="col">Perfiles compatibles</th></tr></thead><tbody>'+
+    factorial.corners.map(c=>'<tr><th scope="row">'+(c.loadFactor>0?'+1':'−1')+'</th><td>'+(c.controlFactor>0?'+1':'−1')+'</td><td>'+(c.feasibleIds.includes('DAILY')?'Cumple':'No cumple')+'</td><td>'+esc(c.feasibleIds.join(', ')||'Ninguno')+'</td></tr>').join('')+
+    '</tbody></table><p><strong>DAILY:</strong> '+factorial.dailyPassedCorners+'/4 casos; <strong>perfiles válidos en todas las esquinas:</strong> '+esc(factorial.survivorIds.join(', ')||'ninguno')+'. '+(factorial.failClosed?'Ningún candidato se acepta para todas las esquinas.':'La factibilidad se limita al modelo factorial declarado.')+'</p>';
    if(!s.grade){
     html+=chooser('eb-critical','Evidencia discriminante: ¿qué causa el resultado en este escenario?',[
       ['margin','Un único perfil conserva margen frente a los intervalos'],
@@ -79,12 +86,13 @@ export function mountRobustResearch(root,{record}){
  root.addEventListener('input',ev=>{
   const id=ev.target.id;
   if(!state.result&&id==='eb-scenario'){
-   state.scenarioId=ev.target.value;state.predictedNominal=null;state.predictedRobust=null;state.predictedFrontier=null;state.realWorldPrediction='';render();return;
+   state.scenarioId=ev.target.value;state.predictedNominal=null;state.predictedRobust=null;state.predictedFrontier=null;state.predictedDailyCorners=null;state.realWorldPrediction='';render();return;
   }
-  if(state.result&&['eb-nominal','eb-robust','eb-frontier','eb-real'].includes(id))return;
+  if(state.result&&['eb-nominal','eb-robust','eb-frontier','eb-factorial','eb-real'].includes(id))return;
   if(id==='eb-nominal')state.predictedNominal=readPrediction(ev.target.value);
   if(id==='eb-robust')state.predictedRobust=readPrediction(ev.target.value);
   if(id==='eb-frontier')state.predictedFrontier=readPrediction(ev.target.value);
+  if(id==='eb-factorial')state.predictedDailyCorners=readPrediction(ev.target.value);
   if(id==='eb-real')state.realWorldPrediction=ev.target.value;
   if(id==='eb-critical')state.criticalEvidence=ev.target.value;
   if(id==='eb-pareto')state.paretoEvidence=ev.target.value;
@@ -93,11 +101,11 @@ export function mountRobustResearch(root,{record}){
  });
  root.addEventListener('click',async ev=>{
   const act=ev.target.closest('[data-eb]')?.dataset.eb;if(!act)return;state.error='';
-  if(act==='reset'){Object.assign(state,{predictedNominal:null,predictedRobust:null,predictedFrontier:null,realWorldPrediction:'',criticalEvidence:'',paretoEvidence:'',
+  if(act==='reset'){Object.assign(state,{predictedNominal:null,predictedRobust:null,predictedFrontier:null,predictedDailyCorners:null,realWorldPrediction:'',criticalEvidence:'',paretoEvidence:'',
    reasoning:'',limits:'',result:null,grade:null,saved:false,saving:false});render();return;}
   if(act==='reveal'){
-   if([state.predictedNominal,state.predictedRobust,state.predictedFrontier].some(x=>!Number.isInteger(x))||
-    !state.realWorldPrediction){state.error='Antes de revelar, completá cuatro predicciones.';render();return;}
+   if([state.predictedNominal,state.predictedRobust,state.predictedFrontier,state.predictedDailyCorners].some(x=>!Number.isInteger(x))||
+    !state.realWorldPrediction){state.error='Antes de revelar, completá cinco predicciones.';render();return;}
    try{state.result=robustAnalysis(state.scenarioId);}catch(error){state.error='Escenario o dominio inválido.';}
    render();return;
   }

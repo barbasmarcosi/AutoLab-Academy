@@ -90,6 +90,47 @@ export function robustAnalysis(id,halfWidths=RW8_INDEX_HALF_WIDTH,thermalShift=0
   provenance:'synthetic_bounded_indices_not_probabilities',
   limitations:'Cinco semianchos ±0,03 adimensionales inventados; no son intervalos de confianza, errores calibrados ni probabilidades. Solo se aplica incertidumbre a restricciones, NO a la dominancia de objetivos. Ningún mapa ECU, señal CAN/UDS, emisiones o knock real.'};
 }
+/** RW8++ — deterministic 2^2 factorial corner design.
+ * Two coupled fictional factors, each in [-1,+1]. Coefficients of each
+ * metric sum in absolute value to 1, so every corner is contained inside
+ * the previous rectangular uncertainty enclosure. Corner frequency is
+ * a design count, NEVER probability or statistical calibration.
+ */
+export const FACTORIAL_MODEL='rw8-two-factor-corners-synthetic-v1';
+export const FACTORIAL_COUPLINGS=Object.freeze({
+ response:Object.freeze([-.6,.4]),thermalProxy:Object.freeze([.6,-.4]),
+ emissionsProxy:Object.freeze([.5,.5]),knockProxy:Object.freeze([-.5,.5]),
+ observability:Object.freeze([.5,-.5])
+});
+export function factorialStressStudy(id,halfWidths=RW8_INDEX_HALF_WIDTH){
+ const base=robustAnalysis(id,halfWidths);
+ const signs=[[-1,-1],[-1,1],[1,-1],[1,1]];
+ const corners=signs.map(([loadFactor,controlFactor])=>{
+  const rows=ECU_PROFILES.map(p=>{
+   const indices=Object.fromEntries(impactKeys.map(key=>{
+    const [a,b]=FACTORIAL_COUPLINGS[key];
+    const value=p[key]+halfWidths[key]*(a*loadFactor+b*controlFactor);
+    return [key,Math.max(0,Math.min(1,value))];
+   }));
+   const violations=[];
+   if(indices.response<base.limits.minResponse-1e-12)violations.push('response_below_min');
+   if(indices.thermalProxy>base.limits.maxThermal+1e-12)violations.push('thermal_above_max');
+   if(indices.emissionsProxy>base.limits.maxEmissions+1e-12)violations.push('emissions_above_max');
+   if(indices.knockProxy>base.limits.maxKnock+1e-12)violations.push('knock_above_max');
+   if(indices.observability<base.limits.minObservability-1e-12)violations.push('observability_below_min');
+   return {id:p.id,indices,feasible:violations.length===0,violations};
+  });
+  return {loadFactor,controlFactor,rows,feasibleIds:rows.filter(x=>x.feasible).map(x=>x.id)};
+ });
+ const feasibleCornerCounts=Object.fromEntries(ECU_PROFILES.map(p=>[p.id,corners.filter(c=>c.feasibleIds.includes(p.id)).length]));
+ const survivorIds=ECU_PROFILES.filter(p=>feasibleCornerCounts[p.id]===corners.length).map(p=>p.id);
+ return {model:FACTORIAL_MODEL,scenarioId:id,halfWidths:{...halfWidths},limits:{...base.limits},
+  factors:['carga artificial','compensación artificial'],corners,feasibleCornerCounts,
+  dailyPassedCorners:feasibleCornerCounts.DAILY,survivorIds,
+  failClosed:survivorIds.length===0,
+  provenance:'synthetic_two_factor_affine_corners_not_probabilities',
+  limitations:'Cuatro vértices deterministas de dos factores acoplados. Cada índice queda dentro del intervalo rectangular RW8+; su frecuencia 0/4 a 4/4 NO es probabilidad, tasa de fallo ni validación de una ECU. Es un experimento virtual, sin datos de sensores, mapas OEM ni causalidad física.'};
+}
 export function thermalSensitivity(id){
  return [-.04,0,.04].map(shift=>{
   const analysis=robustAnalysis(id,RW8_INDEX_HALF_WIDTH,shift);
@@ -99,13 +140,14 @@ export function thermalSensitivity(id){
  });
 }
 export function gradeRobustExercise({scenarioId,predictedNominal,predictedRobust,
- predictedFrontier,realWorldPrediction,criticalEvidence,paretoEvidence,reasoning,limits}){
- for(const prediction of [predictedNominal,predictedRobust,predictedFrontier]){
+ predictedFrontier,predictedDailyCorners,realWorldPrediction,criticalEvidence,paretoEvidence,reasoning,limits}){
+ for(const prediction of [predictedNominal,predictedRobust,predictedFrontier,predictedDailyCorners]){
   if(!Number.isInteger(prediction)||prediction<0||prediction>4)throw RangeError('Predicción de cardinalidad inválida');
  }
  if(!['no','si'].includes(realWorldPrediction))throw RangeError('Aplicabilidad sin declarar');
  const analysis=robustAnalysis(scenarioId);
- const checks={nominal:predictedNominal===analysis.nominalCount,
+ const factorial=factorialStressStudy(scenarioId);
+ const checks={factorial:predictedDailyCorners===factorial.dailyPassedCorners,nominal:predictedNominal===analysis.nominalCount,
   robust:predictedRobust===analysis.robustCount,
   pareto:predictedFrontier===analysis.frontierCount,
   real:realWorldPrediction==='no'};
@@ -113,7 +155,7 @@ export function gradeRobustExercise({scenarioId,predictedNominal,predictedRobust
  const bounds=typeof limits==='string'&&limits.trim().length>=75;
  if(!['margin','thermal','tradeoffs'].includes(criticalEvidence)||!['feasible-set','best-response','full-catalog'].includes(paretoEvidence))throw RangeError('Evidencias conceptuales obligatorias');
  const evidenceChecks={mechanism:criticalEvidence===RW8_EXPLANATORY_EVIDENCE[scenarioId],pareto:paretoEvidence===RW8_PARETO_EVIDENCE};
- const score=Object.values(checks).filter(Boolean).length*10+Object.values(evidenceChecks).filter(Boolean).length*20+(explanation?10:0)+(bounds?10:0);
+ const score=Object.values(checks).filter(Boolean).length*8+Object.values(evidenceChecks).filter(Boolean).length*20+(explanation?10:0)+(bounds?10:0);
  return {model:ROBUST_MODEL,score,passed:Object.values(checks).every(Boolean)&&Object.values(evidenceChecks).every(Boolean)&&explanation&&bounds,
   checks,evidenceChecks,provenance:analysis.provenance,
   warning:'No se evalúa el sentido de texto libre: se comprueban predicciones y extensión, nunca aptitud de calibración real.'};
@@ -121,12 +163,15 @@ export function gradeRobustExercise({scenarioId,predictedNominal,predictedRobust
 export function robustResearchReport(session,result){
  const study=robustAnalysis(session.scenarioId);
  const sensitivity=thermalSensitivity(session.scenarioId);
+ const factorial=factorialStressStudy(session.scenarioId);
  return ['# AutoLab RW8+ — Investigación robusta multiobjetivo','',
   'Modelo: '+ROBUST_MODEL,'Origen: synthetic_bounded_indices_not_probabilities',
   'Escenario: '+study.scenarioId,'Restricciones supuestas: '+JSON.stringify(study.limits),
   'Semianchos de intervalos supuestos (sin valor estadístico): '+JSON.stringify(study.halfWidths),
   'Hipótesis congeladas: nominal='+session.predictedNominal+', robusta='+session.predictedRobust+
    ', frontera='+session.predictedFrontier+', ECU real='+session.realWorldPrediction,
+  'Pronóstico RW8++: DAILY cumple '+session.predictedDailyCorners+' de 4 esquinas factoriales',
+  'Matriz de perturbaciones factoriales sintéticas: '+JSON.stringify(factorial),
   'Prueba conceptual del alumno: mecanismo='+session.criticalEvidence+'; significado de Pareto='+session.paretoEvidence,
   'Nominal: '+study.nominalIds.join(', ')+'; robusta: '+study.robustIds.join(', ')+
    '; frontera de Pareto (criterios nominales entre robustamente elegibles): '+study.frontierIds.join(', '),

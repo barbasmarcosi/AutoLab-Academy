@@ -11,7 +11,7 @@ test('RW8+ three scenarios separate nominal, robust and multiobjective Pareto',(
   assert.deepEqual([a.nominalCount,a.robustCount,a.frontierCount],expected[id]);
   assert.deepEqual(a,robustAnalysis(id));
   const input={scenarioId:id,predictedNominal:a.nominalCount,predictedRobust:a.robustCount,
-   predictedFrontier:a.frontierCount,realWorldPrediction:'no',criticalEvidence:{safe:'margin',edge:'thermal',open:'tradeoffs'}[id],paretoEvidence:'feasible-set',reasoning,limits};
+   predictedFrontier:a.frontierCount,predictedDailyCorners:{safe:4,edge:3,open:4}[id],realWorldPrediction:'no',criticalEvidence:{safe:'margin',edge:'thermal',open:'tradeoffs'}[id],paretoEvidence:'feasible-set',reasoning,limits};
   const grade=gradeRobustExercise(input);assert.equal(grade.score,100);assert.equal(grade.passed,true);
   assert.match(robustResearchReport(input,grade),/synthetic_bounded_indices_not_probabilities/);
  }
@@ -56,8 +56,9 @@ test('RW8+ fails closed for altered profiles, invalid uncertainty and answers',(
  assert.throws(()=>robustAnalysis('safe',RW8_INDEX_HALF_WIDTH,.2),RangeError);
  assert.throws(()=>robustAnalysis('invalid'),RangeError);
  const input={scenarioId:'edge',predictedNominal:1,predictedRobust:0,predictedFrontier:0,
-  realWorldPrediction:'no',criticalEvidence:'thermal',paretoEvidence:'feasible-set',reasoning,limits};
+  predictedDailyCorners:3,realWorldPrediction:'no',criticalEvidence:'thermal',paretoEvidence:'feasible-set',reasoning,limits};
  assert.equal(gradeRobustExercise({...input,predictedRobust:1}).passed,false);
+ assert.equal(gradeRobustExercise({...input,predictedDailyCorners:4}).passed,false);
  assert.equal(gradeRobustExercise({...input,realWorldPrediction:'si'}).passed,false);
  assert.equal(gradeRobustExercise({...input,reasoning:'no'}).passed,false);
  assert.equal(gradeRobustExercise({...input,criticalEvidence:'margin'}).passed,false);
