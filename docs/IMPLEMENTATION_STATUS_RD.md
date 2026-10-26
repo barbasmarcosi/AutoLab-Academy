@@ -67,3 +67,7 @@ La etapa `rotary-science` incorpora ahora `rw6-port-phase-tradeoffs` y `rw7-burn
 ### RW8 — Restricciones de optimización ECU, sin calibraciones
 
 Se incorporó un optimizador **discreto y sintético** sobre ECO/DAILY/SPORT/DIAGNOSTIC con cinco límites independientes. Si no hay perfil viable, devuelve `chosen=null` y `failClosed=true`; nunca relaja restricciones silenciosamente. Las métricas normalizadas no corresponden a torque, temperatura, emisiones, knock ni mediciones reales. El banco permite predicción previa, explicación y exportación de evidencia. Basado en la noción de control ECU y límites de calibración de [Bosch](https://www.bosch-mobility.com/en/solutions/control-units/engine-control-unit/) y [SAE 2021](https://saemobilus.sae.org/articles/engine-model-based-pre-calibration-optimization-mid-level-hierarchical-control-design-03-14-05-0039); las cifras son inventadas. Faltan modelos continuos validados, mapas físicos, datos de motor, emisiones y evaluación experta.
+
+### RW8 — formación específica de optimización
+
+`ecu-optimization-curriculum.js` aporta dos lecciones y ocho preguntas de gestión ECU, restricciones duras, factibilidad, límites y trazabilidad; crea el nivel 16 `rotary-control`, después de `rotary-science`. Recuento de primera cobertura: **85 lecciones y 242 preguntas**. Este programa desarrolla criterio técnico, no sustituye la certificación, calibración ni supervisión de un motor real.

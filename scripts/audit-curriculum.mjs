@@ -16,8 +16,9 @@ import{engineeringBridgeLessons as l12,engineeringBridgeQuestions as q12}from'..
 import{rotaryThermalLessons as l13,rotaryThermalQuestions as q13}from'../src/rotary-thermal-curriculum.js';
 import{rotaryHeatLessons as l14,rotaryHeatQuestions as q14}from'../src/rotary-heat-curriculum.js';
 import{rotaryPortBurnLessons as l15,rotaryPortBurnQuestions as q15}from'../src/rotary-port-burn-curriculum.js';
+import{ecuOptimizationLessons as l16,ecuOptimizationQuestions as q16}from'../src/ecu-optimization-curriculum.js';
 import{auditCurriculum}from'../src/curriculum-audit.js';
-const report=auditCurriculum({tracks,lessons:[...l0,...l1,...l2,...l3,...l4,...l5,...l6,...l7,...l8,...l9,...l10,...l11,...l12,...l13,...l14,...l15],questions:[...q0,...q1,...q2,...q3,...q4,...q5,...q6,...q7,...q8,...q9,...q10,...q11,...q12,...q13,...q14,...q15],cases:[...c0,...additionalCases],learningStages});
+const report=auditCurriculum({tracks,lessons:[...l0,...l1,...l2,...l3,...l4,...l5,...l6,...l7,...l8,...l9,...l10,...l11,...l12,...l13,...l14,...l15,...l16],questions:[...q0,...q1,...q2,...q3,...q4,...q5,...q6,...q7,...q8,...q9,...q10,...q11,...q12,...q13,...q14,...q15,...q16],cases:[...c0,...additionalCases],learningStages});
 console.log('Auditoría curricular estructural integral (no equivale a revisión técnica de fuentes):\n'+JSON.stringify(report.summary,null,2));
 for(const w of report.warnings)console.warn('ADVERTENCIA:',w);
 for(const e of report.errors)console.error('ERROR:',e);

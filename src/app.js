@@ -3,6 +3,7 @@ import{thermalShell,mountThermalLab}from'./rotary-thermal-view.js';
 import{heatTransferShell,mountHeatTransfer}from'./rotary-heat-view.js';
 import{portBurnShell,mountPortBurnLab}from'./rotary-port-burn-view.js';
 import{ecuOptimizationShell,mountECUOptimization}from'./ecu-optimization-view.js';
+import{ecuOptimizationLessons,ecuOptimizationQuestions}from'./ecu-optimization-curriculum.js';
 import{rotaryPortBurnLessons,rotaryPortBurnQuestions}from'./rotary-port-burn-curriculum.js';
 import{rotaryHeatLessons,rotaryHeatQuestions}from'./rotary-heat-curriculum.js';
 import{rotaryThermalLessons,rotaryThermalQuestions}from'./rotary-thermal-curriculum.js';
@@ -35,7 +36,7 @@ import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDif
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
-const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...engineeringBridgeQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions];
+const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...engineeringBridgeQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions,...ecuOptimizationQuestions];
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{multiFaultCases,evaluateMultiFault,multiFaultReport}from'./differential-lab.js';

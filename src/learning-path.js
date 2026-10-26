@@ -1,5 +1,5 @@
 /**
- * Fifteen-stage learning itinerary. Reading and objective exams are shown separately:
+ * Sixteen-stage learning itinerary. Reading and objective exams are shown separately:
  * neither demonstrates competence on a real vehicle.
  */
 export const learningStages=[
@@ -47,7 +47,10 @@ export const learningStages=[
   goal:'Formular hipótesis alternativas, diseñar pruebas discriminantes, estimar incertidumbre y entregar evidencia reproducible.'},
  {id:'rotary-science',order:15,name:'Ingeniería rotativa: termodinámica',subtitle:'RW2/RW3/RW5/RW6/RW7 · Energía, puertos y combustión conceptual',
   lessons:['rw2-ideal-versus-architecture','rw3-energy-losses','rw5-convection-limits','rw6-port-phase-tradeoffs','rw7-burn-shape-literacy'],
-  goal:'Distinguir ciclo termodinámico de arquitectura mecánica y exigir ensayos antes de inferir rendimiento Wankel.'}
+  goal:'Distinguir ciclo termodinámico de arquitectura mecánica y exigir ensayos antes de inferir rendimiento Wankel.'},
+ {id:'rotary-control',order:16,name:'Ingeniería rotativa: control y optimización',subtitle:'RW8 · Restricciones ECU, perfiles virtuales y evaluación de riesgo',
+  lessons:['rw8-controller-boundaries','rw8-constrained-experiment'],
+  goal:'Elegir estrategias solo entre alternativas factibles, documentar descartes y rechazar extrapolación a calibraciones OEM.'}
 ];
 export function evaluateLearningPath(progress,lessons){
  const exists=new Set(lessons.map(l=>l.id));
