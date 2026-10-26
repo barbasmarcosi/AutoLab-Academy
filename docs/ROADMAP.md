@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.17 (candidato en validación): saneamiento de timestamps de candump no finitos o excesivos, cálculos estadísticos finitos ante entradas externas corruptas, dos regresiones unitarias y SW v38→v39. Ver docs/CAN_INPUT_HARDENING_V1_9_17.md.
+
+
 - v1.9.16 (candidato en validación): GitHub Actions fijadas a SHA de commit, comprobación npm audit high/critical, Dependabot semanal con PR limitados y sin merge automático, tests de política CI, SW v37→v38. Ver docs/SUPPLY_CHAIN_HARDENING_V1_9_16.md.
 
 
