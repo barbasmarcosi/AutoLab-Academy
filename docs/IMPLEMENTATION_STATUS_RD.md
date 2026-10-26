@@ -98,3 +98,7 @@ Dos lecciones adicionales (`rw8-robust-uncertainty` y `rw8-pareto-frontier`) y o
 ### Formación RW6+ vinculada al cálculo geométrico
 
 La lección `rw6-aperture-area-study` agrega cuatro preguntas sobre apertura parcial, convergencia de integración, naturaleza adimensional de u y condiciones necesarias para convertir superficie en flujo. Se ubica después de RW6 en el nivel `rotary-science`, sin migraciones de progreso. Recuento de primera cobertura: **88 lecciones, 254 preguntas, 16 niveles**. [Heliyon 2023](https://pmc.ncbi.nlm.nih.gov/articles/PMC10658253/) diferencia fases de puerto, área efectiva y CFD; el ejercicio 2D de AutoLab es independiente y sintético.
+
+### RW6++ — Identificación inversa y límites de instrumento ficticio
+
+`src/rotary-aperture-inverse.js` implementa la inversa estrictamente monótona de área de segmento circular 2D mediante bisección, partiendo de un área observada sintética en mm² y un intervalo determinista ± tolerancia de área total. Recupera intervalo de avance adimensional u, sensibilidad local `d(A/Amax)/du` y contrasta el ancho de intervalos cerca del borde y del centro. Casos con sesgo instrumentado artificial mayor al margen exponen la falla de cobertura de la verdad simulada. Laboratorio separado RW6++ con predicción congelada, expediente y respaldo offline; **no constituye medición de Wankel, incertidumbre metrológica estándar ni probabilidad de cobertura**. Fuente conceptual de distinción: [BIPM/JCGM GUM](https://www.bipm.org/en/web/guest/publications/guides). CI final pendiente.

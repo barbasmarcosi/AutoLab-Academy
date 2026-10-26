@@ -61,6 +61,13 @@ test('MC01 + RW4+ + MC08 function completely offline after service-worker activa
   await page.locator('#ra-physical').selectOption('no');
   await page.getByRole('button',{name:'Congelar hipótesis y medir apertura'}).click();
   await expect(page.getByText('Geometría plana: áreas de puertos de igual superficie máxima')).toBeVisible();
+  await page.locator('nav.nav button[data-id="rotary-inverse"]').click();
+  await expect(page.getByRole('heading',{name:'Inverse Port Metrology Lab'})).toBeVisible();
+  await page.locator('#ai-cover').selectOption('no');
+  await page.locator('#ai-sense').selectOption('borde');
+  await page.locator('#ai-physical').selectOption('no');
+  await page.getByRole('button',{name:'Congelar predicciones y recuperar apertura'}).click();
+  await expect(page.getByText('Inversión de área inventada: tolerancia absoluta determinista')).toBeVisible();
   await page.locator('nav.nav button[data-id="brakes"]').click();
   await expect(page.getByRole('heading',{name:'Brake Energy Research Lab'})).toBeVisible();
   await page.locator('#br-energy').selectOption('quadruple');

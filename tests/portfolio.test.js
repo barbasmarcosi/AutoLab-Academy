@@ -238,3 +238,10 @@ test('RW6+: 2D aperture report survives schema-1 JSON backup and portfolio title
  assert.equal(snap.events[0].title,'RW6+ — Geometría y apertura de puertos');
  assert.match(portfolioMarkdown(recovered,lessons),/analytical_2d_occlusion_geometry/);
 });
+
+test('RW6++ inverse metrology evidence round-trip preserves provenance and full report',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-aperture-inverse-v1',at:'2026-10-26T15:00:00Z',score:100,passed:true,hypothesis:'no',conclusion:'Intervalo excluye verdad sintética',used:['bounded-inverse-bisection','synthetic-gauge-bias'],reasoning:'El sesgo supera a la tolerancia determinista.',report:'# RW6++\nModelo: rw6-inverse-2d-aperture-bounded-v1\nProveniencia: synthetic_deterministic_inverse_interval'});
+ const restored=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(restored,lessons);
+ assert.equal(snap.events[0].title,'RW6++ — Metrología geométrica inversa');
+ assert.match(portfolioMarkdown(restored,lessons),/synthetic_deterministic_inverse_interval/);
+});

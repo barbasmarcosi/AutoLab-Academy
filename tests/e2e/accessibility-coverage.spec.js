@@ -164,3 +164,14 @@ test('WCAG 2.1 AA RW6+ planar port area and numerical convergence tables',async(
  await page.getByRole('button',{name:'Congelar hipótesis y medir apertura'}).click();
  await audit(page,'RW6+ geometry and independent numerical integration');
 });
+
+test('WCAG 2.1 AA RW6++ inverse aperture metrology and bounded report',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-inverse"]').click();
+ await expect(page.getByRole('heading',{name:'Inverse Port Metrology Lab'})).toBeVisible();
+ await audit(page,'RW6++ prior to inverse identification');
+ await page.locator('#ai-cover').selectOption('no');
+ await page.locator('#ai-sense').selectOption('borde');
+ await page.locator('#ai-physical').selectOption('no');
+ await page.getByRole('button',{name:'Congelar predicciones y recuperar apertura'}).click();
+ await audit(page,'RW6++ inverse measurement result');
+});
