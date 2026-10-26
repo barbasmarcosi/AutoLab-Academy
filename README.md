@@ -4,7 +4,13 @@ PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y
 
 ## Visión de evolución (propuesta)
 
-Además del diagnóstico basado en evidencias, aspiramos a formar profesionales capaces de **investigar sistemas, optimizarlos y crear herramientas propias**. El plan [Diagnostic Engineering + Automotive R&D](docs/ENGINEERING_MINDSET_RD_VISION.md) define desafíos de ingeniería inversa, optimización multiobjetivo, experimentos de ECU **simulados** e invención de herramientas. **Es una visión planificada, no una funcionalidad disponible ni formación práctica acreditada.**
+Además del diagnóstico basado en evidencias, aspiramos a formar profesionales capaces de **entender la mecánica del vehículo completo, investigar sistemas, optimizarlos y crear herramientas propias**. El plan [Diagnostic Engineering + Automotive R&D](docs/ENGINEERING_MINDSET_RD_VISION.md) conecta tres ejes:
+ 
+- [**Automotive Mechanics Core**](docs/AUTOMOTIVE_MECHANICS_CURRICULUM.md): formación integral sobre motores, transmisiones, suspensión, dirección, frenos, HVAC, electricidad, electrónica e híbridos/EV.
+- [**Rotary Engineering Lab**](docs/ROTARY_ENGINEERING_LAB.md): investigación del motor Wankel, geometría, sellos, puertos, combustión, ECU, fiabilidad y optimización; comienza con un explorador geométrico offline propuesto.
+- **Diagnostic Engineering + Automotive R&D**: experimentos comparativos, ingeniería inversa, herramientas propias, perfiles de ECU **simulados** y validación reproducible.
+
+**Estos carriles son planes, no funciones de la PWA implementadas ni formación práctica acreditada.**
 
 ## Qué está implementado
 
