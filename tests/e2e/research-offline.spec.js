@@ -41,6 +41,12 @@ test('MC01 + RW4+ + MC08 function completely offline after service-worker activa
   await page.locator('#rp-real').selectOption('no');
   await page.getByRole('button',{name:'Congelar tres hipótesis y contrastar'}).click();
   await expect(page.getByText('Calendario sintético de puertos, sin máscaras geométricas ni caudal')).toBeVisible();
+  await page.locator('nav.nav button[data-id="ecu-optimization"]').click();
+  await expect(page.getByRole('heading',{name:'ECU Optimization Research Lab'})).toBeVisible();
+  await page.locator('#er-predicted').selectOption('DAILY');
+  await page.locator('#er-real').selectOption('no');
+  await page.getByRole('button',{name:'Congelar hipótesis y optimizar'}).click();
+  await expect(page.getByText('Comparativa sintética de perfiles: índices sin unidad, no límites de motor real')).toBeVisible();
   await page.locator('nav.nav button[data-id="brakes"]').click();
   await expect(page.getByRole('heading',{name:'Brake Energy Research Lab'})).toBeVisible();
   await page.locator('#br-energy').selectOption('quadruple');

@@ -132,3 +132,13 @@ test('WCAG 2.1 AA RW6/RW7 port timing and fictional burn result',async({page})=>
  await page.getByRole('button',{name:'Congelar tres hipótesis y contrastar'}).click();
  await audit(page,'RW6/RW7 result tables and chart');
 });
+
+test('WCAG 2.1 AA RW8 constrained ECU profile optimization',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="ecu-optimization"]').click();
+ await expect(page.getByRole('heading',{name:'ECU Optimization Research Lab'})).toBeVisible();
+ await audit(page,'RW8 objective and constraints');
+ await page.locator('#er-predicted').selectOption('DAILY');
+ await page.locator('#er-real').selectOption('no');
+ await page.getByRole('button',{name:'Congelar hipótesis y optimizar'}).click();
+ await audit(page,'RW8 feasibility table and reasoning');
+});

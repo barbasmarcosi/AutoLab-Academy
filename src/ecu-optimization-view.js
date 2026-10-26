@@ -62,7 +62,7 @@ export function mountECUOptimization(root,{record}){
   state.error='';
   if(action==='reset'){Object.assign(state,{predicted:'',realCalibrationPrediction:'',reasoning:'',limits:'',revealed:null,grade:null,saved:false,saving:false});render();return;}
   if(action==='reveal'){
-   if(!state.predicted||!state.realCalibrationPrediction){state.error='Primero congelá una estrategia y declarà el límite de aplicación real.';render();return;}
+   if(!state.predicted||!state.realCalibrationPrediction){state.error='Primero congelá una estrategia y declará el límite de aplicación real.';render();return;}
    try{state.revealed=evaluateECUScenario(state.scenarioId);}
    catch(error){state.error='Escenario o restricciones inválidos.';}
    render();return;

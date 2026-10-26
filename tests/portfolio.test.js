@@ -217,3 +217,10 @@ test('RW6/RW7: reports survive JSON backup round-trip and portfolio metadata',()
  assert.equal(snapshot.events[0].title,'RW6/RW7 — Puertos y combustión conceptual');
  assert.match(portfolioMarkdown(restored,lessons),/synthetic_ports_and_assumed_heat_release/);
 });
+
+test('RW8: constrained profile research survives backup and portfolio export',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-ecu-optimization-v1',at:'2026-10-26T07:00:00Z',score:100,passed:true,hypothesis:'DAILY',conclusion:'DAILY',used:['thermal-constraint','emissions-constraint','knock-constraint'],reasoning:'No ignoro riesgos aunque la respuesta parezca alta.',report:'# RW8\nModelo: rw8-constrained-synthetic-profiles-v1\nProveniencia: synthetic_discrete_constraint_catalog'});
+ const x=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(x,lessons);
+ assert.equal(snap.events[0].title,'RW8 — Optimización ECU restringida');
+ assert.match(portfolioMarkdown(x,lessons),/synthetic_discrete_constraint_catalog/);
+});
