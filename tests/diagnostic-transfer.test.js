@@ -114,3 +114,30 @@ test('entradas de instrumentos inválidas nunca inventan evidencia',()=>{
  assert.equal(g.passed,false);
  assert.equal(g.score,50);
 });
+
+test('una sola predicción discriminante correcta no alcanza el crédito ni la aprobación',()=>{
+ for(let seed=1;seed<=100;seed++){
+  for(const c of buildDiagnosticTransfer(seed).cases){
+   for(const role of ['confirm','exclude']){
+    const a=good(c);
+    const changed=c.probes.find(p=>p.role===role);
+    a.probes=a.probes.map(p=>p.id===changed.id?{...p,prediction:'hipótesis errónea'}:p);
+    const g=gradeDiagnosticTransfer(c,a);
+    assert.equal(g.predictionsMade,2,'semilla '+seed);
+    assert.equal(g.predictionsCorrect,1,'semilla '+seed);
+    assert.equal(g.predicted,false,'semilla '+seed);
+    assert.equal(g.score,95,'semilla '+seed);
+    assert.equal(g.passed,false,'semilla '+seed);
+   }
+  }
+ }
+});
+test('las dos predicciones requieren dos instrumentos independientes, sin doble crédito por repetir un ID',()=>{
+ const c=buildDiagnosticTransfer(731).cases[0],a=good(c);
+ a.probes=[...a.probes,a.probes.find(p=>c.probes.find(x=>x.id===p.id)?.role==='confirm')];
+ const g=gradeDiagnosticTransfer(c,a);
+ assert.equal(g.predictionsCorrect,2);
+ assert.equal(g.predicted,true);
+ assert.equal(g.score,100);
+ assert.equal(g.passed,true);
+});

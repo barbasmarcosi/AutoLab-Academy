@@ -802,7 +802,7 @@ function diagnosticTransferMenu(){
  '<div class="notice">Los veinte cruces posibles entre síntomas, contexto y mecanismos pertenecen a un generador pedagógico. No son capturas reales ni lógica OEM. Para concluir necesitás evidencias que confirmen y descarten alternativas, no solo elegir un DTC.</div>'+
  '<div class="grid two">'+DIAGNOSTIC_TRANSFER_CASES.map(c=>'<article class="panel"><span class="tag dim">'+esc(c.topic)+'</span>'+
  '<h3>'+esc(c.title)+'</h3><p class="muted small">Cada intento cambia el contexto y la causa dentro del emulador.</p></article>').join('')+'</div>'+
- '<div class="panel"><h3>Cómo se evalúa</h3><p>40 puntos por causa identificada, 20 por prueba confirmatoria, 15 por descarte, 10 por contexto, 5 por predicción y 10 por dos textos obligatorios. Acción insegura: 0 puntos.</p>'+
+ '<div class="panel"><h3>Cómo se evalúa</h3><p>40 puntos por causa identificada, 20 por prueba confirmatoria, 15 por descarte, 10 por contexto, 5 por ambas predicciones discriminantes correctas y 10 por dos textos obligatorios. Acción insegura: 0 puntos.</p>'+
  '<p class="muted small">Tu texto no se comprende ni califica semánticamente. Los criterios solo constatan su presencia y extensión.</p>'+
  (data.diagnosticDraft?'<div class="notice">Tenés una investigación sin terminar guardada en este dispositivo. Podés retomarla donde la dejaste.</div>'+button('Retomar investigación guardada','diagtransfer-resume','','alt'):'')+
  button('Iniciar investigación multifuente','diagtransfer-start')+'</div>';

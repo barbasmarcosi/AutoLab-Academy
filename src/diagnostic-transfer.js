@@ -126,7 +126,7 @@ export function gradeDiagnosticTransfer(caseItem,answer={}){
  const discriminating=probes.filter(x=>x.p.role==='confirm'||x.p.role==='exclude');
  const predictionsCorrect=discriminating.filter(x=>x.prediction===x.p.outcome).length;
  const predictionsMade=discriminating.filter(x=>typeof x.prediction==='string'&&x.prediction.length>0).length;
- const predicted=predictionsCorrect>0;
+ const predicted=['confirm','exclude'].every(role=>probes.some(x=>x.p.role===role&&x.prediction===x.p.outcome));
  const reasoning=String(answer.reasoning||'').trim(),limits=String(answer.limits||'').trim();
  const documented=reasoning.length>=100&&reasoning.length<=2000;
  const uncertain=limits.length>=60&&limits.length<=1200;
