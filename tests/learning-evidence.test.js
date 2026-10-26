@@ -1,0 +1,69 @@
+import test from'node:test';import assert from'node:assert/strict';
+import{lessonEvidence,learningEvidenceOverview,EVIDENCE_MODEL}from'../src/learning-evidence.js';
+import{learningStages}from'../src/learning-path.js';
+const lessonIds=learningStages.flatMap(s=>s.lessons);
+const lessons=lessonIds.map(id=>({id}));
+const progress=()=>({notes:{},cases:[],attempts:[]});
+const caseId=id=>'lab-reasoning-'+id+'-v2';
+test('94 lessons have honest, complete, independently auditable evidence coverage',()=>{
+ const summary=learningEvidenceOverview(progress(),lessons,learningStages);
+ assert.equal(summary.model,EVIDENCE_MODEL);
+ assert.equal(summary.totals.lessons,94);
+ assert.equal(summary.totals.reasoningAvailable,13);
+ assert.equal(summary.totals.embeddedAvailable,4);
+ assert.equal(summary.totals.linkedOnly,12);
+ assert.equal(summary.totals.documentedTraining,0);
+ assert.equal(summary.byStage.length,16);
+ assert.deepEqual(summary.nextTask,{lessonId:'volt-drop',kind:'reading',label:'Estudiar la teoría y sus límites'});
+ assert.equal(lessonEvidence(progress(),'hv').phase,'unassessed');
+ assert.equal(lessonEvidence(progress(),'mc06-gears-powertrain').lab.status,'related-only');
+});
+test('a generic exam, a lecture, v1 reasoning and a related lab cannot inflate per-lesson evidence',()=>{
+ const p=progress();p.notes['lesson-mc06-dual-fault-instrumentation']='2026-10-26';
+ p.attempts.push({topic:'motor',percentage:100});
+ p.cases.push({id:'lab-reasoning-mc06-dual-fault-instrumentation-v1',passed:true});
+ p.cases.push({id:'lab-powertrain-mc06-v1',passed:true});
+ const one=lessonEvidence(p,'mc06-dual-fault-instrumentation');
+ assert.equal(one.read,true);assert.equal(one.lab.passed,true);
+ assert.equal(one.reasoning.passed,false);assert.equal(one.documented,false);
+ assert.deepEqual(one.gaps,['reasoning-transfer']);
+ const linked=lessonEvidence(p,'mc06-gears-powertrain');
+ assert.equal(linked.lab.available,false);assert.equal(linked.linkedLab.status,'related-passed');
+ assert.equal(linked.documented,false);
+ p.cases.push({id:caseId('mc06-dual-fault-instrumentation'),passed:true});
+ assert.equal(lessonEvidence(p,'mc06-dual-fault-instrumentation').documented,true);
+ assert.equal(lessonEvidence(p,'mc06-gears-powertrain').documented,false);
+});
+test('path recommendation advances through reading, transfer and an actual embedded lab without conflation',()=>{
+ const p=progress();
+ p.notes['lesson-volt-drop']='2026-10-26';
+ let snapshot=learningEvidenceOverview(p,lessons,learningStages);
+ assert.deepEqual({id:snapshot.nextTask.lessonId,kind:snapshot.nextTask.kind},{id:'volt-drop',kind:'reasoning-transfer'});
+ p.cases.push({id:caseId('volt-drop'),passed:false});
+ snapshot=learningEvidenceOverview(p,lessons,learningStages);
+ assert.equal(snapshot.nextTask.label,'Revisar hipótesis y transferencia');
+ p.cases.push({id:caseId('volt-drop'),passed:true});
+ snapshot=learningEvidenceOverview(p,lessons,learningStages);
+ assert.equal(snapshot.nextTask.lessonId,'motor-data');
+ for(const id of lessonIds.slice(0,lessonIds.indexOf('mc06-dual-fault-instrumentation'))){
+  p.notes['lesson-'+id]='2026-10-26';
+  p.cases.push({id:caseId(id),passed:true});
+ }
+ p.notes['lesson-mc06-dual-fault-instrumentation']='2026-10-26';
+ snapshot=learningEvidenceOverview(p,lessons,learningStages);
+ assert.equal(snapshot.nextTask.lessonId,'mc06-dual-fault-instrumentation');
+ assert.equal(snapshot.nextTask.kind,'reasoning-transfer');
+ p.cases.push({id:caseId('mc06-dual-fault-instrumentation'),passed:true});
+ snapshot=learningEvidenceOverview(p,lessons,learningStages);
+ assert.equal(snapshot.nextTask.kind,'embedded-lab');
+ p.cases.push({id:'lab-powertrain-mc06-v1',passed:true});
+ snapshot=learningEvidenceOverview(p,lessons,learningStages);
+ assert.equal(snapshot.byLesson.get('mc06-dual-fault-instrumentation').documented,true);
+ assert.notEqual(snapshot.nextTask?.lessonId,'mc06-dual-fault-instrumentation');
+});
+test('unknown and broken stage IDs fail closed; no accidental success without assessment',()=>{
+ assert.throws(()=>learningEvidenceOverview({},[{id:'a'}],[{id:'stage',lessons:['b']}]),Error);
+ assert.throws(()=>learningEvidenceOverview({},[{id:'a'},{id:'a'}],[{id:'stage',lessons:['a','a']}]),Error);
+ const x=lessonEvidence({notes:{'lesson-hv':'2026'},cases:[{id:'other',passed:true}]},'hv');
+ assert.equal(x.read,true);assert.equal(x.documented,false);assert.equal(x.phase,'unassessed');
+});

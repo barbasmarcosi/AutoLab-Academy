@@ -1,0 +1,72 @@
+/**
+ * Auditable learning evidence. Does NOT infer competence, mastery, real-world
+ * readiness, or specific lesson success from a generic topic exam.
+ * A linked lab is context only, never completion evidence for another lesson.
+ */
+import{lessonPractice,practiceProgress}from'./lesson-practice.js';
+import{transferCase,transferProgress}from'./lesson-transfer.js';
+export const EVIDENCE_MODEL='lesson-evidence-structured-v1';
+export function lessonEvidence(progress,lessonId){
+ const read=Boolean(progress?.notes?.['lesson-'+lessonId]);
+ const practice=lessonPractice(lessonId),transfer=transferCase(lessonId);
+ const p=practiceProgress(progress,lessonId);
+ const t=transferProgress(progress,lessonId);
+ const reasoning=transfer?{available:true,status:t.status,passed:t.passed===true,attempts:t.attempts}:{
+  available:false,status:'not-offered',passed:false,attempts:0};
+ const lab=practice?.kind==='embedded'?
+  {available:true,status:p.status,passed:p.passed===true,attempts:p.attempts}:
+  {available:false,status:practice?.kind==='linked'?'related-only':'not-offered',
+   passed:false,attempts:0};
+ const linkedLab=practice?.kind==='linked'?{
+  id:practice.caseId,status:p.status,attempts:p.attempts}:null;
+ const assessed=reasoning.available||lab.available;
+ const checks=[read,...(reasoning.available?[reasoning.passed]:[]),...(lab.available?[lab.passed]:[])];
+ const documented=assessed&&checks.every(Boolean);
+ const gaps=[...(!read?['reading']:[]),
+  ...(reasoning.available&&!reasoning.passed?['reasoning-transfer']:[]),
+  ...(lab.available&&!lab.passed?['embedded-lab']:[])];
+ return {model:EVIDENCE_MODEL,lessonId,read,reasoning,lab,linkedLab,
+  assessed,documented,phase:documented?'documented-training':assessed?'in-progress':'unassessed',
+  gaps,disclaimer:'Evidencia de entrenamiento digital, no dominio técnico real ni certificación.'};
+}
+export function learningEvidenceOverview(progress,lessons,stages){
+ const known=new Map(lessons.map(x=>[x.id,x]));
+ const ordered=stages.flatMap(stage=>stage.lessons);
+ if(known.size!==lessons.length||ordered.length!==lessons.length||new Set(ordered).size!==lessons.length||
+  ordered.some(id=>!known.has(id)))throw Error('El itinerario de evidencia contiene IDs duplicados o incompletos');
+ const byLesson=new Map(ordered.map(id=>[id,lessonEvidence(progress,id)]));
+ const all=[...byLesson.values()];
+ const totals={
+  lessons:all.length,read:all.filter(x=>x.read).length,
+  reasoningAvailable:all.filter(x=>x.reasoning.available).length,
+  reasoningPassed:all.filter(x=>x.reasoning.passed).length,
+  embeddedAvailable:all.filter(x=>x.lab.available).length,
+  embeddedPassed:all.filter(x=>x.lab.passed).length,
+  linkedOnly:all.filter(x=>x.linkedLab!==null).length,
+  notAssessed:all.filter(x=>!x.assessed).length,
+  documentedTraining:all.filter(x=>x.documented).length
+ };
+ // Prioritize unfinished work in curriculum order. A linked-only lab may be
+ // suggested as an optional field, but its outcome never certifies this lesson.
+ const nextTask=ordered.reduce((found,id)=>{
+  if(found)return found;
+  const e=byLesson.get(id);
+  if(!e.read)return {lessonId:id,kind:'reading',label:'Estudiar la teoría y sus límites'};
+  if(e.reasoning.available&&!e.reasoning.passed)return {lessonId:id,kind:'reasoning-transfer',
+   label:e.reasoning.attempts?'Revisar hipótesis y transferencia':'Resolver hipótesis y transferencia'};
+  if(e.lab.available&&!e.lab.passed)return {lessonId:id,kind:'embedded-lab',
+   label:e.lab.attempts?'Repetir investigación con evidencia':'Realizar el laboratorio de esta lección'};
+  return null;
+ },null);
+ const byStage=stages.map(stage=>{
+  const events=stage.lessons.map(id=>byLesson.get(id));
+  return {id:stage.id,total:events.length,read:events.filter(x=>x.read).length,
+   reasoningAvailable:events.filter(x=>x.reasoning.available).length,
+   reasoningPassed:events.filter(x=>x.reasoning.passed).length,
+   labAvailable:events.filter(x=>x.lab.available).length,
+   labPassed:events.filter(x=>x.lab.passed).length,
+   documentedTraining:events.filter(x=>x.documented).length};
+ });
+ return {model:EVIDENCE_MODEL,totals,byLesson,byStage,nextTask,
+  limits:'La ausencia de una rúbrica en 81 lecciones no equivale ni a fracaso ni a aprobación. Tampoco se acreditan competencias físicas, seguridad HV ni razonamientos libres sin revisión humana.'};
+}
