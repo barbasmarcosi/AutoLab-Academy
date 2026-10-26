@@ -1,6 +1,6 @@
 # Automotive Mechanics Core — formación mecánica integral
 
-> **Estado:** MC00–MC09 disponibles como doce lecciones y 44 preguntas, incluyendo laboratorios MC01 y MC08. MC10–MC14 continúan planificados. La revisión experta externa y prácticas físicas no están hechas. La revisión experta externa y las prácticas físicas no están hechas. No hay certificación de taller.
+> **Estado:** MC00–MC14 cubiertos por 17 lecciones introductorias y 64 preguntas iniciales, más los laboratorios MC01 y MC08. **Esto completa cobertura inicial de ejes, no profundidad profesional ni todos los laboratorios planeados.** Faltan casos completos por módulo, revisión externa, OEM y pruebas físicas supervisadas. La revisión experta externa y las prácticas físicas no están hechas. No hay certificación de taller.
 > **Articula con:** [ENGINEERING_MINDSET_RD_VISION.md](ENGINEERING_MINDSET_RD_VISION.md) y [ROTARY_ENGINEERING_LAB.md](ROTARY_ENGINEERING_LAB.md).
 > **Objetivo:** que AutoLab no produzca únicamente usuarios de escáneres o programadores de ECUs, sino profesionales que entiendan el **vehículo completo** y puedan diagnosticar, intervenir con criterio, investigar y diseñar soluciones.
 

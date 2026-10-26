@@ -6,6 +6,7 @@ import{brakesShell,mountBrakeLab}from'./brake-view.js';
 import{mechanicsLessons,mechanicsQuestions}from'./mechanics-curriculum.js';
 import{mechanicsSystemsLessons,mechanicsSystemsQuestions}from'./mechanics-systems-curriculum.js';
 import{chassisSystemsLessons,chassisSystemsQuestions}from'./chassis-systems-curriculum.js';
+import{engineeringBridgeLessons,engineeringBridgeQuestions}from'./engineering-bridge-curriculum.js';
 import{tracks,lessons as baseLessons,questions as baseQuestions,cases as baseCases,resources}from'./content.js';
 import{additionalLessons,additionalQuestions}from'./curriculum-advanced.js';
 import{ecuLessons,ecuQuestions}from'./ecu-curriculum.js';
@@ -26,7 +27,7 @@ import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDif
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
-const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions];
+const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...engineeringBridgeQuestions];
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{multiFaultCases,evaluateMultiFault,multiFaultReport}from'./differential-lab.js';

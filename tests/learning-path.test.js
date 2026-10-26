@@ -14,9 +14,10 @@ import{emptyProgress}from'../src/core.js';
 import{mechanicsLessons}from'../src/mechanics-curriculum.js';
 import{mechanicsSystemsLessons}from'../src/mechanics-systems-curriculum.js';
 import{chassisSystemsLessons}from'../src/chassis-systems-curriculum.js';
-const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons];
-test('73 lecturas agrupadas en diez niveles con IDs completos y sin duplicaciones',()=>{
- assert.equal(all.length,73);
+import{engineeringBridgeLessons}from'../src/engineering-bridge-curriculum.js';
+const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons];
+test('78 lecturas agrupadas en diez niveles con IDs completos y sin duplicaciones',()=>{
+ assert.equal(all.length,78);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
  assert.equal(new Set(assigned).size,all.length);
