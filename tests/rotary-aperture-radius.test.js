@@ -48,7 +48,8 @@ test('RW6+++ impossible observations fail closed rather than silently saturating
 test('RW6+++ synthetic bias, scenario report and parameter validation',()=>{
  const s=radiusAmbiguityStudy();
  assert.equal(s.model,RADIUS_MODEL);
- assert.equal(s.truthCovered,false);
+ assert.equal(s.truthCovered,true); // Unknown radius can absorb a biased observation; this is not evidence of calibration.
+ assert.equal(radiusAmbiguityStudy({radiusBandFraction:.01}).truthCovered,false);
  assert.ok(s.boundedRadius.openingIntervalWidth>=s.fixed.openingIntervalWidth);
  assert.ok(s.widened.openingIntervalWidth>=s.boundedRadius.openingIntervalWidth);
  assert.match(radiusAmbiguityReport({radiusMm:20,radiusBandFraction:.05,trueOpeningFraction:.25,biasFraction:.04,toleranceFraction:.02}),/failClosed=true/);
