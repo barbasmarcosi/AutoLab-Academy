@@ -1,0 +1,22 @@
+name: Ephemeral lockfile bootstrap
+on:
+  push:
+    branches:
+      - feature/v1-9-13-deterministic-dependency-lock
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate dependency resolution
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          echo AUTOLAB_LOCK_B64_BEGIN
+          base64 -w0 package-lock.json
+          echo
+          echo AUTOLAB_LOCK_B64_END
