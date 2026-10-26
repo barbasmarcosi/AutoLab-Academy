@@ -2,6 +2,10 @@
 
 PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y electromovilidad**.
 
+## Visión de evolución (propuesta)
+
+Además del diagnóstico basado en evidencias, aspiramos a formar profesionales capaces de **investigar sistemas, optimizarlos y crear herramientas propias**. El plan [Diagnostic Engineering + Automotive R&D](docs/ENGINEERING_MINDSET_RD_VISION.md) define desafíos de ingeniería inversa, optimización multiobjetivo, experimentos de ECU **simulados** e invención de herramientas. **Es una visión planificada, no una funcionalidad disponible ni formación práctica acreditada.**
+
 ## Qué está implementado
 
 - **Transferencia diagnóstica:** cinco familias con causas y síntomas alternativos: ECU/CKP, presión/MAF, CKP/CMP, CAN terminación/saturación y HEV auxiliar/interlock virtual. Exige hipótesis previa, prueba confirmatoria, descarte, contexto, pronóstico y límites; 20 combinaciones de casos ficticios reproducibles.
