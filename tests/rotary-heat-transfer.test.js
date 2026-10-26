@@ -20,7 +20,8 @@ test('RW5 demonstrates h can reverse surface-area-only prediction',()=>{
  assert.equal(high.candidate.heatKw,12);
  assert.equal(low.direction,'disminuye');assert.equal(high.direction,'aumenta');
  assert.ok(low.areaChangePct<0&&high.areaChangePct<0);
- assert.equal(low.changePct,-100/3);assert.equal(high.changePct,100/3);
+ assert.ok(Math.abs(low.changePct+100/3)<1e-10);
+ assert.ok(Math.abs(high.changePct-100/3)<1e-10);
 });
 test('RW5 negative tests, forced uncertainty and report provenance',()=>{
  assert.throws(()=>compareConvectiveSurfaces(300),RangeError);
