@@ -189,3 +189,10 @@ test('RW4+: a biased instrument investigation survives JSON export and recovery'
  assert.deepEqual(snapshot.events[0].evidence,['zero','independent']);
  assert.match(md,/rw4-instrument-adversarial-synthetic-v1/);
 });
+
+test('MC08 ideal brakes: portfolio evidence survives backup round-trip',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-brake-energy-v1',at:'2026-10-26T05:00:00Z',score:100,passed:true,hypothesis:'quadruple',conclusion:'ideal friction model',used:['energy','mu','reaction-distance'],reasoning:'La energía es proporcional a v cuadrado.',report:'# MC08\nModelo mc08-energy-friction-ideal-v1\nProcedencia: derived_from_ideal_physics'});
+ const recovered=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(recovered,lessons);
+ assert.equal(snap.events[0].title,'MC08 — Investigación de energía de frenado');
+ assert.match(portfolioMarkdown(recovered,lessons),/derived_from_ideal_physics/);
+});

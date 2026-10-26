@@ -86,3 +86,14 @@ test('WCAG 2.1 AA RW4 instrument adversarial case',async({page})=>{
  await page.getByRole('button',{name:'Congelar hipótesis provisional'}).click();
  await audit(page,'RW4 adversarial checks');
 });
+
+test('WCAG 2.1 AA MC08 ideal braking and prediction form',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="brakes"]').click();
+ await expect(page.getByRole('heading',{name:'Brake Energy Research Lab'})).toBeVisible();
+ await audit(page,'MC08 brake initial');
+ await page.locator('#br-energy').selectOption('quadruple');
+ await page.locator('#br-distance').selectOption('quadruple');
+ await page.locator('#br-mass-effect').selectOption('same');
+ await page.getByRole('button',{name:'Congelar hipótesis y simular'}).click();
+ await audit(page,'MC08 brake physical comparison');
+});

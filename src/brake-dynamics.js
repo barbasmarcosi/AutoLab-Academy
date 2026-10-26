@@ -23,7 +23,7 @@ export function compareIdealBraking(params){
  const doubled=idealBrakeCase({...params,speedKmh:params.speedKmh*2});
  return {baseline,doubled,energyRatio:doubled.energyJ/baseline.energyJ,
   idealBrakingRatio:doubled.idealBrakingM/baseline.idealBrakingM,
-  reactionRatio:doubled.reactionM/(baseline.reactionM||1),
+  reactionRatio:baseline.reactionM===0?null:doubled.reactionM/baseline.reactionM,
   warning:'Los cocientes solo corresponden a este supuesto de aceleración uniforme y μ constante.'};
 }
 export function gradeBrakeInvestigation({params,energyPrediction,distancePrediction,massPrediction,reasoning,limitations}){

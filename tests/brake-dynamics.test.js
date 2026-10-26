@@ -30,3 +30,8 @@ test('MC08: prerequisitos, evaluación y reporte sin confundir seguridad real',(
  for(const x of [{...params,mu:0},{...params,massKg:0},{...params,speedKmh:200},{...params,reactionSeconds:Infinity}])assert.throws(()=>idealBrakeCase(x),RangeError);
  assert.throws(()=>compareIdealBraking({...params,speedKmh:120}),RangeError);
 });
+
+test('MC08 tiempo de reacción cero no genera razón numérica espuria',()=>{
+ const c=compareIdealBraking({...params,reactionSeconds:0});
+ assert.equal(c.baseline.reactionM,0);assert.equal(c.reactionRatio,null);
+});
