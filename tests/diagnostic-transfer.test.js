@@ -114,3 +114,27 @@ test('entradas de instrumentos inválidas nunca inventan evidencia',()=>{
  assert.equal(g.passed,false);
  assert.equal(g.score,50);
 });
+
+test('un solo pronóstico correcto de confirmación/descarte no habilita aprobación',()=>{
+ for(let seed=1;seed<=100;seed++)for(const c of buildDiagnosticTransfer(seed).cases){
+  for(const role of ['confirm','exclude']){
+   const a=good(c),p=c.probes.find(p=>p.role===role);
+   a.probes=a.probes.map(o=>o.id===p.id?{...o,prediction:'pronóstico erróneo'}:o);
+   const g=gradeDiagnosticTransfer(c,a);
+   assert.equal(g.predictionsMade,2);
+   assert.equal(g.predictionsCorrect,1);
+   assert.equal(g.predicted,false);
+   assert.equal(g.score,95);
+   assert.equal(g.passed,false);
+  }
+ }
+});
+test('el mismo instrumento no acredita dos predicciones',()=>{
+ const c=buildDiagnosticTransfer(731).cases[0],a=good(c);
+ a.probes.push(a.probes.find(o=>c.probes.find(p=>p.id===o.id)?.role==='confirm'));
+ const g=gradeDiagnosticTransfer(c,a);
+ assert.equal(g.predictionsCorrect,2);
+ assert.equal(g.predicted,true);
+ assert.equal(g.score,100);
+ assert.equal(g.passed,true);
+});

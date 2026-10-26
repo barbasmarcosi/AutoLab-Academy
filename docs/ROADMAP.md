@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.12 (candidato en validación): exige predecir correctamente resultados tanto de confirmación como de descarte para acreditar los 5 puntos discriminantes; revisión formativa explica los aciertos parciales sin afirmar comprensión textual. Regresión de 100 semillas × 5 familias × 2 errores y SW upgrade v33→v34. Ver docs/DIAGNOSTIC_PREDICTION_INTEGRITY_V1_9_12.md.
+
+
 - v1.9.11 (candidato en validación): auditoría CI de relaciones y estructura de todo el currículo, fuentes HTTPS, identidad y cobertura de itinerarios; calificación estricta que no concede crédito a null/'' para respuesta 0; regresión SW v32→v33. Ver docs/CURRICULUM_AUDIT_V1_9_11.md. No es auditoría semántica independiente.
 
 

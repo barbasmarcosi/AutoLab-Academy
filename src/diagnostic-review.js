@@ -34,7 +34,7 @@ export function diagnosticReview(grade){
  if(!grade.predicted)items.push({
   id:'prediction',
   label:'Practicar un pronóstico discriminante antes de medir',
-  guidance:'No hay un pronóstico correcto registrado sobre las pruebas que confirman o descartan. Antes de consultar la próxima lectura, anticipá qué esperarías con cada causa.'
+  guidance:'Faltó registrar correctamente ambos pronósticos discriminantes: el que confirma y el que descarta una causa rival. Antes de revelar cada lectura, anticipá qué esperarías con cada hipótesis.'
  });
  // Even a perfect generated score cannot validate reasoning or real practice.
  items.push({

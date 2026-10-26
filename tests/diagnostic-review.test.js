@@ -22,3 +22,5 @@ test('entrada vacía o malformada no fabrica retroalimentación',()=>{
  assert.deepEqual(diagnosticReview(null),[]);
  assert.deepEqual(diagnosticReview('bad'),[]);
 });
+
+test('si un único pronóstico es correcto, la revisión solicita ambos sin negar el acierto observado',()=>{const r=diagnosticReview({correct:true,confirm:true,exclude:true,context:true,predicted:false,predictionsCorrect:1,unsafe:false});assert(r.find(x=>x.id==='prediction').guidance.includes('ambos pronósticos'));});
