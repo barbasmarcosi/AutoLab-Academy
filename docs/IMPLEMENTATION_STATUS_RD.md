@@ -118,3 +118,5 @@ Se incorporó `src/rotary-aperture-radius.js` al banco RW6++, con cota ficticia 
 ## RW6++++ — observación independiente del radio (2026-10-26)
 
 Se incorpora `independentlyCalibratedOpening` al motor geométrico RW6: intersecta una banda inicial del radio con una segunda lectura independiente de radio y una tolerancia determinista declarada. Proyecta el conjunto factible resultante a un intervalo de apertura, conserva la propiedad de subconjunto del resultado previo y falla cerrado ante cotas contradictorias o área físicamente imposible. Nuevas pruebas unitarias de reducción de ambigüedad e inconsistencias. Es un motor reutilizable; todavía no se expone como control propio en la interfaz ni representa instrumentos calibrados reales.
+
+La interfaz RW6++ ahora permite elegir desplazamiento y tolerancia artificial de una segunda medición de radio, observa explícitamente la reducción del conjunto factible o su inconsistencia fail-closed, y conserva la evidencia en el reporte del expediente sin alterar el esquema JSON/IndexedDB.
