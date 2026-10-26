@@ -45,3 +45,20 @@ test('RW8+ requires all prior predictions before exposing the solver or saved re
  await expect(page.getByText(/Antes de revelar, completá cinco predicciones/)).toBeVisible();
  await expect(page.getByRole('button',{name:'Guardar expediente RW8+'})).toHaveCount(0);
 });
+
+test('RW8++ factorial requires its own frozen hypothesis and renders four coupled corner experiments',async({page})=>{
+ await page.goto('./');
+ await page.locator('nav.nav button[data-id="ecu-robust"]').click();
+ await page.locator('#eb-scenario').selectOption('edge');
+ await page.locator('#eb-nominal').selectOption('1');
+ await page.locator('#eb-robust').selectOption('0');
+ await page.locator('#eb-frontier').selectOption('0');
+ await page.locator('#eb-real').selectOption('no');
+ await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
+ await expect(page.getByText(/completá cinco predicciones/)).toBeVisible();
+ await page.locator('#eb-factorial').selectOption('3');
+ await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
+ await expect(page.getByRole('heading',{name:/Diseño factorial 2²/})).toBeVisible();
+ await expect(page.getByText(/DAILY: 3\/4 casos/)).toBeVisible();
+ await expect(page.locator('table caption').filter({hasText:'Esquinas factoriales ficticias'})).toBeVisible();
+});
