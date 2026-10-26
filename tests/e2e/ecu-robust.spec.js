@@ -11,6 +11,8 @@ test('RW8+ edge: nominal DAILY is rejected robustly, evidence saved after scient
  await expect(page.getByText('Factibilidad adimensional nominal y ante límites adversos ±0,03')).toBeVisible();
  await expect(page.getByText(/Sin opción robustamente admisible/)).toBeVisible();
  await expect(page.getByText('RW8+: barrido de techo térmico ±0,04 en índice ficticio')).toBeVisible();
+ await page.locator('#eb-critical').selectOption('thermal');
+ await page.locator('#eb-pareto').selectOption('feasible-set');
  await page.locator('#eb-reason').fill('DAILY satisface el límite térmico nominal, pero no supera el peor caso con incertidumbre de índice de más 0,03. La frontera de Pareto solo puede construirse con alternativas que cumplen todas las restricciones.');
  await page.locator('#eb-limits').fill('Las amplitudes y los índices son ficticios y no tienen distribución estadística ni calibración de sensores. Harían falta modelos reales y validación instrumental.');
  await page.getByRole('button',{name:'Evaluar investigación robusta'}).click();

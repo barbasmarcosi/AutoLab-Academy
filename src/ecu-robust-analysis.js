@@ -14,6 +14,8 @@ export const RW8_ROBUST_SCENARIOS=Object.freeze([
  Object.freeze({id:'edge',title:'El riesgo del límite ajustado',description:'DAILY pasa las restricciones nominales, pero deja de ser admisible si el índice térmico pudiera ser 0,03 mayor.',limits:Object.freeze({minResponse:.65,maxThermal:.50,maxEmissions:.47,maxKnock:.25,minObservability:.40})}),
  Object.freeze({id:'open',title:'Frontera multiobjetivo abierta',description:'Cuatro perfiles satisfacen un conjunto amplio de límites. Ninguno domina a los otros en todas las métricas.',limits:Object.freeze({minResponse:0,maxThermal:.95,maxEmissions:.85,maxKnock:.60,minObservability:0})})
 ]);
+export const RW8_EXPLANATORY_EVIDENCE=Object.freeze({safe:'margin',edge:'thermal',open:'tradeoffs'});
+export const RW8_PARETO_EVIDENCE='feasible-set';
 export const RW8_INDEX_HALF_WIDTH=Object.freeze({response:.03,thermalProxy:.03,emissionsProxy:.03,knockProxy:.03,observability:.03});
 const between=(v,min,max,name)=>{
  if(!Number.isFinite(v)||v<min||v>max)throw RangeError(name+' inválido');
@@ -97,7 +99,7 @@ export function thermalSensitivity(id){
  });
 }
 export function gradeRobustExercise({scenarioId,predictedNominal,predictedRobust,
- predictedFrontier,realWorldPrediction,reasoning,limits}){
+ predictedFrontier,realWorldPrediction,criticalEvidence,paretoEvidence,reasoning,limits}){
  for(const prediction of [predictedNominal,predictedRobust,predictedFrontier]){
   if(!Number.isInteger(prediction)||prediction<0||prediction>4)throw RangeError('Predicción de cardinalidad inválida');
  }
@@ -109,9 +111,11 @@ export function gradeRobustExercise({scenarioId,predictedNominal,predictedRobust
   real:realWorldPrediction==='no'};
  const explanation=typeof reasoning==='string'&&reasoning.trim().length>=100;
  const bounds=typeof limits==='string'&&limits.trim().length>=75;
- const score=Object.values(checks).filter(Boolean).length*15+(explanation?20:0)+(bounds?20:0);
- return {model:ROBUST_MODEL,score,passed:Object.values(checks).every(Boolean)&&explanation&&bounds,
-  checks,provenance:analysis.provenance,
+ if(!['margin','thermal','tradeoffs'].includes(criticalEvidence)||!['feasible-set','best-response','full-catalog'].includes(paretoEvidence))throw RangeError('Evidencias conceptuales obligatorias');
+ const evidenceChecks={mechanism:criticalEvidence===RW8_EXPLANATORY_EVIDENCE[scenarioId],pareto:paretoEvidence===RW8_PARETO_EVIDENCE};
+ const score=Object.values(checks).filter(Boolean).length*10+Object.values(evidenceChecks).filter(Boolean).length*20+(explanation?10:0)+(bounds?10:0);
+ return {model:ROBUST_MODEL,score,passed:Object.values(checks).every(Boolean)&&Object.values(evidenceChecks).every(Boolean)&&explanation&&bounds,
+  checks,evidenceChecks,provenance:analysis.provenance,
   warning:'No se evalúa el sentido de texto libre: se comprueban predicciones y extensión, nunca aptitud de calibración real.'};
 }
 export function robustResearchReport(session,result){
@@ -123,6 +127,7 @@ export function robustResearchReport(session,result){
   'Semianchos de intervalos supuestos (sin valor estadístico): '+JSON.stringify(study.halfWidths),
   'Hipótesis congeladas: nominal='+session.predictedNominal+', robusta='+session.predictedRobust+
    ', frontera='+session.predictedFrontier+', ECU real='+session.realWorldPrediction,
+  'Prueba conceptual del alumno: mecanismo='+session.criticalEvidence+'; significado de Pareto='+session.paretoEvidence,
   'Nominal: '+study.nominalIds.join(', ')+'; robusta: '+study.robustIds.join(', ')+
    '; frontera de Pareto (criterios nominales entre robustamente elegibles): '+study.frontierIds.join(', '),
   'Sensibilidad de techo térmico: '+JSON.stringify(sensitivity),

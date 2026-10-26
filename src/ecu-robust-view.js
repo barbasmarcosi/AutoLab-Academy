@@ -14,7 +14,7 @@ export function robustResearchShell(){
 export function mountRobustResearch(root,{record}){
  if(!root||typeof record!=='function')throw Error('RW8+ exige registrador de evidencia');
  const state={scenarioId:'edge',predictedNominal:null,predictedRobust:null,predictedFrontier:null,
-  realWorldPrediction:'',reasoning:'',limits:'',result:null,grade:null,saved:false,saving:false,error:''};
+  realWorldPrediction:'',criticalEvidence:'',paretoEvidence:'',reasoning:'',limits:'',result:null,grade:null,saved:false,saving:false,error:''};
  const readPrediction=x=>x===''?null:Number(x);
  function render(){
   const s=state;
@@ -56,6 +56,14 @@ export function mountRobustResearch(root,{record}){
    }
    html+='</tbody></table><p>El frente de Pareto usa seis objetivos en su valor nominal, exclusivamente dentro del conjunto robustamente factible; no se considera incertidumbre de objetivos ni probabilidades.</p>';
    if(!s.grade){
+    html+=chooser('eb-critical','Evidencia discriminante: ¿qué causa el resultado en este escenario?',[
+      ['margin','Un único perfil conserva margen frente a los intervalos'],
+      ['thermal','Una opción nominal se descarta porque el peor caso térmico rompe el límite'],
+      ['tradeoffs','Varias opciones robustas mejoran métricas distintas sin dominarse entre sí']],s.criticalEvidence);
+    html+=chooser('eb-pareto','¿Cómo se determina aquí la frontera de Pareto?',[
+      ['feasible-set','Solo entre candidatos robustamente factibles, según todos los objetivos'],
+      ['best-response','El perfil con mayor respuesta, incluso si viola límites'],
+      ['full-catalog','Todos los perfiles del catálogo, aunque no sean factibles']],s.paretoEvidence);
     html+='<label for="eb-reason">Explicá por qué la factibilidad nominal puede no resistir una desviación y qué significa no dominancia (mín. 100 caracteres)</label><textarea id="eb-reason" class="field" rows="4" maxlength="3200">'+esc(s.reasoning)+'</textarea>';
     html+='<label for="eb-limits">Limitaciones: incertidumbre real, correlaciones, fuentes y ensayos necesarios (mín. 75 caracteres)</label><textarea id="eb-limits" class="field" rows="3" maxlength="2400">'+esc(s.limits)+'</textarea>';
     html+='<button class="button" type="button" data-eb="grade">Evaluar investigación robusta</button>';
@@ -78,12 +86,14 @@ export function mountRobustResearch(root,{record}){
   if(id==='eb-robust')state.predictedRobust=readPrediction(ev.target.value);
   if(id==='eb-frontier')state.predictedFrontier=readPrediction(ev.target.value);
   if(id==='eb-real')state.realWorldPrediction=ev.target.value;
+  if(id==='eb-critical')state.criticalEvidence=ev.target.value;
+  if(id==='eb-pareto')state.paretoEvidence=ev.target.value;
   if(id==='eb-reason')state.reasoning=ev.target.value;
   if(id==='eb-limits')state.limits=ev.target.value;
  });
  root.addEventListener('click',async ev=>{
   const act=ev.target.closest('[data-eb]')?.dataset.eb;if(!act)return;state.error='';
-  if(act==='reset'){Object.assign(state,{predictedNominal:null,predictedRobust:null,predictedFrontier:null,realWorldPrediction:'',
+  if(act==='reset'){Object.assign(state,{predictedNominal:null,predictedRobust:null,predictedFrontier:null,realWorldPrediction:'',criticalEvidence:'',paretoEvidence:'',
    reasoning:'',limits:'',result:null,grade:null,saved:false,saving:false});render();return;}
   if(act==='reveal'){
    if([state.predictedNominal,state.predictedRobust,state.predictedFrontier].some(x=>!Number.isInteger(x))||
