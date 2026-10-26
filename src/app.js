@@ -736,7 +736,7 @@ function lessonView(){
  '<div class="section"></div>'+heading('LECCIÓN · '+l.topic.toUpperCase(),l.title,'Comprendé, formulá hipótesis, comprobá y justificá.')+
  '<article class="panel lesson-body"><p class="muted">Teoría: '+(data.notes['lesson-'+l.id]?'lectura registrada':'lectura pendiente')+
  '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>'+
- '. Razonamiento: '+esc(lessonReasoningStatusText(l.id))+'. Ninguno acredita competencia física.</p>'+
+ '. Razonamiento: <span id="lesson-theory-reasoning-status">'+esc(lessonReasoningStatusText(l.id))+'</span>. Ninguno acredita competencia física.</p>'+
  sections(first)+'</article>'+lessonPracticePanel(l)+
  '<article class="panel lesson-body">'+sections(last)+
  '<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+
@@ -1508,6 +1508,8 @@ if(page==='learn'&&selectedLesson){
   if(page==='learn'&&selectedLesson===lessonAtMount){
    const status=document.getElementById('lesson-reasoning-status');
    if(status)status.textContent=lessonReasoningStatusText(lessonAtMount);
+   const summary=document.getElementById('lesson-theory-reasoning-status');
+   if(summary)summary.textContent=lessonReasoningStatusText(lessonAtMount);
   }
  }});
  const practice=lessonPractice(selectedLesson);

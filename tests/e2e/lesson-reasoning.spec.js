@@ -1,0 +1,71 @@
+import{test,expect}from'@playwright/test';
+import{readFile}from'node:fs/promises';
+const explanation='Con una única observación inicial no debo adjudicar una falla a una pieza. Primero defino causas alternativas, predigo qué lectura haría diferencia y me comprometo a abandonar la hipótesis si los datos la contradicen.';
+const bounds='Todos los valores corresponden a un banco matemático ficticio, no a instrumentos calibrados ni a datos OEM; se necesitan comprobaciones supervisadas.';
+async function openLesson(page,title){
+ await page.goto('./');
+ await page.locator('nav.nav button[data-id="learn"]').click();
+ await page.locator('article.lesson-card').filter({hasText:title}).getByRole('button',{name:'Estudiar'}).click();
+}
+async function lock(page,id,value){
+ await expect(page.locator('#reasoning-'+id)).toBeVisible();
+ await page.locator('#reasoning-'+id).selectOption(String(value));
+ await page.getByRole('button',{name:'Congelar decisión y continuar'}).click();
+ await expect(page.locator('#reasoning-'+id)).toHaveCount(0);
+}
+test('MC06 lesson: freeze three logical predictions, reveal feedback and save evidence without falsely marking lab or reading',async({page})=>{
+ await openLesson(page,'MC06+ — Deslizamiento, sensor');
+ await expect(page.getByRole('heading',{name:/Desafío de razonamiento: RPM bajo/})).toBeVisible();
+ await expect(page.locator('#reasoning-measurement')).toHaveCount(0);
+ await lock(page,'hypothesis',2);
+ await expect(page.getByText('Congelado',{exact:true})).toHaveCount(1);
+ await lock(page,'measurement',1);
+ await lock(page,'falsifier',0);
+ await page.locator('#reasoning-justification').fill(explanation);
+ await page.locator('#reasoning-limitations').fill(bounds);
+ await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
+ await expect(page.getByText(/Resultado objetivo: 100\/100/)).toBeVisible();
+ await expect(page.locator('#lesson-reasoning-status')).toContainText('pendiente');
+ await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
+ await expect(page.locator('#lesson-reasoning-status')).toContainText('Razonamiento guiado aprobado');
+ await expect(page.locator('#lesson-theory-reasoning-status')).toContainText('Razonamiento guiado aprobado');
+ await expect(page.locator('#lesson-practice-status')).toContainText('no registrada');
+ await expect(page.getByText(/Teoría: lectura pendiente/)).toBeVisible();
+ await page.locator('nav.nav button[data-id="data"]').click();
+ const pending=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
+ const raw=await readFile(await(await pending).path(),'utf8');
+ const record=JSON.parse(raw).payload.cases.find(c=>c.id==='lab-reasoning-mc06-dual-fault-instrumentation-v1');
+ expect(record?.passed).toBe(true);
+ expect(record?.report).toContain('Predicción congelada');
+ expect(record?.report).toContain('sin revisión semántica');
+ await page.reload();
+ await page.locator('nav.nav button[data-id="learn"]').click();
+ await page.locator('article.lesson-card').filter({hasText:'MC06+ — Deslizamiento, sensor'}).getByRole('button',{name:'Estudiar'}).click();
+ await expect(page.locator('#lesson-reasoning-status')).toContainText('Razonamiento guiado aprobado');
+});
+test('MC14: missing and incorrect reasoning decisions remain fail-closed, retake does not erase prior evidence',async({page})=>{
+ await openLesson(page,'MC14 — Identificación de caja negra');
+ await page.getByRole('button',{name:'Congelar decisión y continuar'}).click();
+ await expect(page.getByText(/Seleccioná una hipótesis o prueba/)).toBeVisible();
+ await lock(page,'hypothesis',0);
+ await lock(page,'measurement',0);
+ await lock(page,'falsifier',2);
+ await page.locator('#reasoning-justification').fill(explanation);
+ await page.locator('#reasoning-limitations').fill(bounds);
+ await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
+ await expect(page.getByText(/Resultado objetivo: 70\/100/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
+ await expect(page.locator('#lesson-reasoning-status')).toContainText('intentado');
+ await page.getByRole('button',{name:'Reintentar con nuevas decisiones'}).click();
+ await lock(page,'hypothesis',1);
+ await lock(page,'measurement',0);
+ await lock(page,'falsifier',2);
+ await page.locator('#reasoning-justification').fill(explanation);
+ await page.locator('#reasoning-limitations').fill(bounds);
+ await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
+ await expect(page.getByText(/Resultado objetivo: 100\/100/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
+ await expect(page.locator('#lesson-reasoning-status')).toContainText('aprobado');
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText(/Razonamiento guiado — Caja negra: modelos indistinguibles/)).toHaveCount(2);
+});
