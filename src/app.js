@@ -46,7 +46,8 @@ import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSes
 import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDifferential,differentialTrace,differentialReport}from'./fault-discrimination.js';
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
 import{lessonPractice,practiceProgress,practiceCoverage}from'./lesson-practice.js';
-import{REASONING_CHALLENGES,reasoningChallenge,reasoningProgress}from'./lesson-reasoning.js';
+import{REASONING_CHALLENGES,reasoningChallenge}from'./lesson-reasoning.js';
+import{transferProgress}from'./lesson-transfer.js';
 import{mountLessonReasoning}from'./lesson-reasoning-view.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
@@ -708,8 +709,8 @@ function lessonPracticeStatusText(id){
   status.status==='not-started'?'Práctica todavía no registrada':'No hay práctica vinculada todavía';
 }
 function lessonReasoningStatusText(id){
- const r=reasoningProgress(data,id);
- return r.status==='passed'?'Razonamiento guiado aprobado':r.status==='attempted'?'Razonamiento guiado intentado':r.status==='unmapped'?'Sin ejercicio de razonamiento asociado':'Razonamiento guiado pendiente';
+ const r=transferProgress(data,id);
+ return r.status==='passed'?'Razonamiento y transferencia aprobados':r.status==='attempted'?'Transferencia todavía no aprobada':r.status==='legacy-passed'?'Ejercicio anterior aprobado; transferencia v2 pendiente':r.status==='unmapped'?'Sin ejercicio de razonamiento asociado':'Razonamiento y transferencia pendientes';
 }
 function lessonPracticePanel(l){
  const p=lessonPractice(l.id);

@@ -10,7 +10,8 @@ import{DIAGNOSTIC_TRANSFER_CASES}from'./diagnostic-transfer.js';
  * No claim that completion or scoring equals supervised qualification.
  */
 import{REASONING_CHALLENGES,reasoningCaseId}from'./lesson-reasoning.js';
-const reasoningTitles=new Map(REASONING_CHALLENGES.map(x=>[reasoningCaseId(x.id),'Razonamiento guiado — '+x.title]));
+import{transferCaseId}from'./lesson-transfer.js';
+const reasoningTitles=new Map(REASONING_CHALLENGES.flatMap(x=>[[reasoningCaseId(x.id),'Razonamiento guiado v1 — '+x.title],[transferCaseId(x.id),'Razonamiento y transferencia v2 — '+x.title]]));
 const differentialTitles=new Map([...differentialCases,...TRACE_CASES,...FUEL_CASES,...MISFIRE_CASES,...INTEGRATIVE_CASES,...TRANSFER_CASES,...DIAGNOSTIC_TRANSFER_CASES].map(c=>[c.id,c.title]));
 const sortDescending=(a,b)=>String(b.at||'').localeCompare(String(a.at||''));
 export function portfolioSnapshot(progress,lessons=[]){
