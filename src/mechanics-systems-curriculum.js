@@ -159,7 +159,7 @@ export const mechanicsSystemsQuestions=[
     "source": "https://saemobilus.sae.org/courses/fundamentals-modern-vehicle-transmissions-pd730419"
   },
   {
-    "id": "mc03-01",
+    "id": "mc03sys-01",
     "topic": "motor",
     "question": "En un motor alternativo común, la carrera S respecto del radio de manivela r es: ",
     "options": [
@@ -173,7 +173,7 @@ export const mechanicsSystemsQuestions=[
     "source": "https://www.educ.ar/recursos/50644/funcionamiento-del-motor"
   },
   {
-    "id": "mc03-02",
+    "id": "mc03sys-02",
     "topic": "motor",
     "question": "¿Qué representa la fórmula r=(Vd+Vc)/Vc?",
     "options": [
@@ -187,7 +187,7 @@ export const mechanicsSystemsQuestions=[
     "source": "https://www.educ.ar/recursos/50644/funcionamiento-del-motor"
   },
   {
-    "id": "mc03-03",
+    "id": "mc03sys-03",
     "topic": "motor",
     "question": "Una relación de compresión alta determina por sí sola la lectura de compresómetro?",
     "options": [
@@ -201,7 +201,7 @@ export const mechanicsSystemsQuestions=[
     "source": "https://www.educ.ar/recursos/50644/funcionamiento-del-motor"
   },
   {
-    "id": "mc03-04",
+    "id": "mc03sys-04",
     "topic": "motor",
     "question": "Un patrón anómalo CKP/CMP indica de forma concluyente: ",
     "options": [
