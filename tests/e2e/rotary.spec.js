@@ -5,7 +5,7 @@ test('RW1 offline geometry: predicción y evidencia tras recarga',async({page,co
  await expect(page.getByRole('heading',{name:'Rotary Geometry Explorer'})).toBeVisible();
  await expect(page.locator('#rw-diagram svg')).toBeVisible();
  await expect(page.getByText(/Modelo didáctico, no CAD validado/)).toBeVisible();
- await page.locator('#rw-angle').fill('120');
+ await page.locator('#rw-angle').evaluate(el=>{el.value='120';el.dispatchEvent(new Event('input',{bubbles:true}));});
  await expect(page.locator('#rw-deg')).toContainText('120°');
  await page.locator('#rw-reason').fill('El ángulo del eje modifica el área de la cámara, pero sin considerar holguras ni portado real; contrastaría el modelo con una medición independiente.');
  await page.locator('#rw-predicted').selectOption('aumenta');
@@ -18,6 +18,7 @@ test('RW1 offline geometry: predicción y evidencia tras recarga',async({page,co
  await page.reload();
  await page.getByRole('button',{name:'Portafolio'}).click();
  await expect(page.getByText('RW1 — Rotary Geometry Explorer')).toBeVisible();
+ await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
  await context.setOffline(true);
  await page.reload();
  await expect(page.getByRole('button',{name:'Portafolio'})).toBeVisible();

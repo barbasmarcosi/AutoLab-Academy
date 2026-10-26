@@ -1,6 +1,6 @@
 # Rotary Engineering Lab — laboratorio de motores Wankel
 
-> **Estado:** RW0/RW1 disponen de primer visor cinemático offline; RW2–RW10 continúan planificados.
+> **Estado:** RW0/RW1 disponen de primer visor cinemático offline; RW2–RW10 continúan planificados. [Contrato científico del modelo](ROTARY_GEOMETRY_MODEL.md).
 > **Vinculación:** [visión de ingeniería e I+D](ENGINEERING_MINDSET_RD_VISION.md), [formación de mecánica integral](AUTOMOTIVE_MECHANICS_CURRICULUM.md), [roadmap](ROADMAP.md).
 > **Propósito:** convertir la curiosidad por los motores rotativos en comprensión mecánica profunda, investigación reproducible, diagnóstico e invención; no en mitología de potencia.
 
