@@ -41,7 +41,7 @@ test('MC06 lesson: freeze three logical predictions, reveal feedback and save ev
  expect(record?.passed).toBe(true);
  expect(record?.report).toContain('Predicción congelada');
  expect(record?.report).toContain('Transferencia congelada');
- expect(record?.report).toContain('sin revisión semántica');
+ expect(record?.report).toContain('sin evaluación semántica');
  await page.reload();
  await page.locator('nav.nav button[data-id="learn"]').click();
  await page.locator('article.lesson-card').filter({hasText:'MC06+ — Deslizamiento, sensor'}).getByRole('button',{name:'Estudiar'}).click();

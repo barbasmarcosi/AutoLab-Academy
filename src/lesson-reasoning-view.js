@@ -43,7 +43,7 @@ export function mountLessonReasoning(root,{lessonId,record,onSaved=()=>{}}){
     '<button type="button" class="button" data-reasoning="grade">Revelar devoluciones y evaluar</button>';
   }else{
    html+='<h3>Devolución por criterio</h3>'+
-    result.stepResults.map((item,i)=>'<div class="panel"><p><strong>'+esc(scenario.steps[i].title)+': '+(item.correct?'Coincide con el modelo':'Revisar hipótesis')+'</strong></p><p>'+esc(item.feedback)+'</p></div>').join('')+
+    result.original.stepResults.map((item,i)=>'<div class="panel"><p><strong>'+esc(scenario.steps[i].title)+': '+(item.correct?'Coincide con el modelo':'Revisar hipótesis')+'</strong></p><p>'+esc(item.feedback)+'</p></div>').join('')+
     '<div class="panel"><p><strong>Transferencia: '+(result.transferCorrect?'Coincide con el modelo':'Revisar hipótesis')+'</strong></p><p>'+esc(transfer.feedback)+'</p></div>'+
     '<p><strong>Resultado estructurado con transferencia: '+result.score+'/100</strong> · '+(result.passed?'Criterios cumplidos':'Volvé a plantear el caso')+'</p>'+
     '<p class="muted">'+esc(result.warning)+'</p>'+
