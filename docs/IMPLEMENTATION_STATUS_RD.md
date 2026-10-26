@@ -40,3 +40,7 @@ Referencias conceptuales:
 El primer recorrido teórico de mecánica ahora se organiza en cinco niveles correlativos (seguridad/metrología, motores, chasis, control y R&D) dentro de los 14 niveles totales de AutoLab. Las lecturas y exámenes se contabilizan por separado; registrar una lectura no prueba destreza de taller.
 
 La cobertura formal de MC00–MC14 no significa que existan 15 simuladores de nivel profesional: los laboratorios MC01 y MC08 son modelos ideales/sintéticos iniciales y quedan pendientes estudios específicos de los demás módulos.
+
+### Exámenes por etapa MC
+
+Ahora se puede iniciar una evaluación dedicada por cualquiera de los cinco niveles MC00–MC14: 6 preguntas seleccionadas del subconjunto correcto por bloque, historial y FSRS integrados. La calificación de conocimiento no certifica destreza física ni habilita tareas HV.

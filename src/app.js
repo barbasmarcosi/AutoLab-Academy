@@ -7,6 +7,7 @@ import{mechanicsLessons,mechanicsQuestions}from'./mechanics-curriculum.js';
 import{mechanicsSystemsLessons,mechanicsSystemsQuestions}from'./mechanics-systems-curriculum.js';
 import{chassisSystemsLessons,chassisSystemsQuestions}from'./chassis-systems-curriculum.js';
 import{engineeringBridgeLessons,engineeringBridgeQuestions}from'./engineering-bridge-curriculum.js';
+import{mechanicsExamStages,mechanicsStageQuestions}from'./mechanics-exams.js';
 import{tracks,lessons as baseLessons,questions as baseQuestions,cases as baseCases,resources}from'./content.js';
 import{additionalLessons,additionalQuestions}from'./curriculum-advanced.js';
 import{ecuLessons,ecuQuestions}from'./ecu-curriculum.js';
@@ -724,6 +725,7 @@ function examMenu(){
  '<div class="panel"><h3>15 preguntas · Todas las áreas</h3><p class="muted">Tres preguntas de cada una de las cinco especialidades. Las respuestas y explicaciones se muestran al finalizar. Objetivo interno: ≥85%.</p>'+
  button('Iniciar evaluación acumulativa','start-exam','data-topic="cumulative"')+'</div>'+
  '<div class="section"><h2>Exámenes por área</h2></div><div class="grid two">'+tracks.map(t=>'<div class="panel"><span class="tag dim">'+esc(t.id.toUpperCase())+'</span><h3>'+esc(t.title)+'</h3><p class="muted">'+questions.filter(q=>q.topic===t.id).length+' preguntas disponibles</p>'+button('Examinar área','start-exam','data-topic="'+t.id+'"','alt')+'</div>').join('')+'</div>'+
+ '<div class="section"><h2>Exámenes por etapa de mecánica MC00–MC14</h2></div><div class="grid two">'+mechanicsExamStages.map(s=>'<div class="panel"><h3>'+esc(s.label)+'</h3><p class="muted">'+mechanicsStageQuestions(questions,s.id).length+' preguntas del bloque · 6 preguntas por intento · criterio de aprobación 85 %.</p>'+button('Examinar etapa','start-exam','data-topic="mc-stage:'+s.id+'"','alt')+'</div>').join('')+'</div>'+ 
  '<div class="section"><h2>Repaso personalizado FSRS</h2></div>'+
  '<div class="panel"><p class="muted">'+stats.due+' preguntas vencidas; '+stats.upcoming+' próximas durante la semana. El calendario se adapta después de cada respuesta, tomando también tu confianza declarada.</p>'+
  '<div class="row">'+button('Repasar preguntas vencidas','review',stats.due===0?'disabled':'','alt')+
@@ -734,7 +736,7 @@ function examMenu(){
 function startExam(topic,review=false){
  const dueSet=new Set(dueReviews(data));
  const pool=topic==='targeted'?selectErrorRetake(summarizeAnswerEvidence(data,questions),questions,10):
-  review?questions.filter(q=>dueSet.has(q.id)):questions.filter(q=>topic==='all'||topic==='cumulative'||q.topic===topic);
+  review?questions.filter(q=>dueSet.has(q.id)):topic.startsWith('mc-stage:')?mechanicsStageQuestions(questions,topic.slice('mc-stage:'.length)):questions.filter(q=>topic==='all'||topic==='cumulative'||q.topic===topic);
  if(!pool.length){toast('No hay preguntas disponibles para este repaso.');return;}
  const selected=topic==='targeted'?[...pool]:topic==='cumulative'&&!review?selectCumulativeQuestions(pool,15):[...pool].sort(()=>Math.random()-.5).slice(0,review?15:topic==='all'?10:6);
  exam={topic,questions:selected,at:0,answers:{},confidence:{},review};

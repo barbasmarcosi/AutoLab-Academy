@@ -146,3 +146,5 @@ Para experiencia física, mantener la distinción clara entre **prácticas posib
 ### Implementación pedagógica inicial
 
 Las 17 lecciones MC00–MC14 están agrupadas en cinco niveles progresivos (órdenes 10–14) y las preguntas se incorporan al área `motor`, con repaso FSRS. Se requiere desarrollar pruebas de desempeño aplicadas por módulo; aprobar preguntas no valida manejo de herramientas físicas o alta tensión.
+
+La pantalla **Exámenes** contiene cinco evaluaciones de etapa MC00–MC14: no confunden estas preguntas con el examen transversal `motor`. Se conservan métricas por intento y repaso, sin atribuir equivalencia a certificación.
