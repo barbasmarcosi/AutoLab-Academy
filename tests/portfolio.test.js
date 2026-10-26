@@ -261,3 +261,22 @@ test('el razonamiento guiado tiene su contador y no infla las prácticas de labo
  assert.match(report,/Razonamientos guiados: 1/);
  assert.match(report,/Predicción congelada y devolución/);
 });
+
+test('legacy guided reasoning survives v2 backup without granting transfer mastery',async()=>{
+ const {transferProgress,transferCaseId}=await import('../src/lesson-transfer.js');
+ const p=emptyProgress();
+ p.cases.push({id:'lab-reasoning-mc06-dual-fault-instrumentation-v1',at:'2026-10-26T17:00:00.000Z',
+   score:100,passed:true,reasoning:'Registro conceptual legado',report:'Modelo original v1'});
+ const original=transferProgress(p,'mc06-dual-fault-instrumentation');
+ assert.equal(original.status,'legacy-passed');assert.equal(original.passed,false);
+ p.cases.push({id:transferCaseId('mc06-dual-fault-instrumentation'),at:'2026-10-26T18:00:00.000Z',
+   score:100,passed:true,reasoning:'Transferencia congelada',report:'Modelo nuevo v2\nEscenario reservado'});
+ const restored=parseBackup(serializeBackup(p));
+ assert.deepEqual(restored.cases,p.cases);
+ const snap=portfolioSnapshot(restored,lessons);
+ assert.equal(snap.totals.reasoning,2);assert.equal(snap.totals.practices,0);
+ assert.equal(transferProgress(restored,'mc06-dual-fault-instrumentation').passed,true);
+ assert.equal(snap.events.filter(e=>e.kind==='reasoning').length,2);
+ assert.match(portfolioMarkdown(restored,lessons),/Modelo original v1/);
+ assert.match(portfolioMarkdown(restored,lessons),/Modelo nuevo v2/);
+});

@@ -21,6 +21,10 @@ test('MC06 lesson: freeze three logical predictions, reveal feedback and save ev
  await expect(page.getByText('Congelado',{exact:true})).toHaveCount(1);
  await lock(page,'measurement',1);
  await lock(page,'falsifier',0);
+ await expect(page.getByText(/Transferencia: Coincide con el modelo/)).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Revelar devoluciones y evaluar'})).toHaveCount(0);
+ await page.getByRole('button',{name:'Congelar hipótesis de transferencia'}).click();
+ await expect(page.getByText(/Seleccioná una conclusión de transferencia/)).toBeVisible();
  await page.locator('#reasoning-transfer').selectOption('1');
  await page.getByRole('button',{name:'Congelar hipótesis de transferencia'}).click();
  await expect(page.locator('#reasoning-transfer')).toHaveCount(0);
@@ -28,6 +32,7 @@ test('MC06 lesson: freeze three logical predictions, reveal feedback and save ev
  await page.locator('#reasoning-limitations').fill(bounds);
  await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
  await expect(page.getByText(/Resultado estructurado con transferencia: 100\/100/)).toBeVisible();
+ await expect(page.getByText(/Transferencia: Coincide con el modelo/)).toBeVisible();
  await expect(page.locator('#lesson-reasoning-status')).toContainText('pendiente');
  await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
  await expect(page.locator('#lesson-reasoning-status')).toContainText('Razonamiento y transferencia aprobados');
