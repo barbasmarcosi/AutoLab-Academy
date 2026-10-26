@@ -173,3 +173,11 @@ test('RW4: portafolio y respaldo conservan hipótesis, dos pruebas y procedencia
  assert.deepEqual(snap.events[0].evidence,['retention','primary']);
  assert.match(md,/synthetic_model/);assert.match(md,/Semilla: 42/);
 });
+
+test('MC01: experiment preserves metrology evidence through backup and portfolio',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-metrology-uncertainty-v1',at:'2026-10-26T04:00:00Z',score:100,passed:true,hypothesis:'resolvable',conclusion:'resolvable',used:['micro','repeatability','resolution'],reasoning:'Comparé la diferencia con dos incertidumbres estándar combinadas.',report:'# MC01\nModelo: mc01-uncertainty-rd-v1\nProcedencia: synthetic_measurement\nSemilla: 42'});
+ const restored=parseBackup(serializeBackup(p)),s=portfolioSnapshot(restored,lessons);
+ assert.equal(s.events[0].title,'MC01 — Metrología e incertidumbre');
+ assert.deepEqual(s.events[0].evidence,['micro','repeatability','resolution']);
+ assert.match(portfolioMarkdown(restored,lessons),/synthetic_measurement/);
+});

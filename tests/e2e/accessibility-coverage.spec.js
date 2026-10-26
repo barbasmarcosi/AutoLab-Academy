@@ -66,3 +66,13 @@ test('WCAG 2.1 AA RW4 differential investigation',async({page})=>{
  await page.locator('#rw4-initial').selectOption('sealing');await page.getByRole('button',{name:'Congelar hipótesis inicial'}).click();
  await audit(page,'RW4 probes and hypothesis');
 });
+
+test('WCAG 2.1 AA MC01 metrology initial and measurements',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="metrology"]').click();
+ await expect(page.getByRole('heading',{name:'Metrology Research Bench'})).toBeVisible();
+ await audit(page,'MC01 metrology initial');
+ await page.getByRole('button',{name:'Nuevo expediente reproducible'}).click();
+ await page.locator('#mc-prediction').selectOption('resolvable');
+ await page.getByRole('button',{name:'Congelar pronóstico y medir'}).click();
+ await audit(page,'MC01 metrology data with table and conclusion form');
+});
