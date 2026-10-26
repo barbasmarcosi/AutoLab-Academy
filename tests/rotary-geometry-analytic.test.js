@@ -24,7 +24,7 @@ test('RW1+ cierre exacto de áreas, cambios de fase, escala cuadrática y period
   assert.ok(Math.abs(analytic.reduce((s,v)=>s+v,0)-global)<1e-8);
   for(let k=0;k<3;k++){
    assert.ok(Math.abs(analytic[k]-analyticChamberAreaMm2(angle+1080,k,parameters))<1e-8);
-   assert.ok(Math.abs(analytic[k]-analyticChamberAreaMm2(angle+720,(k+1)%3,parameters))<1e-8);
+   assert.ok(Math.abs(analytic[k]-analyticChamberAreaMm2(angle+720,(k+2)%3,parameters))<1e-8);
   }
   const doubled={...parameters,Rmm:180,emm:28};
   assert.ok(Math.abs(analyticChamberAreaMm2(angle,0,doubled)/analytic[0]-4)<1e-10);
