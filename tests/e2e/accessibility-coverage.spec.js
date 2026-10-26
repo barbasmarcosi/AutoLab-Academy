@@ -97,3 +97,14 @@ test('WCAG 2.1 AA MC08 ideal braking and prediction form',async({page})=>{
  await page.getByRole('button',{name:'Congelar hipótesis y simular'}).click();
  await audit(page,'MC08 brake physical comparison');
 });
+
+test('WCAG 2.1 AA RW2/RW3 thermodynamics hypotheses and outcome tables',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-thermal"]').click();
+ await expect(page.getByRole('heading',{name:'Thermodynamics Research Bench'})).toBeVisible();
+ await audit(page,'RW2/RW3 initial');
+ await page.locator('#rt-ideal').selectOption('aumenta');
+ await page.locator('#rt-residual').selectOption('resto');
+ await page.locator('#rt-real').selectOption('no');
+ await page.getByRole('button',{name:'Congelar hipótesis y contrastar'}).click();
+ await audit(page,'RW2/RW3 outcome and reasoning');
+});

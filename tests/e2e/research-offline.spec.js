@@ -20,6 +20,13 @@ test('MC01 + RW4+ + MC08 function completely offline after service-worker activa
   await page.locator('#ri-independent').selectOption('normal');
   await page.locator('[data-ri="probe"][data-probe="independent"]').click();
   await expect(page.getByText(/índice observado:/)).toBeVisible();
+  await page.locator('nav.nav button[data-id="rotary-thermal"]').click();
+  await expect(page.getByRole('heading',{name:'Thermodynamics Research Bench'})).toBeVisible();
+  await page.locator('#rt-ideal').selectOption('aumenta');
+  await page.locator('#rt-residual').selectOption('resto');
+  await page.locator('#rt-real').selectOption('no');
+  await page.getByRole('button',{name:'Congelar hipótesis y contrastar'}).click();
+  await expect(page.getByText('RW3 — Balance ficticio de potencia y conservación')).toBeVisible();
   await page.locator('nav.nav button[data-id="brakes"]').click();
   await expect(page.getByRole('heading',{name:'Brake Energy Research Lab'})).toBeVisible();
   await page.locator('#br-energy').selectOption('quadruple');

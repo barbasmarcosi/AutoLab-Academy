@@ -196,3 +196,10 @@ test('MC08 ideal brakes: portfolio evidence survives backup round-trip',()=>{
  assert.equal(snap.events[0].title,'MC08 — Investigación de energía de frenado');
  assert.match(portfolioMarkdown(recovered,lessons),/derived_from_ideal_physics/);
 });
+
+test('RW2/RW3: thermodynamics report round-trip through backup and portfolio',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-thermal-v1',at:'2026-10-26T05:00:00Z',score:100,passed:true,hypothesis:'aumenta',conclusion:'ideal not real',used:['otto-ideal','energy-ledger'],reasoning:'Diferencio el ciclo termodinámico ideal de la arquitectura rotativa.',report:'# RW2/RW3\nModelo: rw2-rw3-ideal-cycle-synthetic-balance-v1\nProcedencia: synthetic_energy_allocation'});
+ const recovered=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(recovered,lessons);
+ assert.equal(snap.events[0].title,'RW2/RW3 — Termodinámica y balance energético');
+ assert.match(portfolioMarkdown(recovered,lessons),/synthetic_energy_allocation/);
+});

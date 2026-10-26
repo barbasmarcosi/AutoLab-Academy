@@ -130,3 +130,7 @@ Opciones de investigación:
 RW-P1 solo está terminado cuando hay un **explorador real**, sin conexión, con predicciones, feedback correcto, pruebas y resultados conservables. El programa completo solo es excelente si enseña a cuestionar, construir, refutar, optimizar y reproducir, **sin disfrazar una animación de gemelo digital validado**.
 
 **El Wankel no se enseña como dogma: se convierte en el caso perfecto para aprender a encontrar el límite de una arquitectura y preguntarse cómo superarlo.**
+
+## RW2/RW3 — Laboratorio inicial de termodinámica y balance energético
+
+`src/rotary-thermal-research.js` + `src/rotary-thermal-view.js` implementan una comparación del **ciclo Otto ideal de aire estándar** y, en paralelo, una tabla de **reparto energético sintético** con cierre de la primera ley. Ninguno se deduce de la geometría RW1 ni calcula eficiencia real Wankel, apertura de puertos, geometría de sellos, combustión, pérdidas o emisiones. Incluye hipótesis previas, evaluación objetiva, expediente y recuperación en el portafolio. Modelo conceptual basado en [NASA Glenn](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/engine-thermodynamic-analysis/). Las conclusiones de eficiencia para un Wankel físico requieren ensayos y modelos validados. RW2/RW3 profundos (modelo termofluídico, transferencia térmica, CFD y datos experimentales) siguen pendientes.
