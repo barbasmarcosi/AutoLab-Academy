@@ -192,3 +192,8 @@ Nuevo módulo `src/learning-evidence.js` que calcula por ID: lectura, **transfer
 
 
 Acceptance gate: browser tests assert that reading a lesson produces a transfer recommendation, that a legacy v1 answer and a generic topic examination do **not** satisfy a v2 transfer, and that MC06 needs both its own v2 transfer and its own embedded powertrain evidence. Validation uses actual IndexedDB-backed writes and reloads without altering the production schema. A training-only completion is never advertised as qualification.
+
+
+### Segunda tanda de razonamiento aplicado — v80 (2026-10-26)
+
+Se añaden cinco ejercicios pedagógicos específicos a lecciones existentes: `ground-test` (localización de caída), `sensor-reference` (causa común), `fuel-trims` (patrones no causales), `pwm-scope` (valor medio versus señal temporal), `ckp-cmp` (correlación multicanal). Cada uno incluye tres decisiones congeladas, evidencia falsadora y un **nuevo contrafactual de transferencia** que exige utilizar el mismo criterio con datos distintos. Total **18/94 lecciones con razonamiento v2**, sin inventar sensores o simuladores físicos; el registro conserva formato `lab-reasoning-{id}-v2`. Auditado que cada microcaso posee transferencia y referencia de lección. PWA cache **v80**, IndexedDB/JSON schema 1 sin cambios.

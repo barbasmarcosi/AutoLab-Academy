@@ -173,6 +173,38 @@ export const REASONING_CHALLENGES=Object.freeze([
     options:['Un único extremo desfavorable que viole una restricción dura','Un perfil nominal con margen positivo','Un número de escenario grande'],
     answer:0,feedback:'Una restricción incumplida basta para rechazar factibilidad robusta bajo el modelo declarado.'}))
 
+,
+freezeCase('ground-test','Retorno eléctrico: dónde cae la tensión',
+  'Una carga virtual de 12 V funciona de forma intermitente. El voltaje en reposo es normal, pero se sospecha un retorno resistivo bajo consumo.',
+  steps(
+   {question:'¿Qué informa una tensión nominal medida solo en reposo?',options:['Que todo retorno está bien','Que no caracteriza por sí sola las caídas cuando circula corriente','Que la carga nunca pierde potencia'],answer:1,feedback:'La resistencia serie provoca caída bajo corriente; el reposo no demuestra su estado.'},
+   {question:'¿Qué contraste puede discriminar la caída del retorno sin cambiar componentes?',options:['Medir entre extremos del retorno bajo una carga de banco conocida','Cambiar todas las masas preventivamente','Observar el voltaje a circuito abierto otra vez'],answer:0,feedback:'La caída entre los extremos de un tramo bajo carga permite localizar resistencia en ese trayecto.'},
+   {question:'¿Qué dato obliga a abandonar la hipótesis de retorno dominante?',options:['Un código sin contexto','Una etiqueta de batería diferente','Retorno con caída despreciable y caída importante en la línea positiva del mismo montaje'],answer:2,feedback:'Si otro segmento presenta la caída dominante, la atribución inicial al retorno pierde soporte.'})),
+ freezeCase('sensor-reference','Referencia compartida y dos canales sesgados',
+  'Dos sensores analógicos virtuales parecen desplazados a la vez, y ambos usan la misma referencia de baja tensión.',
+  steps(
+   {question:'¿La coincidencia de desvíos prueba que fallaron los dos sensores?',options:['Sí, dos componentes averiados siempre','No: una referencia común alterada también podría explicar ambos','Sí, incluso sin contrastar alimentación'],answer:1,feedback:'Un error de causa común puede sesgar múltiples señales; correlación no demuestra dos fallas independientes.'},
+   {question:'¿Qué medida virtual separarías primero de cada salida?',options:['Reemplazar sensores','Medir solo el promedio de ambos','Comprobar la referencia y masa compartidas bajo condición reproducible'],answer:2,feedback:'Una referencia independiente comprueba si la causa común está fuera de sus límites declarados.'},
+   {question:'¿Qué resultado debilita la hipótesis de fallo en referencia común?',options:['Referencia/masa normal verificadas y un canal individual fuera de plausibilidad','Dos canales desplazan su salida igual','Medición nueva con idéntico instrumento no comprobado'],answer:0,feedback:'Si la causa común está contrastada, es razonable investigar el canal individual desviado.'})),
+ freezeCase('fuel-trims','Correcciones de combustible: patrón no es causa única',
+  'En un motor ficticio las correcciones de combustible son positivas al ralentí y menores con carga. Los datos aún no identifican una pieza.',
+  steps(
+   {question:'¿Qué conclusión es válida a partir de ese patrón aislado?',options:['El MAF debe reemplazarse','Existen varias hipótesis: aire no medido, suministro o lectura; faltan pruebas','La ECU está averiada'],answer:1,feedback:'Las correcciones son reacción del sistema de control, no identificación directa del componente culpable.'},
+   {question:'¿Qué secuencia conceptual discrimina alternativas?',options:['Borrar el DTC y cambiar piezas','Concluir a partir del ralentí','Cruzar congelación de contexto, plausibilidad de aire y combustible y pruebas independientes'],answer:2,feedback:'Contrastar condiciones y observables de distintas fuentes separa una lectura sesgada de un fenómeno real.'},
+   {question:'¿Qué refuta concluir que el sensor de aire es la única causa?',options:['Una fuga de admisión virtual confirmada externamente con sensor que reacciona de forma plausible','Otra captura del mismo ajuste sin datos','Que el motor tiene más de una bujía'],answer:0,feedback:'Una entrada de aire no medida corroborada desplaza la sospecha de sensor como explicación exclusiva.'})),
+ freezeCase('pwm-scope','PWM: promedio no describe toda la señal',
+  'Dos modulaciones PWM de banco presentan igual voltaje promedio en un multímetro, aunque sus períodos y ciclos de trabajo son diferentes.',
+  steps(
+   {question:'¿Qué prueba la igualdad del promedio de tensión?',options:['El comportamiento dinámico es idéntico','El ancho de pulso y frecuencia son iguales','El promedio coincide, pero las formas temporales pueden diferir'],answer:2,feedback:'El promedio pierde información temporal; señales diferentes pueden tener igual tensión media.'},
+   {question:'¿Qué evidencia distingue sus formas de onda?',options:['Medir el nivel DC solamente','Comparar período, ancho de pulso y disparo adecuado en osciloscopio virtual','Cambiar actuadores antes de medir'],answer:1,feedback:'La representación temporal permite discriminar frecuencia, ciclo útil, niveles y transiciones.'},
+   {question:'¿Qué refuta que igual voltaje medio implica igual ciclo de trabajo para toda condición?',options:['Dos señales con igual promedio pero distinto par de niveles alto/bajo y distinto ciclo útil','Un voltímetro digital estable','Un PWM de amplitud constante y fija con igual promedio'],answer:0,feedback:'El promedio depende de niveles y ciclo; sin niveles fijados no determina un ciclo único.'})),
+ freezeCase('ckp-cmp','Sincronización CKP/CMP: ausencia de señal o captura',
+  'Un banco presenta arranque sin sincronización aparente. Una captura CKP muestra pulsos, pero la traza CMP permanece plana.',
+  steps(
+   {question:'¿Qué puede concluirse sobre CMP con una sola captura plana?',options:['No diferencia aún sensor, configuración del instrumento o condición del cableado','El sensor CMP está dañado con certeza','La ECU tiene que ser reemplazada'],answer:0,feedback:'Una línea plana aislada no separa falta de señal, modo de disparo, referencia ni condiciones de captura.'},
+   {question:'¿Qué verificación conceptual permite contrastar sincronización?',options:['Desconectar todo sin documentación','Verificar referencia y disparo del canal y capturar CKP/CMP de manera correlacionada en banco aislado','Reemplazar la distribución inmediatamente'],answer:1,feedback:'La simultaneidad y una señal patrón de instrumento permiten diferenciar fase de ausencia aparente.'},
+   {question:'¿Qué dato refutaría ausencia permanente de CMP en ese montaje?',options:['Un DTC sin forma de onda','Un valor promedio de CKP','Pulsos CMP estables detectados al corregir escala y disparo'],answer:2,feedback:'Aparecer pulsos al corregir la captura demuestra que la conclusión anterior estaba mal fundada.'}))
+
 ]);
 const lookup=new Map(REASONING_CHALLENGES.map(x=>[x.id,x]));
 export function reasoningChallenge(lessonId){return lookup.get(lessonId)||null;}

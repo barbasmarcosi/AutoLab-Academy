@@ -33,6 +33,23 @@ const values=[
   'Cumple robustez por estar nominalmente aprobado','La restricción puede ignorarse por promedios','No es robustamente factible en el dominio declarado'],2,'Una sola violación adversa refuta la hipótesis de robustez rectangular dentro del modelo.'],
  ['rw8-factorial-coupled-design','Al comprobar cuatro esquinas acopladas, una viola una restricción dura; no hay distribución de probabilidad para los factores. ¿Qué se justifica?',[
   'Confiabilidad física 75 %','El perfil no cumple las cuatro esquinas; no puede atribuirse una probabilidad','Aprobación probabilística garantizada por otras tres esquinas'],1,'El diseño factorial es determinista; una esquina violada refuta robustez sobre las cuatro sin medir probabilidades.']
+,
+['ground-test','En banco aislado con carga, la caída en el retorno es 0,03 V mientras un conector del lado positivo cae 1,45 V. ¿Qué tramo merece prioridad?',[
+  'Retorno por ser masa del circuito','Conector positivo con caída localizada','Batería por tensión nominal en vacío'],1,
+  'La caída principal aparece en el tramo positivo; el retorno deja de ser la causa dominante bajo este ensayo.'],
+ ['sensor-reference','Ambos sensores comparten referencia, pero una medición independiente muestra referencia normal y solo la salida del sensor A está fuera de plausibilidad. ¿Qué hipótesis resiste?',[
+  'Referencia común defectuosa con certeza','Ambos sensores fallan simultáneamente','Investigar salida o circuito individual A antes de culpar la referencia'],2,
+  'Una referencia comprobada y una sola señal anómala orientan a una causa local, no a desvío común.'],
+ ['fuel-trims','Un motor ficticio mantiene corrección positiva bajo dos cargas, pero una prueba aislada de suministro encuentra presión artificial baja mientras las lecturas de aire son plausibles. ¿Qué priorizás?',[
+  'Contrastar el suministro deficiente como causa posible','Reemplazar el MAF sin más pruebas','Atribuirlo a firmware con certeza'],0,
+  'Una anomalía independiente de combustible altera el conjunto de hipótesis; no se deduce una reparación única.'],
+ ['pwm-scope','Una salida PWM sintética usa 0–5 V y 50 % de ciclo; otra usa 0–10 V y 25 %. ¿Cuál comparación es válida?',[
+  'La frecuencia es necesariamente igual','Las dos pueden promediar 2,5 V pese a ciclos y niveles distintos','Las dos formas de onda son idénticas'],1,
+  'Para PWM ideal promedio = nivel bajo + duty × amplitud; igual promedio no asegura igual señal temporal.'],
+ ['ckp-cmp','La captura CKP/CMP correlacionada muestra CKP regular, CMP pulsante y desplazamiento de fase reproducible respecto de referencia del banco. ¿Qué se investiga?',[
+  'Sensor CMP ausente por lectura anterior','Sistema perfecto porque ambas señales existen','Hipótesis de fase/sincronización, con contexto y referencia del modelo'],2,
+  'Una señal CMP existente refuta ausencia permanente; el desfase reproducible exige interpretación de sincronización, no un reemplazo automático.'],
+
 ];
 export const TRANSFER_CASES=Object.freeze(values.map(([lessonId,context,options,answer,feedback])=>Object.freeze({
  lessonId,context,options:Object.freeze(options),answer,feedback

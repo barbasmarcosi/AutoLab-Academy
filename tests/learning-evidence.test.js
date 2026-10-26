@@ -9,7 +9,7 @@ test('94 lessons have honest, complete, independently auditable evidence coverag
  const summary=learningEvidenceOverview(progress(),lessons,learningStages);
  assert.equal(summary.model,EVIDENCE_MODEL);
  assert.equal(summary.totals.lessons,94);
- assert.equal(summary.totals.reasoningAvailable,13);
+ assert.equal(summary.totals.reasoningAvailable,18);
  assert.equal(summary.totals.embeddedAvailable,4);
  assert.equal(summary.totals.linkedOnly,12);
  assert.equal(summary.totals.documentedTraining,0);

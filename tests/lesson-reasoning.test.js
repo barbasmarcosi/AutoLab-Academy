@@ -3,8 +3,8 @@ import{REASONING_CHALLENGES,reasoningChallenge,reasoningCaseId,gradeReasoning,re
 const reasoning='Antes de medir, esta evidencia no discrimina por sí sola todas las causas. Tomaría una segunda prueba independiente y revisaría la hipótesis si esa lectura contradice la predicción congelada.';
 const limitations='La simulación no tiene sensores calibrados ni datos OEM; no acredita aptitud real y requiere verificación física supervisada.';
 test('thirteen guided reasoning exercises: ambiguous cases, unique choices, feedback and outcomes',()=>{
- assert.equal(REASONING_CHALLENGES.length,13);
- assert.equal(new Set(REASONING_CHALLENGES.map(x=>x.id)).size,13);
+ assert.equal(REASONING_CHALLENGES.length,18);
+ assert.equal(new Set(REASONING_CHALLENGES.map(x=>x.id)).size,18);
  for(const scenario of REASONING_CHALLENGES){
   assert.equal(scenario.steps.length,3);
   const answers=Object.fromEntries(scenario.steps.map(step=>[step.id,step.answer]));
