@@ -61,7 +61,56 @@ export const REASONING_CHALLENGES=Object.freeze([
     answer:0,feedback:'Una única restricción violada en una esquina invalida robustez para todo el dominio de factores.'},
    {question:'¿Qué evidencia invalida afirmar que ese perfil es robusto ante todas las esquinas?',
     options:['Un gráfico con barras de distinto color','Cumplir solamente una esquina favorable','Una esquina que supera una restricción dura'],
-    answer:2,feedback:'Las restricciones son duras en este modelo; una violación falsifica la hipótesis de robustez global.'}))
+    answer:2,feedback:'Las restricciones son duras en este modelo; una violación falsifica la hipótesis de robustez global.'})),
+ freezeCase('mc01-measurement-uncertainty','MC01: precisión no equivale a exactitud',
+  'Un multímetro virtual repite cinco veces un valor muy parecido. Se desconoce la desviación común de su escala frente a una referencia independiente.',
+  steps(
+   {question:'¿Qué podés inferir de las lecturas muy similares?',
+    options:['Hay buena repetibilidad, pero no está acreditada la exactitud','La calibración de fábrica es perfecta','No existen errores sistemáticos'],
+    answer:0,feedback:'Baja dispersión indica repetibilidad; el sesgo compartido entre mediciones no desaparece.'},
+   {question:'¿Qué prueba discrimina precisión de un sesgo común?',
+    options:['Repetir el mismo instrumento cien veces','Comparar con referencia independiente de incertidumbre conocida','Redondear todas las lecturas a entero'],
+    answer:1,feedback:'Una referencia externa permite observar error sistemático que las repeticiones del mismo equipo ocultan.'},
+   {question:'¿Qué observación refuta que menor dispersión garantiza exactitud?',
+    options:['Lecturas consecutivas que coinciden','Cambiar el color de los datos','Un error constante frente a referencia externa aunque todas las medidas coincidan'],
+    answer:2,feedback:'Un instrumento puede repetir sistemáticamente una medida sesgada.'})),
+ freezeCase('mc08-brakes-abs','MC08: energía de frenado y velocidad',
+  'Un modelo ideal de 1000 kg se mueve a 10 m/s. Sin cambiar la masa, se analiza qué ocurre al duplicar a 20 m/s.',
+  steps(
+   {question:'¿Cómo cambia la energía cinética modelada al duplicar velocidad?',
+    options:['Se duplica','Se cuadruplica','Permanece igual'],answer:1,
+    feedback:'E=½mv²: con masa constante, el doble de velocidad cuadruplica la energía.'},
+   {question:'¿Qué comparación numérica prueba la hipótesis dentro del modelo?',
+    options:['Calcular E en 10 m/s y 20 m/s a la misma masa','Comparar solo el color de frenos','Observar un valor de ABS sin condiciones'],
+    answer:0,feedback:'Comparar 50 kJ y 200 kJ a la misma masa permite comprobar el factor cuatro.'},
+   {question:'¿Qué evidencia contradice un modelo que predice E proporcional a velocidad para masa fija?',
+    options:['Un ABS disponible','Otra captura sin velocidad','Un cálculo independiente muestra cuatro veces la energía al duplicarla'],
+    answer:2,feedback:'La ley cuadrática refuta el escalamiento lineal supuesto, pero no calcula distancia real de frenado.'})),
+ freezeCase('rw6-aperture-area-study','RW6: superficies iguales, aperturas distintas',
+  'Un puerto circular y otro rectangular presentan idéntica área máxima, pero una máscara recta avanza hasta u=0,25 del recorrido ficticio.',
+  steps(
+   {question:'¿Alcanza igual área máxima para deducir igual área expuesta parcialmente?',
+    options:['Sí, siempre','No; la forma del contorno puede cambiar el área expuesta','Sí, si el motor tiene dos bujías'],
+    answer:1,feedback:'El área máxima común no determina la función área abierta frente a desplazamiento parcial.'},
+   {question:'¿Qué contraste puede evaluar el modelo sin medir un motor real?',
+    options:['Comparar fórmulas geométricas y cuadratura de franjas al refinar N','Inferir flujo másico OEM solo con área','Observar emisiones sin caudal ni presión'],
+    answer:0,feedback:'Fórmula circular analítica y aproximación independiente por bandas contrastan el cálculo, no caudal.'},
+   {question:'¿Qué hallazgo invalida que una cuadratura numérica esté convergiendo a la fórmula ideal?',
+    options:['Un color diferente del gráfico','Mayor tamaño de pantalla','El error contra la fórmula analítica crece sistemáticamente al refinar bajo parámetros fijos'],
+    answer:2,feedback:'Un resultado divergente exige revisar discretización, integración y supuestos del modelo.'})),
+ freezeCase('rw8-robust-uncertainty','RW8: nominal viable no significa robusto',
+  'Una ECU ficticia supera las cinco restricciones con índices nominales, pero cada índice tiene una banda determinista de perturbación.',
+  steps(
+   {question:'¿Qué afirma correctamente un resultado nominal admisible?',
+    options:['La ECU es segura para un motor real','El perfil supera restricciones solo en el punto nominal','Supera cualquier perturbación adversa'],
+    answer:1,feedback:'La factibilidad nominal no garantiza superar las restricciones en extremos desfavorables.'},
+   {question:'¿Qué prueba virtual corresponde antes de afirmar robustez rectangular?',
+    options:['Verificar el valor más desfavorable de cada índice frente a las cinco restricciones','Promediar resultados nominales','Seleccionar solo la alternativa de mayor respuesta'],
+    answer:0,feedback:'La robustez de caja requiere todas las restricciones en sus extremos pertinentes.'},
+   {question:'¿Qué falsifica la robustez frente a toda la caja rectangular?',
+    options:['Un único extremo desfavorable que viole una restricción dura','Un perfil nominal con margen positivo','Un número de escenario grande'],
+    answer:0,feedback:'Una restricción incumplida basta para rechazar factibilidad robusta bajo el modelo declarado.'}))
+
 ]);
 const lookup=new Map(REASONING_CHALLENGES.map(x=>[x.id,x]));
 export function reasoningChallenge(lessonId){return lookup.get(lessonId)||null;}
