@@ -36,5 +36,5 @@ test('MC14 fail closed for missing holdout, spoofed observations, malformed caus
  assert.throws(()=>buildInventorCase(0),RangeError);
  assert.throws(()=>buildInventorCase(NaN),RangeError);
  assert.throws(()=>revealInventorProbe(3,'holdout','invalid'),RangeError);
- assert.equal(evaluateInventor({...base,observations:[{...observations[0],prediction:'low'},observations[1]]}).passed,false);
+ assert.equal(evaluateInventor({...base,observations:[{...observations[0],prediction:'high'},observations[1]]}).passed,false);
 });
