@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.16 (candidato en validación): GitHub Actions fijadas a SHA de commit, comprobación npm audit high/critical, Dependabot semanal con PR limitados y sin merge automático, tests de política CI, SW v37→v38. Ver docs/SUPPLY_CHAIN_HARDENING_V1_9_16.md.
+
+
 - v1.9.15 (candidato en validación): pantalla de recuperación de respaldo JSON si IndexedDB contiene progreso incompatible, sin limpieza automática y confirmación explícita; integración de importación local y pruebas de recuperación, rechazo de archivo inválido y fallo de cuota. Ver docs/RECOVERY_BOOTSTRAP_V1_9_15.md.
 
 
