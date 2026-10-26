@@ -4,23 +4,23 @@
 
 | Bloque | Alcance | Estado al 26/10 | Gate siguiente |
 | --- | --- | --- | --- |
-| G0 | Asegurar CI, protección de main y retrocompatibilidad | CI RW1 afcc704, integrados ebfce966, E2E ff9ba8fb (165 pruebas) y fe45d0b verificadas en verde | Build, auditorías, E2E Chromium/WebKit/móvil, IndexedDB y offline |
+| G0 | Asegurar CI, protección de main y retrocompatibilidad | CI previa `40270981241` y `40270365868` en verde. RW2/RW3/RW5 agregados con últimas CI completas pendientes de verificación | Build, auditorías, E2E Chromium/WebKit/móvil, IndexedDB y offline |
 | G1 / RW1 | Epitrocoide y cinemática offline, predicción y evidencia | Implementación inicial + A/B geométrico | Validación independiente del modelo y sensibilidad numérica |
-| G2 / MC-P1 | MC00 seguridad, MC01 metrología/torque y MC03 comparación de arquitecturas | Cuatro lecciones y doce preguntas incorporadas en Academia/Exámenes/FSRS; laboratorio de metrología MC01 con hipótesis, dos instrumentos, componentes Tipo A/B y reporte (CI pendiente); no acredita práctica real | Nuevos casos aplicados, evaluación de medición e incertidumbre, revisión curricular experta |
-| G3 / RW4-P2 | Diferenciar falla sintética de sellado vs. encendido | Modelo de 2 hipótesis y 2 pruebas + RW4+ adversarial instrumentación contra sellado con crosschecks y 400 semillas (integración CI pendiente); UI, reporte y backup | Revisar validez técnica del diseño de pruebas y sumar ruido adversarial/instrumental |
+| G2 / MC-P1 | MC00 seguridad, MC01 metrología/torque y MC03 comparación de arquitecturas | MC00–MC14 cubre inicialmente 17 lecciones, 64 preguntas y cinco exámenes por nivel; MC01 metrología Tipo A/B y MC08 frenado ideal integrados, no acreditan práctica real | Nuevos casos aplicados, evaluación de medición e incertidumbre, revisión curricular experta |
+| G3 / RW4-P2 | Diferenciar falla sintética de sellado vs. encendido | Modelo de dos hipótesis con dos pruebas más RW4+ adversarial de sesgo instrumental (400 semillas), UI, respaldo, accesibilidad y E2E integrados con CI previa verde | Revisar validez técnica del diseño de pruebas y sumar ruido adversarial/instrumental |
 | G4 | MC02–MC14: automóvil completo | MC00–MC14: primer recorrido conceptual (17 lecciones, 64 preguntas), con laboratorios MC01/MC08. El tronco inicial está implementado, pero simuladores específicos por módulo, revisión técnica externa y práctica física continúan pendientes. | Lecciones, casos, simuladores necesarios y examen por módulo |
-| G5 | RW2/3/5/6/7/8: respiración, térmica, combustión, ECU y eficiencia | RW2/RW3: primer banco de ciclo Otto ideal y balance ficticio con límites explícitos y CI pendiente. RW5–RW8 y portado/combustión físicamente fundamentados, pendientes | Modelos revisados, balances/limitaciones, nunca datos OEM inventados |
+| G5 | RW2/3/5/6/7/8: respiración, térmica, combustión, ECU y eficiencia | RW2 ciclo Otto ideal, RW3 balance ficticio y RW5 convección lumped: tres lecciones, doce preguntas y dos laboratorios. RW6–RW8, CFD, portado real, combustión, sellado físico y pruebas OEM pendientes; CI final RW5 en verificación | Modelos revisados, balances/limitaciones, nunca datos OEM inventados |
 | G6 | Diagnostic Engineering + ECU profiles ECO/DAILY/SPORT/DIAGNOSTIC | Base diagnóstica de v1.9; optimización nueva pendiente | Baselines, restricciones térmicas/emisiones fail-closed y pruebas adversariales |
 | G7 | Herramientas/instrumentación propia y arquitectura híbrida generadora | Planificado | Prototipos simulados, licencia/software reutilizable, pruebas reproducibles |
 | G8 | Proyectos integradores y validación 10/10 interna | Pendiente | CI repetible, recuperación completa, accesibilidad, trazabilidad, seguridad, revisión científica |
 
 ## Siguiente secuencia concreta
 
-1. Validar CI del banco MC01 nuevo: cálculos, E2E Chromium/WebKit/móvil, respaldos, accesibilidad y funcionamiento offline.
-2. Agregar un laboratorio de metrología con incertidumbre explícita y múltiples instrumentos, más seguridad de taller MC00 con decisiones de detener intervención.
-3. Verificar RW4+ adversarial con fallas instrumentales sintéticas, E2E, portafolio y controles contra conclusiones prematuras, sin transformar índices en presiones reales.
-4. Abordar MC02–MC05 en profundidad; después RW2/RW3 y controles.
-5. Registrar pruebas físicas por separado cuando existan recursos; no usar su ausencia para bloquear desarrollo seguro en PWA.
+1. Cerrar CI de `rotary-science` RW2/RW3/RW5 (`npm run build`, Playwright Chromium/WebKit/móvil, offline, Axe y respaldos), corrigiendo cualquier fallo real.
+2. Ampliar RW6/RW7 con hipótesis controladas sobre admisión/escape y pérdidas, distinguiendo teoría de CFD o mapas reales de puertos.
+3. Crear investigaciones de optimización de control ECO/DAILY/SPORT/DIAGNOSTIC con restricciones explícitas y fallas cerradas, sin escritura ECU.
+4. Reforzar MC02–MC14 con casos simulados y rúbricas de evidencia más profundas; revisar fuentes y errores conceptuales.
+5. Repetir recuperación offline, regresiones y seguridad; documentar validación física/científica independiente como pendiente, no como realizada.
 
 ## Contratos de evidencias
 
