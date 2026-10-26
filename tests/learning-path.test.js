@@ -21,9 +21,10 @@ import{rotaryPortBurnLessons}from'../src/rotary-port-burn-curriculum.js';
 import{ecuOptimizationLessons}from'../src/ecu-optimization-curriculum.js';
 import{ecuRobustLessons}from'../src/ecu-robust-curriculum.js';
 import{rotaryApertureLessons}from'../src/rotary-aperture-curriculum.js';
-const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons];
-test('88 lecturas agrupadas en dieciséis niveles con IDs completos y sin duplicaciones',()=>{
- assert.equal(all.length,88);
+import{rotaryInverseLessons}from'../src/rotary-aperture-inverse-curriculum.js';
+const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons];
+test('89 lecturas agrupadas en dieciséis niveles con IDs completos y sin duplicaciones',()=>{
+ assert.equal(all.length,89);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
  assert.equal(new Set(assigned).size,all.length);
@@ -64,7 +65,7 @@ test('MC00–MC14 avanza en cinco niveles ordenados con toda la cobertura, sin p
 test('RW2/RW3 bridge is its own stage and no foundation lesson is orphaned',()=>{
  const stage=learningStages.at(-2);
  assert.equal(stage.id,'rotary-science');assert.equal(stage.order,15);
- assert.deepEqual(stage.lessons,[...rotaryThermalLessons,...rotaryHeatLessons,rotaryPortBurnLessons[0],...rotaryApertureLessons,rotaryPortBurnLessons[1]].map(l=>l.id));
+ assert.deepEqual(stage.lessons,[...rotaryThermalLessons,...rotaryHeatLessons,rotaryPortBurnLessons[0],...rotaryApertureLessons,...rotaryInverseLessons,rotaryPortBurnLessons[1]].map(l=>l.id));
  const p=emptyProgress();for(const s of learningStages.slice(0,-2))for(const id of s.lessons)p.notes['lesson-'+id]='2026-10-26T00:00:00Z';
  const result=evaluateLearningPath(p,all);
  assert.equal(result.nextStage,'rotary-science');

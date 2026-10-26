@@ -102,3 +102,7 @@ La lección `rw6-aperture-area-study` agrega cuatro preguntas sobre apertura par
 ### RW6++ — Identificación inversa y límites de instrumento ficticio
 
 `src/rotary-aperture-inverse.js` implementa la inversa estrictamente monótona de área de segmento circular 2D mediante bisección, partiendo de un área observada sintética en mm² y un intervalo determinista ± tolerancia de área total. Recupera intervalo de avance adimensional u, sensibilidad local `d(A/Amax)/du` y contrasta el ancho de intervalos cerca del borde y del centro. Casos con sesgo instrumentado artificial mayor al margen exponen la falla de cobertura de la verdad simulada. Laboratorio separado RW6++ con predicción congelada, expediente y respaldo offline; **no constituye medición de Wankel, incertidumbre metrológica estándar ni probabilidad de cobertura**. Fuente conceptual de distinción: [BIPM/JCGM GUM](https://www.bipm.org/en/web/guest/publications/guides). CI final pendiente.
+
+### RW6++ — Integración pedagógica de problemas inversos
+
+La lección `rw6-inverse-area-metrology` y cuatro preguntas se ubican después de `rw6-aperture-area-study`, dentro del nivel rotativo 15. Enseñan inversión numérica por bisección, sensibilidad casi nula cerca de los extremos, límites deterministas vs incertidumbre GUM y sesgos artificiales. Nuevo recuento inicial: **89 lecciones, 258 preguntas y 16 niveles**. `sw.js` incluye precache v64; tests de estructura y lectura, E2E de inferencia, reporte y recuperación JSON. La CI debe confirmar estos últimos cambios antes de declararlos aceptados.
