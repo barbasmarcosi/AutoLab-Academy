@@ -138,3 +138,29 @@ test('el mismo instrumento no acredita dos predicciones',()=>{
  assert.equal(g.score,100);
  assert.equal(g.passed,true);
 });
+
+test('sin hipótesis inicial válida, un diagnóstico final acertado no recibe 100 ni aprueba',()=>{
+ for(let seed=1;seed<=100;seed++)for(const c of buildDiagnosticTransfer(seed).cases){
+  for(const initial of [undefined,'',null,'id-fabricado']){
+   const a=good(c);
+   a.initial=initial;
+   const g=gradeDiagnosticTransfer(c,a);
+   assert.equal(g.initialRecorded,false);
+   assert.equal(g.correct,true);
+   assert.equal(g.score,60);
+   assert.equal(g.passed,false);
+  }
+ }
+});
+test('hipótesis inicial equivocada o acertada cuenta como registrada, no como prueba de razonamiento',()=>{
+ for(const c of buildDiagnosticTransfer(823).cases){
+  for(const initial of c.options.map(([id])=>id)){
+   const a={...good(c),initial};
+   const g=gradeDiagnosticTransfer(c,a);
+   assert.equal(g.initialRecorded,true);
+   assert.equal(g.score,100);
+   assert.equal(g.passed,true);
+   assert.equal(g.explanationReviewed,false);
+  }
+ }
+});

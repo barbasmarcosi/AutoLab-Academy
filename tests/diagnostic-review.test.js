@@ -24,3 +24,9 @@ test('entrada vacía o malformada no fabrica retroalimentación',()=>{
 });
 
 test('si un único pronóstico es correcto, la revisión solicita ambos sin negar el acierto observado',()=>{const r=diagnosticReview({correct:true,confirm:true,exclude:true,context:true,predicted:false,predictionsCorrect:1,unsafe:false});assert(r.find(x=>x.id==='prediction').guidance.includes('ambos pronósticos'));});
+
+test('ausencia de hipótesis inicial genera advertencia formativa sin inventar secuencia temporal',()=>{
+ const r=diagnosticReview({initialRecorded:false,correct:true,confirm:true,exclude:true,context:true,predicted:true,unsafe:false});
+ assert.deepEqual(r.map(x=>x.id),['initial','review']);
+ assert.match(r[0].guidance,/no puede verificar retrospectivamente/i);
+});

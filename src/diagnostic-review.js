@@ -6,6 +6,11 @@
 export function diagnosticReview(grade){
  if(!grade||typeof grade!=='object')return [];
  const items=[];
+ if(grade.initialRecorded===false)items.push({
+  id:'initial',
+  label:'Registrar una hipótesis inicial antes de las pruebas',
+  guidance:'No consta una hipótesis inicial válida en este expediente. El resultado final no sustituye el planteo previo: registrá la hipótesis antes de revelar las lecturas. El evaluador no puede verificar retrospectivamente el orden temporal.'
+ });
  if(grade.unsafe)items.push({
   id:'safety',
   label:'Revisar primero el criterio de seguridad',

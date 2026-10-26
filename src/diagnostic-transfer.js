@@ -117,6 +117,9 @@ export function gradeDiagnosticTransfer(caseItem,answer={}){
   const p=caseItem.probes.find(p=>p.id===record.id);
   if(p)probes.push({p,prediction:record.prediction});
  }
+ // A final guess cannot complete the investigation without a recorded initial hypothesis.
+ // The UI locks this before revealing readings; grading alone cannot prove timing.
+ const initialRecorded=caseItem.options.some(([id])=>id===answer.initial);
  const correct=answer.final===caseItem.cause;
  const confirm=probes.some(x=>x.p.role==='confirm');
  const exclude=probes.some(x=>x.p.role==='exclude');
@@ -130,9 +133,9 @@ export function gradeDiagnosticTransfer(caseItem,answer={}){
  const reasoning=String(answer.reasoning||'').trim(),limits=String(answer.limits||'').trim();
  const documented=reasoning.length>=100&&reasoning.length<=2000;
  const uncertain=limits.length>=60&&limits.length<=1200;
- const score=unsafe?0:(correct?40:0)+(confirm?20:0)+(exclude?15:0)+(context?10:0)+(predicted?5:0)+(documented?5:0)+(uncertain?5:0);
- return {score,passed:!unsafe&&correct&&confirm&&exclude&&context&&predicted&&documented&&uncertain,
-  correct,confirm,exclude,context,predicted,predictionsCorrect,predictionsMade,documented,uncertain,unsafe,
+ const score=unsafe?0:(correct&&initialRecorded?40:0)+(confirm?20:0)+(exclude?15:0)+(context?10:0)+(predicted?5:0)+(documented?5:0)+(uncertain?5:0);
+ return {score,passed:!unsafe&&initialRecorded&&correct&&confirm&&exclude&&context&&predicted&&documented&&uncertain,
+  initialRecorded,correct,confirm,exclude,context,predicted,predictionsCorrect,predictionsMade,documented,uncertain,unsafe,
   explanationReviewed:false,expected:caseItem.cause};
 }
 export function diagnosticTransferReport(session,date=new Date()){
