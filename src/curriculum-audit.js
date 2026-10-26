@@ -52,7 +52,7 @@ export function auditCurriculum({tracks=[],lessons=[],questions=[],cases=[],lear
   if(!Array.isArray(item.choices)||!item.choices.some(p=>Array.isArray(p)&&p[0]===item.solution))errors.push(key+': solución fuera de alternativas');
   if(!Array.isArray(item.probes)||!item.probes.some(p=>p.critical))errors.push(key+': sin prueba confirmatoria');
   if(Array.isArray(item.probes)){unique(item.probes.map(p=>p.id),key+' pruebas',errors);if(item.probes.some(p=>!present(p.label,4)||!present(p.result,8)))errors.push(key+': prueba incompleta')}
-  if(!https(item.source))warnings.push(key+': sin fuente HTTPS contextual');
+  if(!https(item.source))errors.push(key+': falta URL HTTPS contextual');
  }
  return {ok:errors.length===0,errors,warnings,summary:{tracks:tracks.length,lessons:lessons.length,questions:questions.length,cases:cases.length,stages:learningStages.length,uncoveredLessons:lessons.filter(l=>!assigned.has(l.id)).length,distinctSourceURLs:new Set([...lessons.map(l=>l.url),...questions.map(q=>q.source),...cases.map(x=>x.source)].filter(https)).size}};
 }
