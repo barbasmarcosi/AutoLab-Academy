@@ -4,6 +4,8 @@ test('RW1 offline geometry: predicción y evidencia tras recarga',async({page,co
  await page.getByRole('button',{name:'Rotary Engineering'}).click();
  await expect(page.getByRole('heading',{name:'Rotary Geometry Explorer'})).toBeVisible();
  await expect(page.locator('#rw-diagram svg')).toBeVisible();
+ await expect(page.locator('#rw-analytic-audit table')).toBeVisible();
+ await expect(page.getByText(/Cierre exacto de tres cámaras/)).toBeVisible();
  await expect(page.getByText(/Modelo didáctico, no CAD validado/)).toBeVisible();
  await page.locator('#rw-angle').evaluate(el=>{el.value='120';el.dispatchEvent(new Event('input',{bubbles:true}));});
  await expect(page.locator('#rw-deg')).toContainText('120°');
@@ -30,6 +32,7 @@ test('RW1 offline geometry: predicción y evidencia tras recarga',async({page,co
  await page.locator('#rw-research-reason').fill('Mantengo el radio y el ancho virtual fijos; aumentar excentricidad debería modificar la oscilación geométrica. No conozco tolerancias físicas reales.');
  await page.getByRole('button',{name:'Contrastar experimento A/B'}).click();
  await expect(page.getByText(/Variación:/)).toBeVisible();
+ await expect(page.getByText(/Diferencia en oscilación del volumen proxy respecto de integral exacta/)).toBeVisible();
  await page.getByRole('button',{name:'Guardar comparación en portafolio'}).click();
  await expect(page.getByText('Comparación guardada.')).toBeVisible();
  await page.locator('nav.nav button[data-id="portfolio"]').click();

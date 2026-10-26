@@ -23,3 +23,15 @@ test('P1b numérica finita y rechazo fail-closed de geometría inviable',()=>{
  assert.throws(()=>geometrySweep(35),RangeError);
  assert.throws(()=>geometrySweep(18,4),RangeError);
 });
+
+test('RW1+ A/B compara oscilación geométrica contra derivación analítica y cierra las tres cámaras',()=>{
+ for(const e of [10,18]){
+  const r=geometryResearch(e);
+  assert.ok(r.analyticBaseline.swingCm3>0);
+  assert.ok(r.analyticCandidate.swingCm3>0);
+  assert.ok(r.relativeSwingErrorPct<.1);
+  assert.ok(r.geometryAudit.areaClosureErrorMm2<1e-8);
+  assert.ok(r.geometryAudit.maxRefinedRelativeErrorPct<r.geometryAudit.maxRelativeErrorPct);
+  assert.equal(r.geometryAudit.rows.length,3);
+ }
+});
