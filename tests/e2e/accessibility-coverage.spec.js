@@ -172,6 +172,7 @@ test('WCAG 2.1 AA RW6++ inverse aperture metrology and bounded report',async({pa
  await page.locator('#ai-cover').selectOption('no');
  await page.locator('#ai-sense').selectOption('borde');
  await page.locator('#ai-physical').selectOption('no');
+ await page.locator('#ai-radius-predict').selectOption('no');
  await page.getByRole('button',{name:'Congelar predicciones y recuperar apertura'}).click();
  await audit(page,'RW6++ inverse measurement result');
 });

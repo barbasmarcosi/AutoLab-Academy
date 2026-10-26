@@ -10,6 +10,7 @@ test('RW6++ biased instrument exceeds assumed tolerance: recover interval, diagn
  await page.locator('#ai-cover').selectOption('no');
  await page.locator('#ai-sense').selectOption('borde');
  await page.locator('#ai-physical').selectOption('no');
+ await page.locator('#ai-radius-predict').selectOption('no');
  await page.getByRole('button',{name:'Congelar predicciones y recuperar apertura'}).click();
  await expect(page.getByText('Inversión de área inventada: tolerancia absoluta determinista')).toBeVisible();
  await expect(page.getByText(/¿Intervalo contiene verdad sintética\? No/)).toBeVisible();
@@ -29,6 +30,6 @@ test('RW6++ biased instrument exceeds assumed tolerance: recover interval, diagn
 test('RW6++ cannot calculate or save before locking three hypotheses',async({page})=>{
  await page.goto('./');await page.locator('nav.nav button[data-id="rotary-inverse"]').click();
  await page.getByRole('button',{name:'Congelar predicciones y recuperar apertura'}).click();
- await expect(page.getByText(/Completá las tres predicciones/)).toBeVisible();
+ await expect(page.getByText(/Completá las cuatro predicciones/)).toBeVisible();
  await expect(page.getByRole('button',{name:'Guardar expediente RW6++'})).toHaveCount(0);
 });

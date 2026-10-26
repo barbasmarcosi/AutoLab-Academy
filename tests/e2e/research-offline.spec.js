@@ -66,6 +66,7 @@ test('MC01 + RW4+ + MC08 function completely offline after service-worker activa
   await page.locator('#ai-cover').selectOption('no');
   await page.locator('#ai-sense').selectOption('borde');
   await page.locator('#ai-physical').selectOption('no');
+ await page.locator('#ai-radius-predict').selectOption('no');
   await page.getByRole('button',{name:'Congelar predicciones y recuperar apertura'}).click();
   await expect(page.getByText('Inversión de área inventada: tolerancia absoluta determinista')).toBeVisible();
   await page.locator('nav.nav button[data-id="brakes"]').click();

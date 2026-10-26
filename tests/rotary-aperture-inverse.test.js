@@ -37,13 +37,14 @@ test('RW6++ synthetic bias exceeding assumed tolerance invalidates coverage, fai
  assert.equal(normalizedApertureSensitivity(0),0);
  assert.equal(normalizedApertureSensitivity(1),0);
  const inp={radiusMm:20,trueOpeningFraction:.25,biasFraction:.04,toleranceFraction:.02,
-  predictedCoverage:'no',predictedSensitivity:'borde',predictedPhysical:'no',reasoning,limits};
+  predictedCoverage:'no',predictedSensitivity:'borde',predictedPhysical:'no',predictedRadiusEffect:'no',reasoning,limits};
  const grade=gradeInverseAperture(inp);
  assert.equal(grade.score,100);assert.equal(grade.passed,true);
  assert.match(inverseApertureReport(inp,grade),/synthetic_deterministic_inverse_interval/);
  assert.equal(gradeInverseAperture({...inp,predictedCoverage:'si'}).passed,false);
  assert.equal(gradeInverseAperture({...inp,predictedSensitivity:'centro'}).passed,false);
  assert.equal(gradeInverseAperture({...inp,predictedPhysical:'si'}).passed,false);
+ assert.equal(gradeInverseAperture({...inp,predictedRadiusEffect:'si'}).passed,false);
  assert.equal(gradeInverseAperture({...inp,reasoning:''}).passed,false);
 });
 test('RW6++ corrupted geometries, impossible measurements and invalid hypotheses are rejected',()=>{

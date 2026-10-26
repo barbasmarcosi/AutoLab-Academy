@@ -76,15 +76,15 @@ export function inverseApertureStudy({radiusMm=20,trueOpeningFraction=.25,
   warning:'La cobertura depende de un sesgo y tolerancia elegidos artificialmente. Un intervalo de área no implica una probabilidad ni relaciona u con grados de rotor.'};
 }
 export function gradeInverseAperture({radiusMm,trueOpeningFraction,biasFraction,toleranceFraction,
- predictedCoverage,predictedSensitivity,predictedPhysical,reasoning,limits}){
+ predictedCoverage,predictedSensitivity,predictedPhysical,predictedRadiusEffect,reasoning,limits}){
  if(!['si','no'].includes(predictedCoverage)||!['borde','centro','igual'].includes(predictedSensitivity)||
-    !['si','no'].includes(predictedPhysical))throw RangeError('Tres predicciones obligatorias');
+    !['si','no'].includes(predictedPhysical)||!['si','no'].includes(predictedRadiusEffect))throw RangeError('Cuatro predicciones obligatorias');
  const x=inverseApertureStudy({radiusMm,trueOpeningFraction,biasFraction,toleranceFraction});
  const checks={coverage:predictedCoverage===(x.coverage?'si':'no'),
-  sensitivity:predictedSensitivity==='borde',real:predictedPhysical==='no'};
+  sensitivity:predictedSensitivity==='borde',real:predictedPhysical==='no',radius:predictedRadiusEffect==='no'};
  const explain=typeof reasoning==='string'&&reasoning.trim().length>=100;
  const caveat=typeof limits==='string'&&limits.trim().length>=75;
- return {score:Object.values(checks).filter(Boolean).length*25+(explain?10:0)+(caveat?15:0),
+ return {score:Object.values(checks).filter(Boolean).length*20+(explain?10:0)+(caveat?10:0),
   passed:Object.values(checks).every(Boolean)&&explain&&caveat,checks,
   model:APERTURE_INVERSE_MODEL,provenance:'synthetic_deterministic_inverse_interval',
   warning:'Calificación de hipótesis y extensión de texto; no se evalúa semánticamente el texto libre ni se acredita metrología real.'};
@@ -104,7 +104,7 @@ export function inverseApertureReport(session,grade){
   'Ancho inverso cerca de borde u=.05='+x.nearEdgeIntervalWidth.toFixed(9)+
    ', cerca de centro u=.5='+x.centerIntervalWidth.toFixed(9),
   'Predicción alumno cobertura='+session.predictedCoverage+'; sensibilidad='+session.predictedSensitivity+
-   '; aplicación real='+session.predictedPhysical,
+   '; aplicación real='+session.predictedPhysical+'; predicción radio='+session.predictedRadiusEffect,
   'Evaluación '+grade.score+'/100; aprobado='+grade.passed,
   'Justificación (sin corrección semántica): '+session.reasoning,
   'Límites declarados: '+session.limits,

@@ -10,7 +10,7 @@ export function apertureInverseShell(){
 export function mountApertureInverse(root,{record}){
  if(!root||typeof record!=='function')throw Error('RW6++ requiere almacenamiento confirmado');
  const s={radiusMm:20,trueOpeningFraction:.25,biasFraction:.04,toleranceFraction:.02,radiusBandFraction:.05,
-  predictedCoverage:'',predictedSensitivity:'',predictedPhysical:'',reasoning:'',limits:'',
+  predictedCoverage:'',predictedSensitivity:'',predictedPhysical:'',predictedRadiusEffect:'',reasoning:'',limits:'',
   data:null,assessment:null,saved:false,saving:false,error:''};
  function render(){
   let html='<div class="panel stack"><h2>Contrato de inferencia</h2><p role="note"><strong>Modelo 2D inventado.</strong> El puerto es un círculo ideal parcialmente descubierto por una máscara recta. El supuesto instrumento informa un área con sesgo artificial y una tolerancia determinista absoluta. Una bisección invierte el área de segmento circular para encontrar u. Los límites no son datos metrológicos, ni una incertidumbre estadística o un intervalo de confianza, ni un ángulo real de rotor.</p>'+
@@ -32,10 +32,11 @@ export function mountApertureInverse(root,{record}){
     [['','Elegí…'],['borde','Cerca del borde u=0,05'],['centro','Cerca de la mitad u=0,50'],['igual','Igual en ambos']],s.predictedSensitivity);
    html+=select('ai-physical','¿Permite este resultado inferir grados de eje, caudal o pérdida física Wankel?',
     [['','Elegí…'],['si','Sí, directamente'],['no','No, falta modelo/medición física']],s.predictedPhysical);
+   html+=select('ai-radius-predict','¿Ampliar la banda de radios admisibles puede reducir el conjunto de aperturas compatibles?',[['','Elegí…'],['si','Sí, puede descartar soluciones'],['no','No, no puede descartar soluciones previas']],s.predictedRadiusEffect);
    html+='<button type="button" class="button" data-ai="reveal">Congelar predicciones y recuperar apertura</button>';
   }else{
    const a=s.data,radius=radiusAmbiguityStudy(s),b=radius.boundedRadius;
-   html+='<p>Predicciones congeladas: cobertura '+esc(s.predictedCoverage)+', sensibilidad '+esc(s.predictedSensitivity)+', extrapolación física '+esc(s.predictedPhysical)+'.</p>';
+   html+='<p>Predicciones congeladas: cobertura '+esc(s.predictedCoverage)+', sensibilidad '+esc(s.predictedSensitivity)+', extrapolación física '+esc(s.predictedPhysical)+', banda radial '+esc(s.predictedRadiusEffect)+'.</p>';
    html+='<table class="rw-table" style="width:100%"><caption>Inversión de área inventada: tolerancia absoluta determinista</caption><thead><tr><th scope="col">Magnitud</th><th scope="col">Resultado</th></tr></thead><tbody>'+
     [['Área total circular (mm²)',fmt(a.fullAreaMm2)],
      ['Área verdadera ficticia (mm²)',fmt(a.trueAreaMm2)],
@@ -71,7 +72,7 @@ export function mountApertureInverse(root,{record}){
  }
  root.addEventListener('input',event=>{
   const f={'ai-radius':'radiusMm','ai-radius-band':'radiusBandFraction','ai-u':'trueOpeningFraction','ai-bias':'biasFraction','ai-tolerance':'toleranceFraction',
-   'ai-cover':'predictedCoverage','ai-sense':'predictedSensitivity','ai-physical':'predictedPhysical',
+   'ai-cover':'predictedCoverage','ai-sense':'predictedSensitivity','ai-physical':'predictedPhysical','ai-radius-predict':'predictedRadiusEffect',
    'ai-reason':'reasoning','ai-limits':'limits'};
   const prop=f[event.target.id];if(!prop)return;
   if(s.data&& !['reasoning','limits'].includes(prop))return;
@@ -79,9 +80,9 @@ export function mountApertureInverse(root,{record}){
  });
  root.addEventListener('click',async event=>{
   const action=event.target.closest('[data-ai]')?.dataset.ai;if(!action)return;s.error='';
-  if(action==='reset'){Object.assign(s,{data:null,assessment:null,predictedCoverage:'',predictedSensitivity:'',predictedPhysical:'',reasoning:'',limits:'',saved:false,saving:false});render();return;}
+  if(action==='reset'){Object.assign(s,{data:null,assessment:null,predictedCoverage:'',predictedSensitivity:'',predictedPhysical:'',predictedRadiusEffect:'',reasoning:'',limits:'',saved:false,saving:false});render();return;}
   if(action==='reveal'){
-   if(!s.predictedCoverage||!s.predictedSensitivity||!s.predictedPhysical){s.error='Completá las tres predicciones antes de revelar la medición.';render();return;}
+   if(!s.predictedCoverage||!s.predictedSensitivity||!s.predictedPhysical||!s.predictedRadiusEffect){s.error='Completá las cuatro predicciones antes de revelar la medición.';render();return;}
    try{s.data=inverseApertureStudy(s);}catch(error){s.error='Los parámetros del modelo no son válidos.';}
    render();return;
   }
