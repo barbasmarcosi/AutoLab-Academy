@@ -1,0 +1,31 @@
+import{test,expect}from'@playwright/test';
+test('MC01 + RW4+ + MC08 function completely offline after service-worker activation',async({page,context})=>{
+ await page.goto('./');
+ await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
+ await context.setOffline(true);
+ try{
+  await page.reload();
+  await page.locator('nav.nav button[data-id="metrology"]').click();
+  await expect(page.getByRole('heading',{name:'Metrology Research Bench'})).toBeVisible();
+  await page.getByRole('button',{name:'Nuevo expediente reproducible'}).click();
+  await page.locator('#mc-tool').selectOption('micro');
+  await page.locator('#mc-prediction').selectOption('resolvable');
+  await page.getByRole('button',{name:'Congelar pronóstico y medir'}).click();
+  await expect(page.getByRole('heading',{name:'Presupuesto de incertidumbre'})).toBeVisible();
+  await page.locator('nav.nav button[data-id="rotary-instruments"]').click();
+  await expect(page.getByRole('heading',{name:'Instrument Verification Lab'})).toBeVisible();
+  await page.getByRole('button',{name:'Crear desafío adversarial'}).click();
+  await page.locator('#ri-initial').selectOption('instrument');
+  await page.getByRole('button',{name:'Congelar hipótesis provisional'}).click();
+  await page.locator('#ri-independent').selectOption('normal');
+  await page.locator('[data-ri="probe"][data-probe="independent"]').click();
+  await expect(page.getByText(/índice observado:/)).toBeVisible();
+  await page.locator('nav.nav button[data-id="brakes"]').click();
+  await expect(page.getByRole('heading',{name:'Brake Energy Research Lab'})).toBeVisible();
+  await page.locator('#br-energy').selectOption('quadruple');
+  await page.locator('#br-distance').selectOption('quadruple');
+  await page.locator('#br-mass-effect').selectOption('same');
+  await page.getByRole('button',{name:'Congelar hipótesis y simular'}).click();
+  await expect(page.getByText('Resultados de física ideal, NO distancias de seguridad vial')).toBeVisible();
+ }finally{await context.setOffline(false);}
+});
