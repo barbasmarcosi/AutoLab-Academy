@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.15 (candidato en validación): pantalla de recuperación de respaldo JSON si IndexedDB contiene progreso incompatible, sin limpieza automática y confirmación explícita; integración de importación local y pruebas de recuperación, rechazo de archivo inválido y fallo de cuota. Ver docs/RECOVERY_BOOTSTRAP_V1_9_15.md.
+
+
 - v1.9.14 (candidato en validación): auditoría global de IDs/temas/validador de 13 catálogos de escenarios, reusa verificadores de ECU, multifallas, inyección, misfire, diferenciales e integrador; gate en npm build, regression SW v35→v36. Ver docs/SCENARIO_AUDIT_V1_9_14.md.
 
 
