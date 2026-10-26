@@ -45,6 +45,7 @@ import{FUEL_CASES,createFuelSession,fuelFrame,fuelProbe,gradeFuelSession,fuelRep
 import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSession,generateTrace,traceSummary,gradeTraceSession,traceReport}from'./temporal-trace-lab.js';
 import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDifferential,differentialTrace,differentialReport}from'./fault-discrimination.js';
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
+import{learningEvidenceOverview}from'./learning-evidence.js';
 import{lessonPractice,practiceProgress,practiceCoverage}from'./lesson-practice.js';
 import{REASONING_CHALLENGES,reasoningChallenge}from'./lesson-reasoning.js';
 import{transferProgress}from'./lesson-transfer.js';
@@ -591,23 +592,35 @@ function studyCoachView(){
 
 function pathView(){
  const status=evaluateLearningPath(data,lessons);
+ const evidence=learningEvidenceOverview(data,lessons,learningStages);
+ const recommendation=evidence.nextTask;
  return heading('ITINERARIO TÉCNICO','Aprendizaje por niveles','Ruta orientativa y accesible sin bloqueo. Las lecturas y los exámenes se cuentan por separado; ninguna etapa acredita experiencia real.')+
  '<div class="grid two"><div class="panel"><div class="stat-number">'+status.read+'/'+status.total+'</div><p class="stat-label">Lecturas registradas</p></div>'+
  '<div class="panel"><div class="stat-number">'+status.approvedTopics+'/5</div><p class="stat-label">Áreas con al menos un examen ≥85%</p></div></div>'+
- '<div class="section"><h2>Tu siguiente contenido sugerido</h2></div><div class="panel">'+(status.nextLesson?
- '<h3>'+esc(lessons.find(l=>l.id===status.nextLesson)?.title||status.nextLesson)+'</h3>'+
- '<p class="muted">Podés avanzar a cualquier nivel; la sugerencia se basa exclusivamente en lecturas registradas.</p>'+
- button('Estudiar siguiente lección','path-lesson','data-id="'+attr(status.nextLesson)+'"'):
- '<h3>Recorrido de lecturas registrado</h3><p>Podés seguir repasando, rindiendo y realizando prácticas.</p>')+'</div>'+
+ '<div class="grid two"><div class="panel"><div class="stat-number">'+evidence.totals.reasoningPassed+'/'+evidence.totals.reasoningAvailable+'</div><p class="stat-label">Transferencias contrafactuales aprobadas</p></div>'+
+ '<div class="panel"><div class="stat-number">'+evidence.totals.embeddedPassed+'/'+evidence.totals.embeddedAvailable+'</div><p class="stat-label">Laboratorios embebidos aprobados</p></div></div>'+
+ '<div class="section"><h2>Siguiente evidencia sugerida</h2></div><div class="panel">'+(recommendation?
+ '<h3>'+esc(lessons.find(l=>l.id===recommendation.lessonId)?.title||recommendation.lessonId)+'</h3>'+
+ '<p class="muted" id="next-evidence-reason">'+esc(recommendation.label)+'. El siguiente paso prioriza criterios sin probar antes de proponer otra lectura; podés navegar a cualquier lección.</p>'+
+ button('Abrir siguiente actividad','path-lesson','data-id="'+attr(recommendation.lessonId)+'"'):
+ '<h3>Sin actividades evaluables pendientes en la ruta disponible</h3><p>Esto no es una certificación: hay contenidos aún sin rúbrica propia, y toda práctica real requiere supervisión.</p>')+'</div>'+
  '<div class="section"><h2>Tres etapas del recorrido</h2></div>'+
  '<div class="stack">'+status.stages.map(stage=>
  '<article class="panel"><div class="row spaced"><div><span class="tag dim">ETAPA '+stage.order+'</span><h2 style="margin:12px 0 4px">'+esc(stage.name)+'</h2><p class="muted">'+esc(stage.subtitle)+'</p></div>'+
  '<strong>'+stage.read+'/'+stage.total+' lecturas</strong></div>'+
+ '<p class="muted small">Transferencia contrafactual: '+evidence.byStage.find(x=>x.id===stage.id).reasoningPassed+'/'+evidence.byStage.find(x=>x.id===stage.id).reasoningAvailable+
+ ' · Laboratorios embebidos: '+evidence.byStage.find(x=>x.id===stage.id).labPassed+'/'+evidence.byStage.find(x=>x.id===stage.id).labAvailable+
+ ' · Evidencia documental formativa: '+evidence.byStage.find(x=>x.id===stage.id).documentedTraining+' (no certificación)</p>'+
  '<div class="progress"><span style="width:'+Math.round(stage.read/stage.total*100)+'%"></span></div>'+
  '<p class="muted">'+esc(stage.goal)+'</p>'+
  '<div class="path-lessons">'+stage.lessons.map(id=>{
-  const l=lessons.find(x=>x.id===id),done=Boolean(data.notes['lesson-'+id]);
-  return '<button class="path-lesson" data-action="path-lesson" data-id="'+attr(id)+'"><span aria-hidden="true">'+(done?'✓':'○')+'</span><span>'+esc(l?.title||id)+'</span><small>'+esc(l?.topic||'')+'</small></button>';
+  const l=lessons.find(x=>x.id===id),e=evidence.byLesson.get(id);
+  const details=[e.read?'Lectura registrada':'Lectura pendiente'];
+  if(e.reasoning.available)details.push(e.reasoning.passed?'Transferencia aprobada':'Transferencia pendiente');
+  if(e.lab.available)details.push(e.lab.passed?'Laboratorio aprobado':'Laboratorio pendiente');
+  if(e.linkedLab)details.push('Banco vinculado (no acredita esta lección)');
+  if(!e.assessed)details.push('Sin rúbrica individual');
+  return '<button class="path-lesson" data-action="path-lesson" data-id="'+attr(id)+'"><span aria-hidden="true">'+(e.read?'✓':'○')+'</span><span>'+esc(l?.title||id)+'</span><small>'+esc((l?.topic||'')+' · '+details.join(' · '))+'</small></button>';
  }).join('')+'</div>'+
  (stage.id==='ecu'?'<div class="row" style="margin-top:16px">'+button('Practicar en Banco ECU','nav','data-id="ecu"')+'</div>':'')+
  (stage.id==='components'?'<div class="row" style="margin-top:16px">'+button('Abrir laboratorio de componentes','open-components')+'</div>':'')+
@@ -617,7 +630,7 @@ function pathView(){
  (stage.id==='misfire'?'<div class="row" style="margin-top:16px">'+button('Practicar balance de cilindros','nav','data-id="misfire"')+'</div>':'')+
  (stage.id==='integrative'?'<div class="row" style="margin-top:16px">'+button('Abrir Taller Integrador','nav','data-id="integrative"')+'</div>':'')+
  '</article>').join('')+'</div>'+
- '<div class="notice">El avance por lectura no se interpreta como dominio de un tema. El puntaje de selección múltiple tampoco demuestra aptitud para diagnóstico real ni intervención HV.</div>';
+ '<div class="notice">El registro de lectura, las '+evidence.totals.reasoningPassed+' transferencias y los '+evidence.totals.embeddedPassed+' laboratorios aprobados son evidencias independientes. '+evidence.totals.notAssessed+' lecciones todavía carecen de evaluación individual. Ninguno acredita experiencia en taller, diagnóstico físico o intervención HV.</div>';
 }
 function ecuMenu(){
  return heading('BANCO ECU','Investigar controladores sin cambiarlos a ciegas','Cinco modelos de banco sintético. Anticipá la observación antes de solicitarla y fundamentá por qué confirma o refuta tu diagnóstico.')+
