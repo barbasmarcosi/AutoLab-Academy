@@ -44,3 +44,7 @@ La cobertura formal de MC00–MC14 no significa que existan 15 simuladores de ni
 ### Exámenes por etapa MC
 
 Ahora se puede iniciar una evaluación dedicada por cualquiera de los cinco niveles MC00–MC14: 6 preguntas seleccionadas del subconjunto correcto por bloque, historial y FSRS integrados. La calificación de conocimiento no certifica destreza física ni habilita tareas HV.
+
+### RW2/RW3 — integración de currículo
+
+Dos lecciones nuevas (`rw2-ideal-versus-architecture`, `rw3-energy-losses`) y ocho preguntas de fuente conceptual NASA Glenn / SAE se incorporaron a Academia, Exámenes y FSRS. Tienen un nivel de aprendizaje 15 (`rotary-science`) sin modificar notas previas ni el esquema IndexedDB. Las cifras del balance RW3 se generan por definición, no son datos físicos ni mediciones OEM.

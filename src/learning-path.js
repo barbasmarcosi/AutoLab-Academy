@@ -1,5 +1,5 @@
 /**
- * Fourteen-stage learning itinerary. Reading and objective exams are shown separately:
+ * Fifteen-stage learning itinerary. Reading and objective exams are shown separately:
  * neither demonstrates competence on a real vehicle.
  */
 export const learningStages=[
@@ -44,7 +44,10 @@ export const learningStages=[
   goal:'Relacionar mediciones y control con la mecánica, conservar límites HV y contrastar arquitecturas energéticas.'},
  {id:'research-core',order:14,name:'Diagnóstico e investigación',subtitle:'MC13–MC14 · Hipótesis, diseño experimental e invención',
   lessons:['mc13-diagnostic-method','mc14-research-doe'],
-  goal:'Formular hipótesis alternativas, diseñar pruebas discriminantes, estimar incertidumbre y entregar evidencia reproducible.'}
+  goal:'Formular hipótesis alternativas, diseñar pruebas discriminantes, estimar incertidumbre y entregar evidencia reproducible.'},
+ {id:'rotary-science',order:15,name:'Ingeniería rotativa: termodinámica',subtitle:'RW2/RW3 · Otto ideal, balance energético y límites de inferencia',
+  lessons:['rw2-ideal-versus-architecture','rw3-energy-losses'],
+  goal:'Distinguir ciclo termodinámico de arquitectura mecánica y exigir ensayos antes de inferir rendimiento Wankel.'}
 ];
 export function evaluateLearningPath(progress,lessons){
  const exists=new Set(lessons.map(l=>l.id));
