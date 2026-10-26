@@ -46,7 +46,7 @@ import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSes
 import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDifferential,differentialTrace,differentialReport}from'./fault-discrimination.js';
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
 import{lessonPractice,practiceProgress,practiceCoverage}from'./lesson-practice.js';
-import{reasoningChallenge,reasoningProgress}from'./lesson-reasoning.js';
+import{REASONING_CHALLENGES,reasoningChallenge,reasoningProgress}from'./lesson-reasoning.js';
 import{mountLessonReasoning}from'./lesson-reasoning-view.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
@@ -685,7 +685,7 @@ function ecuSummary(c){
 function learn(){
  const done=lessons.filter(l=>Boolean(data.notes['lesson-'+l.id])).length;
  return heading('ACADEMIA','Biblioteca de diagnóstico aplicado',lessons.length+' lecciones orientadas a interpretar mediciones, diagnosticar sin sustituir piezas al azar y trabajar con evidencia.')+
- '<div class="notice">Lectura, práctica y examen son evidencias diferentes. '+practiceCoverage(lessons).mapped+' lecciones están vinculadas a laboratorios; '+practiceCoverage(lessons).embedded+' permiten practicar aquí mismo. Además, hay '+8+' ejercicios de razonamiento falsable en sus lecciones. El resto aún no dispone de una práctica integrada.</div>'+
+ '<div class="notice">Lectura, práctica y examen son evidencias diferentes. '+practiceCoverage(lessons).mapped+' lecciones están vinculadas a laboratorios; '+practiceCoverage(lessons).embedded+' permiten practicar aquí mismo. Además, hay '+REASONING_CHALLENGES.length+' ejercicios de razonamiento falsable en sus lecciones. El resto aún no dispone de una práctica integrada.</div>'+
  '<div class="panel row spaced"><div><strong>'+done+' de '+lessons.length+' lecturas registradas</strong><p class="muted small">El registro es de lectura, no acredita dominio técnico.</p></div><span class="tag dim">Cinco especialidades</span></div>'+
  tracks.map(t=>{
   const group=lessons.filter(l=>l.topic===t.id),completed=group.filter(l=>data.notes['lesson-'+l.id]).length;
@@ -693,7 +693,7 @@ function learn(){
   '<div class="cards">'+group.map(l=>{
    const completed=Boolean(data.notes['lesson-'+l.id]);
    const p=lessonPractice(l.id),pr=practiceProgress(data,l.id);
-   const status=pr.passed?'Práctica aprobada':pr.status==='related-passed'?'Banco relacionado aprobado; lección aún sin evaluar':pr.status==='related-attempted'?'Banco relacionado practicado':pr.attempts?'Práctica realizada':p?.kind==='embedded'?'Simulador en lección':p?'Laboratorio asociado':'Práctica pendiente de integrar';
+   const status=pr.passed?'Práctica aprobada':pr.status==='related-passed'?'Banco relacionado aprobado; lección aún sin evaluar':pr.status==='related-attempted'?'Banco relacionado practicado':pr.attempts?'Práctica realizada':p?.kind==='embedded'?'Simulador en lección':p?'Laboratorio asociado':reasoningChallenge(l.id)?'Ejercicio de criterio dentro de la lección':'Práctica pendiente de integrar';
    return '<article class="panel lesson-card"><div><span class="tag '+(completed?'':'dim')+'">'+(completed?'Lectura registrada':'Por estudiar')+'</span>'+
    '<h3 style="margin-top:12px">'+esc(l.title)+'</h3><p class="muted">'+l.minutes+' minutos sugeridos · '+l.sections.length+' temas</p><p class="muted small">'+esc(status)+'</p></div>'+
    button(completed?'Revisar contenido':'Estudiar','lesson','data-id="'+attr(l.id)+'"','alt')+'</article>';
@@ -709,11 +709,16 @@ function lessonPracticeStatusText(id){
 }
 function lessonReasoningStatusText(id){
  const r=reasoningProgress(data,id);
- return r.status==='passed'?'Razonamiento guiado aprobado':r.status==='attempted'?'Razonamiento guiado intentado':'Razonamiento guiado pendiente';
+ return r.status==='passed'?'Razonamiento guiado aprobado':r.status==='attempted'?'Razonamiento guiado intentado':r.status==='unmapped'?'Sin ejercicio de razonamiento asociado':'Razonamiento guiado pendiente';
 }
 function lessonPracticePanel(l){
  const p=lessonPractice(l.id);
- if(!p)return '<section class="panel stack lesson-practice"><h2>Aplicación de criterios</h2><p>Esta lección todavía no dispone de una práctica interactiva específica. Leer el contenido no acredita dominio ni práctica.</p></section>';
+ if(!p)return '<section class="panel stack lesson-practice"><h2>Aplicación de criterios</h2>'+
+ (reasoningChallenge(l.id)?'<div id="lesson-reasoning-host" class="reasoning-host" aria-label="Actividad de razonamiento de esta lección"></div>'+
+ '<p id="lesson-reasoning-status" class="muted">'+esc(lessonReasoningStatusText(l.id))+'</p>':'')+
+ '<p>'+ (reasoningChallenge(l.id)?
+ 'Este microcaso entrena inferencias, pruebas y falsación. El simulador instrumental de esta lección todavía no está integrado.':
+ 'Esta lección todavía no dispone de una práctica interactiva específica. Leer el contenido no acredita dominio ni práctica.')+'</p></section>';
  return '<section class="panel stack lesson-practice" aria-label="Práctica vinculada a la lección">'+
  '<div class="eyebrow">DEL CONCEPTO A LA HIPÓTESIS</div><h2>'+esc(p.title)+'</h2>'+
  '<p><strong>Antes de observar:</strong> '+esc(p.prompt)+'</p>'+

@@ -69,3 +69,14 @@ test('MC14: missing and incorrect reasoning decisions remain fail-closed, retake
  await page.locator('nav.nav button[data-id="portfolio"]').click();
  await expect(page.getByText(/Razonamiento guiado — Caja negra: modelos indistinguibles/)).toHaveCount(2);
 });
+
+test('foundational 12 V and CAN lessons have in-place falsifiable reasoning without claiming physical simulators',async({page})=>{
+ await openLesson(page,'La caída de tensión cuenta la historia');
+ await expect(page.getByRole('heading',{name:/Desafío de razonamiento: Arranque lento/})).toBeVisible();
+ await expect(page.getByText(/Este microcaso entrena inferencias/)).toBeVisible();
+ await expect(page.locator('#lesson-practice-host')).toHaveCount(0);
+ await page.locator('nav.nav button[data-id="learn"]').click();
+ await page.locator('article.lesson-card').filter({hasText:'CAN: más allá de los dos cables'}).getByRole('button',{name:'Estudiar'}).click();
+ await expect(page.getByRole('heading',{name:/Desafío de razonamiento: CAN sin comunicación/})).toBeVisible();
+ await expect(page.locator('#reasoning-hypothesis')).toBeVisible();
+});

@@ -33,6 +33,6 @@ for(const e of report.errors)console.error('ERROR:',e);
 const registryAudit=practiceCoverage(learningStages.flatMap(s=>s.lessons).map(id=>({id})));
 console.log('Cobertura teoría-práctica declarada: '+JSON.stringify(registryAudit));
 console.log('Desafíos de hipótesis en lección: '+REASONING_CHALLENGES.length);
-if(REASONING_CHALLENGES.length<8||REASONING_CHALLENGES.some(x=>!learningStages.some(s=>s.lessons.includes(x.id))))process.exitCode=1;
+if(REASONING_CHALLENGES.length<13||REASONING_CHALLENGES.some(x=>!learningStages.some(s=>s.lessons.includes(x.id))))process.exitCode=1;
 if(registryAudit.invalid.length||registryAudit.total!==report.summary.lessons||registryAudit.embedded>registryAudit.mapped)process.exitCode=1;
 if(!report.ok)process.exitCode=1;
