@@ -5,7 +5,7 @@ export const MAX_BACKUP_IMPORT_CHARS=16_000_000;
 export const MAX_BACKUP_FILE_BYTES=24_000_000;
 export const SCHEMA_VERSION=1;
 export function emptyProgress(){return {schema:SCHEMA_VERSION,attempts:[],cases:[],reviews:{},notes:{},studyMinutes:0,diagnosticDraft:null};}
-export function gradeQuestion(question,selected){return Number(selected)===question.answer;}
+export function gradeQuestion(question,selected){return Number.isInteger(selected)&&selected===question.answer;}
 export function scoreExam(questions,answers){let correct=0;const details=questions.map((question,index)=>{const chosen=answers[index];const ok=gradeQuestion(question,chosen);if(ok)correct++;return {id:question.id,selected:chosen,correct:ok};});return {correct,total:questions.length,percentage:questions.length?Math.round(correct/questions.length*100):0,details};}
 export function scheduleReview(previous,correct,now=new Date()){const level=correct?Math.min((previous?.level??0)+1,5):0;const delays=[1,2,4,7,14,30];const due=new Date(now.getTime()+delays[level]*86400000).toISOString();return {level,due,last:now.toISOString(),correct};}
 export function dueReviews(progress,now=new Date()){return Object.entries(progress.reviews||{}).filter(([,r])=>Date.parse(r.due)<=now.getTime()).map(([id])=>id);}
