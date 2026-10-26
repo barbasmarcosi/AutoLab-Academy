@@ -181,3 +181,11 @@ test('MC01: experiment preserves metrology evidence through backup and portfolio
  assert.deepEqual(s.events[0].evidence,['micro','repeatability','resolution']);
  assert.match(portfolioMarkdown(restored,lessons),/synthetic_measurement/);
 });
+
+test('RW4+: a biased instrument investigation survives JSON export and recovery',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-instrument-v1',at:'2026-10-26T05:00:00Z',score:100,passed:true,hypothesis:'sealing',conclusion:'instrument',used:['zero','independent'],reasoning:'La referencia del instrumento está desviada, se descarta la hipótesis de estanqueidad al verificar una fuente independiente.',report:'# RW4+\nSemilla: 111\nModelo: rw4-instrument-adversarial-synthetic-v1'});
+ const recovered=parseBackup(serializeBackup(p)),snapshot=portfolioSnapshot(recovered,lessons),md=portfolioMarkdown(recovered,lessons);
+ assert.equal(snapshot.events[0].title,'RW4+ — Verificación instrumental adversarial');
+ assert.deepEqual(snapshot.events[0].evidence,['zero','independent']);
+ assert.match(md,/rw4-instrument-adversarial-synthetic-v1/);
+});

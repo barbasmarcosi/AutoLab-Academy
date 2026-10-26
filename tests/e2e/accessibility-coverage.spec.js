@@ -76,3 +76,13 @@ test('WCAG 2.1 AA MC01 metrology initial and measurements',async({page})=>{
  await page.getByRole('button',{name:'Congelar pronóstico y medir'}).click();
  await audit(page,'MC01 metrology data with table and conclusion form');
 });
+
+test('WCAG 2.1 AA RW4 instrument adversarial case',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-instruments"]').click();
+ await expect(page.getByRole('heading',{name:'Instrument Verification Lab'})).toBeVisible();
+ await audit(page,'RW4 adversarial initial');
+ await page.getByRole('button',{name:'Crear desafío adversarial'}).click();
+ await page.locator('#ri-initial').selectOption('sealing');
+ await page.getByRole('button',{name:'Congelar hipótesis provisional'}).click();
+ await audit(page,'RW4 adversarial checks');
+});
