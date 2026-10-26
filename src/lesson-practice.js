@@ -32,8 +32,11 @@ export function practiceProgress(progress,lessonId){
  const p=lessonPractice(lessonId);
  if(!p)return {status:'unmapped',attempts:0,passed:false};
  const cases=Array.isArray(progress?.cases)?progress.cases.filter(x=>x&&x.id===p.caseId):[];
- return {status:cases.some(x=>x.passed===true)?'passed':cases.length?'attempted':'not-started',
-  attempts:cases.length,passed:cases.some(x=>x.passed===true)};
+ const passed=cases.some(x=>x.passed===true);
+ if(p.kind==='linked')return {status:passed?'related-passed':cases.length?'related-attempted':'not-started',
+  attempts:cases.length,passed:false};
+ return {status:passed?'passed':cases.length?'attempted':'not-started',
+  attempts:cases.length,passed};
 }
 export function practiceCoverage(lessons){
  const known=new Set(lessons.map(x=>x.id)),duplicate=new Set(),unknown=[];

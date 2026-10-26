@@ -24,6 +24,7 @@ test('MC06 learns theory, predicts virtual measurements and stores approved prac
  await expect(page.getByText(/Resultado: 100\/100/)).toBeVisible();
  await page.getByRole('button',{name:'Guardar investigación MC06'}).click();
  await expect(page.locator('#lesson-practice-status')).toContainText('Práctica aprobada');
+ await expect(page.locator('#lesson-theory-practice-status')).toContainText('Práctica aprobada');
  await expect(page.getByText(/Teoría: lectura pendiente/)).toBeVisible();
  await page.getByRole('button',{name:'Registrar lectura y volver'}).click();
  const card=page.locator('article.lesson-card').filter({hasText:'MC06+ — Deslizamiento, sensor'});

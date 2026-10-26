@@ -691,7 +691,7 @@ function learn(){
   '<div class="cards">'+group.map(l=>{
    const completed=Boolean(data.notes['lesson-'+l.id]);
    const p=lessonPractice(l.id),pr=practiceProgress(data,l.id);
-   const status=pr.passed?'Práctica aprobada':pr.attempts?'Práctica realizada':p?.kind==='embedded'?'Simulador en lección':p?'Laboratorio asociado':'Práctica pendiente de integrar';
+   const status=pr.passed?'Práctica aprobada':pr.status==='related-passed'?'Banco relacionado aprobado; lección aún sin evaluar':pr.status==='related-attempted'?'Banco relacionado practicado':pr.attempts?'Práctica realizada':p?.kind==='embedded'?'Simulador en lección':p?'Laboratorio asociado':'Práctica pendiente de integrar';
    return '<article class="panel lesson-card"><div><span class="tag '+(completed?'':'dim')+'">'+(completed?'Lectura registrada':'Por estudiar')+'</span>'+
    '<h3 style="margin-top:12px">'+esc(l.title)+'</h3><p class="muted">'+l.minutes+' minutos sugeridos · '+l.sections.length+' temas</p><p class="muted small">'+esc(status)+'</p></div>'+
    button(completed?'Revisar contenido':'Estudiar','lesson','data-id="'+attr(l.id)+'"','alt')+'</article>';
@@ -700,7 +700,10 @@ function learn(){
 }
 function lessonPracticeStatusText(id){
  const status=practiceProgress(data,id);
- return status.status==='passed'?'Práctica aprobada: hay evidencia guardada':status.status==='attempted'?'Práctica realizada, todavía sin aprobar':status.status==='not-started'?'Práctica todavía no registrada':'No hay práctica vinculada todavía';
+ return status.status==='passed'?'Práctica aprobada: hay evidencia guardada':status.status==='attempted'?'Práctica realizada, todavía sin aprobar':
+  status.status==='related-passed'?'El banco relacionado fue aprobado; esta lección no tiene rúbrica propia':
+  status.status==='related-attempted'?'El banco relacionado tiene intentos; no se acredita esta lección':
+  status.status==='not-started'?'Práctica todavía no registrada':'No hay práctica vinculada todavía';
 }
 function lessonPracticePanel(l){
  const p=lessonPractice(l.id);
@@ -724,7 +727,7 @@ function lessonView(){
  return button('← Volver a academia','nav','data-id="learn"','alt small')+
  '<div class="section"></div>'+heading('LECCIÓN · '+l.topic.toUpperCase(),l.title,'Comprendé, formulá hipótesis, comprobá y justificá.')+
  '<article class="panel lesson-body"><p class="muted">Teoría: '+(data.notes['lesson-'+l.id]?'lectura registrada':'lectura pendiente')+
- '. Evidencia práctica: '+esc(lessonPracticeStatusText(l.id))+'. Ninguno de estos estados acredita competencia física.</p>'+
+ '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>. Ninguno de estos estados acredita competencia física.</p>'+
  sections(first)+'</article>'+lessonPracticePanel(l)+
  '<article class="panel lesson-body">'+sections(last)+
  '<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+
@@ -1494,11 +1497,17 @@ if(page==='learn'&&selectedLesson){
  if(practice?.kind==='embedded'){
   const mounts={powertrain:mountPowertrainLab,inventor:mountInventorLab,rotary:mountRotaryLab,'ecu-robust':mountRobustResearch};
   const node=document.getElementById('lesson-practice-host'),mount=mounts[practice.page];
-  if(node&&mount)mount(node,{record:async entry=>{
-   await saveLabEntry(entry);
-   const label=document.getElementById('lesson-practice-status');
-   if(label)label.textContent=lessonPracticeStatusText(selectedLesson);
-  }});
+  if(node&&mount){
+   const lessonAtMount=selectedLesson;
+   mount(node,{record:async entry=>{
+     await saveLabEntry(entry);
+     if(selectedLesson!==lessonAtMount||page!=='learn')return;
+     const label=document.getElementById('lesson-practice-status');
+     const summary=document.getElementById('lesson-theory-practice-status');
+     if(label)label.textContent=lessonPracticeStatusText(lessonAtMount);
+     if(summary)summary.textContent=lessonPracticeStatusText(lessonAtMount);
+   }});
+  }
  }
 }
 }

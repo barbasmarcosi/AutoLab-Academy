@@ -28,3 +28,13 @@ test('reading progress never masquerades as a passed practice or vice versa',()=
  assert.equal(practiceProgress({cases:[{id:p.caseId,passed:'true'}]},id).passed,false);
  assert.deepEqual(practiceProgress({cases:[{id:p.caseId,passed:true}]},'volt-drop'),{status:'unmapped',attempts:0,passed:false});
 });
+
+test('related lab evidence does not certify a separate linked lesson',()=>{
+ const related=practiceProgress({cases:[{id:'lab-powertrain-mc06-v1',passed:true}]},'mc06-gears-powertrain');
+ assert.equal(related.status,'related-passed');
+ assert.equal(related.passed,false);
+ assert.equal(related.attempts,1);
+ const attempt=practiceProgress({cases:[{id:'lab-powertrain-mc06-v1',passed:false}]},'mc06-gears-powertrain');
+ assert.equal(attempt.status,'related-attempted');
+ assert.equal(attempt.passed,false);
+});
