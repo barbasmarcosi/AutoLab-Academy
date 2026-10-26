@@ -27,3 +27,23 @@ test('RW4+ adversarial: solo instrumentación independiente demuestra que índic
  await page.locator('nav.nav button[data-id="portfolio"]').click();
  await expect(page.getByText('RW4+ — Verificación instrumental adversarial')).toBeVisible();
 });
+
+test('RW4++ simultaneous synthetic faults require a second instrument and zero reference',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-instruments"]').click();
+ await page.evaluate(()=>{Math.random=()=>1.5/2147483647;});
+ await page.getByRole('button',{name:'Crear desafío adversarial'}).click();
+ await expect(page.getByRole('heading',{name:/semilla 2/})).toBeVisible();
+ await page.locator('#ri-initial').selectOption('sealing');
+ await page.getByRole('button',{name:'Congelar hipótesis provisional'}).click();
+ const actual=await page.evaluate(async()=>{const {buildAdversarialCase}=await import('./src/rotary-instrument-check.js');return buildAdversarialCase(2);});
+ expect(actual.cause).toBe('both');
+ for(const check of actual.checks){
+  await page.locator('#ri-'+check.id).selectOption(check.classification);
+  await page.locator('[data-ri="probe"][data-probe="'+check.id+'"]').click();
+ }
+ await page.locator('#ri-final').selectOption('both');
+ await page.locator('#ri-reason').fill('El síntoma inicial es ambiguo. La segunda lectura señala retención sintética baja y el control de cero señala desviación del instrumento; las dos anomalías coexisten en el caso programado.');
+ await page.locator('#ri-limits').fill('Las señales son índices adimensionales ficticios y no acreditan diagnóstico de compresión, metrología ni umbrales OEM de un motor real.');
+ await page.getByRole('button',{name:'Concluir desafío adversarial'}).click();
+ await expect(page.getByText(/Resultado: 100\/100/)).toBeVisible();
+});

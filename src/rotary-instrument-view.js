@@ -1,14 +1,14 @@
 import{RW4_ALTERNATIVES,RW4_CROSSCHECKS,publicAdversarialCase,revealCrosscheck,evaluateAdversarial,adversarialReport}from'./rotary-instrument-check.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;'}[c]));
 export function adversarialShell(){
- return '<section class="stack"><div class="eyebrow">RW4 · INVESTIGACIÓN ADVERSARIAL</div><h1>Instrument Verification Lab</h1><p>Una señal anómala puede provenir del sistema o del instrumento. Contrastá el diagnóstico con una segunda lectura y un control de referencia antes de atribuir una causa.</p><div id="rotary-instrument-explorer"></div></section>';
+ return '<section class="stack"><div class="eyebrow">RW4 · INVESTIGACIÓN ADVERSARIAL</div><h1>Instrument Verification Lab</h1><p>Una señal anómala puede provenir del sistema, del instrumento o de ambos simultáneamente. Contrastá el diagnóstico con una segunda lectura y un control de referencia antes de atribuir una causa.</p><div id="rotary-instrument-explorer"></div></section>';
 }
 export function mountAdversarialLab(root,{record}){
  if(!root||typeof record!=='function')throw Error('Se requiere registrar evidencia RW4');
  const s={seed:null,initial:'',observations:[],final:'',reasoning:'',limits:'',result:null,saved:false,saving:false,error:''};
  const opts=(list,empty)=>'<option value="">'+empty+'</option>'+list.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.label)+'</option>').join('');
  function render(){
-  let html='<div class="panel stack"><h2>Qué se investiga</h2><p role="note"><strong>Banco ficticio.</strong> Una falla de estanqueidad y un instrumento desviado pueden entregar la misma lectura inicial baja. El resultado inicial <em>no</em> confirma desgaste ni fugas. Los índices son adimensionales e inventados: no representan presión de compresión, calibración certificada ni mediciones OEM.</p><button class="button" type="button" data-ri="new">Crear desafío adversarial</button></div>';
+  let html='<div class="panel stack"><h2>Qué se investiga</h2><p role="note"><strong>Banco ficticio.</strong> Una falla de estanqueidad, un instrumento desviado o ambas fallas simultáneas pueden entregar la misma lectura inicial baja. El resultado inicial <em>no</em> confirma desgaste ni fugas. Los índices son adimensionales e inventados: no representan presión de compresión, calibración certificada ni mediciones OEM.</p><button class="button" type="button" data-ri="new">Crear desafío adversarial</button></div>';
   if(s.seed!==null){
    const c=publicAdversarialCase(s.seed);
    html+='<div class="panel stack"><h2>Expediente RW4+ · semilla '+s.seed+'</h2><p>'+esc(c.symptom)+'</p><p>Índice de retención del instrumento original: <strong>'+c.observed.toFixed(3)+'</strong> (bajo en ambas causas). Índice de encendido sintético: '+c.ignitionIndex.toFixed(3)+'.</p>';

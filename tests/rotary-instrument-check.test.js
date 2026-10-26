@@ -26,3 +26,30 @@ test('RW4 adversarial: falla cerrada sin crosschecks o evidencia',()=>{
  assert.throws(()=>revealCrosscheck(30,'zero','normal'),RangeError);
  assert.throws(()=>buildAdversarialCase(-1),RangeError);
 });
+
+test('RW4++ 600 seeds exercise three distinct instrument-system causal alternatives without leaking the answer',()=>{
+ const seen=new Set();
+ for(let seed=1;seed<=600;seed++){
+  const c=buildAdversarialCase(seed),pub=publicAdversarialCase(seed);
+  seen.add(c.cause);
+  assert.equal('cause' in pub,false);
+  assert.equal(pub.hypotheses.length,3);
+  assert.deepEqual(c,buildAdversarialCase(seed));
+  assert.ok(c.observed>.3&&c.observed<.35);
+  const ind=c.checks.find(x=>x.id==='independent');
+  const zero=c.checks.find(x=>x.id==='zero');
+  assert.equal(ind.classification,c.cause==='instrument'?'normal':'bajo');
+  assert.equal(zero.classification,c.cause==='sealing'?'correcto':'desviado');
+  const session={seed,initial:'instrument',final:c.cause,
+   observations:c.checks.map(x=>({id:x.id,prediction:x.classification})),reasoning,limits};
+  assert.equal(evaluateAdversarial(session).passed,true);
+ }
+ assert.deepEqual([...seen].sort(),['both','instrument','sealing']);
+ const dual=buildAdversarialCase(2),observations=dual.checks.map(x=>({id:x.id,prediction:x.classification}));
+ assert.equal(dual.cause,'both');
+ const base={seed:2,initial:'sealing',final:'both',observations,reasoning,limits};
+ assert.equal(evaluateAdversarial({...base,final:'sealing'}).passed,false);
+ assert.equal(evaluateAdversarial({...base,final:'instrument'}).passed,false);
+ assert.equal(evaluateAdversarial({...base,observations:observations.slice(0,1)}).passed,false);
+ assert.match(adversarialReport(base,evaluateAdversarial(base)),/multicausal-synthetic-v2/);
+});

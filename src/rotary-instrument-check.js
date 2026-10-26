@@ -1,12 +1,13 @@
 /**
- * RW4-P3. Instrument verification challenge: two latent hypotheses cause
- * the same apparent 'low seal' index. This is a logic exercise, not Wankel
+ * RW4-P4. Instrument verification challenge: three latent hypotheses cause
+ * the same apparent 'low seal' index, including simultaneous failures. This is a logic exercise, not Wankel
  * engine pressure measurement. All values, thresholds and instruments are fictional.
  */
-export const RW4_ADVERSARIAL_VERSION='rw4-instrument-adversarial-synthetic-v1';
+export const RW4_ADVERSARIAL_VERSION='rw4-instrument-adversarial-multicausal-synthetic-v2';
 export const RW4_ALTERNATIVES=Object.freeze([
  {id:'sealing',label:'Pérdida de estanqueidad en el modelo'},
- {id:'instrument',label:'Desviación de referencia del instrumento virtual'}
+ {id:'instrument',label:'Desviación de referencia del instrumento virtual'},
+ {id:'both',label:'Estanqueidad e instrumento virtual simultáneamente anómalos'}
 ]);
 export const RW4_CROSSCHECKS=Object.freeze([
  {id:'independent',label:'Lectura en un segundo instrumento virtual',options:['bajo','normal']},
@@ -15,10 +16,10 @@ export const RW4_CROSSCHECKS=Object.freeze([
 const seedOk=s=>{if(!Number.isSafeInteger(s)||s<1||s>2147483647)throw RangeError('Semilla no reproducible');return s;};
 const jitter=(s,salt)=>{let n=Math.imul((s^salt)>>>0,1664525)+1013904223>>>0;return (n/4294967296-.5)*.028;};
 export function buildAdversarialCase(seed){
- seedOk(seed);const cause=seed%2===0?'sealing':'instrument';
+ seedOk(seed);const cause=['sealing','instrument','both'][seed%3];
  const observed=Number((.32+jitter(seed,1)).toFixed(3));
  const checks=[
-  {id:'independent',value:Number(((cause==='sealing'?.33:.85)+jitter(seed,9)).toFixed(3)),classification:cause==='sealing'?'bajo':'normal'},
+  {id:'independent',value:Number((((cause==='sealing'||cause==='both')?.33:.85)+jitter(seed,9)).toFixed(3)),classification:cause==='sealing'?'bajo':'normal'},
   {id:'zero',value:Number(((cause==='sealing'?.02:.30)+jitter(seed,19)).toFixed(3)),classification:cause==='sealing'?'correcto':'desviado'}
  ];
  return {model:RW4_ADVERSARIAL_VERSION,seed,cause,observed,checks,ignitionIndex:0.86,
@@ -51,7 +52,7 @@ export function evaluateAdversarial({seed,initial,observations,final,reasoning,l
  return {model:c.model,provenance:'synthetic_model',
   score:(all?20:0)+(cause?40:0)+correct*10+(typeof reasoning==='string'&&reasoning.trim().length>=90?10:0)+(typeof limits==='string'&&limits.trim().length>=60?10:0),
   passed:all&&enough&&cause&&correct===2,correct,cause,expected:c.cause,
-  warning:'Un índice bajo no acredita un problema real de sellos. En este modelo también puede ser el instrumento.'};
+  warning:'Un índice bajo no acredita sellos dañados. El instrumento puede fallar por sí solo o junto al sistema sintético.'};
 }
 export function adversarialReport(s,result){
  const c=buildAdversarialCase(s.seed);
