@@ -52,6 +52,7 @@ test('MC01 + RW4+ + MC08 function completely offline after service-worker activa
   await page.locator('#eb-nominal').selectOption('1');
   await page.locator('#eb-robust').selectOption('0');
   await page.locator('#eb-frontier').selectOption('0');
+  await page.locator('#eb-factorial').selectOption('3');
   await page.locator('#eb-real').selectOption('no');
   await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
   await expect(page.getByText('Factibilidad adimensional nominal y ante límites adversos ±0,03')).toBeVisible();
