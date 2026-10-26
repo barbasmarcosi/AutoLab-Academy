@@ -20,7 +20,7 @@ export function portfolioSnapshot(progress,lessons=[]){
  const cases=(progress.cases||[]).map(c=>({
   kind:c.id.startsWith('diagnostic-')?'diagnostic-transfer':c.id.startsWith('transfer-')?'transfer':c.id.startsWith('integral-')?'integrative':c.id.startsWith('misfire-')?'combustion':c.id.startsWith('fuel-')?'injection':c.id.startsWith('mf-')?'multifault':c.id.startsWith('trace-')?'temporal':c.id.startsWith('di-')?'differential':c.id.startsWith('lab-')?'lab':c.id.startsWith('measure-')?'quantitative':'diagnostic',
   id:c.id,topic:c.id.split('-')[1]||'varios',at:c.at,score:c.score,
-  title:(c.id==='lab-rotary-geometry-v1'?'RW1 — Rotary Geometry Explorer':differentialTitles.get(c.id))||c.id.replace(/^lab-|^measure-/,'').replaceAll('-',' '),
+  title:(c.id==='lab-rotary-geometry-v1'?'RW1 — Rotary Geometry Explorer':c.id==='lab-rotary-sensitivity-v1'?'Rotary Research Bench — sensibilidad A/B':differentialTitles.get(c.id))||c.id.replace(/^lab-|^measure-/,'').replaceAll('-',' '),
   evidence:Array.isArray(c.used)?c.used:[],
   reasoning:String(c.reasoning||''),
   hypothesis:String(c.hypothesis||''),conclusion:String(c.conclusion||''),
@@ -60,7 +60,7 @@ export function portfolioMarkdown(progress,lessons=[],date=new Date()){
    '- Hipótesis: '+(e.hypothesis||'no registrada'),
    '- Conclusión: '+(e.conclusion||'no registrada'),
    '- Justificación de estudiante (sin evaluación semántica): '+(e.reasoning||'sin registro'),'');
-  if((['integrative','transfer','diagnostic-transfer'].includes(e.kind)||e.id==='lab-rotary-geometry-v1')&&e.report)lines.push('#### Informe completo de expediente','',e.report,'');
+  if((['integrative','transfer','diagnostic-transfer'].includes(e.kind)||e.id==='lab-rotary-geometry-v1'||e.id==='lab-rotary-sensitivity-v1')&&e.report)lines.push('#### Informe completo de expediente','',e.report,'');
  }
  if(!snapshot.events.length)lines.push('(Sin evaluaciones registradas.)','');
  lines.push('---','La experiencia práctica solo puede ser acreditada mediante criterios, observación y supervisión profesionales.','');

@@ -12,7 +12,7 @@ Además del diagnóstico basado en evidencias, aspiramos a formar profesionales 
 
 **Solo RW0/RW1 está implementado como primer incremento experimental; los demás carriles siguen planificados y no constituyen formación práctica acreditada.**
 
-El laboratorio **RW0/RW1 (Rotary Geometry Explorer)** ahora tiene cinemática Wankel simplificada, animación offline, cámaras y predicciones con evidencia persistida. No simula combustión ni representa volúmenes OEM. Los restantes RW2–RW10 y el currículo MC siguen en planificación. [Modelo, fuentes y limitaciones](docs/ROTARY_GEOMETRY_MODEL.md).
+El laboratorio **RW0/RW1 (Rotary Geometry Explorer)** ahora tiene cinemática Wankel simplificada, animación offline, cámaras y predicciones con evidencia persistida. El primer Rotary Research Bench compara la sensibilidad geométrica A/B frente a cambios sintéticos de excentricidad, sin atribuir mejoras de rendimiento. No simula combustión ni representa volúmenes OEM. Los restantes RW2–RW10 y el currículo MC siguen en planificación. [Modelo, fuentes y limitaciones](docs/ROTARY_GEOMETRY_MODEL.md).
 
 ## Qué está implementado
 

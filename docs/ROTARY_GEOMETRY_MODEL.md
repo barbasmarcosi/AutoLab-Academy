@@ -41,3 +41,7 @@ El estudiante selecciona cámara y ángulo, pronostica el cambio de área en +30
 Pruebas unitarias del giro 3:1, ápices, positividad y balance de áreas, periodicidad 1080°, rechazo de parámetros inválidos, tendencia y fórmula de potencia. E2E: predicción, persistencia, recarga y uso offline en navegadores soportados por CI. No se han realizado ensayos físicos ni contraste con CAD de geometría de flancos reales.
 
 Próxima iteración: comparar áreas contra integración de referencia, cuantificar error por discretización, validar flancos curvos y añadir experimentos RW4 con hipótesis alternativas y pruebas discriminantes.
+
+## Primer Rotary Research Bench: análisis de sensibilidad (P1b)
+
+Se agregó un A/B determinista: baseline e=14 mm y alternativas e=10 o 18 mm, manteniendo R=90 mm, ancho ficticio=50 mm y paso de muestreo angular de 15 grados. La métrica es oscilación máximo-mínimo del volumen-proxy de una cámara; no compresión ni eficiencia. El estudiante plantea predicción e incertidumbre antes de contrastar y puede guardar el resultado y procedencia en el portafolio. Una comparación de 48 vs. 192 segmentos comprueba sensibilidad numérica de discretización, no sustituye estimación de incertidumbre física. Pruebas: tests/rotary-research.test.js.
