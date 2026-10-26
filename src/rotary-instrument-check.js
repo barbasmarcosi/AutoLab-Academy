@@ -19,7 +19,7 @@ export function buildAdversarialCase(seed){
  seedOk(seed);const cause=['sealing','instrument','both'][seed%3];
  const observed=Number((.32+jitter(seed,1)).toFixed(3));
  const checks=[
-  {id:'independent',value:Number((((cause==='sealing'||cause==='both')?.33:.85)+jitter(seed,9)).toFixed(3)),classification:cause==='sealing'?'bajo':'normal'},
+  {id:'independent',value:Number((((cause==='sealing'||cause==='both')?.33:.85)+jitter(seed,9)).toFixed(3)),classification:(cause==='sealing'||cause==='both')?'bajo':'normal'},
   {id:'zero',value:Number(((cause==='sealing'?.02:.30)+jitter(seed,19)).toFixed(3)),classification:cause==='sealing'?'correcto':'desviado'}
  ];
  return {model:RW4_ADVERSARIAL_VERSION,seed,cause,observed,checks,ignitionIndex:0.86,
