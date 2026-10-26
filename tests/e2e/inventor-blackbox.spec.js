@@ -1,4 +1,5 @@
 import{test,expect}from'@playwright/test';
+import{readFile}from'node:fs/promises';
 test('MC14 virtual black box freezes hypotheses, checks held-out evidence and restores portfolio offline',async({page,context})=>{
  await page.goto('./');
  await page.locator('nav.nav button[data-id="inventor"]').click();
@@ -24,6 +25,22 @@ test('MC14 virtual black box freezes hypotheses, checks held-out evidence and re
  await page.locator('nav.nav button[data-id="portfolio"]').click();
  await expect(page.getByText('MC14 — Caja negra virtual')).toBeVisible();
  await page.reload();await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('MC14 — Caja negra virtual')).toBeVisible();
+ await page.locator('nav.nav button[data-id="data"]').click();
+ const download=page.waitForEvent('download');
+ await page.locator('[data-action="export"]').click();
+ const json=await readFile(await (await download).path(),'utf8');
+ const backup=JSON.parse(json);
+ const saved=backup.payload.cases.find(c=>c.id==='lab-inventor-blackbox-v1');
+ expect(saved).toBeTruthy();
+ expect(saved.report).toContain('Semilla reproducible: 1');
+ expect(saved.report).toContain('synthetic_virtual_blackbox');
+ expect(saved.report).toContain('holdout');
+ page.on('dialog',dialog=>dialog.accept());
+ await page.locator('[data-action="reset"]').click();
+ await page.locator('nav.nav button[data-id="data"]').click();
+ await page.locator('#import-file').setInputFiles({name:'mc14-backup.json',mimeType:'application/json',buffer:Buffer.from(json)});
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
  await expect(page.getByText('MC14 — Caja negra virtual')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
  await context.setOffline(true);

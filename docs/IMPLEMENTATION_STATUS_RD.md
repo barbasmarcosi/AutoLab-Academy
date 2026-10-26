@@ -148,3 +148,5 @@ Nueva sección `inventor` con un experimento de ingeniería inversa de baja tens
 ### MC14 — teoría de identificación y validación retenida (26/10/2026)
 
 Lección MC14 con cuatro secciones y cuatro preguntas objetivas sobre evidencia indistinguible, predicción congelada, prueba discriminante y validación con dato retenido. Referencia conceptual: https://www.mathworks.com/help/ident/ug/specifying-estimation-and-validation-data.html. Las funciones de transferencia, lecturas, ruido y umbrales son inventados, sin certificados ni valores OEM. Integración con Academia, FSRS, auditoría curricular y E2E; **93 lecciones, 274 preguntas, 16 etapas**. Cache PWA **v72** con migración de v38 sin modificar IndexedDB.
+
+Gate MC14 reforzado: la prueba E2E descarga el respaldo JSON, comprueba procedencia y semilla, borra el progreso local y restaura el expediente completo antes de ensayar navegación offline. No se cambió schema v1.
