@@ -7,7 +7,7 @@ const visit=async(page,title)=>{
 };
 test('MC06 learns theory, predicts virtual measurements and stores approved practice independently of reading',async({page})=>{
  await visit(page,'MC06+ — Deslizamiento, sensor');
- await expect(page.getByRole('heading',{name:'Powertrain Diagnostic Bench'})).toBeVisible();
+ await expect(page.locator('#lesson-practice-host [data-pt="new"]')).toBeVisible();
  await expect(page.locator('#lesson-practice-status')).toContainText('no registrada');
  await page.evaluate(()=>{Math.random=()=>1.5/2147483647;});
  await page.getByRole('button',{name:'Crear investigación MC06'}).click();
@@ -35,7 +35,7 @@ test('MC06 learns theory, predicts virtual measurements and stores approved prac
 });
 test('MC14 is embedded with prediction and holdout separated from study progress',async({page})=>{
  await visit(page,'MC14 — Identificación de caja negra');
- await expect(page.getByRole('heading',{name:/Inventor’s Bench/})).toBeVisible();
+ await expect(page.locator('#lesson-practice-host [data-inv="new"]')).toBeVisible();
  await expect(page.locator('#lesson-practice-status')).toContainText('no registrada');
  await page.getByRole('button',{name:'Crear experimento reproducible'}).click();
  await expect(page.locator('#inv-initial')).toBeVisible();
@@ -48,12 +48,12 @@ test('MC14 is embedded with prediction and holdout separated from study progress
 });
 test('RW1 and RW8 use their existing mathematics simulators inline; other links remain honest',async({page})=>{
  await visit(page,'RW1+ — Validar geometría');
- await expect(page.getByRole('heading',{name:'Rotary Geometry Explorer'})).toBeVisible();
+ await expect(page.locator('#lesson-practice-host #rw-analytic-audit table')).toBeVisible();
  await expect(page.locator('#rw-analytic-audit table')).toBeVisible();
  await page.locator('nav.nav button[data-id="learn"]').click();
  const card=page.locator('article.lesson-card').filter({hasText:'RW8++ — Diseño factorial'});
  await card.getByRole('button',{name:'Estudiar'}).click();
- await expect(page.getByRole('heading',{name:'Robust Optimization Research Lab'})).toBeVisible();
+ await expect(page.locator('#lesson-practice-host #eb-scenario')).toBeVisible();
  await expect(page.locator('#lesson-practice-host')).toBeVisible();
  await page.locator('nav.nav button[data-id="learn"]').click();
  const ordinary=page.locator('article.lesson-card').filter({hasText:'MC07 — Dirección'});
