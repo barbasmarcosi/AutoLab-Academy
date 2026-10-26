@@ -158,3 +158,7 @@ Laboratorio `powertrain` para diagnosticar tres causas sintéticas que comparten
 ### MC06 — evaluación curricular del laboratorio (2026-10-26)
 
 Se sumó `mc06-dual-fault-instrumentation` al bloque de chasis y mecánica con 4 secciones y 4 preguntas sobre reducción, doble causalidad, contrastes instrumentales y potencia de eje. Referencia conceptual sobre transmisión: https://saemobilus.sae.org/courses/fundamentals-modern-vehicle-transmissions-pd730419; las lecturas, la eficiencia y las causas del simulador son inventadas y NO proceden de esa fuente. Cobertura **94 lecciones, 278 preguntas, 16 etapas**. Actualización de precache a **v74**, sin cambios de IndexedDB schema 1. Se mantienen exámenes, FSRS, auditoría curricular y nuevo E2E de lectura.
+
+### Continuidad teoría–práctica v75 (2026-10-26)
+
+El registro explícito `src/lesson-practice.js` enlaza 16 lecciones a laboratorios existentes (4 completamente embebidos: MC06+, MC14, RW1+, RW8++ factorial; 12 con navegación contextual). Cada vista de estudio coloca una actividad después de los dos primeros apartados y muestra estados **independientes** de lectura, intento y aprobación del motor, sin equiparar lectura o puntaje a competencia en el mundo físico. Los otros 78 contenidos declaran con honestidad que aún no tienen práctica asociada. Los expedientes se guardan con IDs existentes y el formato IndexedDB/JSON v1 sigue intacto. Precache v75; falta incrementar cobertura y revisar la idoneidad didáctica de cada enlace.
