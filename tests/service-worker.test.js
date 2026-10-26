@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 function harness(fetchImpl=async()=>({ok:true,clone(){return this}}),failPut=false){
- const events={},store=new Map([['autolab-academy-v45',new Map([['old','old']])],['unrelated-app',new Map()]]);
+ const events={},store=new Map([['autolab-academy-v46',new Map([['old','old']])],['unrelated-app',new Map()]]);
  const writes=[];
  const cacheFor=name=>({
   async addAll(paths){writes.push({name,paths});},
@@ -33,7 +33,7 @@ async function dispatch(handler,request=null){
 test('v1.9.13: activation removes previous AutoLab cache, not unrelated browser data',async()=>{
  const sw=harness();
  await dispatch(sw.events.install);
- assert.equal(sw.store.has('autolab-academy-v46'),true);
+ assert.equal(sw.store.has('autolab-academy-v47'),true);
  assert.equal(sw.writes[0].paths.includes('./src/diagnostic-draft.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-geometry.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-view.js'),true);
@@ -48,9 +48,10 @@ test('v1.9.13: activation removes previous AutoLab cache, not unrelated browser 
  assert.equal(sw.writes[0].paths.includes('./src/rotary-instrument-view.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/brake-dynamics.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/brake-view.js'),true);
+ assert.equal(sw.writes[0].paths.includes('./src/chassis-systems-curriculum.js'),true);
  await dispatch(sw.events.activate);
- assert.equal(sw.store.has('autolab-academy-v45'),false);
- assert.equal(sw.store.has('autolab-academy-v46'),true);
+ assert.equal(sw.store.has('autolab-academy-v46'),false);
+ assert.equal(sw.store.has('autolab-academy-v47'),true);
  assert.equal(sw.store.has('unrelated-app'),true);
 });
 test('v1.9.3: server failure status never overwrites the offline app shell',async()=>{
@@ -90,7 +91,7 @@ test('v1.9.10: true network outage restores cached index',async()=>{
  const sw=harness(async()=>{throw Error('sin internet')});
  await dispatch(sw.events.install);
  const shell={status:200};
- sw.store.get('autolab-academy-v46').set('./index.html',shell);
+ sw.store.get('autolab-academy-v47').set('./index.html',shell);
  const result=await dispatch(sw.events.fetch,{method:'GET',url:'http://127.0.0.1:4173/AutoLab-Academy/',mode:'navigate'});
  assert.equal(result,shell);
 });

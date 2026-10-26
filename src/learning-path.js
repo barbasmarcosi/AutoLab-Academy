@@ -30,8 +30,8 @@ export const learningStages=[
  {id:'integrative',order:9,name:'Taller Integrador',subtitle:'Cruzar OBD, oscilogramas, circuitos y condiciones de funcionamiento',
   lessons:['chain-of-evidence','obd-context-provenance','multichannel-crosschecks','mixture-closed-loop-inference','professional-diagnostic-report'],
   goal:'Documentar procedencia, confirmación, descarte e incertidumbres con un expediente reproducible; jamás equiparar la nota con una certificación de taller.'},
- {id:'mechanics',order:10,name:'Mecánica integral — fundamentos',subtitle:'MC00–MC05: taller, metrología, tren motriz y motores',
-  lessons:['mc00-risk-assessment','mc01-measurement-uncertainty','mc01-torque-preload','mc03-cycle-vs-architecture','mc02-energy-path','mc03-piston-cinematics','mc04-diesel-commonrail','mc05-cooling-lubrication'],
+ {id:'mechanics',order:10,name:'Mecánica integral — fundamentos',subtitle:'MC00–MC09: taller, metrología, tren motriz y chasis',
+  lessons:['mc00-risk-assessment','mc01-measurement-uncertainty','mc01-torque-preload','mc03-cycle-vs-architecture','mc02-energy-path','mc03-piston-cinematics','mc04-diesel-commonrail','mc05-cooling-lubrication','mc06-gears-powertrain','mc07-chassis-geometry','mc08-brakes-abs','mc09-hvac-loop'],
   goal:'Reconocer límites de seguridad, documentar mensurandos y comparar motores sin confundir cinemática con rendimiento real.'}
 ];
 export function evaluateLearningPath(progress,lessons){

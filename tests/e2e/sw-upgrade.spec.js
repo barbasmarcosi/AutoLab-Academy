@@ -5,7 +5,7 @@ import {join} from 'node:path';
 // A real versioned worker from the previous release, installed and activated
 // in the same browser origin/scope before upgrading to the current release.
 // Fixture files exist only while tests run and are deleted before artifacts.
-test('actualización v38 → v46 conserva IndexedDB y reabre la PWA sin red',async({page,context},testInfo)=>{
+test('actualización v38 → v47 conserva IndexedDB y reabre la PWA sin red',async({page,context},testInfo)=>{
  const stem='sw-legacy-'+testInfo.project.name.replace(/[^a-z0-9-]/ig,'-');
  const workerName=stem+'.js',htmlName=stem+'.html';
  const folder=join('site','AutoLab-Academy');
@@ -36,7 +36,7 @@ test('actualización v38 → v46 conserva IndexedDB y reabre la PWA sin red',asy
    await navigator.serviceWorker.register('./sw.js',{scope:'./'});
   });
   await page.waitForFunction(()=>navigator.serviceWorker.controller?.scriptURL.endsWith('/sw.js'),null,{timeout:30_000});
-  await expect.poll(()=>page.evaluate(()=>caches.keys())).toContain('autolab-academy-v46');
+  await expect.poll(()=>page.evaluate(()=>caches.keys())).toContain('autolab-academy-v47');
   await expect.poll(()=>page.evaluate(()=>caches.keys())).not.toContain('autolab-academy-v38');
   await context.setOffline(true);
   await page.goto('./');
