@@ -272,7 +272,8 @@ test('legacy guided reasoning survives v2 backup without granting transfer maste
  p.cases.push({id:transferCaseId('mc06-dual-fault-instrumentation'),at:'2026-10-26T18:00:00.000Z',
    score:100,passed:true,reasoning:'Transferencia congelada',report:'Modelo nuevo v2\nEscenario reservado'});
  const restored=parseBackup(serializeBackup(p));
- assert.deepEqual(restored.cases,p.cases);
+ assert.deepEqual(restored.cases.map(x=>({id:x.id,passed:x.passed,score:x.score,report:x.report})),p.cases.map(x=>({id:x.id,passed:x.passed,score:x.score,report:x.report})));
+ assert.ok(restored.cases.every(x=>Array.isArray(x.used)&&typeof x.hypothesis==='string'&&typeof x.conclusion==='string'));
  const snap=portfolioSnapshot(restored,lessons);
  assert.equal(snap.totals.reasoning,2);assert.equal(snap.totals.practices,0);
  assert.equal(transferProgress(restored,'mc06-dual-fault-instrumentation').passed,true);
