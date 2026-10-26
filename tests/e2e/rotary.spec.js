@@ -25,4 +25,13 @@ test('RW1 offline geometry: predicción y evidencia tras recarga',async({page,co
  await page.getByRole('button',{name:'Rotary Engineering'}).click();
  await expect(page.locator('#rw-diagram svg')).toBeVisible();
  await context.setOffline(false);
+ await page.locator('#rw-research-e').selectOption('18');
+ await page.locator('#rw-research-pred').selectOption('aumenta');
+ await page.locator('#rw-research-reason').fill('Mantengo el radio y el ancho virtual fijos; aumentar excentricidad debería modificar la oscilación geométrica. No conozco tolerancias físicas reales.');
+ await page.getByRole('button',{name:'Contrastar experimento A/B'}).click();
+ await expect(page.getByText(/Variación:/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar comparación en portafolio'}).click();
+ await expect(page.getByText('Comparación guardada.')).toBeVisible();
+ await page.getByRole('button',{name:'Portafolio'}).click();
+ await expect(page.getByText('Rotary Research Bench — sensibilidad A/B')).toBeVisible();
 });
