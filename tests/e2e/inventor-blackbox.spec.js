@@ -40,6 +40,11 @@ test('MC14 virtual black box freezes hypotheses, checks held-out evidence and re
  await page.locator('[data-action="reset"]').click();
  await page.locator('nav.nav button[data-id="data"]').click();
  await page.locator('#import-file').setInputFiles({name:'mc14-backup.json',mimeType:'application/json',buffer:Buffer.from(json)});
+ await expect.poll(()=>page.evaluate(async()=>{
+  const {loadProgress}=await import('./src/core.js');
+  const state=await loadProgress();
+  return state.cases.some(c=>c.id==='lab-inventor-blackbox-v1');
+ })).toBe(true);
  await page.locator('nav.nav button[data-id="portfolio"]').click();
  await expect(page.getByText('MC14 — Caja negra virtual')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
