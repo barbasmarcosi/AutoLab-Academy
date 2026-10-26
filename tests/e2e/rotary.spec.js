@@ -13,15 +13,15 @@ test('RW1 offline geometry: predicción y evidencia tras recarga',async({page,co
  await expect(page.getByText('Coincide con el pronóstico.')).toBeVisible();
  await page.getByRole('button',{name:'Guardar evidencia en portafolio'}).click();
  await expect(page.getByRole('button',{name:'Evidencia registrada'})).toBeDisabled();
- await page.getByRole('button',{name:'Portafolio'}).click();
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
  await expect(page.getByText('RW1 — Rotary Geometry Explorer')).toBeVisible();
  await page.reload();
- await page.getByRole('button',{name:'Portafolio'}).click();
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
  await expect(page.getByText('RW1 — Rotary Geometry Explorer')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
  await context.setOffline(true);
  await page.reload();
- await expect(page.getByRole('button',{name:'Portafolio'})).toBeVisible();
+ await expect(page.locator('nav.nav button[data-id="portfolio"]')).toBeVisible();
  await page.getByRole('button',{name:'Rotary Engineering'}).click();
  await expect(page.locator('#rw-diagram svg')).toBeVisible();
  await context.setOffline(false);
@@ -32,6 +32,6 @@ test('RW1 offline geometry: predicción y evidencia tras recarga',async({page,co
  await expect(page.getByText(/Variación:/)).toBeVisible();
  await page.getByRole('button',{name:'Guardar comparación en portafolio'}).click();
  await expect(page.getByText('Comparación guardada.')).toBeVisible();
- await page.getByRole('button',{name:'Portafolio'}).click();
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
  await expect(page.getByText('Rotary Research Bench — sensibilidad A/B')).toBeVisible();
 });
