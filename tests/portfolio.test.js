@@ -224,3 +224,10 @@ test('RW8: constrained profile research survives backup and portfolio export',()
  assert.equal(snap.events[0].title,'RW8 — Optimización ECU restringida');
  assert.match(portfolioMarkdown(x,lessons),/synthetic_discrete_constraint_catalog/);
 });
+
+test('RW8+: worst-case Pareto research persists through schema 1 backup',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-ecu-robust-v1',at:'2026-10-26T08:00:00Z',score:100,passed:true,hypothesis:'1 / 0 / 0',conclusion:'Sin solución robustamente viable',used:['worst-case-interval','multiobjective-pareto','thermal-sensitivity'],reasoning:'Una opción puede aprobar nominalmente y fracasar con incertidumbre acotada.',report:'# RW8+\nModelo: rw8-robust-pareto-fictitious-indices-v1\nOrigen: synthetic_bounded_indices_not_probabilities'});
+ const restored=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(restored,lessons);
+ assert.equal(snap.events[0].title,'RW8+ — Robustez y Pareto ECU');
+ assert.match(portfolioMarkdown(restored,lessons),/synthetic_bounded_indices_not_probabilities/);
+});

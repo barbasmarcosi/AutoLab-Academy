@@ -47,6 +47,14 @@ test('MC01 + RW4+ + MC08 function completely offline after service-worker activa
   await page.locator('#er-real').selectOption('no');
   await page.getByRole('button',{name:'Congelar hipótesis y optimizar'}).click();
   await expect(page.getByText('Comparativa sintética de perfiles: índices sin unidad, no límites de motor real')).toBeVisible();
+  await page.locator('nav.nav button[data-id="ecu-robust"]').click();
+  await expect(page.getByRole('heading',{name:'Robust Optimization Research Lab'})).toBeVisible();
+  await page.locator('#eb-nominal').selectOption('1');
+  await page.locator('#eb-robust').selectOption('0');
+  await page.locator('#eb-frontier').selectOption('0');
+  await page.locator('#eb-real').selectOption('no');
+  await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
+  await expect(page.getByText('Factibilidad adimensional nominal y ante límites adversos ±0,03')).toBeVisible();
   await page.locator('nav.nav button[data-id="brakes"]').click();
   await expect(page.getByRole('heading',{name:'Brake Energy Research Lab'})).toBeVisible();
   await page.locator('#br-energy').selectOption('quadruple');

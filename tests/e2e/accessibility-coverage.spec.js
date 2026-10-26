@@ -142,3 +142,15 @@ test('WCAG 2.1 AA RW8 constrained ECU profile optimization',async({page})=>{
  await page.getByRole('button',{name:'Congelar hipótesis y optimizar'}).click();
  await audit(page,'RW8 feasibility table and reasoning');
 });
+
+test('WCAG 2.1 AA RW8+ robustness hypotheses, scenario edge and Pareto tables',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="ecu-robust"]').click();
+ await expect(page.getByRole('heading',{name:'Robust Optimization Research Lab'})).toBeVisible();
+ await audit(page,'RW8+ initial uncertainty form');
+ await page.locator('#eb-nominal').selectOption('1');
+ await page.locator('#eb-robust').selectOption('0');
+ await page.locator('#eb-frontier').selectOption('0');
+ await page.locator('#eb-real').selectOption('no');
+ await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
+ await audit(page,'RW8+ robust result and Pareto comparison');
+});
