@@ -46,7 +46,7 @@ export const learningStages=[
   lessons:['mc13-diagnostic-method','mc14-research-doe'],
   goal:'Formular hipótesis alternativas, diseñar pruebas discriminantes, estimar incertidumbre y entregar evidencia reproducible.'},
  {id:'rotary-science',order:15,name:'Ingeniería rotativa: termodinámica',subtitle:'RW2–RW7 · Energía, puertos, metrología inversa y combustión conceptual',
-  lessons:['rw2-ideal-versus-architecture','rw3-energy-losses','rw5-convection-limits','rw6-port-phase-tradeoffs','rw6-aperture-area-study','rw6-inverse-area-metrology','rw7-burn-shape-literacy'],
+  lessons:['rw2-ideal-versus-architecture','rw3-energy-losses','rw5-convection-limits','rw6-port-phase-tradeoffs','rw6-aperture-area-study','rw6-inverse-area-metrology','rw6-radius-identifiability','rw7-burn-shape-literacy'],
   goal:'Distinguir ciclo termodinámico de arquitectura mecánica y exigir ensayos antes de inferir rendimiento Wankel.'},
  {id:'rotary-control',order:16,name:'Ingeniería rotativa: control y optimización',subtitle:'RW8/RW8+ · Restricciones, incertidumbre y Pareto',
   lessons:['rw8-controller-boundaries','rw8-constrained-experiment','rw8-robust-uncertainty','rw8-pareto-frontier'],

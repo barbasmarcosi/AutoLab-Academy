@@ -1,4 +1,5 @@
 import{inverseApertureStudy,gradeInverseAperture,inverseApertureReport,APERTURE_INVERSE_REFERENCE}from'./rotary-aperture-inverse.js';
+import{radiusAmbiguityStudy,radiusAmbiguityReport}from'./rotary-aperture-radius.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;'}[c]));
 const select=(id,label,choices,current)=>'<label for="'+id+'">'+esc(label)+'</label><select class="field" id="'+id+'">'+
  choices.map(([v,text])=>'<option value="'+v+'" '+(String(v)===String(current)?'selected':'')+'>'+esc(text)+'</option>').join('')+'</select>';
@@ -8,7 +9,7 @@ export function apertureInverseShell(){
 }
 export function mountApertureInverse(root,{record}){
  if(!root||typeof record!=='function')throw Error('RW6++ requiere almacenamiento confirmado');
- const s={radiusMm:20,trueOpeningFraction:.25,biasFraction:.04,toleranceFraction:.02,
+ const s={radiusMm:20,trueOpeningFraction:.25,biasFraction:.04,toleranceFraction:.02,radiusBandFraction:.05,
   predictedCoverage:'',predictedSensitivity:'',predictedPhysical:'',reasoning:'',limits:'',
   data:null,assessment:null,saved:false,saving:false,error:''};
  function render(){
@@ -18,6 +19,7 @@ export function mountApertureInverse(root,{record}){
   html+='<div class="panel stack"><h2>Identificación RW6++ · Predicción y contraste</h2>';
   if(!s.data){
    html+=select('ai-radius','Radio geométrico ficticio',[[10,'10 mm'],[20,'20 mm'],[30,'30 mm']],s.radiusMm);
+   html+=select('ai-radius-band','Margen geométrico supuesto de radio',[[0,'±0 % (radio conocido)'],[.05,'±5 %'],[.15,'±15 %']],s.radiusBandFraction);
    html+=select('ai-u','Apertura verdadera simulada u',[[.05,'0,05 — cerca del borde'],[.25,'0,25'],[.5,'0,50 — mitad'],[.75,'0,75'],[.95,'0,95 — cerca del final']],s.trueOpeningFraction);
    html+=select('ai-bias','Sesgo asumido en el instrumento (fracción de área total)',
     [[-.04,'−0,04'],[-.01,'−0,01'],[0,'0'],[.01,'+0,01'],[.04,'+0,04']],s.biasFraction);
@@ -32,7 +34,7 @@ export function mountApertureInverse(root,{record}){
     [['','Elegí…'],['si','Sí, directamente'],['no','No, falta modelo/medición física']],s.predictedPhysical);
    html+='<button type="button" class="button" data-ai="reveal">Congelar predicciones y recuperar apertura</button>';
   }else{
-   const a=s.data;
+   const a=s.data,radius=radiusAmbiguityStudy(s),b=radius.boundedRadius;
    html+='<p>Predicciones congeladas: cobertura '+esc(s.predictedCoverage)+', sensibilidad '+esc(s.predictedSensitivity)+', extrapolación física '+esc(s.predictedPhysical)+'.</p>';
    html+='<table class="rw-table" style="width:100%"><caption>Inversión de área inventada: tolerancia absoluta determinista</caption><thead><tr><th scope="col">Magnitud</th><th scope="col">Resultado</th></tr></thead><tbody>'+
     [['Área total circular (mm²)',fmt(a.fullAreaMm2)],
@@ -50,6 +52,11 @@ export function mountApertureInverse(root,{record}){
     '<tr><th scope="row">Borde (u=0,05)</th><td>'+fmt(a.nearEdgeIntervalWidth)+'</td></tr>'+
     '<tr><th scope="row">Centro (u=0,50)</th><td>'+fmt(a.centerIntervalWidth)+'</td></tr></tbody></table>'+
     '<p>La sensibilidad local normalizada dF/du='+fmt(a.openingSensitivity)+'. Cerca de los extremos, una diferencia muy pequeña de área puede corresponder a un desplazamiento mayor de u. No es un ensayo de un sello de motor real.</p>';
+   html+='<h3>RW6+++ · Radio incierto e identificabilidad</h3><p>Una sola área no identifica a la vez radio y apertura. Las dos cotas siguientes son <strong>supuestos deterministas</strong>, no mediciones ni incertidumbres GUM. No se infiere posición de rotor real.</p>'+
+    '<table class="rw-table" style="width:100%"><caption>Conjunto factible: comparación radio conocido frente a radio dentro de una banda</caption><thead><tr><th scope="col">Hipótesis geométrica</th><th scope="col">u mínimo</th><th scope="col">u máximo</th></tr></thead><tbody>'+
+    [['Radio nominal conocido',radius.fixed],['Radio acotado ±'+(100*s.radiusBandFraction)+' %',b],['Banda mayor (prueba de sensibilidad)',radius.widened]]
+     .map(([label,x])=>'<tr><th scope="row">'+esc(label)+'</th><td>'+fmt(x.lowerOpeningFraction)+'</td><td>'+fmt(x.upperOpeningFraction)+'</td></tr>').join('')+
+    '</tbody></table><p><strong>Prueba adversarial:</strong> área mínima superior a la de cualquier círculo permitido → '+(radius.contradict.failClosed?'inconsistencia detectada; sin solución (fail-closed).':'error: inconsistencia no detectada')+'</p>';
    if(!s.assessment){
     html+='<label for="ai-reason">Justificá matemáticamente el efecto del sesgo y la diferencia entre borde/centro (mínimo 100 caracteres)</label><textarea id="ai-reason" class="field" rows="4" maxlength="3500">'+esc(s.reasoning)+'</textarea>';
     html+='<label for="ai-limits">Definí qué instrumentación/calibración y geometría faltan antes de trasladarlo a un Wankel (mínimo 75 caracteres)</label><textarea id="ai-limits" class="field" rows="4" maxlength="2500">'+esc(s.limits)+'</textarea>';
@@ -63,12 +70,12 @@ export function mountApertureInverse(root,{record}){
   root.innerHTML=html;
  }
  root.addEventListener('input',event=>{
-  const f={'ai-radius':'radiusMm','ai-u':'trueOpeningFraction','ai-bias':'biasFraction','ai-tolerance':'toleranceFraction',
+  const f={'ai-radius':'radiusMm','ai-radius-band':'radiusBandFraction','ai-u':'trueOpeningFraction','ai-bias':'biasFraction','ai-tolerance':'toleranceFraction',
    'ai-cover':'predictedCoverage','ai-sense':'predictedSensitivity','ai-physical':'predictedPhysical',
    'ai-reason':'reasoning','ai-limits':'limits'};
   const prop=f[event.target.id];if(!prop)return;
   if(s.data&& !['reasoning','limits'].includes(prop))return;
-  s[prop]=['radiusMm','trueOpeningFraction','biasFraction','toleranceFraction'].includes(prop)?Number(event.target.value):event.target.value;
+  s[prop]=['radiusMm','radiusBandFraction','trueOpeningFraction','biasFraction','toleranceFraction'].includes(prop)?Number(event.target.value):event.target.value;
  });
  root.addEventListener('click',async event=>{
   const action=event.target.closest('[data-ai]')?.dataset.ai;if(!action)return;s.error='';
@@ -87,8 +94,8 @@ export function mountApertureInverse(root,{record}){
    if(!s.assessment||s.saved||s.saving)return;s.saving=true;
    try{await record({id:'lab-rotary-aperture-inverse-v1',at:new Date().toISOString(),score:s.assessment.score,
     passed:s.assessment.passed,hypothesis:s.predictedCoverage,conclusion:s.data.coverage?'Intervalo incluye verdad sintética':'Intervalo excluye verdad sintética',
-    used:['exact-circular-area','bounded-inverse-bisection','synthetic-gauge-bias','local-sensitivity'],
-    reasoning:s.reasoning,report:inverseApertureReport(s,s.assessment)});s.saved=true;}
+    used:['exact-circular-area','bounded-inverse-bisection','synthetic-gauge-bias','local-sensitivity','radius-feasible-set'],
+    reasoning:s.reasoning,report:inverseApertureReport(s,s.assessment)+'\n\n'+radiusAmbiguityReport(s)});s.saved=true;}
    catch(error){s.error='El almacenamiento local no confirmó el guardado; reintentá.';}
    finally{s.saving=false;if(root.isConnected)render();}
   }

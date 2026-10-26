@@ -106,3 +106,9 @@ La lección `rw6-aperture-area-study` agrega cuatro preguntas sobre apertura par
 ### RW6++ — Integración pedagógica de problemas inversos
 
 La lección `rw6-inverse-area-metrology` y cuatro preguntas se ubican después de `rw6-aperture-area-study`, dentro del nivel rotativo 15. Enseñan inversión numérica por bisección, sensibilidad casi nula cerca de los extremos, límites deterministas vs incertidumbre GUM y sesgos artificiales. Nuevo recuento inicial: **89 lecciones, 258 preguntas y 16 niveles**. `sw.js` incluye precache v64; tests de estructura y lectura, E2E de inferencia, reporte y recuperación JSON. La CI debe confirmar estos últimos cambios antes de declararlos aceptados.
+
+### RW6+++ — Radio desconocido y conjunto geométrico factible (26/10/2026)
+
+Se incorporó `src/rotary-aperture-radius.js` al banco RW6++, con cota ficticia de radio ±0/5/15 %, cota absoluta de área, proyección matemática exacta de la región factible sobre el avance u, comparación de bandas y caso imposible que **falla cerrado** (sin saturar falsamente a u=1). Una sola observación de área no identifica conjuntamente radio y apertura; para desambiguar hacen falta observaciones independientes o nueva instrumentación. Nuevas pruebas por grilla adversarial, invariantes de inclusión/nesting, round-trip con radio conocido, PWA con precache v65 y examen teórico de cuatro preguntas. Recuento de primera cobertura **90 lecciones / 262 preguntas / 16 niveles**; respaldo IndexedDB JSON v1 sin migraciones.
+
+**Fronteras científicas:** geometría circular 2D, radio y tolerancias inventados; no hay GUM, inferencia estadística, CAD Wankel, medición trazable, coeficiente de descarga, fase angular real ni validación de ECU. CI del nuevo HEAD debe confirmarse antes de acreditar esta implementación.

@@ -33,7 +33,7 @@ async function dispatch(handler,request=null){
 test('v1.9.13: activation removes previous AutoLab cache, not unrelated browser data',async()=>{
  const sw=harness();
  await dispatch(sw.events.install);
- assert.equal(sw.store.has('autolab-academy-v64'),true);
+ assert.equal(sw.store.has('autolab-academy-v65'),true);
  assert.equal(sw.writes[0].paths.includes('./src/diagnostic-draft.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-geometry.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-view.js'),true);
@@ -50,6 +50,7 @@ test('v1.9.13: activation removes previous AutoLab cache, not unrelated browser 
  assert.equal(sw.writes[0].paths.includes('./src/rotary-aperture.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-aperture-view.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-aperture-curriculum.js'),true);
+ assert.equal(sw.writes[0].paths.includes('./src/rotary-aperture-radius.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-aperture-inverse.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-aperture-inverse-view.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-aperture-inverse-curriculum.js'),true);

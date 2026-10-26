@@ -3,6 +3,7 @@ test('RW6++ biased instrument exceeds assumed tolerance: recover interval, diagn
  await page.goto('./');await page.locator('nav.nav button[data-id="rotary-inverse"]').click();
  await expect(page.getByRole('heading',{name:'Inverse Port Metrology Lab'})).toBeVisible();
  await page.locator('#ai-radius').selectOption('20');
+ await page.locator('#ai-radius-band').selectOption('0.15');
  await page.locator('#ai-u').selectOption('0.25');
  await page.locator('#ai-bias').selectOption('0.04');
  await page.locator('#ai-tolerance').selectOption('0.02');
@@ -12,6 +13,8 @@ test('RW6++ biased instrument exceeds assumed tolerance: recover interval, diagn
  await page.getByRole('button',{name:'Congelar predicciones y recuperar apertura'}).click();
  await expect(page.getByText('Inversión de área inventada: tolerancia absoluta determinista')).toBeVisible();
  await expect(page.getByText(/¿Intervalo contiene verdad sintética\? No/)).toBeVisible();
+ await expect(page.getByText('Conjunto factible: comparación radio conocido frente a radio dentro de una banda')).toBeVisible();
+ await expect(page.getByText(/inconsistencia detectada; sin solución/)).toBeVisible();
  await page.locator('#ai-reason').fill('El área del segmento circular cambia de modo no lineal. Si el sesgo de área excede el intervalo supuesto, la inversa entrega un rango que puede excluir el valor verdadero, aunque la fórmula geométrica sea exacta.');
  await page.locator('#ai-limits').fill('Los intervalos son ficticios: no se ha medido la máscara, calibrado un instrumento, identificado el CAD del Wankel ni determinado u respecto de la posición angular del rotor.');
  await page.getByRole('button',{name:'Evaluar inferencia inversa'}).click();

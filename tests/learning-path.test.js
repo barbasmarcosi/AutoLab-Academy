@@ -23,8 +23,8 @@ import{ecuRobustLessons}from'../src/ecu-robust-curriculum.js';
 import{rotaryApertureLessons}from'../src/rotary-aperture-curriculum.js';
 import{rotaryInverseLessons}from'../src/rotary-aperture-inverse-curriculum.js';
 const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons];
-test('89 lecturas agrupadas en dieciséis niveles con IDs completos y sin duplicaciones',()=>{
- assert.equal(all.length,89);
+test('90 lecturas agrupadas en dieciséis niveles con IDs completos y sin duplicaciones',()=>{
+ assert.equal(all.length,90);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
  assert.equal(new Set(assigned).size,all.length);
