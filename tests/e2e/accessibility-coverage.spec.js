@@ -50,3 +50,10 @@ test('WCAG 2.1 A/AA examen con radios y confianza',async({page})=>{
  await expect(page.locator('fieldset')).toHaveCount(2);
  await audit(page,'examen de conocimiento');
 });
+
+test('WCAG 2.1 A/AA Rotary Geometry Explorer y laboratorio A/B',async({page})=>{
+ await page.goto('./');
+ await page.locator('nav.nav button[data-id="rotary"]').click();
+ await expect(page.getByRole('heading',{name:'Rotary Geometry Explorer'})).toBeVisible();
+ await audit(page,'RW0/RW1 experimental, diagramas SVG y formularios de predicción');
+});
