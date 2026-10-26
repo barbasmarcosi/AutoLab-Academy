@@ -46,6 +46,8 @@ import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSes
 import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDifferential,differentialTrace,differentialReport}from'./fault-discrimination.js';
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
 import{lessonPractice,practiceProgress,practiceCoverage}from'./lesson-practice.js';
+import{reasoningChallenge,reasoningProgress}from'./lesson-reasoning.js';
+import{mountLessonReasoning}from'./lesson-reasoning-view.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
 const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...powertrainLessons,...engineeringBridgeLessons,...inventorLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...powertrainQuestions,...engineeringBridgeQuestions,...inventorQuestions,...rotaryGeometryQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions,...ecuOptimizationQuestions,...ecuRobustQuestions,...rotaryApertureQuestions,...rotaryInverseQuestions];
@@ -705,6 +707,10 @@ function lessonPracticeStatusText(id){
   status.status==='related-attempted'?'El banco relacionado tiene intentos; no se acredita esta lección':
   status.status==='not-started'?'Práctica todavía no registrada':'No hay práctica vinculada todavía';
 }
+function lessonReasoningStatusText(id){
+ const r=reasoningProgress(data,id);
+ return r.status==='passed'?'Razonamiento guiado aprobado':r.status==='attempted'?'Razonamiento guiado intentado':'Razonamiento guiado pendiente';
+}
 function lessonPracticePanel(l){
  const p=lessonPractice(l.id);
  if(!p)return '<section class="panel stack lesson-practice"><h2>Aplicación de criterios</h2><p>Esta lección todavía no dispone de una práctica interactiva específica. Leer el contenido no acredita dominio ni práctica.</p></section>';
@@ -712,6 +718,8 @@ function lessonPracticePanel(l){
  '<div class="eyebrow">DEL CONCEPTO A LA HIPÓTESIS</div><h2>'+esc(p.title)+'</h2>'+
  '<p><strong>Antes de observar:</strong> '+esc(p.prompt)+'</p>'+
  '<p id="lesson-practice-status" class="muted" role="status">'+esc(lessonPracticeStatusText(l.id))+'</p>'+
+ (reasoningChallenge(l.id)?'<div id="lesson-reasoning-host" class="reasoning-host" aria-label="Actividad de razonamiento de esta lección"></div>'+
+   '<p id="lesson-reasoning-status" class="muted">'+esc(lessonReasoningStatusText(l.id))+'</p>':'')+
  (p.kind==='embedded'?
   '<div class="lesson-practice-body" id="lesson-practice-host" aria-label="Simulador real integrado"></div>'+
   '<p class="muted small">El mismo laboratorio sigue disponible desde el menú. Guardar evidencia práctica no equivale a marcar la lectura.</p>'+
@@ -727,7 +735,8 @@ function lessonView(){
  return button('← Volver a academia','nav','data-id="learn"','alt small')+
  '<div class="section"></div>'+heading('LECCIÓN · '+l.topic.toUpperCase(),l.title,'Comprendé, formulá hipótesis, comprobá y justificá.')+
  '<article class="panel lesson-body"><p class="muted">Teoría: '+(data.notes['lesson-'+l.id]?'lectura registrada':'lectura pendiente')+
- '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>. Ninguno de estos estados acredita competencia física.</p>'+
+ '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>'+
+ '. Razonamiento: '+esc(lessonReasoningStatusText(l.id))+'. Ninguno acredita competencia física.</p>'+
  sections(first)+'</article>'+lessonPracticePanel(l)+
  '<article class="panel lesson-body">'+sections(last)+
  '<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+
@@ -1493,6 +1502,14 @@ function resourceView(){return heading('FUENTES Y HERRAMIENTAS','Biblioteca exte
 function dataView(){return heading('DATOS PERSONALES','Tu progreso te pertenece','Se guarda en IndexedDB de este navegador. Si cambiás de equipo o borrás datos del sitio, necesitás un respaldo.')+'<div class="notice">Los respaldos JSON no están cifrados. Guardalos en un lugar privado. El límite de importación es 24 MB, con validación adicional del contenido.</div><div class="grid two"><div class="panel"><h3>Exportar respaldo</h3><p class="muted">Descarga un JSON portable con intentos, resultados de casos, repeticiones y notas.</p>'+button('Descargar respaldo','export')+'</div><div class="panel"><h3>Importar respaldo</h3><p class="muted">Reemplaza el progreso local luego de validar el archivo. Guardá una copia antes de importar.</p><label class="button alt" for="import-file">Elegir archivo JSON</label><input class="sr-only" type="file" id="import-file" accept=".json,application/json"></div></div><div class="section"><h2>Notas privadas</h2></div><div class="panel"><label for="notebook">Hipótesis, dudas y procedimientos aprendidos</label><textarea class="field" id="notebook" maxlength="10000">'+esc(data.notes.general||'')+'</textarea><div class="row" style="margin-top:14px">'+button('Guardar notas','save-notes')+'</div></div><div class="section"><h2>Reinicio</h2></div><div class="panel"><p class="muted">Borrar todo es irreversible si no conservás una exportación.</p>'+button('Borrar progreso local','reset','','danger')+'</div>';}
 function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='analytics'?errorAnalyticsView():page==='path'?pathView():page==='coach'?studyCoachView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='temporal'?(traceTraining?temporalView():temporalMenu()):page==='fuel'?(fuelTraining?fuelView():fuelMenu()):page==='misfire'?(misfireTraining?misfireView():misfireMenu()):page==='integrative'?(integralTraining?integrativeView():integrativeMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='transfer'?(transferTraining?transferView():transferMenu()):page==='diagtransfer'?(diagnosticTransferTraining?diagnosticTransferView():diagnosticTransferMenu()):page==='rotary'?rotaryShell():page==='rotary-thermal'?thermalShell():page==='rotary-heat'?heatTransferShell():page==='rotary-ports'?portBurnShell():page==='rotary-aperture'?apertureShell():page==='rotary-inverse'?apertureInverseShell():page==='ecu-optimization'?ecuOptimizationShell():page==='ecu-robust'?robustResearchShell():page==='rotary-seals'?sealLabShell():page==='metrology'?metrologyShell():page==='inventor'?inventorShell():page==='rotary-instruments'?adversarialShell():page==='brakes'?brakesShell():page==='powertrain'?powertrainShell():page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);const saveLabEntry=async entry=>{const before=data.cases;data.cases=[...before,entry].slice(-500);if(!await persist()){data.cases=before;throw Error('Guardado no confirmado');}};if(page==='rotary')mountRotaryLab(document.getElementById('rotary-explorer'),{record:saveLabEntry});if(page==='rotary-thermal')mountThermalLab(document.getElementById('rotary-thermal-explorer'),{record:saveLabEntry});if(page==='rotary-heat')mountHeatTransfer(document.getElementById('rotary-heat-explorer'),{record:saveLabEntry});if(page==='rotary-ports')mountPortBurnLab(document.getElementById('rotary-port-burn-explorer'),{record:saveLabEntry});if(page==='rotary-aperture')mountApertureLab(document.getElementById('rotary-aperture-explorer'),{record:saveLabEntry});if(page==='rotary-inverse')mountApertureInverse(document.getElementById('rotary-aperture-inverse-explorer'),{record:saveLabEntry});if(page==='ecu-optimization')mountECUOptimization(document.getElementById('ecu-optimization-explorer'),{record:saveLabEntry});if(page==='ecu-robust')mountRobustResearch(document.getElementById('ecu-robust-explorer'),{record:saveLabEntry});if(page==='rotary-seals')mountSealLab(document.getElementById('rotary-seal-lab'),{record:saveLabEntry});if(page==='metrology')mountMetrology(document.getElementById('metrology-explorer'),{record:saveLabEntry});if(page==='inventor')mountInventorLab(document.getElementById('inventor-explorer'),{record:saveLabEntry});if(page==='rotary-instruments')mountAdversarialLab(document.getElementById('rotary-instrument-explorer'),{record:saveLabEntry});if(page==='brakes')mountBrakeLab(document.getElementById('brake-explorer'),{record:saveLabEntry});if(page==='powertrain')mountPowertrainLab(document.getElementById('powertrain-explorer'),{record:saveLabEntry});
 if(page==='learn'&&selectedLesson){
+ const lessonAtMount=selectedLesson;
+ const reasonNode=document.getElementById('lesson-reasoning-host');
+ if(reasonNode)mountLessonReasoning(reasonNode,{lessonId:lessonAtMount,record:saveLabEntry,onSaved:()=>{
+  if(page==='learn'&&selectedLesson===lessonAtMount){
+   const status=document.getElementById('lesson-reasoning-status');
+   if(status)status.textContent=lessonReasoningStatusText(lessonAtMount);
+  }
+ }});
  const practice=lessonPractice(selectedLesson);
  if(practice?.kind==='embedded'){
   const mounts={powertrain:mountPowertrainLab,inventor:mountInventorLab,rotary:mountRotaryLab,'ecu-robust':mountRobustResearch};

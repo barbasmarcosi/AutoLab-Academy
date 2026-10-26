@@ -33,10 +33,12 @@ async function dispatch(handler,request=null){
 test('v1.9.13: activation removes previous AutoLab cache, not unrelated browser data',async()=>{
  const sw=harness();
  await dispatch(sw.events.install);
- assert.equal(sw.store.has('autolab-academy-v75'),true);
+ assert.equal(sw.store.has('autolab-academy-v76'),true);
  assert.equal(sw.writes[0].paths.includes('./src/diagnostic-draft.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-geometry.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/lesson-practice.js'),true);
+ assert.equal(sw.writes[0].paths.includes('./src/lesson-reasoning.js'),true);
+ assert.equal(sw.writes[0].paths.includes('./src/lesson-reasoning-view.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-geometry-curriculum.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-geometry-analytic.js'),true);
  assert.equal(sw.writes[0].paths.includes('./src/rotary-view.js'),true);
@@ -84,7 +86,7 @@ test('v1.9.13: activation removes previous AutoLab cache, not unrelated browser 
  assert.equal(sw.writes[0].paths.includes('./src/mechanics-exams.js'),true);
  await dispatch(sw.events.activate);
  assert.equal(sw.store.has('autolab-academy-v63'),false);
- assert.equal(sw.store.has('autolab-academy-v75'),true);
+ assert.equal(sw.store.has('autolab-academy-v76'),true);
  assert.equal(sw.store.has('unrelated-app'),true);
 });
 test('v1.9.3: server failure status never overwrites the offline app shell',async()=>{
@@ -124,7 +126,7 @@ test('v1.9.10: true network outage restores cached index',async()=>{
  const sw=harness(async()=>{throw Error('sin internet')});
  await dispatch(sw.events.install);
  const shell={status:200};
- sw.store.get('autolab-academy-v75').set('./index.html',shell);
+ sw.store.get('autolab-academy-v76').set('./index.html',shell);
  const result=await dispatch(sw.events.fetch,{method:'GET',url:'http://127.0.0.1:4173/AutoLab-Academy/',mode:'navigate'});
  assert.equal(result,shell);
 });
