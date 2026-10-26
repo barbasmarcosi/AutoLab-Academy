@@ -685,7 +685,7 @@ function ecuSummary(c){
 function learn(){
  const done=lessons.filter(l=>Boolean(data.notes['lesson-'+l.id])).length;
  return heading('ACADEMIA','Biblioteca de diagnóstico aplicado',lessons.length+' lecciones orientadas a interpretar mediciones, diagnosticar sin sustituir piezas al azar y trabajar con evidencia.')+
- '<div class="notice">Lectura, práctica y examen son evidencias diferentes. '+practiceCoverage(lessons).mapped+' lecciones están vinculadas a laboratorios; '+practiceCoverage(lessons).embedded+' permiten practicar aquí mismo. El resto aún no dispone de una práctica integrada.</div>'+
+ '<div class="notice">Lectura, práctica y examen son evidencias diferentes. '+practiceCoverage(lessons).mapped+' lecciones están vinculadas a laboratorios; '+practiceCoverage(lessons).embedded+' permiten practicar aquí mismo. Además, hay '+8+' ejercicios de razonamiento falsable en sus lecciones. El resto aún no dispone de una práctica integrada.</div>'+
  '<div class="panel row spaced"><div><strong>'+done+' de '+lessons.length+' lecturas registradas</strong><p class="muted small">El registro es de lectura, no acredita dominio técnico.</p></div><span class="tag dim">Cinco especialidades</span></div>'+
  tracks.map(t=>{
   const group=lessons.filter(l=>l.topic===t.id),completed=group.filter(l=>data.notes['lesson-'+l.id]).length;

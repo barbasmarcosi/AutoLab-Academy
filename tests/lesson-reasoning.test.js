@@ -2,9 +2,9 @@ import test from'node:test';import assert from'node:assert/strict';
 import{REASONING_CHALLENGES,reasoningChallenge,reasoningCaseId,gradeReasoning,reasoningReport,reasoningProgress}from'../src/lesson-reasoning.js';
 const reasoning='Antes de medir, esta evidencia no discrimina por sí sola todas las causas. Tomaría una segunda prueba independiente y revisaría la hipótesis si esa lectura contradice la predicción congelada.';
 const limitations='La simulación no tiene sensores calibrados ni datos OEM; no acredita aptitud real y requiere verificación física supervisada.';
-test('four guided reasoning exercises: ambiguous cases, unique choices, feedback and outcomes',()=>{
+test('eight guided reasoning exercises: ambiguous cases, unique choices, feedback and outcomes',()=>{
  assert.equal(REASONING_CHALLENGES.length,8);
- assert.equal(new Set(REASONING_CHALLENGES.map(x=>x.id)).size,4);
+ assert.equal(new Set(REASONING_CHALLENGES.map(x=>x.id)).size,8);
  for(const scenario of REASONING_CHALLENGES){
   assert.equal(scenario.steps.length,3);
   const answers=Object.fromEntries(scenario.steps.map(step=>[step.id,step.answer]));
