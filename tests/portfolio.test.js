@@ -203,3 +203,10 @@ test('RW2/RW3: thermodynamics report round-trip through backup and portfolio',()
  assert.equal(snap.events[0].title,'RW2/RW3 — Termodinámica y balance energético');
  assert.match(portfolioMarkdown(recovered,lessons),/synthetic_energy_allocation/);
 });
+
+test('RW5: convection evidence survives JSON export and portfolio recovery',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-convection-v1',at:'2026-10-26T06:00:00Z',score:100,passed:true,hypothesis:'aumenta',conclusion:'aumenta',used:['assumed-area','assumed-convective-coefficient'],reasoning:'Área menor pero coeficiente convectivo mayor.',report:'# RW5\nModelo: rw5-lumped-convection-sensitivity-v1\nProcedencia: derived_from_lumped_heat_transfer'});
+ const recovered=parseBackup(serializeBackup(p)),s=portfolioSnapshot(recovered,lessons);
+ assert.equal(s.events[0].title,'RW5 — Sensibilidad de transferencia térmica');
+ assert.match(portfolioMarkdown(recovered,lessons),/derived_from_lumped_heat_transfer/);
+});

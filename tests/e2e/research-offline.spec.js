@@ -27,6 +27,13 @@ test('MC01 + RW4+ + MC08 function completely offline after service-worker activa
   await page.locator('#rt-real').selectOption('no');
   await page.getByRole('button',{name:'Congelar hipótesis y contrastar'}).click();
   await expect(page.getByText('RW3 — Balance ficticio de potencia y conservación')).toBeVisible();
+  await page.locator('nav.nav button[data-id="rotary-heat"]').click();
+  await expect(page.getByRole('heading',{name:'Rotary Heat Transfer Lab'})).toBeVisible();
+  await page.locator('#rh-h').selectOption('400');
+  await page.locator('#rh-prediction').selectOption('aumenta');
+  await page.locator('#rh-real').selectOption('no');
+  await page.getByRole('button',{name:'Congelar hipótesis y revelar'}).click();
+  await expect(page.getByText('Convección ideal uniforme: valores sintéticos y dimensionalmente consistentes')).toBeVisible();
   await page.locator('nav.nav button[data-id="brakes"]').click();
   await expect(page.getByRole('heading',{name:'Brake Energy Research Lab'})).toBeVisible();
   await page.locator('#br-energy').selectOption('quadruple');

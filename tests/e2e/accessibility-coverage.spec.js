@@ -108,3 +108,14 @@ test('WCAG 2.1 AA RW2/RW3 thermodynamics hypotheses and outcome tables',async({p
  await page.getByRole('button',{name:'Congelar hipótesis y contrastar'}).click();
  await audit(page,'RW2/RW3 outcome and reasoning');
 });
+
+test('WCAG 2.1 AA RW5 heat-transfer physics, predictions and result',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-heat"]').click();
+ await expect(page.getByRole('heading',{name:'Rotary Heat Transfer Lab'})).toBeVisible();
+ await audit(page,'RW5 heat-transfer initial');
+ await page.locator('#rh-h').selectOption('400');
+ await page.locator('#rh-prediction').selectOption('aumenta');
+ await page.locator('#rh-real').selectOption('no');
+ await page.getByRole('button',{name:'Congelar hipótesis y revelar'}).click();
+ await audit(page,'RW5 heat-transfer result');
+});
