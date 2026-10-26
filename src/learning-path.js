@@ -45,8 +45,8 @@ export const learningStages=[
  {id:'research-core',order:14,name:'Diagnóstico e investigación',subtitle:'MC13–MC14 · Hipótesis, diseño experimental e invención',
   lessons:['mc13-diagnostic-method','mc14-research-doe'],
   goal:'Formular hipótesis alternativas, diseñar pruebas discriminantes, estimar incertidumbre y entregar evidencia reproducible.'},
- {id:'rotary-science',order:15,name:'Ingeniería rotativa: termodinámica',subtitle:'RW2/RW3/RW5 · Ciclo ideal, energía y convección',
-  lessons:['rw2-ideal-versus-architecture','rw3-energy-losses','rw5-convection-limits'],
+ {id:'rotary-science',order:15,name:'Ingeniería rotativa: termodinámica',subtitle:'RW2/RW3/RW5/RW6/RW7 · Energía, puertos y combustión conceptual',
+  lessons:['rw2-ideal-versus-architecture','rw3-energy-losses','rw5-convection-limits','rw6-port-phase-tradeoffs','rw7-burn-shape-literacy'],
   goal:'Distinguir ciclo termodinámico de arquitectura mecánica y exigir ensayos antes de inferir rendimiento Wankel.'}
 ];
 export function evaluateLearningPath(progress,lessons){

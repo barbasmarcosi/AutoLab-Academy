@@ -17,9 +17,10 @@ import{chassisSystemsLessons}from'../src/chassis-systems-curriculum.js';
 import{engineeringBridgeLessons}from'../src/engineering-bridge-curriculum.js';
 import{rotaryThermalLessons}from'../src/rotary-thermal-curriculum.js';
 import{rotaryHeatLessons}from'../src/rotary-heat-curriculum.js';
-const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...rotaryThermalLessons,...rotaryHeatLessons];
-test('81 lecturas agrupadas en quince niveles con IDs completos y sin duplicaciones',()=>{
- assert.equal(all.length,81);
+import{rotaryPortBurnLessons}from'../src/rotary-port-burn-curriculum.js';
+const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons];
+test('83 lecturas agrupadas en quince niveles con IDs completos y sin duplicaciones',()=>{
+ assert.equal(all.length,83);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
  assert.equal(new Set(assigned).size,all.length);
@@ -60,7 +61,7 @@ test('MC00–MC14 avanza en cinco niveles ordenados con toda la cobertura, sin p
 test('RW2/RW3 bridge is its own stage and no foundation lesson is orphaned',()=>{
  const stage=learningStages.at(-1);
  assert.equal(stage.id,'rotary-science');assert.equal(stage.order,15);
- assert.deepEqual(stage.lessons,[...rotaryThermalLessons,...rotaryHeatLessons].map(l=>l.id));
+ assert.deepEqual(stage.lessons,[...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons].map(l=>l.id));
  const p=emptyProgress();for(const s of learningStages.slice(0,-1))for(const id of s.lessons)p.notes['lesson-'+id]='2026-10-26T00:00:00Z';
  const result=evaluateLearningPath(p,all);
  assert.equal(result.nextStage,'rotary-science');

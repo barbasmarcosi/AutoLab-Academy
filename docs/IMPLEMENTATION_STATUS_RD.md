@@ -61,3 +61,5 @@ La etapa `rotary-science` ahora agrupa teoría RW2/RW3/RW5: tres lecciones y doc
 - RW7: curva de Wiebe **normalizada** ficticia, independiente de RW6, con escenarios de inicio/duración y fracción acumulada a 220°. No calcula calor real, presión, NOx, BSFC, potencia o encendido OEM.
 - Gate: pruebas de propiedades matemáticas, hipótesis antes de revelar, explicación, respaldo/portfolio, Axe, E2E Chrome/WebKit/móvil y PWA completamente offline. Aún no se considera un modelo de combustión validado.
 - Fuentes conceptuales verificadas: [Heliyon 2023](https://pmc.ncbi.nlm.nih.gov/articles/PMC10658253/) y [SAE 2020-01-0280](https://saemobilus.sae.org/articles/initial-investigations-benefits-challenges-eliminating-port-overlap-wankel-rotary-engines-2020-01-0280).
+
+La etapa `rotary-science` incorpora ahora `rw6-port-phase-tradeoffs` y `rw7-burn-shape-literacy` (2 lecciones / 8 preguntas); el total inicial de la Academia asciende a **83 lecciones y 234 preguntas**, manteniendo cinco etapas específicas MC00–MC14 y quince niveles globales. La revisión académica experta de las fuentes y el modelo termofluídico cuantitativo siguen pendientes.
