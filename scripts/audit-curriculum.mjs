@@ -9,6 +9,7 @@ import{misfireLessons as l7,misfireQuestions as q7}from'../src/misfire-curriculu
 import{integrativeLessons as l8,integrativeQuestions as q8}from'../src/integrative-curriculum.js';
 import{additionalCases}from'../src/cases-advanced.js';
 import{learningStages}from'../src/learning-path.js';
+import{practiceCoverage}from'../src/lesson-practice.js';
 import{mechanicsLessons as l9,mechanicsQuestions as q9}from'../src/mechanics-curriculum.js';
 import{mechanicsSystemsLessons as l10,mechanicsSystemsQuestions as q10}from'../src/mechanics-systems-curriculum.js';
 import{chassisSystemsLessons as l11,chassisSystemsQuestions as q11}from'../src/chassis-systems-curriculum.js';
@@ -28,4 +29,7 @@ const report=auditCurriculum({tracks,lessons:[...l0,...l1,...l2,...l3,...l4,...l
 console.log('Auditoría curricular estructural integral (no equivale a revisión técnica de fuentes):\n'+JSON.stringify(report.summary,null,2));
 for(const w of report.warnings)console.warn('ADVERTENCIA:',w);
 for(const e of report.errors)console.error('ERROR:',e);
+const registryAudit=practiceCoverage(learningStages.flatMap(s=>s.lessons).map(id=>({id})));
+console.log('Cobertura teoría-práctica declarada: '+JSON.stringify(registryAudit));
+if(registryAudit.invalid.length||registryAudit.total!==report.summary.lessons||registryAudit.embedded>registryAudit.mapped)process.exitCode=1;
 if(!report.ok)process.exitCode=1;
