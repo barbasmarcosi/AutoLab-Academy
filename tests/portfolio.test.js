@@ -245,3 +245,19 @@ test('RW6++ inverse metrology evidence round-trip preserves provenance and full 
  assert.equal(snap.events[0].title,'RW6++ — Metrología geométrica inversa');
  assert.match(portfolioMarkdown(restored,lessons),/synthetic_deterministic_inverse_interval/);
 });
+
+test('el razonamiento guiado tiene su contador y no infla las prácticas de laboratorio',()=>{
+ const p=emptyProgress();
+ p.cases.push({id:'lab-reasoning-volt-drop-v1',score:100,passed:true,at:'2026-10-26T16:00:00Z',
+  hypothesis:'no identificable',conclusion:'señal alternativa',used:['hypothesis-frozen'],
+  reasoning:'Hipótesis falsable',report:'Predicción congelada y devolución'});
+ p.cases.push({id:'lab-powertrain-mc06-v1',score:100,passed:true,at:'2026-10-26T16:01:00Z'});
+ const snap=portfolioSnapshot(p,lessons);
+ assert.equal(snap.totals.practices,1);assert.equal(snap.totals.reasoning,1);
+ assert.match(snap.events.find(x=>x.kind==='reasoning').title,/Razonamiento guiado/);
+ const recovered=parseBackup(serializeBackup(p));
+ assert.deepEqual(portfolioSnapshot(recovered,lessons),snap);
+ const report=portfolioMarkdown(recovered,lessons);
+ assert.match(report,/Razonamientos guiados: 1/);
+ assert.match(report,/Predicción congelada y devolución/);
+});

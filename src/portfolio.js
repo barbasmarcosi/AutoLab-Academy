@@ -20,7 +20,7 @@ export function portfolioSnapshot(progress,lessons=[]){
   evidence:[],reasoning:'',passed:a.percentage>=85
  }));
  const cases=(progress.cases||[]).map(c=>({
-  kind:c.id.startsWith('diagnostic-')?'diagnostic-transfer':c.id.startsWith('transfer-')?'transfer':c.id.startsWith('integral-')?'integrative':c.id.startsWith('misfire-')?'combustion':c.id.startsWith('fuel-')?'injection':c.id.startsWith('mf-')?'multifault':c.id.startsWith('trace-')?'temporal':c.id.startsWith('di-')?'differential':c.id.startsWith('lab-')?'lab':c.id.startsWith('measure-')?'quantitative':'diagnostic',
+  kind:reasoningTitles.has(c.id)?'reasoning':c.id.startsWith('diagnostic-')?'diagnostic-transfer':c.id.startsWith('transfer-')?'transfer':c.id.startsWith('integral-')?'integrative':c.id.startsWith('misfire-')?'combustion':c.id.startsWith('fuel-')?'injection':c.id.startsWith('mf-')?'multifault':c.id.startsWith('trace-')?'temporal':c.id.startsWith('di-')?'differential':c.id.startsWith('lab-')?'lab':c.id.startsWith('measure-')?'quantitative':'diagnostic',
   id:c.id,topic:c.id.split('-')[1]||'varios',at:c.at,score:c.score,
   title:(reasoningTitles.has(c.id)?reasoningTitles.get(c.id):c.id==='lab-rotary-geometry-v1'?'RW1 — Rotary Geometry Explorer':c.id==='lab-rotary-thermal-v1'?'RW2/RW3 — Termodinámica y balance energético':c.id==='lab-rotary-convection-v1'?'RW5 — Sensibilidad de transferencia térmica':c.id==='lab-rotary-port-burn-v1'?'RW6/RW7 — Puertos y combustión conceptual':c.id==='lab-rotary-aperture-v1'?'RW6+ — Geometría y apertura de puertos':c.id==='lab-rotary-aperture-inverse-v1'?'RW6++ — Metrología geométrica inversa':c.id==='lab-ecu-optimization-v1'?'RW8 — Optimización ECU restringida':c.id==='lab-ecu-robust-v1'?'RW8+ — Robustez y Pareto ECU':c.id==='lab-rotary-sensitivity-v1'?'Rotary Research Bench — sensibilidad A/B':c.id==='lab-rotary-sealing-v1'?'RW4 — Diagnóstico diferencial rotativo':c.id==='lab-metrology-uncertainty-v1'?'MC01 — Metrología e incertidumbre':c.id==='lab-inventor-blackbox-v1'?'MC14 — Caja negra virtual':c.id==='lab-rotary-instrument-v1'?'RW4+ — Verificación instrumental adversarial':c.id==='lab-brake-energy-v1'?'MC08 — Investigación de energía de frenado':c.id==='lab-powertrain-mc06-v1'?'MC06 — Diagnóstico del tren motriz':differentialTitles.get(c.id))||c.id.replace(/^lab-|^measure-/,'').replaceAll('-',' '),
   evidence:Array.isArray(c.used)?c.used:[],
@@ -34,7 +34,7 @@ export function portfolioSnapshot(progress,lessons=[]){
  const scheduled=reviews.filter(r=>Number.isFinite(Date.parse(r?.due))).length;
  const reviewed=reviews.filter(r=>r?.algorithm==='ts-fsrs-5').length;
  return {events,totals:{
-  exams:attempts.length,practices:cases.length,completedLessons:completed.length,knownLessons:lessons.length,
+  exams:attempts.length,practices:cases.filter(c=>c.kind!=='reasoning').length,reasoning:cases.filter(c=>c.kind==='reasoning').length,completedLessons:completed.length,knownLessons:lessons.length,
   reviewItems:scheduled,fsrsItems:reviewed,studyMinutes:Number(progress.studyMinutes)||0
  },lessons:completed.map(l=>({id:l.id,title:l.title,topic:l.topic,at:progress.notes['lesson-'+l.id]}))};
 }
@@ -47,6 +47,7 @@ export function portfolioMarkdown(progress,lessons=[],date=new Date()){
   '## Resumen de actividad',
   '- Exámenes teóricos: '+snapshot.totals.exams,
   '- Prácticas y laboratorios: '+snapshot.totals.practices,
+  '- Razonamientos guiados: '+snapshot.totals.reasoning,
   '- Lecciones con lectura registrada: '+snapshot.totals.completedLessons+' / '+snapshot.totals.knownLessons,
   '- Repasos programados: '+snapshot.totals.reviewItems,
   '- Tarjetas con historial FSRS: '+snapshot.totals.fsrsItems,
@@ -62,7 +63,7 @@ export function portfolioMarkdown(progress,lessons=[],date=new Date()){
    '- Hipótesis: '+(e.hypothesis||'no registrada'),
    '- Conclusión: '+(e.conclusion||'no registrada'),
    '- Justificación de estudiante (sin evaluación semántica): '+(e.reasoning||'sin registro'),'');
-  if((['integrative','transfer','diagnostic-transfer'].includes(e.kind)||e.id==='lab-rotary-geometry-v1'||e.id==='lab-rotary-thermal-v1'||e.id==='lab-rotary-convection-v1'||e.id==='lab-rotary-port-burn-v1'||e.id==='lab-rotary-aperture-v1'||e.id==='lab-rotary-aperture-inverse-v1'||e.id==='lab-ecu-optimization-v1'||e.id==='lab-ecu-robust-v1'||e.id==='lab-rotary-sensitivity-v1'||e.id==='lab-rotary-sealing-v1'||e.id==='lab-metrology-uncertainty-v1'||e.id==='lab-inventor-blackbox-v1'||e.id==='lab-rotary-instrument-v1'||e.id==='lab-brake-energy-v1'||e.id==='lab-powertrain-mc06-v1')&&e.report)lines.push('#### Informe completo de expediente','',e.report,'');
+  if((['integrative','transfer','diagnostic-transfer','reasoning'].includes(e.kind)||e.id==='lab-rotary-geometry-v1'||e.id==='lab-rotary-thermal-v1'||e.id==='lab-rotary-convection-v1'||e.id==='lab-rotary-port-burn-v1'||e.id==='lab-rotary-aperture-v1'||e.id==='lab-rotary-aperture-inverse-v1'||e.id==='lab-ecu-optimization-v1'||e.id==='lab-ecu-robust-v1'||e.id==='lab-rotary-sensitivity-v1'||e.id==='lab-rotary-sealing-v1'||e.id==='lab-metrology-uncertainty-v1'||e.id==='lab-inventor-blackbox-v1'||e.id==='lab-rotary-instrument-v1'||e.id==='lab-brake-energy-v1'||e.id==='lab-powertrain-mc06-v1')&&e.report)lines.push('#### Informe completo de expediente','',e.report,'');
  }
  if(!snapshot.events.length)lines.push('(Sin evaluaciones registradas.)','');
  lines.push('---','La experiencia práctica solo puede ser acreditada mediante criterios, observación y supervisión profesionales.','');

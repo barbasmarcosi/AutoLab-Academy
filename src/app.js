@@ -1150,11 +1150,12 @@ function multiSummary(c){
 }
 function portfolioView(){
  const snap=portfolioSnapshot(data,lessons);
- const visible=snap.events.filter(e=>portfolioFilter==='all'||(portfolioFilter==='exam'?e.kind==='exam':portfolioFilter==='lab'?e.kind==='lab':e.kind!=='exam'&&e.kind!=='lab')).slice(0,40);
+ const visible=snap.events.filter(e=>portfolioFilter==='all'||(portfolioFilter==='exam'?e.kind==='exam':portfolioFilter==='lab'?e.kind==='lab':portfolioFilter==='reasoning'?e.kind==='reasoning':e.kind!=='exam'&&e.kind!=='lab'&&e.kind!=='reasoning')).slice(0,40);
  const num=n=>String(n);
  return heading('PORTAFOLIO','Evidencias de tu formación','Historial de simulaciones, repasos y lecturas guardado exclusivamente en este navegador; sin certificaciones ni afirmaciones de experiencia real.')+
  '<div class="grid"><div class="panel"><div class="stat-number">'+num(snap.totals.exams)+'</div><div class="stat-label">Exámenes teóricos</div></div>'+
- '<div class="panel"><div class="stat-number">'+num(snap.totals.practices)+'</div><div class="stat-label">Prácticas registradas</div></div>'+
+ '<div class="panel"><div class="stat-number">'+num(snap.totals.practices)+'</div><div class="stat-label">Prácticas y laboratorios</div></div>'+
+ '<div class="panel"><div class="stat-number">'+num(snap.totals.reasoning)+'</div><div class="stat-label">Razonamientos guiados</div></div>'+
  '<div class="panel"><div class="stat-number">'+num(snap.totals.completedLessons)+'/'+num(snap.totals.knownLessons)+'</div><div class="stat-label">Lecciones registradas</div></div></div>'+
  '<div class="panel" style="margin-top:14px"><h3>Registro profesional en formación</h3>'+
  '<p class="muted">Las puntuaciones de exámenes, casos y laboratorios no son comparables y las justificaciones todavía requieren un revisor humano. El informe exporta solo lo registrado localmente.</p>'+
@@ -1162,7 +1163,7 @@ function portfolioView(){
  '<p class="muted small">Estudio estimado registrado: '+snap.totals.studyMinutes+' min · Preguntas programadas: '+snap.totals.reviewItems+' · Tarjetas FSRS: '+snap.totals.fsrsItems+'</p></div>'+
  '<div class="section"><h2>Actividad reciente</h2></div>'+
  '<div class="panel"><label for="portfolio-filter">Filtrar registros</label><select id="portfolio-filter" class="field">'+
- [['all','Todos'],['exam','Exámenes'],['diagnostic','Diagnóstico y retos'],['lab','Laboratorios']].map(([id,label])=>'<option value="'+id+'" '+(portfolioFilter===id?'selected':'')+'>'+label+'</option>').join('')+'</select>'+
+ [['all','Todos'],['exam','Exámenes'],['diagnostic','Diagnóstico y retos'],['lab','Laboratorios'],['reasoning','Razonamientos guiados']].map(([id,label])=>'<option value="'+id+'" '+(portfolioFilter===id?'selected':'')+'>'+label+'</option>').join('')+'</select>'+
  (visible.length?'<div class="portfolio-list">'+visible.map(e=>
  '<div class="portfolio-entry"><div class="row spaced"><strong>'+esc(e.title)+'</strong><span class="tag dim">'+e.score+'/100</span></div>'+
  '<p class="muted small">'+esc(e.at?.slice(0,10)||'sin fecha')+' · '+esc(e.kind)+'</p>'+

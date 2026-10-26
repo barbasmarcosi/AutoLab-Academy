@@ -67,7 +67,12 @@ test('MC14: missing and incorrect reasoning decisions remain fail-closed, retake
  await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
  await expect(page.locator('#lesson-reasoning-status')).toContainText('aprobado');
  await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('Razonamientos guiados',{exact:true})).toBeVisible();
+ await expect(page.getByText('Prácticas y laboratorios',{exact:true})).toBeVisible();
+ await page.locator('#portfolio-filter').selectOption('reasoning');
  await expect(page.getByText(/Razonamiento guiado — Caja negra: modelos indistinguibles/)).toHaveCount(2);
+ await page.locator('#portfolio-filter').selectOption('lab');
+ await expect(page.getByText(/Razonamiento guiado — Caja negra: modelos indistinguibles/)).toHaveCount(0);
 });
 
 test('foundational 12 V and CAN lessons have in-place falsifiable reasoning without claiming physical simulators',async({page})=>{

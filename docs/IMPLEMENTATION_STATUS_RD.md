@@ -176,3 +176,5 @@ Se amplía a **8 desafíos de razonamiento falsable**: además de MC06, MC14, RW
 ### Fundamentos con hipótesis guiadas (26/10/2026)
 
 Cinco microcasos específicos se suman a las lecciones de fundamento: caída de tensión bajo carga, DTC versus causa, errores de configuración del osciloscopio, falta de comunicación CAN y estimación de SOC. Se distinguen explícitamente de simuladores físicos: son ejercicios de decisión y falsación dentro de la lección, con justificación registrada, y la interfaz reconoce que falta un laboratorio instrumental específico. Cobertura de entrenamiento de razonamiento: **13/94 lecciones**, junto a 4 simuladores embebidos y 12 enlaces contextuales. El conteo de biblioteca permanece 94 lecciones, 278 preguntas teóricas y 16 etapas.
+
+**Integridad del portafolio:** los microcasos de razonamiento ahora figuran con tipo `reasoning` y contador/filtro separados de `practices` y `exam`. Una decisión conceptual no infla los totales de laboratorio. El expediente y su devolución se exportan en Markdown y JSON; schema v1 compatible y PWA cache v77. Tests de conteo, backup y filtro.
