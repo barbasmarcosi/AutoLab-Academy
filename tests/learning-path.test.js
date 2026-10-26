@@ -15,6 +15,7 @@ import{mechanicsLessons}from'../src/mechanics-curriculum.js';
 import{mechanicsSystemsLessons}from'../src/mechanics-systems-curriculum.js';
 import{chassisSystemsLessons}from'../src/chassis-systems-curriculum.js';
 import{engineeringBridgeLessons}from'../src/engineering-bridge-curriculum.js';
+import{inventorLessons}from'../src/inventor-curriculum.js';
 import{rotaryThermalLessons}from'../src/rotary-thermal-curriculum.js';
 import{rotaryGeometryLessons}from'../src/rotary-geometry-curriculum.js';
 import{rotaryHeatLessons}from'../src/rotary-heat-curriculum.js';
@@ -23,9 +24,9 @@ import{ecuOptimizationLessons}from'../src/ecu-optimization-curriculum.js';
 import{ecuRobustLessons}from'../src/ecu-robust-curriculum.js';
 import{rotaryApertureLessons}from'../src/rotary-aperture-curriculum.js';
 import{rotaryInverseLessons}from'../src/rotary-aperture-inverse-curriculum.js';
-const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons];
-test('92 lecturas agrupadas en dieciséis niveles con IDs completos y sin duplicaciones',()=>{
- assert.equal(all.length,92);
+const all=[...lessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...engineeringBridgeLessons,...inventorLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons];
+test('93 lecturas agrupadas en dieciséis niveles con IDs completos y sin duplicaciones',()=>{
+ assert.equal(all.length,93);
  const assigned=learningStages.flatMap(s=>s.lessons);
  assert.equal(assigned.length,all.length);
  assert.equal(new Set(assigned).size,all.length);
@@ -57,7 +58,7 @@ test('MC00–MC14 avanza en cinco niveles ordenados con toda la cobertura, sin p
  const ids=learningStages.slice(9,14).map(x=>x.id);
  assert.deepEqual(ids,['mechanics','engine-core','chassis-core','control-core','research-core']);
  assert.deepEqual(learningStages.map(x=>x.order),Array.from({length:16},(_,i)=>i+1));
- assert.equal(learningStages.slice(9,14).reduce((n,x)=>n+x.lessons.length,0),17);
+ assert.equal(learningStages.slice(9,14).reduce((n,x)=>n+x.lessons.length,0),18);
  const p=emptyProgress();for(const stage of learningStages.slice(0,10))for(const id of stage.lessons)p.notes['lesson-'+id]='2026-10-26T00:00:00Z';
  const s=evaluateLearningPath(p,all);
  assert.equal(s.nextStage,'engine-core');assert.equal(s.nextLesson,'mc02-energy-path');

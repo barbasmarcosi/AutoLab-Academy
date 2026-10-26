@@ -43,7 +43,7 @@ export const learningStages=[
   lessons:['mc10-electronic-architecture','mc11-engine-control','mc12-hybrid-energy'],
   goal:'Relacionar mediciones y control con la mecánica, conservar límites HV y contrastar arquitecturas energéticas.'},
  {id:'research-core',order:14,name:'Diagnóstico e investigación',subtitle:'MC13–MC14 · Hipótesis, diseño experimental e invención',
-  lessons:['mc13-diagnostic-method','mc14-research-doe'],
+  lessons:['mc13-diagnostic-method','mc14-research-doe','mc14-blackbox-identification'],
   goal:'Formular hipótesis alternativas, diseñar pruebas discriminantes, estimar incertidumbre y entregar evidencia reproducible.'},
  {id:'rotary-science',order:15,name:'Ingeniería rotativa: termodinámica',subtitle:'RW1–RW7 · Geometría, energía, puertos, metrología y combustión conceptual',
   lessons:['rw1-analytic-geometry-validation','rw2-ideal-versus-architecture','rw3-energy-losses','rw5-convection-limits','rw6-port-phase-tradeoffs','rw6-aperture-area-study','rw6-inverse-area-metrology','rw6-radius-identifiability','rw7-burn-shape-literacy'],
