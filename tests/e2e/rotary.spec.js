@@ -1,0 +1,27 @@
+import{test,expect}from'@playwright/test';
+test('RW1 offline geometry: predicción y evidencia tras recarga',async({page,context})=>{
+ await page.goto('./');
+ await page.getByRole('button',{name:'Rotary Engineering'}).click();
+ await expect(page.getByRole('heading',{name:'Rotary Geometry Explorer'})).toBeVisible();
+ await expect(page.locator('#rw-diagram svg')).toBeVisible();
+ await expect(page.getByText(/Modelo didáctico, no CAD validado/)).toBeVisible();
+ await page.locator('#rw-angle').fill('120');
+ await expect(page.locator('#rw-deg')).toContainText('120°');
+ await page.locator('#rw-reason').fill('El ángulo del eje modifica el área de la cámara, pero sin considerar holguras ni portado real; contrastaría el modelo con una medición independiente.');
+ await page.locator('#rw-predicted').selectOption('aumenta');
+ await page.getByRole('button',{name:'Congelar pronóstico y revelar'}).click();
+ await expect(page.getByText('Coincide con el pronóstico.')).toBeVisible();
+ await page.getByRole('button',{name:'Guardar evidencia en portafolio'}).click();
+ await expect(page.getByRole('button',{name:'Evidencia registrada'})).toBeDisabled();
+ await page.getByRole('button',{name:'Portafolio'}).click();
+ await expect(page.getByText('RW1 — Rotary Geometry Explorer')).toBeVisible();
+ await page.reload();
+ await page.getByRole('button',{name:'Portafolio'}).click();
+ await expect(page.getByText('RW1 — Rotary Geometry Explorer')).toBeVisible();
+ await context.setOffline(true);
+ await page.reload();
+ await expect(page.getByRole('button',{name:'Portafolio'})).toBeVisible();
+ await page.getByRole('button',{name:'Rotary Engineering'}).click();
+ await expect(page.locator('#rw-diagram svg')).toBeVisible();
+ await context.setOffline(false);
+});

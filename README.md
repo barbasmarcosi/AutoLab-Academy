@@ -7,10 +7,12 @@ PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y
 Además del diagnóstico basado en evidencias, aspiramos a formar profesionales capaces de **entender la mecánica del vehículo completo, investigar sistemas, optimizarlos y crear herramientas propias**. El plan [Diagnostic Engineering + Automotive R&D](docs/ENGINEERING_MINDSET_RD_VISION.md) conecta tres ejes:
  
 - [**Automotive Mechanics Core**](docs/AUTOMOTIVE_MECHANICS_CURRICULUM.md): formación integral sobre motores, transmisiones, suspensión, dirección, frenos, HVAC, electricidad, electrónica e híbridos/EV.
-- [**Rotary Engineering Lab**](docs/ROTARY_ENGINEERING_LAB.md): investigación del motor Wankel, geometría, sellos, puertos, combustión, ECU, fiabilidad y optimización; comienza con un explorador geométrico offline propuesto.
+- [**Rotary Engineering Lab**](docs/ROTARY_ENGINEERING_LAB.md): investigación del motor Wankel, geometría, sellos, puertos, combustión, ECU, fiabilidad y optimización; incluye un primer explorador geométrico offline RW0/RW1.
 - **Diagnostic Engineering + Automotive R&D**: experimentos comparativos, ingeniería inversa, herramientas propias, perfiles de ECU **simulados** y validación reproducible.
 
-**Estos carriles son planes, no funciones de la PWA implementadas ni formación práctica acreditada.**
+**Solo RW0/RW1 está implementado como primer incremento experimental; los demás carriles siguen planificados y no constituyen formación práctica acreditada.**
+
+El laboratorio **RW0/RW1 (Rotary Geometry Explorer)** ahora tiene cinemática Wankel simplificada, animación offline, cámaras y predicciones con evidencia persistida. No simula combustión ni representa volúmenes OEM. Los restantes RW2–RW10 y el currículo MC siguen en planificación.
 
 ## Qué está implementado
 
