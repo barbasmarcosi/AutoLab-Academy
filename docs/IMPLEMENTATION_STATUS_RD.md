@@ -52,3 +52,5 @@ Dos lecciones nuevas (`rw2-ideal-versus-architecture`, `rw3-energy-losses`) y oc
 ### RW5 — Convección A/B
 
 `src/rotary-heat-transfer.js` permite contrastar A=0,24→0,20 m² con h supuesto 250→200 o 400 W/(m²·K), y ΔT=150 K constante. La hipótesis previa, evaluación y expediente del nuevo laboratorio son reproducibles y offline. Solo se aplica Q̇=h·A·ΔT con valores inventados: no se estiman pérdidas, Nusselt, CFD ni eficiencia Wankel reales. Gate pendiente: validación de CI y revisión científica experta.
+
+La etapa `rotary-science` ahora agrupa teoría RW2/RW3/RW5: tres lecciones y doce preguntas nuevas sobre eficiencia ideal, balance y convección. El marco termofluídico físicamente validado continúa pendiente: aprobar un cuestionario no avala cálculos de eficiencia real.
