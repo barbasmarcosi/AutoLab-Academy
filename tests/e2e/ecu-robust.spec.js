@@ -2,6 +2,7 @@ import{test,expect}from'@playwright/test';
 test('RW8+ edge: nominal DAILY is rejected robustly, evidence saved after scientific caveats',async({page})=>{
  await page.goto('./');await page.locator('nav.nav button[data-id="ecu-robust"]').click();
  await expect(page.getByRole('heading',{name:'Robust Optimization Research Lab'})).toBeVisible();
+ await expect(page.locator('#eb-scenario option')).toHaveCount(3);
  await page.locator('#eb-scenario').selectOption('edge');
  await page.locator('#eb-nominal').selectOption('1');
  await page.locator('#eb-robust').selectOption('0');

@@ -1,7 +1,7 @@
 import{RW8_ROBUST_SCENARIOS,robustAnalysis,thermalSensitivity,gradeRobustExercise,robustResearchReport,
  PARETO_REFERENCE,UNCERTAINTY_REFERENCE}from'./ecu-robust-analysis.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;'}[c]));
-const chooser=(id,label,options,current)=>'<label for="'+id+'">'+esc(label)+'</label><select class="field" id="'+id+'"><option value="">Seleccioná…</option>'+options.map(([v,l])=>'<option value="'+v+'" '+(String(v)===String(current)?'selected':'')+'>'+esc(l)+'</option>').join('')+'</select>';
+const chooser=(id,label,options,current,allowBlank=true)=>'<label for="'+id+'">'+esc(label)+'</label><select class="field" id="'+id+'">'+(allowBlank?'<option value="">Seleccioná…</option>':'')+options.map(([v,l])=>'<option value="'+v+'" '+(String(v)===String(current)?'selected':'')+'>'+esc(l)+'</option>').join('')+'</select>';
 const counts=[0,1,2,3,4].map(n=>[String(n),String(n)+' perfil'+(n===1?'':'es')]);
 const rules={response_worst_below_min:'Respuesta mínima no garantizada',
  thermal_worst_above_max:'Techo térmico no garantizado',
@@ -23,7 +23,7 @@ export function mountRobustResearch(root,{record}){
   '<p>Lecturas: <a href="'+PARETO_REFERENCE+'" target="_blank" rel="noopener noreferrer">concepto de Pareto</a> y <a href="'+UNCERTAINTY_REFERENCE+'" target="_blank" rel="noopener noreferrer">incertidumbre en medición (NIST)</a>. No atribuimos los números inventados a esas referencias.</p></div>';
   html+='<div class="panel stack"><h2>Escenario de incertidumbre</h2>';
   if(!s.result){
-   html+=chooser('eb-scenario','Escenario de investigación',RW8_ROBUST_SCENARIOS.map(x=>[x.id,x.title]),s.scenarioId);
+   html+=chooser('eb-scenario','Escenario de investigación',RW8_ROBUST_SCENARIOS.map(x=>[x.id,x.title]),s.scenarioId,false);
    const sc=RW8_ROBUST_SCENARIOS.find(x=>x.id===s.scenarioId);
    html+='<p>'+esc(sc?.description)+'</p>';
    html+='<p><strong>Restricciones ficticias:</strong> respuesta ≥'+sc.limits.minResponse.toFixed(2)+
