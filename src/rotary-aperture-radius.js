@@ -39,6 +39,36 @@ export function radiusOpeningEnvelope({radiusMm,relativeRadiusBound,observedArea
   lowerOpeningFraction:lower,upperOpeningFraction:upper,openingIntervalWidth:Math.max(0,upper-lower),
   reason:'Proyección exacta de la región factible bajo modelo circular 2D monotónico; no identifica un par (radio, apertura) único.'};
 }
+/** RW6++++: independent radius-gauge interval intersects the prior radius band.
+ * A genuinely independent geometric observable restricts the ambiguity, but
+ * cannot turn synthetic tolerance bounds into a metrological confidence level.
+ * Contradictory gauge intervals must fail closed, not silently choose a radius.
+ */
+export function independentlyCalibratedOpening({radiusMm,relativeRadiusBound,observedAreaMm2,toleranceMm2,measuredRadiusMm,radiusToleranceMm}){
+ const base=radiusOpeningEnvelope({radiusMm,relativeRadiusBound,observedAreaMm2,toleranceMm2});
+ const measured=bounded(measuredRadiusMm,0,200,'Radio medido independiente');
+ const tolerance=bounded(radiusToleranceMm,0,50,'Cota independiente de radio');
+ const low=Math.max(base.radiusLowMm,measured-tolerance);
+ const high=Math.min(base.radiusHighMm,measured+tolerance);
+ const metadata={independentRadiusMeasurementMm:measured,independentRadiusToleranceMm:tolerance,
+  independentlyCalibrated:true,limitations:'Intervalos geométricos deterministas sintéticos; la medición independiente no es calibración trazable ni incertidumbre GUM.'};
+ if(low>high)return {...base,...metadata,feasible:false,failClosed:true,feasibleRadiusLowMm:null,
+  lowerOpeningFraction:null,upperOpeningFraction:null,openingIntervalWidth:null,
+  radiusLowMm:low,radiusHighMm:high,
+  reason:'La medición independiente de radio contradice la banda radial inicial.'};
+ const minArea=Math.max(0,observedAreaMm2-toleranceMm2);
+ if(minArea>Math.PI*high*high*(1+1e-14))return {...base,...metadata,feasible:false,failClosed:true,
+  feasibleRadiusLowMm:null,lowerOpeningFraction:null,upperOpeningFraction:null,openingIntervalWidth:null,
+  radiusLowMm:low,radiusHighMm:high,
+  reason:'La menor área compatible excede el círculo de radio máximo tras la medición independiente.'};
+ const feasibleLow=Math.max(low,Math.sqrt(minArea/Math.PI));
+ const lower=inverseCircularApertureFraction(clamp(minArea/(Math.PI*high*high)));
+ const upper=inverseCircularApertureFraction(clamp((observedAreaMm2+toleranceMm2)/(Math.PI*feasibleLow*feasibleLow)));
+ return {...base,...metadata,feasible:true,failClosed:false,radiusLowMm:low,radiusHighMm:high,
+  feasibleRadiusLowMm:feasibleLow,lowerOpeningFraction:lower,upperOpeningFraction:upper,
+  openingIntervalWidth:Math.max(0,upper-lower),
+  reason:'Intersección explícita de dos cotas de radio independientes y proyección exacta sobre apertura.'};
+}
 export function radiusAmbiguityStudy({radiusMm=20,trueOpeningFraction=.25,biasFraction=.04,
  toleranceFraction=.02,radiusBandFraction=.05}={}){
  const band=bounded(radiusBandFraction,0,.2,'Cota relativa de radio');

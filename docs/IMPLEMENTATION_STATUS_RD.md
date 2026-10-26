@@ -114,3 +114,7 @@ Se incorporó `src/rotary-aperture-radius.js` al banco RW6++, con cota ficticia 
 **Fronteras científicas:** geometría circular 2D, radio y tolerancias inventados; no hay GUM, inferencia estadística, CAD Wankel, medición trazable, coeficiente de descarga, fase angular real ni validación de ECU. CI del nuevo HEAD debe confirmarse antes de acreditar esta implementación.
 
 **Refuerzo de rúbrica RW6+++**: cuarta predicción pre-registrada sobre monotonía del conjunto factible ante un radio menos conocido. 20 puntos para cada una de cuatro decisiones objetivas, 10 para razonamiento y 10 para límites. Texto libre verificado solo estructuralmente, no semánticamente. Se actualizan pruebas unitarias, navegador, Axe y offline.
+
+## RW6++++ — observación independiente del radio (2026-10-26)
+
+Se incorpora `independentlyCalibratedOpening` al motor geométrico RW6: intersecta una banda inicial del radio con una segunda lectura independiente de radio y una tolerancia determinista declarada. Proyecta el conjunto factible resultante a un intervalo de apertura, conserva la propiedad de subconjunto del resultado previo y falla cerrado ante cotas contradictorias o área físicamente imposible. Nuevas pruebas unitarias de reducción de ambigüedad e inconsistencias. Es un motor reutilizable; todavía no se expone como control propio en la interfaz ni representa instrumentos calibrados reales.

@@ -1,6 +1,6 @@
 import test from'node:test';import assert from'node:assert/strict';
 import{circularApertureFraction}from'../src/rotary-aperture.js';
-import{radiusOpeningEnvelope,radiusAmbiguityStudy,radiusAmbiguityReport,RADIUS_MODEL}from'../src/rotary-aperture-radius.js';
+import{radiusOpeningEnvelope,independentlyCalibratedOpening,radiusAmbiguityStudy,radiusAmbiguityReport,RADIUS_MODEL}from'../src/rotary-aperture-radius.js';
 import{recoverOpeningInterval}from'../src/rotary-aperture-inverse.js';
 test('RW6+++ zero radius band reproduces the one-radius inverse exactly',()=>{
  for(const r of [10,20,40])for(const u of [0,.001,.05,.25,.5,.75,.95,.999,1]){
@@ -61,4 +61,25 @@ test('RW6+++ synthetic bias, scenario report and parameter validation',()=>{
   {radiusMm:20,relativeRadiusBound:0,observedAreaMm2:4,toleranceMm2:-1},
   {radiusMm:20,relativeRadiusBound:0,observedAreaMm2:4,toleranceMm2:999}
  ])assert.throws(()=>radiusOpeningEnvelope(invalid),RangeError);
+});
+
+test('RW6++++ independent radius observation shrinks the opening interval without inventing confidence',()=>{
+ const parameters={radiusMm:20,relativeRadiusBound:.15,observedAreaMm2:600,toleranceMm2:15};
+ const base=radiusOpeningEnvelope(parameters);
+ const narrowed=independentlyCalibratedOpening({...parameters,measuredRadiusMm:20,radiusToleranceMm:.5});
+ assert.equal(narrowed.feasible,true);
+ assert.ok(narrowed.lowerOpeningFraction>=base.lowerOpeningFraction-1e-12);
+ assert.ok(narrowed.upperOpeningFraction<=base.upperOpeningFraction+1e-12);
+ assert.ok(narrowed.openingIntervalWidth<base.openingIntervalWidth);
+ assert.match(narrowed.limitations,/GUM/);
+});
+test('RW6++++ contradicting independent gauges fail closed, including physically impossible area',()=>{
+ const p={radiusMm:20,relativeRadiusBound:.1,observedAreaMm2:900,toleranceMm2:5};
+ const inconsistent=independentlyCalibratedOpening({...p,measuredRadiusMm:30,radiusToleranceMm:1});
+ assert.equal(inconsistent.failClosed,true);
+ assert.equal(inconsistent.lowerOpeningFraction,null);
+ const impossible=independentlyCalibratedOpening({...p,measuredRadiusMm:18,radiusToleranceMm:0});
+ assert.equal(impossible.feasible,false);
+ assert.equal(impossible.upperOpeningFraction,null);
+ assert.throws(()=>independentlyCalibratedOpening({...p,measuredRadiusMm:-1,radiusToleranceMm:.5}),RangeError);
 });
