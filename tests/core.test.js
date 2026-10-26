@@ -135,3 +135,5 @@ test('v1.9.4: entradas sobredimensionadas siguen rechazadas',()=>{
  assert.throws(()=>validateBackup(p),/límites de seguridad/);
  assert.throws(()=>parseBackup('x'.repeat(16_000_001)),/demasiado grande/);
 });
+
+test('v1.9.11: una respuesta omitida nunca se transforma en la opción cero',()=>{const q={id:'zero',answer:0};for(const selected of [undefined,null,'',false,'0','  ',NaN,-1,0.5,{},[]])assert.equal(gradeQuestion(q,selected),false);assert.equal(gradeQuestion(q,0),true);assert.equal(scoreExam([q],[null]).percentage,0);assert.equal(scoreExam([q],['']).percentage,0);assert.equal(scoreExam([q],[0]).percentage,100);});

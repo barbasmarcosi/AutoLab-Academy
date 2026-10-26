@@ -2,6 +2,9 @@
 
 ## Estado real al 25/10/2026
 
+- v1.9.11 (candidato en validación): auditoría CI de relaciones y estructura de todo el currículo, fuentes HTTPS, identidad y cobertura de itinerarios; calificación estricta que no concede crédito a null/'' para respuesta 0; regresión SW v32→v33. Ver docs/CURRICULUM_AUDIT_V1_9_11.md. No es auditoría semántica independiente.
+
+
 - v1.9.10: SW devuelve HTML válida aunque Cache Storage falle; solo el inicio de la PWA actualiza index.html, no páginas ajenas ni JSON. Tests de cuota simulada, navegación ajena, caída real de red y upgrade offline v31→v32. Ver docs/SERVICE_WORKER_RELIABILITY_V1_9_10.md.
 
 
@@ -72,7 +75,7 @@
 ## Arquitectura actual
 
 PWA estática sin backend: HTML, CSS y JS modular ESM, service worker y IndexedDB.
-La propuesta original React/TypeScript, Dexie y FSRS queda como evaluación de evolución después de validar el MVP; **no se afirma implementada**. Esta elección reduce el riesgo de despliegue y mantiene el proyecto funcional sin servicios de terceros. El repaso actual utiliza intervalos sencillos documentados, no FSRS.
+La propuesta original React/TypeScript, Dexie y FSRS queda como evaluación de evolución después de validar el MVP; **no se afirma implementada**. Esta elección reduce el riesgo de despliegue y mantiene el proyecto funcional sin servicios de terceros. El repaso actual usa ts-fsrs 5.4.2; las tarjetas heredadas conservan intervalos previos hasta el siguiente repaso real.
 
 ## Deploy GitHub Pages
 

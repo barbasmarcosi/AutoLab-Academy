@@ -1,0 +1,17 @@
+import{tracks,lessons as l0,questions as q0,cases as c0}from'../src/content.js';
+import{additionalLessons as l1,additionalQuestions as q1}from'../src/curriculum-advanced.js';
+import{ecuLessons as l2,ecuQuestions as q2}from'../src/ecu-curriculum.js';
+import{componentLessons as l3,componentQuestions as q3}from'../src/components-curriculum.js';
+import{differentialLessons as l4,differentialQuestions as q4}from'../src/differential-curriculum.js';
+import{temporalLessons as l5,temporalQuestions as q5}from'../src/temporal-curriculum.js';
+import{fuelLessons as l6,fuelQuestions as q6}from'../src/fuel-curriculum.js';
+import{misfireLessons as l7,misfireQuestions as q7}from'../src/misfire-curriculum.js';
+import{integrativeLessons as l8,integrativeQuestions as q8}from'../src/integrative-curriculum.js';
+import{additionalCases}from'../src/cases-advanced.js';
+import{learningStages}from'../src/learning-path.js';
+import{auditCurriculum}from'../src/curriculum-audit.js';
+const report=auditCurriculum({tracks,lessons:[...l0,...l1,...l2,...l3,...l4,...l5,...l6,...l7,...l8],questions:[...q0,...q1,...q2,...q3,...q4,...q5,...q6,...q7,...q8],cases:[...c0,...additionalCases],learningStages});
+console.log('Auditoría curricular estructural integral (no equivale a revisión técnica de fuentes):\n'+JSON.stringify(report.summary,null,2));
+for(const w of report.warnings)console.warn('ADVERTENCIA:',w);
+for(const e of report.errors)console.error('ERROR:',e);
+if(!report.ok)process.exitCode=1;
