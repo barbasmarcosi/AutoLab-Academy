@@ -2,6 +2,10 @@
 
 PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y electromovilidad**.
 
+## Seguimiento de implementación
+
+El avance real, criterios de cierre y próximas etapas están en [**Estado de implementación de Automotive R&D**](docs/IMPLEMENTATION_STATUS_RD.md). Este documento distingue funciones implementadas, validación automatizada pendiente y ensayos físicos externos.
+
 ## Visión de evolución (propuesta)
 
 Además del diagnóstico basado en evidencias, aspiramos a formar profesionales capaces de **entender la mecánica del vehículo completo, investigar sistemas, optimizarlos y crear herramientas propias**. El plan [Diagnostic Engineering + Automotive R&D](docs/ENGINEERING_MINDSET_RD_VISION.md) conecta tres ejes:

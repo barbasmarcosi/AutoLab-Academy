@@ -164,3 +164,12 @@ test('RW1: evidencia geométrica y procedencia se conservan en backup y Portafol
  assert.equal(snap.events[0].report,p.cases[0].report);
  assert.match(report,/derived_from_geometry/);
 });
+
+
+test('RW4: portafolio y respaldo conservan hipótesis, dos pruebas y procedencia del modelo',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-sealing-v1',score:100,passed:true,at:'2026-10-26T04:00:00.000Z',hypothesis:'ignition',conclusion:'sealing',used:['retention','primary'],reasoning:'Dos índices sintéticos distinguen las hipótesis sin mediciones físicas.',report:'# RW4\nProcedencia: synthetic_model\nSemilla: 42'});
+ const restored=parseBackup(serializeBackup(p)),snap=portfolioSnapshot(restored,lessons),md=portfolioMarkdown(restored,lessons);
+ assert.equal(snap.events[0].title,'RW4 — Diagnóstico diferencial rotativo');
+ assert.deepEqual(snap.events[0].evidence,['retention','primary']);
+ assert.match(md,/synthetic_model/);assert.match(md,/Semilla: 42/);
+});
