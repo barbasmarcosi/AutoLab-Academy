@@ -154,3 +154,13 @@ test('v1.9: diagnóstico por evidencia conserva hipótesis, descartes e informe 
  assert.match(portfolioMarkdown(restored,lessons),/Semilla reproducible: 291/);
  assert.match(portfolioMarkdown(restored,lessons),/Puntuación: 100\/100/);
 });
+
+
+test('RW1: evidencia geométrica y procedencia se conservan en backup y Portafolio',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-geometry-v1',at:'2026-10-26T03:00:00Z',score:100,passed:true,hypothesis:'aumenta',conclusion:'aumenta',used:['geometry-a'],reasoning:'Predicción registrada con modelo cinemático; no es metrología ni un resultado real.',report:'# RW1\nModelo: rw1-epitrochoid-straight-flanks v1\nProcedencia: derived_from_geometry'});
+ const recovered=parseBackup(serializeBackup(p)),snap=portfolioSnapshot(recovered,lessons),report=portfolioMarkdown(recovered,lessons);
+ assert.equal(snap.events[0].title,'RW1 — Rotary Geometry Explorer');
+ assert.equal(snap.events[0].hypothesis,'aumenta');
+ assert.equal(snap.events[0].report,p.cases[0].report);
+ assert.match(report,/derived_from_geometry/);
+});
