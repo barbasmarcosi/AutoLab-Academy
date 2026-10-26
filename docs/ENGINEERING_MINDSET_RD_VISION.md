@@ -6,7 +6,7 @@
 
 ## 1. Norte profesional
 
-**Formar un profesional capaz de comprender por qué y cómo funciona un vehículo, diagnosticar problemas que otros no resuelven, optimizar sistemas mediante evidencia y desarrollar sus propias herramientas cuando las existentes no alcanzan.**
+**Formar un profesional capaz de comprender por qué y cómo funciona un vehículo completo —mecánica y electrónica—, diagnosticar problemas que otros no resuelven, optimizar sistemas mediante evidencia y desarrollar sus propias herramientas cuando las existentes no alcanzan.**
 
 El objetivo no es aprender botones de un escáner, memorizar DTC ni limitarse a ser preparador de motores. Es integrar cuatro capacidades que se alimentan mutuamente:
 
@@ -49,7 +49,13 @@ Al completar un itinerario avanzado, el estudiante debería poder, **en simulaci
 
 Ninguna simulación otorga por sí sola habilitación para operar con alta tensión, calibrar vehículos reales ni certificar oficio.
 
-## 3. Los dos caminos que transcurren en paralelo
+## 3. Una base mecánica integral y dos caminos que transcurren en paralelo
+
+### Tronco común obligatorio — Automotive Mechanics Core
+
+La excelencia diagnóstica o de I+D requiere comprender **cómo funciona mecánicamente un vehículo completo**, no solo leer los parámetros de una ECU. El [currículo integral de mecánica automotriz](AUTOMOTIVE_MECHANICS_CURRICULUM.md) propone 15 módulos (MC00–MC14) de seguridad de taller, física y metrología, motores nafteros y diésel, lubricación, refrigeración, transmisiones, suspensión/dirección, frenos, HVAC, electrónica, redes, ECU, híbridos/EV, diagnóstico e ingeniería aplicada. Progresión M0–M3, prácticas concretas, prerrequisitos, rúbricas y referentes curriculares INET/ASE **sin equiparar la PWA con una certificación**.
+
+La mecánica y la electrónica se enseñan como causas y efectos de un mismo sistema. Ninguna especialización en motores o ecu optimizada sustituye este tronco común.
 
 ### A. Diagnostic Engineering — «¿Qué le pasa y por qué?»
 
@@ -71,6 +77,12 @@ Ninguna simulación otorga por sí sola habilitación para operar con alta tensi
 
 **Ambas vías confluyen** en proyectos integradores: un diagnóstico revela una limitación; la ingeniería desarrolla una mejora; el diagnóstico verifica que la mejora funciona y no introduce fallas nuevas.
 
+### Laboratorio insignia — Rotary Engineering Lab
+
+El [Rotary Engineering Lab](ROTARY_ENGINEERING_LAB.md) es la primera gran especialización de investigación mecánica: geometría y cinemática Wankel, respiración/puertos, sellos de ápice, lubricación, termodinámica, refrigeración, combustión, ECU, fiabilidad, emisiones, generación eléctrica y optimización bajo restricciones. Propone RW0–RW10 y entregas RW-P0–RW-P5, con un primer **Rotary Geometry Explorer offline**. No está implementado.
+
+El alumno deberá contrastar Wankel con motores alternativos sin confundir el **ciclo termodinámico Otto** con la **arquitectura mecánica** de un motor; el Wankel de encendido provocado puede operar bajo el principio de cuatro tiempos. Premiar el análisis de ventajas **y** desventajas, no el favoritismo tecnológico.
+
 ## 4. Familias de desafíos que debería ofrecer AutoLab
 
 ### D1 — Diagnóstico de máxima información
@@ -90,6 +102,9 @@ El prototipo mejora una métrica pero degrada otra o falla fuera de las condicio
 
 ### D6 — Investigación abierta reproducible
 Pregunta, hipótesis, instrumentos/datos, metodología, bitácora, resultados, límites, conclusiones y réplica de un segundo caso. Exportación a portafolio con procedencia *sintética* o *medida* explícita.
+
+### D7 — Mecánica integral y estudio de arquitecturas
+Desmontaje conceptual seguro, relaciones fuerza-torque, transmisión, fricción, refrigeración, mantenimiento y fallas mecánicas que imitan averías eléctricas. Contraste Wankel vs. alternativo con unidades, condiciones, simuladores reproducibles y opción «no hay datos suficientes». Especialización: [Rotary Engineering Lab](ROTARY_ENGINEERING_LAB.md).
 
 ## 5. Proyecto faro: modos de ECU y consumo — solo banco/simulación primero
 
@@ -152,6 +167,8 @@ Una comparación documentada **usar / adaptar / construir** es obligatoria en ca
 
 Las fases son objetivos de producto, **no versiones ya prometidas ni fechas**. Priorizar R0/R1 sin bloquear la actual agenda de confiabilidad v1.9; dividir trabajo en PRs revisables.
 
+**Carriles curriculares adicionales, también propuestos:** [Mecánica MC-P1–MC-P5](AUTOMOTIVE_MECHANICS_CURRICULUM.md) y [Wankel RW-P0–RW-P5](ROTARY_ENGINEERING_LAB.md). Orden inicial sugerido: revisar fuentes/licencias/prerrequisitos de MC-P1 y RW-P0; luego construir **un** desafío transversal de mecánica y **un** explorador geométrico Wankel offline que pasen pruebas. No duplicar el motor de evaluación y portafolio existente.
+
 ### Primer backlog concreto para implementar después de aprobar el concepto
 
 - [ ] `experiment-schema`: IDs/semilla/dataset/modelo/versión, métricas, restricciones, procedencia y estados; rechazo de NaN, resultados inalcanzables y entradas malformadas.
@@ -190,7 +207,7 @@ El «10/10» interno del software puede alcanzarse sin que el alumno haya hecho 
 
 ## 10. Decisiones y preguntas abiertas
 
-- **Decidido conceptualmente:** diagnóstico + innovación en paralelo; aprendizaje basado en ciencia aplicada; creatividad con evidencia; offline-first; reutilizar herramientas existentes; no funciones de escritura real.
+- **Decidido conceptualmente:** tronco común de mecánica automotriz + diagnóstico + innovación en paralelo; Wankel como laboratorio insignia, sin tratarlo como arquitectura superior por definición; aprendizaje basado en ciencia aplicada; creatividad con evidencia; offline-first; reutilizar herramientas existentes; no funciones de escritura real.
 - **Pendiente de investigación:** primer modelo físico, licencia/integración del simulador, tamaño de datasets y límites de IndexedDB, hardware de banco de baja tensión, formato de interoperabilidad y evaluación especializada.
 - **Pendiente de priorización:** si R1 empieza con inyección/motor, señales de ECU, CAN o BMS. La elección no altera la visión.
 - **Pendiente de validación externa:** exactitud física y pedagógica de los retos e interpretación de resultados medidos.
