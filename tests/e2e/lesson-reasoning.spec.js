@@ -67,8 +67,8 @@ test('MC14: missing and incorrect reasoning decisions remain fail-closed, retake
  await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
  await expect(page.locator('#lesson-reasoning-status')).toContainText('aprobado');
  await page.locator('nav.nav button[data-id="portfolio"]').click();
- await expect(page.getByText('Razonamientos guiados',{exact:true})).toBeVisible();
- await expect(page.getByText('Prácticas y laboratorios',{exact:true})).toBeVisible();
+ await expect(page.locator('.stat-label').filter({hasText:'Razonamientos guiados'})).toBeVisible();
+ await expect(page.locator('.stat-label').filter({hasText:'Prácticas y laboratorios'})).toBeVisible();
  await page.locator('#portfolio-filter').selectOption('reasoning');
  await expect(page.getByText(/Razonamiento guiado — Caja negra: modelos indistinguibles/)).toHaveCount(2);
  await page.locator('#portfolio-filter').selectOption('lab');
