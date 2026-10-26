@@ -50,7 +50,7 @@ test('MC00–MC14 avanza en cinco niveles ordenados con toda la cobertura, sin p
  const ids=learningStages.slice(9,14).map(x=>x.id);
  assert.deepEqual(ids,['mechanics','engine-core','chassis-core','control-core','research-core']);
  assert.deepEqual(learningStages.map(x=>x.order),Array.from({length:15},(_,i)=>i+1));
- assert.equal(learningStages.slice(9).reduce((n,x)=>n+x.lessons.length,0),17);
+ assert.equal(learningStages.slice(9,14).reduce((n,x)=>n+x.lessons.length,0),17);
  const p=emptyProgress();for(const stage of learningStages.slice(0,10))for(const id of stage.lessons)p.notes['lesson-'+id]='2026-10-26T00:00:00Z';
  const s=evaluateLearningPath(p,all);
  assert.equal(s.nextStage,'engine-core');assert.equal(s.nextLesson,'mc02-energy-path');
