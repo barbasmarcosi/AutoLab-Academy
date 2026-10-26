@@ -78,7 +78,7 @@ test('RW6++++ contradicting independent gauges fail closed, including physically
  const inconsistent=independentlyCalibratedOpening({...p,measuredRadiusMm:30,radiusToleranceMm:1});
  assert.equal(inconsistent.failClosed,true);
  assert.equal(inconsistent.lowerOpeningFraction,null);
- const impossible=independentlyCalibratedOpening({...p,measuredRadiusMm:18,radiusToleranceMm:0});
+ const impossible=independentlyCalibratedOpening({...p,observedAreaMm2:1100,measuredRadiusMm:18,radiusToleranceMm:0});
  assert.equal(impossible.feasible,false);
  assert.equal(impossible.upperOpeningFraction,null);
  assert.throws(()=>independentlyCalibratedOpening({...p,measuredRadiusMm:-1,radiusToleranceMm:.5}),RangeError);
