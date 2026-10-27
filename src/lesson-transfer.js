@@ -94,6 +94,15 @@ const values=[
   'Retorno LV con falla confirmada','Pack HV defectuoso con certeza','Regulación, capacidad o habilitación del DC/DC en el modelo LV'],2,'El defecto se manifiesta ya en la fuente LV y no en el trayecto hasta la carga; no autoriza ensayos HV.'],
  ['current-shunt','En banco protegido, un shunt medido a 20 mΩ produce 80 mV diferenciales bajo condición estable. ¿Cuál corriente ideal corresponde?',[
   '4 A, siempre aclarando incertidumbre del valor real del shunt','40 A sin control térmico','0,4 A y resistencia irrelevante'],0,'La relación I=0,080/0,020=4 A cambia al variar R, por lo que calibración y temperatura importan.']
+,
+ ['scope-reference','En un banco aislado, una forma de onda se conserva respecto a su masa local, mientras el desplazamiento aparente de 0,8 V desaparece al comparar las referencias con sonda diferencial. ¿Qué conclusión corresponde?',[
+  'El offset de referencia explica el desplazamiento aparente; no se demostró fallo del sensor','La ECU necesariamente dejó de funcionar','Un nivel diferente prueba que el sensor ha envejecido'],0,'Corregir la referencia con control diferencial refuta atribuir el offset al sensor sin evidencia independiente.'],
+ ['actuator-current','Un nuevo ensayo LV muestra PWM de mando y tensión adecuada en los bornes de un actuador, pero corriente nula en la ventana de excitación. ¿Dónde investigar?',[
+  'En el código de diagnóstico únicamente','En continuidad de carga y su circuito de corriente, sin afirmar todavía fallo mecánico','La carga trabaja porque su tensión es correcta'],1,'Con suministro presente y corriente nula, la hipótesis cambia de falta de tensión hacia la ruta de corriente sin poder determinar una pieza exacta.'],
+ ['can-isolation','En el escenario retenido, el nodo que no responde tiene alimentación y habilitación estables, mientras los demás generan tramas válidas; el transceptor local no refleja ninguna actividad de bus. ¿Cuál es el siguiente enfoque?',[
+  'Declarar toda la red caída','Transmitir arbitrariamente a un vehículo real','Investigar enlace local del transceptor o conexión de ese módulo en banco, sin concluir colapso total'],2,'La alimentación local medida desplaza la hipótesis y la red activa refuta un apagón global.'],
+ ['uds-session','Una documentación de banco indica que el DID pedido solo está implementado en otra versión de firmware autorizada; el sensor entrega una señal física plausible en ensayo independiente. ¿Qué cambia?',[
+  'La negativa es compatible con DID no soportado y no acredita sensor averiado','El rechazo exige sustituir sensor','Toda respuesta negativa es una falla eléctrica'],0,'La trazabilidad de la versión y un control físico independiente separan limitación de protocolo de avería del sensor.']
 
 ];
 export const TRANSFER_CASES=Object.freeze(values.map(([lessonId,context,options,answer,feedback])=>Object.freeze({
