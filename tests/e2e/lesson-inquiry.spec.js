@@ -17,7 +17,8 @@ test('every lesson can host a frozen inquiry design without inventing a simulato
  await page.getByRole('button',{name:'Guardar diseño sin acreditar práctica'}).click();
  await expect(page.locator('#lesson-inquiry-status')).toContainText('1 diseño');
  await expect(page.locator('#lesson-theory-practice-status')).toContainText('No hay práctica vinculada');
- await expect(page.locator('#lesson-theory-reasoning-status')).toContainText('Sin ejercicio');
+ await expect(page.locator('#lesson-theory-reasoning-status')).toContainText('Razonamiento y transferencia pendientes');
+ await expect(page.locator('#reasoning-hypothesis')).toBeVisible();
  await expect(page.getByText('Teoría: lectura pendiente',{exact:false})).toBeVisible();
  await page.locator('nav.nav button[data-id="data"]').click();
  const pending=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
