@@ -5,6 +5,7 @@
  */
 import{lessonPractice,practiceProgress}from'./lesson-practice.js';
 import{transferCase,transferProgress}from'./lesson-transfer.js';
+import{inquiryProgress}from'./lesson-inquiry.js';
 export const EVIDENCE_MODEL='lesson-evidence-structured-v1';
 export function lessonEvidence(progress,lessonId){
  const read=Boolean(progress?.notes?.['lesson-'+lessonId]);
@@ -25,7 +26,7 @@ export function lessonEvidence(progress,lessonId){
  const gaps=[...(!read?['reading']:[]),
   ...(reasoning.available&&!reasoning.passed?['reasoning-transfer']:[]),
   ...(lab.available&&!lab.passed?['embedded-lab']:[])];
- return {model:EVIDENCE_MODEL,lessonId,read,reasoning,lab,linkedLab,
+ return {model:EVIDENCE_MODEL,lessonId,read,reasoning,lab,linkedLab,inquiry:inquiryProgress(progress,lessonId),
   assessed,documented,phase:documented?'documented-training':assessed?'in-progress':'unassessed',
   gaps,disclaimer:'Evidencia de entrenamiento digital, no dominio técnico real ni certificación.'};
 }
@@ -43,6 +44,7 @@ export function learningEvidenceOverview(progress,lessons,stages){
   embeddedAvailable:all.filter(x=>x.lab.available).length,
   embeddedPassed:all.filter(x=>x.lab.passed).length,
   linkedOnly:all.filter(x=>x.linkedLab!==null).length,
+  inquiryAvailable:all.length,inquiryRecorded:all.filter(x=>x.inquiry.attempts>0).length,
   notAssessed:all.filter(x=>!x.assessed).length,
   documentedTraining:all.filter(x=>x.documented).length
  };
@@ -65,8 +67,9 @@ export function learningEvidenceOverview(progress,lessons,stages){
    reasoningPassed:events.filter(x=>x.reasoning.passed).length,
    labAvailable:events.filter(x=>x.lab.available).length,
    labPassed:events.filter(x=>x.lab.passed).length,
-   documentedTraining:events.filter(x=>x.documented).length};
+   documentedTraining:events.filter(x=>x.documented).length,
+   inquiryRecorded:events.filter(x=>x.inquiry.attempts>0).length};
  });
  return {model:EVIDENCE_MODEL,totals,byLesson,byStage,nextTask,
-  limits:'La ausencia de una rúbrica en 81 lecciones no equivale ni a fracaso ni a aprobación. Tampoco se acreditan competencias físicas, seguridad HV ni razonamientos libres sin revisión humana.'};
+  limits:'El cuaderno científico en las 94 lecciones no acredita dominio. La ausencia de una rúbrica en 76 lecciones no equivale ni a fracaso ni a aprobación. Tampoco se acreditan competencias físicas, seguridad HV ni razonamientos libres sin revisión humana.'};
 }
