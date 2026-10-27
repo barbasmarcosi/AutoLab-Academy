@@ -46,6 +46,9 @@ test('reject incomplete, unsafe or fabricated notebook states and preserve 94 st
  for(const k of ['hypothesis','alternative','probe','predictH1','predictH2','falsifier','confounder','limits'])
   assert.throws(()=>makeInquiryRecord(lesson,{...answer,[k]:'breve'}),RangeError);
  assert.throws(()=>makeInquiryRecord(lesson,{...answer,mode:'verified'}),RangeError);
+ assert.throws(()=>makeInquiryRecord(lesson,{...answer,alternative:answer.hypothesis}),/H1 y H2/);
+ assert.throws(()=>makeInquiryRecord(lesson,{...answer,predictH2:answer.predictH1}),/predicciones/);
+ assert.throws(()=>makeInquiryRecord(lesson,{...answer,alternative:'  '+answer.hypothesis.toUpperCase()+'  '}),/H1 y H2/);
  assert.throws(()=>makeInquiryRecord({id:'bad!',sections:[]},answer),RangeError);
  const ids=learningStages.flatMap(x=>x.lessons);
  assert.equal(ids.length,94);assert.equal(new Set(ids.map(inquiryId)).size,94);

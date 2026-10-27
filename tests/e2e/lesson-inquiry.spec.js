@@ -6,7 +6,17 @@ test('every lesson can host a frozen inquiry design without inventing a simulato
  await page.locator('article.lesson-card').filter({hasText:'Seguridad de alta tensión: reconocer el límite'}).getByRole('button',{name:'Estudiar'}).click();
  await expect(page.getByRole('heading',{name:/Cuaderno de investigación: Seguridad de alta tensión/})).toBeVisible();
  await expect(page.locator('#lesson-practice-host')).toHaveCount(0);
- const fill=async(id)=>page.locator('#inquiry-'+id).fill('En un ensayo didáctico reproducible podría separarse esta explicación mediante un contraste independiente y documentado.');
+ const text={
+  hypothesis:'H1: existe una diferencia local de referencia de tensión en el circuito conceptual.',
+  alternative:'H2: un canal del instrumento produce la diferencia aparente sin falla física.',
+  probe:'Comparar una referencia aislada y un segundo canal en un circuito didáctico protegido.',
+  predictH1:'La referencia aislada repetirá la desviación en las dos lecturas del circuito.',
+  predictH2:'El canal independiente no repetirá el error mostrado por la primera medición.',
+  falsifier:'Una referencia estable en ambas condiciones refutaría la hipótesis principal.',
+  confounder:'La deriva térmica de la referencia y del instrumento puede sesgar las comparaciones.',
+  limits:'Esta práctica de diseño usa un ejemplo virtual y no habilita mediciones reales sobre sistemas de alta tensión. Requiere supervisión especializada.'
+ };
+ const fill=async(id)=>page.locator('#inquiry-'+id).fill(text[id]);
  await fill('hypothesis');await fill('alternative');
  await page.getByRole('button',{name:'Congelar hipótesis'}).click();
  for(const key of ['probe','predictH1','predictH2','falsifier','confounder'])await fill(key);

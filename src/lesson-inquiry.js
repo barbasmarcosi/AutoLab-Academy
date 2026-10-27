@@ -9,6 +9,10 @@ const required=(value,min=30,max=700)=>{
   throw RangeError('Completá el criterio con al menos '+min+' caracteres concretos.');
  return value.trim();
 };
+const distinguish=(a,b,label)=>{
+ const normalize=s=>s.toLocaleLowerCase('es').replace(/[\s.,;:!?¿¡]+/g,' ').trim();
+ if(normalize(a)===normalize(b))throw RangeError(label+' deben formular consecuencias diferentes.');
+};
 export function inquiryProgress(progress,id){
  const cases=Array.isArray(progress?.cases)?progress.cases.filter(x=>x?.id===inquiryId(id)):[];
  return {attempts:cases.length,passed:false,status:cases.length?'documented-unverified':'not-started'};
@@ -19,6 +23,8 @@ export function makeInquiryRecord(lesson,input){
  const values={};
  for(const field of ['hypothesis','alternative','probe','predictH1','predictH2','falsifier','confounder'])
   values[field]=required(input?.[field]);
+ distinguish(values.hypothesis,values.alternative,'H1 y H2');
+ distinguish(values.predictH1,values.predictH2,'Las predicciones para H1 y H2');
  values.limits=required(input?.limits,60,900);
  if(!['design','observation'].includes(input?.mode))throw RangeError('Modo de evidencia inválido');
  const observed=input.mode==='observation';
@@ -94,9 +100,11 @@ export function mountInquiryNotebook(root,{lesson,record,onSaved=()=>{}}){
   error='';
   try{
    if(action==='first'&&stage===0){
-    for(const id of fields.slice(0,2))frozen[id]=required(values[id]);stage=1;
+    for(const id of fields.slice(0,2))frozen[id]=required(values[id]);
+    distinguish(frozen.hypothesis,frozen.alternative,'H1 y H2');stage=1;
    }else if(action==='second'&&stage===1){
-    for(const id of fields.slice(2,7))frozen[id]=required(values[id]);stage=2;
+    for(const id of fields.slice(2,7))frozen[id]=required(values[id]);
+    distinguish(frozen.predictH1,frozen.predictH2,'Las predicciones para H1 y H2');stage=2;
    }else if(action==='save'&&stage===2){
     const entry=makeInquiryRecord(lesson,{...frozen,...values,mode:values.mode||'design'});
     saving=true;
