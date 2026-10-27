@@ -58,4 +58,7 @@ test('parameter variation follows the declared ideal causal law for each bench',
  assert.deepEqual([5,10,20].map(v=>computeNumericBench('pullups',v)),[5/3,2.5,10/3]);
  assert.deepEqual([25,50,75].map(v=>computeNumericBench('actuator-power',v)),[3,6,9]);
  assert.deepEqual([1,2,3].map(v=>computeNumericBench('can',v)),[120,60,40]);
+ const single={lessonId:'can',variant:1,hypothesis:2,falsifier:1,predicted:120,explanation,limitations};
+ assert.equal(gradeNumericBench(single).passed,true);
+ assert.throws(()=>gradeNumericBench({...single,predicted:Infinity}),RangeError);
 });
