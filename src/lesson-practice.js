@@ -5,6 +5,10 @@
  * existing lab, while preserving the learner's theory reading marker.
  */
 export const LESSON_PRACTICES=Object.freeze([
+ {lessonId:'sensor-plausibility',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-sensor-fallback-v1',
+  title:'ECT: valor sustitutivo frente a temperatura de referencia',prompt:'Estimá la diferencia entre un valor diagnóstico congelado por fallback y una referencia física sintética. Discriminá lectura de ECU de estado real.'},
+ {lessonId:'scope-reference',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-scope-ground-v1',
+  title:'Osciloscopio: offset por referencia y retorno',prompt:'Predecí cómo se desplaza el potencial aparente al variar la referencia. No conectes masas de equipos reales a puntos desconocidos.'},
  {lessonId:'resistive-loss',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-resistive-loss-v1',
   title:'Potencia I²R de una conexión: predicción y refutación',prompt:'Calculá la pérdida resistiva variando corriente sin generar calor real. Contrastá por qué una continuidad sin carga puede ocultar el comportamiento bajo consumo.'},
  {lessonId:'mosfet-control',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-mosfet-v1',
