@@ -98,6 +98,7 @@ export function numericBenchRecord(input,result){
  return {id:b.caseId,date:new Date().toISOString(),score:result.score,passed:result.passed,
   model:NUMERIC_BENCH_MODEL,report:[
   '# AutoLab — banco numérico de baja tensión (modelo ideal)',
+  'Modelo: '+NUMERIC_BENCH_MODEL,
   'Lección: '+b.lessonId,'Caso: '+b.title,
   'Condición seleccionada: '+selection.label,
   'Hipótesis congelada: '+b.hypotheses[input.hypothesis],
