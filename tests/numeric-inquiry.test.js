@@ -26,7 +26,7 @@ test('three independent LV experiments produce reproducible model output, never 
   assert.equal(record.passed,true);
   assert.match(record.report,/NO evaluad[oa] semánticamente/);
   assert.match(record.report,/Resultado CALCULADO del modelo/);
-  assert.match(record.report,/NO es una medición/);
+  assert.match(record.report,/No equivale a medición/i);
   assert.equal(gradeNumericBench({...args,hypothesis:(x.hypothesis+1)%3}).passed,false);
   assert.equal(gradeNumericBench({...args,falsifier:(x.falsifier+1)%3}).passed,false);
   assert.equal(gradeNumericBench({...args,predicted:x.predicted*1.5}).passed,false);
