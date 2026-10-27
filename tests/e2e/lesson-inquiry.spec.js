@@ -4,7 +4,7 @@ test('every lesson can host a frozen inquiry design without inventing a simulato
  await page.goto('./');
  await page.locator('nav.nav button[data-id="learn"]').click();
  await page.locator('article.lesson-card').filter({hasText:'Seguridad de alta tensión: reconocer el límite'}).getByRole('button',{name:'Estudiar'}).click();
- await expect(page.getByRole('heading',{name:/Cuaderno de investigación: Seguridad de alta tensión/})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Cuaderno científico: diseñá una investigación'})).toBeVisible();
  await expect(page.locator('#lesson-practice-host')).toHaveCount(0);
  const text={
   hypothesis:'H1: existe una diferencia local de referencia de tensión en el circuito conceptual.',
