@@ -81,8 +81,9 @@ export function gradeNumericBench(input){
  const bench=numericBenchFor(input?.lessonId);
  if(!bench)throw RangeError('Banco inexistente');
  const result=computeNumericBench(bench.lessonId,input.variant);
- if(!Number.isFinite(input.predicted)||input.predicted<0||input.predicted>100)
-  throw RangeError('La predicción debe ser un número válido y no negativo.');
+ const maximum=Math.max(1000,4*Math.max(...numericBenchSensitivity(bench.lessonId).map(x=>x.result)));
+ if(!Number.isFinite(input.predicted)||input.predicted<0||input.predicted>maximum)
+  throw RangeError('La predicción debe ser un número finito y no negativo dentro de la escala del banco.');
  if(!Number.isInteger(input.hypothesis)||input.hypothesis<0||input.hypothesis>2||
     !Number.isInteger(input.falsifier)||input.falsifier<0||input.falsifier>2)
   throw RangeError('Congelá hipótesis y refutador antes de observar');
