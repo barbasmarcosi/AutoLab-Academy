@@ -45,6 +45,7 @@ for(const entry of entries){
   await expect(root.locator('#nb-predicted')).toHaveCount(0);
   await root.getByRole('button',{name:'Guardar evidencia del banco numérico'}).click();
   await expect(page.locator('#lesson-practice-status')).toContainText('Práctica aprobada');
+  await expect(page.locator('#lesson-practice-status')).toContainText('NO competencia física');
   await expect(page.locator('#lesson-theory-practice-status')).toContainText('Práctica aprobada');
   await expect(page.getByText(/Teoría: lectura pendiente/)).toBeVisible();
   await page.locator('nav.nav button[data-id="data"]').click();
