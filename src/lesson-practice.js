@@ -5,6 +5,16 @@
  * existing lab, while preserving the learner's theory reading marker.
  */
 export const LESSON_PRACTICES=Object.freeze([
+ {lessonId:'resistive-loss',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-resistive-loss-v1',
+  title:'Potencia I²R de una conexión: predicción y refutación',prompt:'Calculá la pérdida resistiva variando corriente sin generar calor real. Contrastá por qué una continuidad sin carga puede ocultar el comportamiento bajo consumo.'},
+ {lessonId:'mosfet-control',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-mosfet-v1',
+  title:'MOSFET low-side: pérdidas por resistencia de conducción',prompt:'Anticipá P=I²·RDS(on) bajo condición de excitación completa y aclarando por qué el voltaje umbral no garantiza un driver sano.'},
+ {lessonId:'inductive-load',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-inductor-energy-v1',
+  title:'Energía de bobina ficticia: análisis de límites',prompt:'Estimá E=½LI² en una bobina ideal antes de revelar cálculos. No extrapoles el resultado a tensiones de desconexión sin modelo de protección.'},
+ {lessonId:'ground-reference-network',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-shared-return-v1',
+  title:'Desplazamiento de potencial en masa compartida',prompt:'Predecí ΔV=I·R de un retorno LV de impedancia conocida y distinguí el modelo de un diagnóstico confirmado de CAN o ECU.'},
+ {lessonId:'dcdc-switches',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-buck-v1',
+  title:'Buck LV: teoría y cálculo de duty',prompt:'Contrastá la aproximación ideal Vout≈D·Vin de un buck de 12 V sin equiparar el cálculo a regulación real o sistemas HV.'},
  {lessonId:'scope',page:'wave-inquiry',kind:'embedded',caseId:'lab-scope-waveform-v1',
   title:'Osciloscopía: contrastá período y frecuencia',prompt:'Definí una predicción de frecuencia antes de conocer la onda sintética. Contrastá escala temporal y amplitud.'},
  {lessonId:'pwm-scope',page:'wave-inquiry',kind:'embedded',caseId:'lab-pwm-waveform-v1',
