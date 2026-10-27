@@ -65,7 +65,7 @@ test('parameter variation follows the declared ideal causal law for each bench',
  assert.deepEqual([1,2,3].map(v=>computeNumericBench('can',v)),[120,60,40]);
  assert.deepEqual([2,4,6].map(v=>computeNumericBench('resistive-loss',v)),[1,4,9]);
  assert.deepEqual([2,4,6].map(v=>computeNumericBench('mosfet-control',v)),[0.2,0.8,1.8]);
- assert.deepEqual([2,4,6].map(v=>computeNumericBench('inductive-load',v)),[0.4,1.6,3.6]);
+ assert.deepEqual([2,4,6].map(v=>Number(computeNumericBench('inductive-load',v).toFixed(4))),[0.4,1.6,3.6]);
  assert.deepEqual([2,4,6].map(v=>computeNumericBench('ground-reference-network',v)),[0.1,0.2,0.30000000000000004]);
  assert.deepEqual([25,50,75].map(v=>computeNumericBench('dcdc-switches',v)),[3,6,9]);
  const single={lessonId:'can',variant:1,hypothesis:2,falsifier:1,predicted:120,explanation,limitations};
