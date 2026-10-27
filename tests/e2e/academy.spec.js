@@ -92,7 +92,7 @@ test('PWA instalada en scope Pages: funciona sin red y sin datos OEM',async({pag
  await page.goto('./');
  await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
  await page.waitForFunction(()=>Boolean(navigator.serviceWorker?.controller),null,{timeout:30_000});
- expect((await page.evaluate(()=>caches.keys())).includes('autolab-academy-v85')).toBe(true);
+ expect((await page.evaluate(()=>caches.keys())).includes('autolab-academy-v86')).toBe(true);
  await context.setOffline(true);
  await page.reload();
  await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
