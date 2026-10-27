@@ -6,6 +6,22 @@
  */
 import{reasoningChallenge,gradeReasoning}from'./lesson-reasoning.js';
 export const TRANSFER_MODEL='autolab-reasoning-transfer-v2';
+
+/** Human-only review; unrelated to the four objectively graded decisions. */
+export const REASONING_HUMAN_REVIEW=Object.freeze([
+ {id:'causal-model',name:'Mecanismo y alternativas',levels:['Afirma una pieza sin mecanismo','Propone una causa sin justificar síntomas','Explica un mecanismo y una causa alternativa','Predice resultados distintos para dos mecanismos bajo condiciones explícitas']},
+ {id:'discriminator',name:'Prueba discriminante',levels:['No propone contraste','Nombra instrumento sin observable','Define observable, condición y predicción','Compara H1 y H2 con referencia independiente y control de confusores']},
+ {id:'falsification',name:'Falsación y actualización',levels:['Rechaza toda refutación','Menciona una anomalía inespecífica','Establece hallazgo que debilita H1','Revisa su conclusión ante evidencia contraria y expone alternativas']},
+ {id:'provenance',name:'Procedencia e incertidumbre',levels:['Confunde modelo con medida real','Registra dato sin fuente ni condiciones','Registra fuente, unidades, contexto y límites','Contrasta calibración, incertidumbre y seguridad antes de inferir causalidad']},
+ {id:'transfer',name:'Transferencia contrafactual',levels:['Repite solución pese a nueva evidencia','Reconoce nuevos datos pero no ajusta criterio','Usa evidencia nueva para decidir','Justifica revisión/retención de la hipótesis con descartes y límites']}
+].map(x=>Object.freeze({...x,levels:Object.freeze(x.levels)})));
+export function reasoningHumanReviewGuide(){
+ return ['## Rúbrica cualitativa para un revisor humano — SIN NOTA AUTOMÁTICA',
+  'Por cada criterio se sugiere un anclaje de 0 a 3. AutoLab NO juzga el texto libre ni asigna estos niveles.',
+  ...REASONING_HUMAN_REVIEW.map(x=>'### '+x.name+'\n'+x.levels.map((name,i)=>i+': '+name).join('\n')),
+  'Resultado de revisión humana: PENDIENTE. No hay acreditación profesional ni promedio calculado.'].join('\n');
+}
+
 const values=[
  ['volt-drop','Con el consumidor alimentado en un banco aislado, un retorno cae 0,02 V y el tramo positivo cae 1,80 V. ¿Qué hipótesis resiste?',[
   'Resistencia elevada del retorno','Resistencia elevada del tramo positivo','La medición en reposo confirma ambos tramos'],1,'La gran caída localizada en el positivo, con retorno prácticamente sin caída, orienta al tramo positivo, no al retorno.'],
@@ -110,7 +126,7 @@ export function reasoningTransferReport({lessonId,answers,transferAnswer,reasoni
  'Transferencia compatible: '+result.transferCorrect,
  'Justificación original (sin evaluación semántica): '+reasoning,
  'Límites declarados: '+limitations,'Puntaje estructurado: '+result.score+'/100',
- 'Aprobación del ejercicio v2: '+result.passed,result.warning
+ 'Aprobación del ejercicio v2: '+result.passed,result.warning,reasoningHumanReviewGuide()
  ].join('\n');
 }
 export function transferProgress(progress,lessonId){
