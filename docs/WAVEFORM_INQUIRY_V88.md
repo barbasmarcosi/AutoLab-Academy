@@ -38,4 +38,4 @@ Do not connect a generator, ground-referenced oscilloscope, bus transmitter or m
 - Offline service worker `autolab-academy-v88` precaches the module.
 - PR #52 remains **Draft**, Vercel `autolab-academy-rd-preview` is **preview-only**, GitHub Pages production is not deployed.
 
-Coverage after this increment: **94** theory lessons, **94** ungraded inquiry notebooks, **32** objective causal/transfer cases, **14** embedded labs (4 previous, 6 numeric and 4 waveform), **12** linked-only labs, **68** lessons without either embedded or linked lab. This does not represent complete scientific or physical proficiency.
+Coverage after this increment: **94** theory lessons, **94** ungraded inquiry notebooks, **36** objective causal/transfer cases, **14** embedded labs (4 previous, 6 numeric and 4 waveform), **12** linked-only labs, **68** lessons without either embedded or linked lab. This does not represent complete scientific or physical proficiency.
