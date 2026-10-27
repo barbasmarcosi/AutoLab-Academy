@@ -1,6 +1,7 @@
 import{reasoningChallenge}from'./lesson-reasoning.js';
 import{transferCase,transferCaseId,gradeReasoningTransfer,reasoningTransferReport}from'./lesson-transfer.js';
 import{CONFIDENCE_LEVELS,auditDecisionConfidence,confidenceReport}from'./lesson-confidence.js';
+import{choiceOrder,choiceOrderReport}from'./lesson-choice-order.js';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 /**
  * Predict → freeze → next question; no key or feedback displayed until
@@ -10,7 +11,7 @@ export function mountLessonReasoning(root,{lessonId,record,onSaved=()=>{}}){
  if(!root||typeof record!=='function')throw Error('La reflexión necesita un guardador de evidencia');
  const scenario=reasoningChallenge(lessonId),transfer=transferCase(lessonId);
  if(!scenario||!transfer){root.innerHTML='';return;}
- let answers={},confidences={},transferAnswer=null,transferConfidence=null,transferFrozen=false,reasoning='',limitations='',result=null,recorded=false,saving=false,error='';
+ let answers={},confidences={},transferAnswer=null,transferConfidence=null,transferFrozen=false,reasoning='',limitations='',result=null,recorded=false,saving=false,error='',presentationSeed=Math.floor(Math.random()*2147483647)+1;
  const keys=['hypothesis','measurement','falsifier'];
  const confidenceSelect=(id)=>'<label for="confidence-'+id+'">¿Cuán seguro estás de tu decisión? (opcional; se congela junto con tu respuesta)</label>'+
   '<select class="field" id="confidence-'+id+'"><option value="">No declarar confianza</option>'+
@@ -38,13 +39,13 @@ export function mountLessonReasoning(root,{lessonId,record,onSaved=()=>{}}){
    const field='reasoning-'+next.id;
    html+='<label for="'+field+'"><strong>'+esc(next.title)+'</strong> · '+esc(next.question)+'</label>'+
     '<select class="field" id="'+field+'"><option value="">Elegí una decisión antes de continuar</option>'+
-    next.options.map((item,i)=>'<option value="'+i+'">'+esc(item)+'</option>').join('')+'</select>'+confidenceSelect(next.id)+
+    choiceOrder(presentationSeed,next.id).map(i=>'<option value="'+i+'">'+esc(next.options[i])+'</option>').join('')+'</select>'+confidenceSelect(next.id)+
     '<button type="button" class="button" data-reasoning="lock" data-step="'+esc(next.id)+'">Congelar decisión y continuar</button>';
   }else if(!transferFrozen){
    html+='<div class="panel stack"><div class="eyebrow">TRANSFERENCIA · ESCENARIO NUEVO</div><h3>Aplicá el mismo criterio con evidencia diferente</h3><p>'+esc(transfer.context)+'</p>'+ 
      '<label for="reasoning-transfer">'+esc(transfer.context.split('.')[0])+': ¿qué conclusión justifica la nueva evidencia?</label>'+ 
      '<select class="field" id="reasoning-transfer"><option value="">Elegí una decisión antes de continuar</option>'+ 
-     transfer.options.map((item,i)=>'<option value="'+i+'">'+esc(item)+'</option>').join('')+'</select>'+confidenceSelect('transfer')+ 
+     choiceOrder(presentationSeed,'transfer').map(i=>'<option value="'+i+'">'+esc(transfer.options[i])+'</option>').join('')+'</select>'+confidenceSelect('transfer')+ 
      '<button type="button" class="button" data-reasoning="lock-transfer">Congelar hipótesis de transferencia</button></div>';
   }else if(!result){
    html+='<p class="reasoning-frozen"><strong>Escenario reservado: </strong>'+esc(transfer.options[transferAnswer])+' <span class="tag dim">Congelado</span>'+(transferConfidence===null?' · confianza no declarada':' · confianza subjetiva '+Math.round(transferConfidence*100)+' %')+'</p>';
@@ -101,7 +102,7 @@ export function mountLessonReasoning(root,{lessonId,record,onSaved=()=>{}}){
    render();return;
   }
   if(b.dataset.reasoning==='reset'){
-   if(saving)return;answers={};confidences={};transferAnswer=null;transferConfidence=null;transferFrozen=false;reasoning='';limitations='';result=null;recorded=false;render();return;
+   if(saving)return;answers={};confidences={};transferAnswer=null;transferConfidence=null;transferFrozen=false;reasoning='';limitations='';result=null;recorded=false;presentationSeed=Math.floor(Math.random()*2147483647)+1;render();return;
   }
   if(b.dataset.reasoning==='save'){
    if(!result||saving||recorded)return;saving=true;
@@ -110,7 +111,7 @@ export function mountLessonReasoning(root,{lessonId,record,onSaved=()=>{}}){
       hypothesis:scenario.steps[0].options[answers.hypothesis],
       conclusion:scenario.steps[2].options[answers.falsifier],
       used:['hypothesis-frozen','independent-probe-choice','falsifier-choice','counterfactual-transfer-frozen'],
-      reasoning,report:reasoningTransferReport({lessonId,answers,transferAnswer,reasoning,limitations},result)+'\n\n'+confidenceReport(currentAudit())});
+      reasoning,report:reasoningTransferReport({lessonId,answers,transferAnswer,reasoning,limitations},result)+'\n\n'+confidenceReport(currentAudit())+'\n\n'+choiceOrderReport(presentationSeed,lessonId,scenario,transfer)});
     recorded=true;onSaved(result);
    }catch{error='No se confirmó el guardado de tu reflexión. Podés reintentarlo.';}
    finally{saving=false;if(root.isConnected)render();}
