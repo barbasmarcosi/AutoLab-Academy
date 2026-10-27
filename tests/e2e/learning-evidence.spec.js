@@ -43,6 +43,7 @@ test('MC06 recommendation requires genuine v2 transfer then its own embedded lab
   const {loadProgress,saveProgress}=await import('./src/core.js');
   const {learningStages}=await import('./src/learning-path.js');
   const {transferCase}=await import('./src/lesson-transfer.js');
+  const {lessonPractice}=await import('./src/lesson-practice.js');
   const p=await loadProgress();
   const ids=learningStages.flatMap(s=>s.lessons);
   for(const id of ids.slice(0,ids.indexOf('mc06-dual-fault-instrumentation'))){
