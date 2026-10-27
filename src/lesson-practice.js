@@ -5,6 +5,12 @@
  * existing lab, while preserving the learner's theory reading marker.
  */
 export const LESSON_PRACTICES=Object.freeze([
+ {lessonId:'voltage-dividers',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-divider-v1',
+  title:'Divisor con carga: contrastá tu cálculo',prompt:'Antes de conocer la salida matemática, predecí cómo cambia Vout al poner una resistencia de carga en paralelo con la inferior.'},
+ {lessonId:'rc-input',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-rc-v1',
+  title:'Respuesta RC: predecí una constante de tiempo',prompt:'Elegí una resistencia, anticipá τ=RC y describí cómo falsarías el modelo manteniendo fija la capacidad.'},
+ {lessonId:'current-shunt',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-shunt-v1',
+  title:'Shunt: del milivoltio al amperio calculado',prompt:'Con ΔV constante, predecí qué corriente ideal corresponde a una resistencia real distinta de la nominal y qué la refutaría.'},
  {lessonId:'mc06-dual-fault-instrumentation',page:'powertrain',kind:'embedded',caseId:'lab-powertrain-mc06-v1',
   title:'Investigá las tres causas de una misma RPM',prompt:'Antes de revelar la lectura, planteá una causa alternativa y anticipá qué pasaría en un tacómetro independiente y en una referencia de sensor.'},
  {lessonId:'mc14-blackbox-identification',page:'inventor',kind:'embedded',caseId:'lab-inventor-blackbox-v1',
