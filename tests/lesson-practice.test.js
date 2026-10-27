@@ -2,6 +2,7 @@ import test from'node:test';
 import assert from'node:assert/strict';
 import{LESSON_PRACTICES,lessonPractice,practiceProgress,practiceCoverage}from'../src/lesson-practice.js';
 import{learningStages}from'../src/learning-path.js';
+import{NUMERIC_BENCHES}from'../src/numeric-inquiry.js';
 test('all practice bridges are unique, target genuine stages and use known labs',()=>{
  const catalog=learningStages.flatMap(s=>s.lessons).map(id=>({id}));
  const coverage=practiceCoverage(catalog);
@@ -16,6 +17,20 @@ test('all practice bridges are unique, target genuine stages and use known labs'
  const supported=new Set(['rotary','rotary-thermal','rotary-heat','rotary-ports','rotary-aperture','rotary-inverse','ecu-robust','metrology','inventor','brakes','powertrain','numeric-bench']);
  assert.ok(LESSON_PRACTICES.every(p=>supported.has(p.page)&&['embedded','linked'].includes(p.kind)&&p.title.length>12&&p.prompt.length>35));
  assert.equal(lessonPractice('not-a-lesson'),null);
+});
+test('all six numeric models are embedded in exactly their own lesson, with distinct evidence IDs',()=>{
+ assert.equal(NUMERIC_BENCHES.length,6);
+ const curriculumIds=new Set(learningStages.flatMap(stage=>stage.lessons));
+ for(const model of NUMERIC_BENCHES){
+  assert.ok(curriculumIds.has(model.lessonId));
+  const entry=lessonPractice(model.lessonId);
+  assert.equal(entry?.kind,'embedded');
+  assert.equal(entry?.page,'numeric-bench');
+  assert.equal(entry?.caseId,model.caseId);
+  assert.equal(practiceProgress({cases:[]},model.lessonId).passed,false);
+  const evidence=practiceProgress({cases:[{id:model.caseId,passed:true}]},model.lessonId);
+  assert.equal(evidence.passed,true);
+ }
 });
 test('reading progress never masquerades as a passed practice or vice versa',()=>{
  const id='mc06-dual-fault-instrumentation',p=lessonPractice(id);
