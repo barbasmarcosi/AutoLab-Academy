@@ -68,7 +68,7 @@ export function mountInquiryNotebook(root,{lesson,record,onSaved=()=>{}}){
  function render(){
   let out='<section class="panel stack inquiry-notebook"><div class="eyebrow">DISEÑO CIENTÍFICO · SIN NOTA</div>'+
   '<h2>Cuaderno científico: diseñá una investigación</h2>'+
-  '<p class="muted">Del concepto «'+esc(lesson.sections[0]?.[0]||'teoría')+'» a hipótesis, prueba y falsación. No se simula ninguna lectura ni se acredita práctica.</p>';
+  '<p class="muted">Partí de los conceptos desarrollados en la teoría y prepará un contraste mediante hipótesis, pruebas y falsación. No se simula ninguna lectura ni se acredita práctica.</p>';
   if(stage===0)out+=field('hypothesis')+field('alternative')+'<button type="button" class="button" data-inquiry="first">Fijar H1 y H2 en el cuaderno</button>';
   else{
    out+=frozenView('hypothesis')+frozenView('alternative');
