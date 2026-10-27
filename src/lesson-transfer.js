@@ -49,8 +49,6 @@ const values=[
  ['ckp-cmp','La captura CKP/CMP correlacionada muestra CKP regular, CMP pulsante y desplazamiento de fase reproducible respecto de referencia del banco. ¿Qué se investiga?',[
   'Sensor CMP ausente por lectura anterior','Sistema perfecto porque ambas señales existen','Hipótesis de fase/sincronización, con contexto y referencia del modelo'],2,
   'Una señal CMP existente refuta ausencia permanente; el desfase reproducible exige interpretación de sincronización, no un reemplazo automático.'],
-
-,
  ['hv','El alumno terminó todas las preguntas de teoría HV, pero el vehículo real exige una intervención energizada sin profesional autorizado. ¿Cuál es la decisión correcta?',[
   'Realizarla porque aprobó el examen','No intervenir; obtener formación, autorización, procedimiento y supervisión específicos','Medir el pack directamente para ganar experiencia'],1,'La competencia digital no satisface las barreras obligatorias para intervenir sobre energía peligrosa.'],
  ['dtc-method','Una referencia compartida de un banco aislado cae cuando entra una carga, mientras el sensor reproduce valores correctos con referencia estable. ¿Qué causa toma prioridad?',[
