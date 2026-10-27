@@ -63,6 +63,15 @@ export function computeNumericBench(lessonId,variant){
  if(lessonId==='can')return 120/variant;
  throw RangeError('Experimento no disponible');
 }
+/** Sensitivity table revealed only AFTER the learner freezes a prediction. */
+export function numericBenchSensitivity(lessonId){
+ const bench=numericBenchFor(lessonId);
+ if(!bench)throw RangeError('Experimento no disponible');
+ return Object.freeze(bench.options.map(option=>Object.freeze({
+  value:option.value,label:option.label,result:computeNumericBench(lessonId,option.value),
+  units:bench.units
+ })));
+}
 const textAtLeast=(value,min)=>{
  if(typeof value!=='string'||value.trim().length<min||value.length>2500)
   throw RangeError('Explicá el criterio (mínimo '+min+' caracteres y máximo 2500).');
@@ -108,7 +117,12 @@ export function numericBenchRecord(input,result){
   'Error absoluto: '+result.difference.toFixed(4)+' '+b.units,
   'Predicción dentro de tolerancia declarada: '+result.withinTolerance,
   'Hipótesis objetiva compatible: '+result.hypothesisCorrect,
+  'Criterio de hipótesis en el modelo: '+b.hypotheses[b.answer],
   'Criterio refutador objetivo compatible: '+result.falsifierCorrect,
+  'Refutador correcto del modelo: '+b.falsifiers[b.falsifierAnswer],
+  'Fundamento físico-matemático del modelo: '+b.explain,
+  'Sensibilidad PARAMÉTRICA (modelo, NO mediciones):',
+  ...numericBenchSensitivity(b.lessonId).map(row=>row.label+': '+row.result.toFixed(4)+' '+row.units),
   'Explicación libre NO evaluada semánticamente: '+result.explanation,
   'Límites declarados NO evaluados semánticamente: '+result.limitations,
   'Nota estructurada: '+result.score+'/100','Aprobación del cálculo: '+result.passed,
@@ -142,6 +156,12 @@ export function mountNumericBench(root,{lessonId,record,onSaved=()=>{}}){
    '<p><strong>Predicción congelada:</strong> '+locked.predicted+' '+escapeHtml(bench.units)+'</p>'+
    '<p><strong>Resultado matemático:</strong> '+result.result.toFixed(4)+' '+escapeHtml(bench.units)+'</p>'+
    '<p><strong>Contraste estructurado:</strong> '+result.score+'/100 · '+(result.passed?'cálculo compatible':'revisar la hipótesis o el valor predicho')+'</p>'+
+   '<p><strong>Hipótesis compatible:</strong> '+escapeHtml(bench.hypotheses[bench.answer])+'</p>'+
+   '<p><strong>Refutador conceptual:</strong> '+escapeHtml(bench.falsifiers[bench.falsifierAnswer])+'</p>'+
+   '<p>'+escapeHtml(bench.explain)+'</p>'+
+   '<table class="numeric-sensitivity"><caption>Ensayo de sensibilidad (resultados calculados, no mediciones)</caption><thead><tr><th scope="col">Parámetro</th><th scope="col">Resultado ideal</th></tr></thead><tbody>'+
+   numericBenchSensitivity(lessonId).map(row=>'<tr><th scope="row">'+escapeHtml(row.label)+'</th><td>'+row.result.toFixed(4)+' '+escapeHtml(row.units)+'</td></tr>').join('')+
+   '</tbody></table>'+
    '<p class="muted">'+escapeHtml(result.warning)+'</p>'+
    '<button class="button" type="button" data-numeric="save" '+(saved||saving?'disabled':'')+'>'+(saved?'Cálculo guardado':'Guardar evidencia del banco numérico')+'</button> '+
    '<button class="button alt" type="button" data-numeric="reset">Realizar otro contraste</button>';
