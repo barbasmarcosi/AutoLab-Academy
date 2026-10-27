@@ -31,8 +31,11 @@ for(const entry of entries){
   await root.locator('#nb-explanation').fill(why);
   await root.locator('#nb-limitations').fill(limits);
   await expect(root.getByText(/Resultado matemático:/)).toHaveCount(0);
+  await expect(root.locator('.numeric-sensitivity')).toHaveCount(0);
   await root.getByRole('button',{name:'Congelar predicción y calcular el modelo'}).click();
   await expect(root.getByText(/Resultado matemático:/)).toBeVisible();
+  await expect(root.locator('.numeric-sensitivity')).toBeVisible();
+  await expect(root.locator('.numeric-sensitivity tbody tr')).toHaveCount(3);
   await expect(root.getByText(/100\/100/)).toBeVisible();
   await expect(root.locator('#nb-predicted')).toHaveCount(0);
   await root.getByRole('button',{name:'Guardar evidencia del banco numérico'}).click();
@@ -47,6 +50,7 @@ for(const entry of entries){
   expect(record?.report).toContain('Modelo: autolab-numeric-bench-v1');
   expect(record?.report).toContain('Predicción numérica congelada');
   expect(record?.report).toContain('Resultado CALCULADO del modelo');
+  expect(record?.report).toContain('Sensibilidad PARAMÉTRICA');
   expect(record?.report).toContain('No equivale a medición');
   await page.reload();
   await page.locator('nav.nav button[data-id="learn"]').click();
