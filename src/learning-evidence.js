@@ -71,5 +71,5 @@ export function learningEvidenceOverview(progress,lessons,stages){
    inquiryRecorded:events.filter(x=>x.inquiry.attempts>0).length};
  });
  return {model:EVIDENCE_MODEL,totals,byLesson,byStage,nextTask,
-  limits:'El cuaderno científico en las 94 lecciones no acredita dominio. La ausencia de una rúbrica en 76 lecciones no equivale ni a fracaso ni a aprobación. Tampoco se acreditan competencias físicas, seguridad HV ni razonamientos libres sin revisión humana.'};
+  limits:'El cuaderno científico en las 94 lecciones no acredita dominio. La ausencia de una rúbrica en 68 lecciones no equivale ni a fracaso ni a aprobación. Tampoco se acreditan competencias físicas, seguridad HV ni razonamientos libres sin revisión humana.'};
 }

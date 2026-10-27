@@ -9,13 +9,13 @@ test('94 lessons have honest, complete, independently auditable evidence coverag
  const summary=learningEvidenceOverview(progress(),lessons,learningStages);
  assert.equal(summary.model,EVIDENCE_MODEL);
  assert.equal(summary.totals.lessons,94);
- assert.equal(summary.totals.reasoningAvailable,18);
+ assert.equal(summary.totals.reasoningAvailable,26);
  assert.equal(summary.totals.embeddedAvailable,4);
  assert.equal(summary.totals.linkedOnly,12);
  assert.equal(summary.totals.documentedTraining,0);
  assert.equal(summary.byStage.length,16);
  assert.deepEqual(summary.nextTask,{lessonId:'volt-drop',kind:'reading',label:'Estudiar la teoría y sus límites'});
- assert.equal(lessonEvidence(progress(),'hv').phase,'unassessed');
+ assert.equal(lessonEvidence(progress(),'hv').phase,'in-progress');
  assert.equal(lessonEvidence(progress(),'mc06-gears-powertrain').lab.status,'related-only');
 });
 test('a generic exam, a lecture, v1 reasoning and a related lab cannot inflate per-lesson evidence',()=>{
@@ -65,5 +65,5 @@ test('unknown and broken stage IDs fail closed; no accidental success without as
  assert.throws(()=>learningEvidenceOverview({},[{id:'a'}],[{id:'stage',lessons:['b']}]),Error);
  assert.throws(()=>learningEvidenceOverview({},[{id:'a'},{id:'a'}],[{id:'stage',lessons:['a','a']}]),Error);
  const x=lessonEvidence({notes:{'lesson-hv':'2026'},cases:[{id:'other',passed:true}]},'hv');
- assert.equal(x.read,true);assert.equal(x.documented,false);assert.equal(x.phase,'unassessed');
+ assert.equal(x.read,true);assert.equal(x.documented,false);assert.equal(x.phase,'in-progress');
 });

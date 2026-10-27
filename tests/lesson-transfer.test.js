@@ -3,9 +3,9 @@ import{REASONING_CHALLENGES}from'../src/lesson-reasoning.js';
 import{TRANSFER_MODEL,TRANSFER_CASES,transferCase,transferCaseId,gradeReasoningTransfer,reasoningTransferReport,transferProgress}from'../src/lesson-transfer.js';
 const reasoning='Una medición aislada no demuestra causalidad; contrastaré un observable independiente y abandonaré mi hipótesis original si contradice una predicción falsable. El caso debe investigarse antes de reemplazar componentes.';
 const limitations='Estos datos provienen de un banco sintético. Requieren instrumentos calibrados, condiciones reproducibles y supervisión antes de concluir sobre un vehículo real.';
-test('18 counterfactuals test transfer rather than repeating the original answer key',()=>{
+test('26 counterfactuals test transfer rather than repeating the original answer key',()=>{
  assert.equal(TRANSFER_CASES.length,REASONING_CHALLENGES.length);
- assert.equal(new Set(TRANSFER_CASES.map(x=>x.lessonId)).size,18);
+ assert.equal(new Set(TRANSFER_CASES.map(x=>x.lessonId)).size,26);
  for(const challenge of REASONING_CHALLENGES){
   const transfer=transferCase(challenge.id);assert.ok(transfer);
   assert.equal(transfer.options.length,3);assert.equal(new Set(transfer.options).size,3);

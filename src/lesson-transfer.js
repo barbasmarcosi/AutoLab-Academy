@@ -50,6 +50,24 @@ const values=[
   'Sensor CMP ausente por lectura anterior','Sistema perfecto porque ambas señales existen','Hipótesis de fase/sincronización, con contexto y referencia del modelo'],2,
   'Una señal CMP existente refuta ausencia permanente; el desfase reproducible exige interpretación de sincronización, no un reemplazo automático.'],
 
+,
+ ['hv','El alumno terminó todas las preguntas de teoría HV, pero el vehículo real exige una intervención energizada sin profesional autorizado. ¿Cuál es la decisión correcta?',[
+  'Realizarla porque aprobó el examen','No intervenir; obtener formación, autorización, procedimiento y supervisión específicos','Medir el pack directamente para ganar experiencia'],1,'La competencia digital no satisface las barreras obligatorias para intervenir sobre energía peligrosa.'],
+ ['dtc-method','Una referencia compartida de un banco aislado cae cuando entra una carga, mientras el sensor reproduce valores correctos con referencia estable. ¿Qué causa toma prioridad?',[
+  'El sensor debe reemplazarse','El DTC prueba falla de ECU','Investigar referencia o retorno bajo carga como mecanismo común'],2,'La evidencia independiente localiza el efecto aguas arriba y no en el sensor individual.'],
+ ['physical-can','Un banco CAN muestra tramas correctas de otros dos nodos y la ECU silenciosa tiene 0 V de alimentación local. ¿Qué priorizás?',[
+  'La alimentación y retorno del nodo antes de acusar caída global','Cambiar todos los terminadores','Reprogramar el gateway'],0,'Una ausencia local documentada explica mejor el silencio de una ECU que un colapso global no observado.'],
+ ['uds-nrc','Tras un NRC 0x78, la traza del banco recibe la respuesta positiva correlacionada dentro del intervalo esperado. ¿Qué hipótesis resiste?',[
+  'Toda la red estaba caída','La ECU seguía procesando y completó la transacción','La petición provocó avería de memoria'],1,'La secuencia distingue procesamiento diferido de pérdida de comunicación.'],
+ ['bms-calibration','Con un offset ficticio +0,1 A durante 20 h, ¿qué error de carga acumula el integrador ideal sin corrección?',[
+  '0,1 Ah','20 Ah','2 Ah'],2,'El error acumulado es 0,1 A × 20 h = 2 Ah, sin inferir SOC real ni SOH.'],
+ ['hv-safety','Un diagrama HEV y sus flujos de potencia parecen completos. El aprendiz propone abrir conectores HV para validarlo. ¿Qué curso de acción corresponde?',[
+  'Mantener el análisis virtual y no efectuar la intervención HV no autorizada','Deshabilitar los interlocks y repetir','Aceptar porque un buen diagrama equivale a formación'],0,'La descripción de arquitectura no reemplaza formación y control de energía peligrosa.'],
+ ['ecu-feed','Durante el evento, batería 12,4 V, pin ECU 8,1 V y caída significativa sobre el relé virtual. ¿Qué hipótesis gana soporte?',[
+  'Batería necesariamente descargada','Caída resistiva local de alimentación bajo demanda','Firmware defectuoso confirmado'],1,'La comparación simultánea revela una caída localizada en el suministro a la ECU.'],
+ ['pullups','Un contacto de un banco se verifica cerrado, pero el pin con pull-up sigue alto y la prueba de continuidad detecta conductor abierto. ¿Qué conclusión corresponde?',[
+  'Contacto abierto normal','Pin correcto porque hay pull-up','La interrupción del cable explica la lectura alta pese al contacto cerrado'],2,'El circuito interrumpido elimina la ruta de masa y deja el nodo alto, igual que un contacto abierto.']
+
 ];
 export const TRANSFER_CASES=Object.freeze(values.map(([lessonId,context,options,answer,feedback])=>Object.freeze({
  lessonId,context,options:Object.freeze(options),answer,feedback
