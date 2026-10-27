@@ -41,7 +41,7 @@ for(const entry of entries){
   const raw=JSON.parse(await readFile(await(await download).path(),'utf8'));
   const record=raw.payload.cases.find(x=>x.id===entry.id);
   expect(record?.passed).toBe(true);
-  expect(record?.model).toBe('autolab-numeric-bench-v1');
+  expect(record?.report).toContain('Modelo: autolab-numeric-bench-v1');
   expect(record?.report).toContain('Predicción numérica congelada');
   expect(record?.report).toContain('Resultado CALCULADO del modelo');
   expect(record?.report).toContain('No equivale a medición');
