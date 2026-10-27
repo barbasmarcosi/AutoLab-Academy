@@ -739,7 +739,7 @@ function lessonPracticePanel(l){
   '<p id="lesson-reasoning-status" class="muted">'+esc(lessonReasoningStatusText(l.id))+'</p>':'';
  if(!p)return '<section class="panel stack lesson-practice"><h2>Aplicación de criterios</h2>'+
   reasoning+'<p>'+(reasoningChallenge(l.id)?
-  'El microcaso entrena inferencia y transferencia, pero esta lección no tiene simulador instrumental propio.':
+  'Este microcaso entrena inferencias, pruebas y falsación. La transferencia y el cuaderno están disponibles; esta lección no tiene simulador instrumental propio.':
   'Todavía no hay simulador ni rúbrica objetiva individual. Podés diseñar y documentar una investigación; esto no acredita práctica.')+'</p>'+
   inquiry+'</section>';
  return '<section class="panel stack lesson-practice" aria-label="Práctica vinculada a la lección">'+

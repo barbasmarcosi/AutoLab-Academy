@@ -57,5 +57,5 @@ test('RW1 and RW8 use their existing mathematics simulators inline; other links 
  await expect(page.locator('#lesson-practice-host')).toBeVisible();
  await page.locator('nav.nav button[data-id="learn"]').click();
  const ordinary=page.locator('article.lesson-card').filter({hasText:'MC07 — Dirección'});
- await expect(ordinary).toContainText('Práctica pendiente de integrar');
+ await expect(ordinary).toContainText('Cuaderno científico · simulador pendiente');
 });
