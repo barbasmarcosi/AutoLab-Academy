@@ -5,7 +5,10 @@ const limits='El cálculo es sintético, no una lectura instrumental. Falta tole
 const entries=[
  {title:'Divisores resistivos y entradas analógicas',id:'lab-numeric-divider-v1',variant:'10',hypothesis:'0',falsifier:'0',predicted:'1.6666667'},
  {title:'Filtro RC: constante de tiempo y respuesta a escalón',id:'lab-numeric-rc-v1',variant:'2',hypothesis:'2',falsifier:'1',predicted:'0.2'},
- {title:'Medición de corriente: shunt y diferencial',id:'lab-numeric-shunt-v1',variant:'12.5',hypothesis:'0',falsifier:'2',predicted:'4'}
+ {title:'Medición de corriente: shunt y diferencial',id:'lab-numeric-shunt-v1',variant:'12.5',hypothesis:'0',falsifier:'2',predicted:'4'},
+ {title:'Entradas digitales, pull-up y circuitos abiertos',id:'lab-numeric-pullup-v1',variant:'10',hypothesis:'2',falsifier:'1',predicted:'2.5'},
+ {title:'Driver, actuador y carga: mando no es funcionamiento',id:'lab-numeric-pwm-v1',variant:'50',hypothesis:'1',falsifier:'2',predicted:'6'},
+ {title:'CAN: más allá de los dos cables',id:'lab-numeric-can-termination-v1',variant:'2',hypothesis:'2',falsifier:'1',predicted:'60'}
 ];
 async function visit(page,title){
  await page.goto('./');
