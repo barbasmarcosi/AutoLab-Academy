@@ -50,6 +50,7 @@ import{lessonPractice,practiceProgress,practiceCoverage}from'./lesson-practice.j
 import{REASONING_CHALLENGES,reasoningChallenge}from'./lesson-reasoning.js';
 import{transferProgress}from'./lesson-transfer.js';
 import{mountLessonReasoning}from'./lesson-reasoning-view.js';
+import{mountInquiryNotebook,inquiryProgress}from'./lesson-inquiry.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
 const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...powertrainLessons,...engineeringBridgeLessons,...inventorLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...powertrainQuestions,...engineeringBridgeQuestions,...inventorQuestions,...rotaryGeometryQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions,...ecuOptimizationQuestions,...ecuRobustQuestions,...rotaryApertureQuestions,...rotaryInverseQuestions];
@@ -699,7 +700,7 @@ function ecuSummary(c){
 function learn(){
  const done=lessons.filter(l=>Boolean(data.notes['lesson-'+l.id])).length;
  return heading('ACADEMIA','Biblioteca de diagnóstico aplicado',lessons.length+' lecciones orientadas a interpretar mediciones, diagnosticar sin sustituir piezas al azar y trabajar con evidencia.')+
- '<div class="notice">Lectura, práctica y examen son evidencias diferentes. '+practiceCoverage(lessons).mapped+' lecciones están vinculadas a laboratorios; '+practiceCoverage(lessons).embedded+' permiten practicar aquí mismo. Además, hay '+REASONING_CHALLENGES.length+' ejercicios de razonamiento falsable en sus lecciones. El resto aún no dispone de una práctica integrada.</div>'+
+ '<div class="notice">Lectura, práctica y examen son evidencias diferentes. '+practiceCoverage(lessons).mapped+' lecciones están vinculadas a laboratorios; '+practiceCoverage(lessons).embedded+' permiten practicar aquí mismo. Además, hay '+REASONING_CHALLENGES.length+' ejercicios de razonamiento falsable en sus lecciones. Cada lección incluye un cuaderno científico sin nota; las 76 rúbricas v2 faltantes y los simuladores propios siguen pendientes.</div>'+
  '<div class="panel row spaced"><div><strong>'+done+' de '+lessons.length+' lecturas registradas</strong><p class="muted small">El registro es de lectura, no acredita dominio técnico.</p></div><span class="tag dim">Cinco especialidades</span></div>'+
  tracks.map(t=>{
   const group=lessons.filter(l=>l.topic===t.id),completed=group.filter(l=>data.notes['lesson-'+l.id]).length;
@@ -707,7 +708,7 @@ function learn(){
   '<div class="cards">'+group.map(l=>{
    const completed=Boolean(data.notes['lesson-'+l.id]);
    const p=lessonPractice(l.id),pr=practiceProgress(data,l.id);
-   const status=pr.passed?'Práctica aprobada':pr.status==='related-passed'?'Banco relacionado aprobado; lección aún sin evaluar':pr.status==='related-attempted'?'Banco relacionado practicado':pr.attempts?'Práctica realizada':p?.kind==='embedded'?'Simulador en lección':p?'Laboratorio asociado':reasoningChallenge(l.id)?'Ejercicio de criterio dentro de la lección':'Práctica pendiente de integrar';
+   const status=pr.passed?'Práctica aprobada':pr.status==='related-passed'?'Banco relacionado aprobado; lección aún sin evaluar':pr.status==='related-attempted'?'Banco relacionado practicado':pr.attempts?'Práctica realizada':p?.kind==='embedded'?'Simulador en lección':p?'Laboratorio asociado':reasoningChallenge(l.id)?'Razonamiento v2 y cuaderno científico':'Cuaderno científico · simulador pendiente';
    return '<article class="panel lesson-card"><div><span class="tag '+(completed?'':'dim')+'">'+(completed?'Lectura registrada':'Por estudiar')+'</span>'+
    '<h3 style="margin-top:12px">'+esc(l.title)+'</h3><p class="muted">'+l.minutes+' minutos sugeridos · '+l.sections.length+' temas</p><p class="muted small">'+esc(status)+'</p></div>'+
    button(completed?'Revisar contenido':'Estudiar','lesson','data-id="'+attr(l.id)+'"','alt')+'</article>';
@@ -725,27 +726,34 @@ function lessonReasoningStatusText(id){
  const r=transferProgress(data,id);
  return r.status==='passed'?'Razonamiento y transferencia aprobados':r.status==='attempted'?'Transferencia todavía no aprobada':r.status==='legacy-passed'?'Ejercicio anterior aprobado; transferencia v2 pendiente':r.status==='unmapped'?'Sin ejercicio de razonamiento asociado':'Razonamiento y transferencia pendientes';
 }
+function inquiryStatusText(id){
+ const n=inquiryProgress(data,id).attempts;
+ return n+' diseño'+(n===1?'':'s')+' documentado'+(n===1?'':'s')+' · sin calificación ni aprobación';
+}
 function lessonPracticePanel(l){
  const p=lessonPractice(l.id);
+ const inquiry='<div id="lesson-inquiry-host" class="reasoning-host" aria-label="Cuaderno de diseño experimental de la lección"></div>'+
+  '<p id="lesson-inquiry-status" class="muted">'+esc(inquiryStatusText(l.id))+'</p>';
+ const reasoning=reasoningChallenge(l.id)?
+  '<div id="lesson-reasoning-host" class="reasoning-host" aria-label="Actividad de razonamiento de esta lección"></div>'+
+  '<p id="lesson-reasoning-status" class="muted">'+esc(lessonReasoningStatusText(l.id))+'</p>':'';
  if(!p)return '<section class="panel stack lesson-practice"><h2>Aplicación de criterios</h2>'+
- (reasoningChallenge(l.id)?'<div id="lesson-reasoning-host" class="reasoning-host" aria-label="Actividad de razonamiento de esta lección"></div>'+
- '<p id="lesson-reasoning-status" class="muted">'+esc(lessonReasoningStatusText(l.id))+'</p>':'')+
- '<p>'+ (reasoningChallenge(l.id)?
- 'Este microcaso entrena inferencias, pruebas y falsación. El simulador instrumental de esta lección todavía no está integrado.':
- 'Esta lección todavía no dispone de una práctica interactiva específica. Leer el contenido no acredita dominio ni práctica.')+'</p></section>';
+  reasoning+'<p>'+(reasoningChallenge(l.id)?
+  'El microcaso entrena inferencia y transferencia, pero esta lección no tiene simulador instrumental propio.':
+  'Todavía no hay simulador ni rúbrica objetiva individual. Podés diseñar y documentar una investigación; esto no acredita práctica.')+'</p>'+
+  inquiry+'</section>';
  return '<section class="panel stack lesson-practice" aria-label="Práctica vinculada a la lección">'+
- '<div class="eyebrow">DEL CONCEPTO A LA HIPÓTESIS</div><h2>'+esc(p.title)+'</h2>'+
- '<p><strong>Antes de observar:</strong> '+esc(p.prompt)+'</p>'+
- '<p id="lesson-practice-status" class="muted" role="status">'+esc(lessonPracticeStatusText(l.id))+'</p>'+
- (reasoningChallenge(l.id)?'<div id="lesson-reasoning-host" class="reasoning-host" aria-label="Actividad de razonamiento de esta lección"></div>'+
-   '<p id="lesson-reasoning-status" class="muted">'+esc(lessonReasoningStatusText(l.id))+'</p>':'')+
- (p.kind==='embedded'?
-  '<div class="lesson-practice-body" id="lesson-practice-host" aria-label="Simulador real integrado"></div>'+
-  '<p class="muted small">El mismo laboratorio sigue disponible desde el menú. Guardar evidencia práctica no equivale a marcar la lectura.</p>'+
-  button('Abrir banco como pantalla completa','nav','data-id="'+attr(p.page)+'"','alt'):
-  '<p>Este ejercicio funciona en su banco especializado: el enlace abre el laboratorio real, donde se evalúan predicciones y evidencia.</p>'+
-  button('Ir a la práctica correspondiente','nav','data-id="'+attr(p.page)+'"'))+
- '</section>';
+  '<div class="eyebrow">DEL CONCEPTO A LA HIPÓTESIS</div><h2>'+esc(p.title)+'</h2>'+
+  '<p><strong>Antes de observar:</strong> '+esc(p.prompt)+'</p>'+
+  '<p id="lesson-practice-status" class="muted" role="status">'+esc(lessonPracticeStatusText(l.id))+'</p>'+
+  reasoning+
+  (p.kind==='embedded'?
+   '<div class="lesson-practice-body" id="lesson-practice-host" aria-label="Simulador real integrado"></div>'+
+   '<p class="muted small">El mismo laboratorio sigue disponible desde el menú. Guardar evidencia práctica no equivale a marcar la lectura.</p>'+
+   button('Abrir banco como pantalla completa','nav','data-id="'+attr(p.page)+'"','alt'):
+   '<p>Este ejercicio funciona en su banco especializado: el enlace abre el laboratorio real, donde se evalúan predicciones y evidencia.</p>'+
+   button('Ir a la práctica correspondiente','nav','data-id="'+attr(p.page)+'"'))+
+  inquiry+'</section>';
 }
 function lessonView(){
  const l=lessons.find(x=>x.id===selectedLesson);if(!l)return learn();
@@ -1164,7 +1172,7 @@ function multiSummary(c){
 }
 function portfolioView(){
  const snap=portfolioSnapshot(data,lessons);
- const visible=snap.events.filter(e=>portfolioFilter==='all'||(portfolioFilter==='exam'?e.kind==='exam':portfolioFilter==='lab'?e.kind==='lab':portfolioFilter==='reasoning'?e.kind==='reasoning':e.kind!=='exam'&&e.kind!=='lab'&&e.kind!=='reasoning')).slice(0,40);
+ const visible=snap.events.filter(e=>portfolioFilter==='all'||(portfolioFilter==='exam'?e.kind==='exam':portfolioFilter==='lab'?e.kind==='lab':portfolioFilter==='reasoning'?e.kind==='reasoning':portfolioFilter==='inquiry'?e.kind==='inquiry':e.kind!=='exam'&&e.kind!=='lab'&&e.kind!=='reasoning'&&e.kind!=='inquiry')).slice(0,40);
  const num=n=>String(n);
  return heading('PORTAFOLIO','Evidencias de tu formación','Historial de simulaciones, repasos y lecturas guardado exclusivamente en este navegador; sin certificaciones ni afirmaciones de experiencia real.')+
  '<div class="grid"><div class="panel"><div class="stat-number">'+num(snap.totals.exams)+'</div><div class="stat-label">Exámenes teóricos</div></div>'+
@@ -1177,9 +1185,9 @@ function portfolioView(){
  '<p class="muted small">Estudio estimado registrado: '+snap.totals.studyMinutes+' min · Preguntas programadas: '+snap.totals.reviewItems+' · Tarjetas FSRS: '+snap.totals.fsrsItems+'</p></div>'+
  '<div class="section"><h2>Actividad reciente</h2></div>'+
  '<div class="panel"><label for="portfolio-filter">Filtrar registros</label><select id="portfolio-filter" class="field">'+
- [['all','Todos'],['exam','Exámenes'],['diagnostic','Diagnóstico y retos'],['lab','Laboratorios'],['reasoning','Razonamientos guiados']].map(([id,label])=>'<option value="'+id+'" '+(portfolioFilter===id?'selected':'')+'>'+label+'</option>').join('')+'</select>'+
+ [['all','Todos'],['exam','Exámenes'],['diagnostic','Diagnóstico y retos'],['lab','Laboratorios'],['reasoning','Razonamientos guiados'],['inquiry','Cuadernos científicos']].map(([id,label])=>'<option value="'+id+'" '+(portfolioFilter===id?'selected':'')+'>'+label+'</option>').join('')+'</select>'+
  (visible.length?'<div class="portfolio-list">'+visible.map(e=>
- '<div class="portfolio-entry"><div class="row spaced"><strong>'+esc(e.title)+'</strong><span class="tag dim">'+e.score+'/100</span></div>'+
+ '<div class="portfolio-entry"><div class="row spaced"><strong>'+esc(e.title)+'</strong><span class="tag dim">'+(e.kind==='inquiry'?'Sin calificación':e.score+'/100')+'</span></div>'+
  '<p class="muted small">'+esc(e.at?.slice(0,10)||'sin fecha')+' · '+esc(e.kind)+'</p>'+
  (e.evidence.length?'<p class="muted small">Pruebas: '+esc(e.evidence.join(', '))+'</p>':'')+
  (e.reasoning?'<details><summary>Ver razonamiento registrado</summary><p>'+esc(e.reasoning)+'</p></details>':'')+
@@ -1530,6 +1538,13 @@ if(page==='learn'&&selectedLesson){
    if(status)status.textContent=lessonReasoningStatusText(lessonAtMount);
    const summary=document.getElementById('lesson-theory-reasoning-status');
    if(summary)summary.textContent=lessonReasoningStatusText(lessonAtMount);
+  }
+ }});
+ const notebook=document.getElementById('lesson-inquiry-host');
+ if(notebook)mountInquiryNotebook(notebook,{lesson:lessons.find(x=>x.id===lessonAtMount),record:saveLabEntry,onSaved:()=>{
+  if(page==='learn'&&selectedLesson===lessonAtMount){
+   const status=document.getElementById('lesson-inquiry-status');
+   if(status)status.textContent=inquiryStatusText(lessonAtMount);
   }
  }});
  const practice=lessonPractice(selectedLesson);
