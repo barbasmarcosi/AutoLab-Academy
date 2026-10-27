@@ -1,6 +1,6 @@
 import test from'node:test';
 import assert from'node:assert/strict';
-import{NUMERIC_BENCH_MODEL,NUMERIC_BENCHES,numericBenchFor,computeNumericBench,gradeNumericBench,numericBenchRecord}from'../src/numeric-inquiry.js';
+import{NUMERIC_BENCH_MODEL,NUMERIC_BENCHES,numericBenchFor,computeNumericBench,gradeNumericBench,numericBenchRecord,numericBenchSensitivity}from'../src/numeric-inquiry.js';
 const explanation='El modelo usa unidades SI y conserva la fuente ideal. La predicción se basa en una relación calculada y debería revisarse si las condiciones de contorno no corresponden.';
 const limitations='Esta evidencia no proviene de un instrumento. Hay errores de tolerancia, temperatura y conexiones que no se modelan ni demuestran aptitud física.';
 const fixtures=[
@@ -28,6 +28,8 @@ test('six independent LV and CAN experiments produce reproducible model output, 
   assert.equal(record.id,numericBenchFor(x.lessonId).caseId);
   assert.equal(record.passed,true);
   assert.match(record.report,/NO evaluad[oa] semánticamente/);
+  assert.match(record.report,/Sensibilidad PARAMÉTRICA/);
+  assert.match(record.report,/Fundamento físico-matemático/);
   assert.match(record.report,/Resultado CALCULADO del modelo/);
   assert.match(record.report,/No equivale a medición/i);
   assert.equal(gradeNumericBench({...args,hypothesis:(x.hypothesis+1)%3}).passed,false);
@@ -40,6 +42,13 @@ test('six independent LV and CAN experiments produce reproducible model output, 
   assert.throws(()=>gradeNumericBench({...args,limitations:'insuficiente'}),RangeError);
  }
  assert.throws(()=>computeNumericBench('invalid',10),RangeError);
+ assert.throws(()=>numericBenchSensitivity('invalid'),RangeError);
+ for(const bench of NUMERIC_BENCHES){
+  const series=numericBenchSensitivity(bench.lessonId);
+  assert.equal(series.length,3);
+  assert.ok(series.every((x,i)=>x.value===bench.options[i].value&&Number.isFinite(x.result)&&x.units===bench.units));
+  assert.equal(Object.isFrozen(series),true);
+ }
 });
 test('parameter variation follows the declared ideal causal law for each bench',()=>{
  const d=[5,10,20].map(v=>computeNumericBench('voltage-dividers',v));
