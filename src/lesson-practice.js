@@ -5,6 +5,14 @@
  * existing lab, while preserving the learner's theory reading marker.
  */
 export const LESSON_PRACTICES=Object.freeze([
+ {lessonId:'scope',page:'wave-inquiry',kind:'embedded',caseId:'lab-scope-waveform-v1',
+  title:'Osciloscopía: contrastá período y frecuencia',prompt:'Definí una predicción de frecuencia antes de conocer la onda sintética. Contrastá escala temporal y amplitud.'},
+ {lessonId:'pwm-scope',page:'wave-inquiry',kind:'embedded',caseId:'lab-pwm-waveform-v1',
+  title:'PWM: reconocé qué cambia el duty',prompt:'Antes de revelar el oscilograma, predecí fracción de tiempo alto, hipótesis y evidencia incompatible.'},
+ {lessonId:'ckp-cmp',page:'wave-inquiry',kind:'embedded',caseId:'lab-ckp-waveform-v1',
+  title:'CKP: separá referencia de rueda y velocidad',prompt:'Anticipá RPM para una vuelta completa de duración conocida sin confundir huecos de referencia con falla confirmada.'},
+ {lessonId:'physical-can',page:'wave-inquiry',kind:'embedded',caseId:'lab-can-differential-waveform-v1',
+  title:'CAN: calculá el diferencial dominante',prompt:'Predecí la diferencia entre CAN-H y CAN-L en una trama sintética antes de observar ambos canales.'},
  {lessonId:'pullups',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-pullup-v1',
   title:'Pull-up con retorno resistivo en banco',prompt:'Anticipá la tensión de una entrada conectada a masa por diferentes resistencias; contrastá circuito abierto, contacto ideal y divisor real.'},
  {lessonId:'actuator-power',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-pwm-v1',
