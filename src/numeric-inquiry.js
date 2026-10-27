@@ -72,6 +72,19 @@ const experiments=[
   hypotheses:['Vout se iguala siempre a Vin en cualquier duty','Vout ideal aumenta con duty según D·Vin bajo estas hipótesis','El duty determina por sí solo temperatura y calidad de regulación real'],answer:1,
   falsifiers:['Dos duty distintos generan Vout diferentes en el modelo','El inductor está representado esquemáticamente','Con Vin fija y condiciones ideales, duty 75 % entrega menos voltaje que duty 25 %'],falsifierAnswer:2,
   explain:'Vout≈D·Vin en un buck IDEAL de conducción continua, Vin=12 V. No simula conmutación, control de corriente, saturación, BMS, pérdidas o tensión HV.'}
+,
+ {lessonId:'sensor-plausibility',caseId:'lab-numeric-sensor-fallback-v1',title:'Plausibilidad: lectura diagnóstica congelada frente a referencia independiente',
+  units:'°C',description:'Modelo didáctico de ECT: temperatura física simulada a 20, 40 o 60 °C, pero un parámetro de ECU usa valor sustitutivo FIJO 80 °C. Predecí la discrepancia absoluta entre sustitución y temperatura física ficticia.',
+  options:[{value:20,label:'Referencia física modelada 20 °C'},{value:40,label:'Referencia física modelada 40 °C'},{value:60,label:'Referencia física modelada 60 °C'}],
+  hypotheses:['El parámetro fijo demuestra que el motor está realmente a 80 °C','Una discrepancia entre fallback y referencia independiente no demuestra por sí sola sensor roto','Todo valor fijo implica necesariamente un cable cortado'],answer:1,
+  falsifiers:['Un DTC histórico sin tiempo','Una etiqueta nominal del termistor','Si el parámetro fuese medida física fiel, una referencia independiente idéntica bajo las mismas condiciones haría cero la discrepancia'],falsifierAnswer:2,
+  explain:'Diferencia absoluta = |T_fallback−T_referencia|, T_fallback=80 °C. Es una distancia de valores, no un diagnóstico del sensor, ni define rangos ECT OEM.'},
+ {lessonId:'scope-reference',caseId:'lab-numeric-scope-ground-v1',title:'Referencia de osciloscopio: potencial relativo y offset aparente',
+  units:'V',description:'Una señal virtual está a 2,50 V respecto de su masa local. Elegí un desplazamiento sintético de esa masa de 0,10, 0,20 o 0,40 V respecto de la referencia de lectura. Predecí el potencial absoluto aparente.',
+  options:[{value:0.1,label:'Offset de retorno +0,10 V'},{value:0.2,label:'Offset de retorno +0,20 V'},{value:0.4,label:'Offset de retorno +0,40 V'}],
+  hypotheses:['El cambio de referencia modifica el potencial aparente sin probar defecto del sensor','Una referencia desplazada cambia necesariamente la señal respecto de su retorno','Dos masas siempre son equipotenciales bajo cualquier corriente'],answer:0,
+  falsifiers:['Ver otra vez el mismo color de traza','La diferencia entre referencia local y de lectura es cero, pero persiste el offset atribuido solo a la referencia','Una nueva etiqueta de canal'],falsifierAnswer:1,
+  explain:'Vrespecto_referencia = Vrespecto_masa_local + Vmasa_local_respecto_referencia. No conecta masas de osciloscopios reales; una tierra de red puede provocar cortos.'}
 
 ];
 export const NUMERIC_BENCHES=Object.freeze(experiments.map(x=>Object.freeze({...x,
@@ -97,6 +110,8 @@ export function computeNumericBench(lessonId,variant){
  if(lessonId==='inductive-load')return 0.1*variant*variant;
  if(lessonId==='ground-reference-network')return 0.05*variant;
  if(lessonId==='dcdc-switches')return 12*variant/100;
+ if(lessonId==='sensor-plausibility')return 80-variant;
+ if(lessonId==='scope-reference')return 2.5+variant;
  throw RangeError('Experimento no disponible');
 }
 /** Sensitivity table revealed only AFTER the learner freezes a prediction. */
