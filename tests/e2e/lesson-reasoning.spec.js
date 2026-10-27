@@ -116,7 +116,7 @@ test('MC06 freezes explicit confidence before results, reports high-confidence m
  await page.locator('#reasoning-limitations').fill(bounds);
  await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
  await expect(page.getByText(/Resultado estructurado con transferencia: 80\/100/)).toBeVisible();
- await expect(page.getByText(/Autoconfianza \(no es parte de la nota\):/)).toContainText('4/4');
+ await expect(page.locator('.reasoning-bench p').filter({hasText:'Autoconfianza (no es parte de la nota):'})).toContainText('4/4');
  await expect(page.getByText(/Errores cometidos con confianza 95 %: 1/)).toBeVisible();
  await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
  await page.locator('nav.nav button[data-id="data"]').click();
