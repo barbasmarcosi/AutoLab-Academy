@@ -8,7 +8,12 @@ const entries=[
  {title:'Medición de corriente: shunt y diferencial',id:'lab-numeric-shunt-v1',variant:'12.5',hypothesis:'0',falsifier:'2',predicted:'4'},
  {title:'Entradas digitales, pull-up y circuitos abiertos',id:'lab-numeric-pullup-v1',variant:'10',hypothesis:'2',falsifier:'1',predicted:'2.5'},
  {title:'Driver, actuador y carga: mando no es funcionamiento',id:'lab-numeric-pwm-v1',variant:'50',hypothesis:'1',falsifier:'2',predicted:'6'},
- {title:'CAN: más allá de los dos cables',id:'lab-numeric-can-termination-v1',variant:'2',hypothesis:'2',falsifier:'1',predicted:'60'}
+ {title:'CAN: más allá de los dos cables',id:'lab-numeric-can-termination-v1',variant:'2',hypothesis:'2',falsifier:'1',predicted:'60'},
+ {title:'Pérdidas resistivas y temperatura de conectores',id:'lab-numeric-resistive-loss-v1',variant:'4',hypothesis:'0',falsifier:'1',predicted:'4'},
+ {title:'Conmutación low-side: MOSFET, puerta y carga',id:'lab-numeric-mosfet-v1',variant:'4',hypothesis:'1',falsifier:'2',predicted:'0.8'},
+ {title:'Actuadores inductivos: energía y apagado controlado',id:'lab-numeric-inductor-energy-v1',variant:'4',hypothesis:'0',falsifier:'2',predicted:'1.6'},
+ {title:'Referencias compartidas, alimentación y nodos CAN',id:'lab-numeric-shared-return-v1',variant:'4',hypothesis:'1',falsifier:'2',predicted:'0.2'},
+ {title:'MOSFETs, conmutación y DC/DC: conceptos de potencia',id:'lab-numeric-buck-v1',variant:'50',hypothesis:'1',falsifier:'2',predicted:'6'}
 ];
 async function visit(page,title){
  await page.goto('./');
