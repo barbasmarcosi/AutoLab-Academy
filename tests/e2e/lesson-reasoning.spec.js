@@ -152,3 +152,31 @@ test('MC14 omitted confidences never generate fabricated calibration, even with 
  expect(record.report).toContain('Declaraciones: 0/4');
  expect(record.report).toContain('Error cuadrático medio: NO CALCULADO');
 });
+
+
+test('options reorder deterministically while canonical answer values remain stable and the seed survives export',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>0;});
+ await openLesson(page,'MC06+ — Deslizamiento, sensor');
+ const opts=async id=>page.locator('#reasoning-'+id+' option').evaluateAll(nodes=>nodes.map(x=>x.value).slice(1));
+ expect(await opts('hypothesis')).toEqual(['0','1','2']);
+ await lock(page,'hypothesis',2);
+ expect(await opts('measurement')).toEqual(['0','2','1']);
+ await lock(page,'measurement',1);
+ expect(await opts('falsifier')).toEqual(['1','0','2']);
+ await lock(page,'falsifier',0);
+ expect(await opts('transfer')).toEqual(['1','2','0']);
+ await page.locator('#reasoning-transfer').selectOption('1');
+ await page.getByRole('button',{name:'Congelar hipótesis de transferencia'}).click();
+ await page.locator('#reasoning-justification').fill(explanation);
+ await page.locator('#reasoning-limitations').fill(bounds);
+ await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
+ await expect(page.getByText(/Resultado estructurado con transferencia: 100\/100/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
+ await page.locator('nav.nav button[data-id="data"]').click();
+ const d=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
+ const exported=JSON.parse(await readFile(await (await d).path(),'utf8'));
+ const session=exported.payload.cases.find(x=>x.id==='lab-reasoning-mc06-dual-fault-instrumentation-v2');
+ expect(session?.report).toContain('Semilla de presentación: 1');
+ expect(session?.report).toContain('Paso measurement — índices originales mostrados: 0, 2, 1');
+ expect(session?.report).toContain('Transferencia — índices originales mostrados: 1, 2, 0');
+});
