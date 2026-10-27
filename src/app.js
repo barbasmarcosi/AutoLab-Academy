@@ -51,6 +51,7 @@ import{REASONING_CHALLENGES,reasoningChallenge}from'./lesson-reasoning.js';
 import{transferProgress}from'./lesson-transfer.js';
 import{mountLessonReasoning}from'./lesson-reasoning-view.js';
 import{mountInquiryNotebook,inquiryProgress}from'./lesson-inquiry.js';
+import{mountNumericBench}from'./numeric-inquiry.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
 const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...powertrainLessons,...engineeringBridgeLessons,...inventorLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...powertrainQuestions,...engineeringBridgeQuestions,...inventorQuestions,...rotaryGeometryQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions,...ecuOptimizationQuestions,...ecuRobustQuestions,...rotaryApertureQuestions,...rotaryInverseQuestions];
@@ -749,8 +750,9 @@ function lessonPracticePanel(l){
   reasoning+
   (p.kind==='embedded'?
    '<div class="lesson-practice-body" id="lesson-practice-host" aria-label="Simulador real integrado"></div>'+
-   '<p class="muted small">El mismo laboratorio sigue disponible desde el menú. Guardar evidencia práctica no equivale a marcar la lectura.</p>'+
-   button('Abrir banco como pantalla completa','nav','data-id="'+attr(p.page)+'"','alt'):
+   (p.page==='numeric-bench'?'<p class="muted small">Banco matemático integrado exclusivamente aquí. No es una captura de instrumento ni acredita competencias físicas.</p>':
+    '<p class="muted small">El mismo laboratorio sigue disponible desde el menú. Guardar evidencia práctica no equivale a marcar la lectura.</p>'+
+    button('Abrir banco como pantalla completa','nav','data-id="'+attr(p.page)+'"','alt')):
    '<p>Este ejercicio funciona en su banco especializado: el enlace abre el laboratorio real, donde se evalúan predicciones y evidencia.</p>'+
    button('Ir a la práctica correspondiente','nav','data-id="'+attr(p.page)+'"'))+
   inquiry+'</section>';
@@ -1549,10 +1551,11 @@ if(page==='learn'&&selectedLesson){
  }});
  const practice=lessonPractice(selectedLesson);
  if(practice?.kind==='embedded'){
-  const mounts={powertrain:mountPowertrainLab,inventor:mountInventorLab,rotary:mountRotaryLab,'ecu-robust':mountRobustResearch};
+  const lessonAtMount=selectedLesson;
+  const mounts={powertrain:mountPowertrainLab,inventor:mountInventorLab,rotary:mountRotaryLab,'ecu-robust':mountRobustResearch,
+   'numeric-bench':(node,opts)=>mountNumericBench(node,{...opts,lessonId:lessonAtMount})};
   const node=document.getElementById('lesson-practice-host'),mount=mounts[practice.page];
   if(node&&mount){
-   const lessonAtMount=selectedLesson;
    mount(node,{record:async entry=>{
      await saveLabEntry(entry);
      if(selectedLesson!==lessonAtMount||page!=='learn')return;
