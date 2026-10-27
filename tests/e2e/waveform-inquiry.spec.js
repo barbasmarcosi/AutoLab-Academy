@@ -36,6 +36,7 @@ for(const c of cases){
   await expect(root.getByText(/Hipótesis compatible:/)).toBeVisible();
   await root.getByRole('button',{name:'Guardar evidencia del oscilograma'}).click();
   await expect(page.locator('#lesson-practice-status')).toContainText('Práctica aprobada');
+  await expect(page.locator('#lesson-practice-status')).toContainText('NO competencia física');
   await expect(page.getByText(/Teoría: lectura pendiente/)).toBeVisible();
   await page.locator('nav.nav button[data-id="data"]').click();
   const dl=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
