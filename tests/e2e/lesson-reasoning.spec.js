@@ -33,6 +33,7 @@ test('MC06 lesson: freeze three logical predictions, reveal feedback and save ev
  await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
  await expect(page.getByText(/Resultado estructurado con transferencia: 100\/100/)).toBeVisible();
  await expect(page.getByText(/Transferencia: Coincide con el modelo/)).toBeVisible();
+ await expect(page.getByText('Rúbrica cualitativa con revisión humana pendiente')).toBeVisible();
  await expect(page.locator('#lesson-reasoning-status')).toContainText('pendiente');
  await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
  await expect(page.locator('#lesson-reasoning-status')).toContainText('Razonamiento y transferencia aprobados');
@@ -47,6 +48,7 @@ test('MC06 lesson: freeze three logical predictions, reveal feedback and save ev
  expect(record?.report).toContain('Predicción congelada');
  expect(record?.report).toContain('Transferencia congelada');
  expect(record?.report).toContain('sin evaluación semántica');
+ expect(record?.report).toContain('Resultado de revisión humana: PENDIENTE');
  await page.reload();
  await page.locator('nav.nav button[data-id="learn"]').click();
  await page.locator('article.lesson-card').filter({hasText:'MC06+ — Deslizamiento, sensor'}).getByRole('button',{name:'Estudiar'}).click();
