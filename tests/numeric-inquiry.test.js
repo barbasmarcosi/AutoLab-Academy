@@ -1,0 +1,46 @@
+import test from'node:test';
+import assert from'node:assert/strict';
+import{NUMERIC_BENCH_MODEL,NUMERIC_BENCHES,numericBenchFor,computeNumericBench,gradeNumericBench,numericBenchRecord}from'../src/numeric-inquiry.js';
+const explanation='El modelo usa unidades SI y conserva la fuente ideal. La predicción se basa en una relación calculada y debería revisarse si las condiciones de contorno no corresponden.';
+const limitations='Esta evidencia no proviene de un instrumento. Hay errores de tolerancia, temperatura y conexiones que no se modelan ni demuestran aptitud física.';
+const fixtures=[
+ {lessonId:'voltage-dividers',variant:10,hypothesis:0,falsifier:0,predicted:5/3},
+ {lessonId:'rc-input',variant:2,hypothesis:2,falsifier:1,predicted:0.2},
+ {lessonId:'current-shunt',variant:12.5,hypothesis:0,falsifier:2,predicted:4}
+];
+test('three independent LV experiments produce reproducible model output, never instrument claims',()=>{
+ assert.equal(NUMERIC_BENCHES.length,3);
+ assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.lessonId)).size,3);
+ assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.caseId)).size,3);
+ assert.equal(numericBenchFor('does-not-exist'),null);
+ for(const x of fixtures){
+  assert.ok(numericBenchFor(x.lessonId));
+  assert.equal(computeNumericBench(x.lessonId,x.variant),x.predicted);
+  const args={...x,explanation,limitations};
+  const a=gradeNumericBench(args),b=gradeNumericBench(args);
+  assert.equal(a.model,NUMERIC_BENCH_MODEL);
+  assert.deepEqual(a,b);
+  assert.equal(a.score,100);assert.equal(a.passed,true);
+  const record=numericBenchRecord(args,a);
+  assert.equal(record.id,numericBenchFor(x.lessonId).caseId);
+  assert.equal(record.passed,true);
+  assert.match(record.report,/NO evaluad[oa] semánticamente/);
+  assert.match(record.report,/Resultado CALCULADO del modelo/);
+  assert.match(record.report,/NO es una medición/);
+  assert.equal(gradeNumericBench({...args,hypothesis:(x.hypothesis+1)%3}).passed,false);
+  assert.equal(gradeNumericBench({...args,falsifier:(x.falsifier+1)%3}).passed,false);
+  assert.equal(gradeNumericBench({...args,predicted:x.predicted*1.5}).passed,false);
+  assert.throws(()=>gradeNumericBench({...args,variant:-10}),RangeError);
+  assert.throws(()=>gradeNumericBench({...args,predicted:NaN}),RangeError);
+  assert.throws(()=>gradeNumericBench({...args,predicted:Infinity}),RangeError);
+  assert.throws(()=>gradeNumericBench({...args,explanation:'insuficiente'}),RangeError);
+  assert.throws(()=>gradeNumericBench({...args,limitations:'insuficiente'}),RangeError);
+ }
+ assert.throws(()=>computeNumericBench('invalid',10),RangeError);
+});
+test('parameter variation follows the declared ideal causal law for each bench',()=>{
+ const d=[5,10,20].map(v=>computeNumericBench('voltage-dividers',v));
+ assert.ok(d[0]<d[1]&&d[1]<d[2]&&d[2]<2.5);
+ assert.deepEqual([1,2,4].map(v=>computeNumericBench('rc-input',v)),[0.1,0.2,0.4]);
+ assert.deepEqual([12.5,20,25].map(v=>computeNumericBench('current-shunt',v)),[4,2.5,2]);
+});
