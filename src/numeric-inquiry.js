@@ -22,7 +22,26 @@ const experiments=[
   options:[{value:12.5,label:'Shunt real 12,5 mΩ'},{value:20,label:'Shunt real 20 mΩ'},{value:25,label:'Shunt real 25 mΩ'}],
   hypotheses:['A igual ΔV, mayor R implica menor corriente inferida','A igual ΔV, mayor R implica mayor corriente','La resistencia no afecta el cociente ΔV/R'],answer:0,
   falsifiers:['Una corriente inferida menor al aumentar R','Una etiqueta de color de la resistencia','Con ΔV fija, una R mayor medida da una corriente mayor a la R menor'],falsifierAnswer:2,
-  explain:'En el modelo I = V/R, usando V=0,050 V y R en Ω; incertidumbre, conexiones Kelvin y autocalentamiento requieren ensayos externos.'}
+  explain:'En el modelo I = V/R, usando V=0,050 V y R en Ω; incertidumbre, conexiones Kelvin y autocalentamiento requieren ensayos externos.'},
+ {lessonId:'pullups',caseId:'lab-numeric-pullup-v1',title:'Pull-up: el nivel lógico depende del camino a masa',
+  units:'V',description:'Entrada ideal con referencia 5 V y pull-up de 10 kΩ. Seleccioná una resistencia de retorno a masa NO IDEAL: 5, 10 o 20 kΩ. Con circuito realmente abierto el nodo tendería a 5 V.',
+  options:[{value:5,label:'Retorno a masa de 5 kΩ'},{value:10,label:'Retorno a masa de 10 kΩ'},{value:20,label:'Retorno a masa de 20 kΩ'}],
+  hypotheses:['Aumentar el retorno a masa reduce la tensión de nodo','Un pull-up convierte todo circuito abierto en 0 V','Aumentar el retorno a masa eleva la tensión del nodo en el divisor ideal'],answer:2,
+  falsifiers:['Una resistencia más grande deja el nodo más alto','Con referencia fija y pull-up constante, mayor resistencia a masa produce voltaje menor','Un esquema de pines identifica la resistencia nominal'],falsifierAnswer:1,
+  explain:'Con Rpull=10 kΩ y Rmasa conocida, Vnodo=5·Rmasa/(10+Rmasa). Un circuito abierto y un contacto cerrado ideal no son los tres retornos resistivos aquí estudiados.'},
+ {lessonId:'actuator-power',caseId:'lab-numeric-pwm-v1',title:'PWM: promedio matemático versus corriente de actuador',
+  units:'V',description:'Señal cuadrada ideal de mando de 12 V a 0 V. Elegí duty cycle 25/50/75 % para calcular su tensión promedio temporal; no se modela el driver ni la corriente de una carga.',
+  options:[{value:25,label:'Duty ideal 25 %'},{value:50,label:'Duty ideal 50 %'},{value:75,label:'Duty ideal 75 %'}],
+  hypotheses:['El promedio siempre es 12 V para cualquier duty','La tensión media ideal crece proporcionalmente al duty','La tensión media demuestra el par del actuador real'],answer:1,
+  falsifiers:['Un duty mayor produce mayor promedio dentro del modelo','El osciloscopio muestra frecuencia PWM estable','Con niveles y fuente constantes, promedios iguales para 25 % y 75 %'],falsifierAnswer:2,
+  explain:'El promedio de una onda cuadrada ideal que conmuta entre 0 y 12 V vale 12·duty/100. No establece corriente, torque ni accionamiento real.'},
+ {lessonId:'can',caseId:'lab-numeric-can-termination-v1',title:'Terminación CAN: resistencia equivalente ideal en paralelo',
+  units:'Ω',description:'Red desconectada de toda energía dentro de un MODELO. Calculá la resistencia equivalente de 1, 2 o 3 terminaciones idénticas de 120 Ω en paralelo. Tres terminaciones son una situación hipotética, no una recomendación de modificación de buses.',
+  options:[{value:1,label:'Una resistencia de 120 Ω'},{value:2,label:'Dos resistencias de 120 Ω'},{value:3,label:'Tres resistencias de 120 Ω (hipotético)'}],
+  hypotheses:['Más resistencias iguales en paralelo aumentan R equivalente','La resistencia equivalente es 120 Ω para cualquier número','Más resistencias iguales en paralelo disminuyen R equivalente'],answer:2,
+  falsifiers:['El circuito tiene una ECU en cada extremo','Al agregar un resistor paralelo idéntico, la resistencia equivalente aumenta con el resto aislado','Dos resistores nominales son de 120 Ω'],falsifierAnswer:1,
+  explain:'Req=120 Ω/n en paralelo ideal. Esta cuenta aislada no certifica integridad de CAN ni permite inferir resistencias conectadas a vehículos energizados.'}
+
 ];
 export const NUMERIC_BENCHES=Object.freeze(experiments.map(x=>Object.freeze({...x,
  options:Object.freeze(x.options.map(v=>Object.freeze(v))),hypotheses:Object.freeze(x.hypotheses),
@@ -39,6 +58,9 @@ export function computeNumericBench(lessonId,variant){
  }
  if(lessonId==='rc-input')return variant*0.1;
  if(lessonId==='current-shunt')return 50/variant;
+ if(lessonId==='pullups')return 5*variant/(10+variant);
+ if(lessonId==='actuator-power')return 12*variant/100;
+ if(lessonId==='can')return 120/variant;
  throw RangeError('Experimento no disponible');
 }
 const textAtLeast=(value,min)=>{
