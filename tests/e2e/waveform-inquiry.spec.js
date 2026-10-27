@@ -32,7 +32,7 @@ for(const c of cases){
   await root.getByRole('button',{name:'Congelar predicción y revelar oscilograma'}).click();
   await expect(root.locator('svg[role="img"]')).toBeVisible();
   await expect(root.locator('.inquiry-oscillogram figcaption')).toContainText('GENERADO');
-  await expect(root.getByText(/Resultado del modelo:/)).toContainText('100/100');
+  await expect(root.locator('p').filter({hasText:'Resultado del modelo:'})).toContainText('100/100');
   await expect(root.getByText(/Hipótesis compatible:/)).toBeVisible();
   await root.getByRole('button',{name:'Guardar evidencia del oscilograma'}).click();
   await expect(page.locator('#lesson-practice-status')).toContainText('Práctica aprobada');
