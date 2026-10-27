@@ -90,6 +90,32 @@ test('MC14: missing and incorrect reasoning decisions remain fail-closed, retake
  await expect(page.getByText(/Razonamiento guiado — Caja negra: modelos indistinguibles/)).toHaveCount(0);
 });
 
+test('MOSFET causal transfer v2 does not auto-approve its separate numeric bench',async({page})=>{
+ await openLesson(page,'Conmutación low-side: MOSFET, puerta y carga');
+ await expect(page.getByRole('heading',{name:/Desafío de razonamiento: MOSFET low-side/})).toBeVisible();
+ await expect(page.locator('#lesson-practice-status')).toContainText('todavía no registrada');
+ await lock(page,'hypothesis',1);
+ await lock(page,'measurement',2);
+ await lock(page,'falsifier',0);
+ await page.locator('#reasoning-transfer').selectOption('0');
+ await page.getByRole('button',{name:'Congelar hipótesis de transferencia'}).click();
+ await page.locator('#reasoning-justification').fill(explanation);
+ await page.locator('#reasoning-limitations').fill(bounds);
+ await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
+ await expect(page.getByText(/Resultado estructurado con transferencia: 100\/100/)).toBeVisible();
+ await expect(page.getByText('Rúbrica cualitativa con revisión humana pendiente')).toBeVisible();
+ await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
+ await expect(page.locator('#lesson-reasoning-status')).toContainText('Razonamiento y transferencia aprobados');
+ await expect(page.locator('#lesson-practice-status')).toContainText('todavía no registrada');
+ await expect(page.getByText(/Teoría: lectura pendiente/)).toBeVisible();
+ await page.locator('nav.nav button[data-id="data"]').click();
+ const download=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
+ const exported=JSON.parse(await readFile(await(await download).path(),'utf8'));
+ const saved=exported.payload.cases.find(x=>x.id==='lab-reasoning-mosfet-control-v2');
+ expect(saved?.passed).toBe(true);
+ expect(saved?.report).toContain('Resultado de revisión humana: PENDIENTE');
+});
+
 test('foundational 12 V and CAN lessons have in-place falsifiable reasoning without claiming physical simulators',async({page})=>{
  await openLesson(page,'La caída de tensión cuenta la historia');
  await expect(page.getByRole('heading',{name:/Desafío de razonamiento: Arranque lento/})).toBeVisible();
