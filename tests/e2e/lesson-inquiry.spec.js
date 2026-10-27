@@ -18,7 +18,7 @@ test('every lesson can host a frozen inquiry design without inventing a simulato
  };
  const fill=async(id)=>page.locator('#inquiry-'+id).fill(text[id]);
  await fill('hypothesis');await fill('alternative');
- await page.getByRole('button',{name:'Congelar hipótesis del cuaderno'}).click();
+ await page.getByRole('button',{name:'Fijar H1 y H2 en el cuaderno'}).click();
  for(const key of ['probe','predictH1','predictH2','falsifier','confounder'])await fill(key);
  await page.getByRole('button',{name:'Congelar prueba y predicciones'}).click();
  await expect(page.locator('#inquiry-hypothesis')).toHaveCount(0);
