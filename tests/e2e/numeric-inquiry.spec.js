@@ -13,7 +13,9 @@ const entries=[
  {title:'Conmutación low-side: MOSFET, puerta y carga',id:'lab-numeric-mosfet-v1',variant:'4',hypothesis:'1',falsifier:'2',predicted:'0.8'},
  {title:'Actuadores inductivos: energía y apagado controlado',id:'lab-numeric-inductor-energy-v1',variant:'4',hypothesis:'0',falsifier:'2',predicted:'1.6'},
  {title:'Referencias compartidas, alimentación y nodos CAN',id:'lab-numeric-shared-return-v1',variant:'4',hypothesis:'1',falsifier:'2',predicted:'0.2'},
- {title:'MOSFETs, conmutación y DC/DC: conceptos de potencia',id:'lab-numeric-buck-v1',variant:'50',hypothesis:'1',falsifier:'2',predicted:'6'}
+ {title:'MOSFETs, conmutación y DC/DC: conceptos de potencia',id:'lab-numeric-buck-v1',variant:'50',hypothesis:'1',falsifier:'2',predicted:'6'},
+ {title:'Correlaciones MAP, TPS y ECT para encontrar contradicciones',id:'lab-numeric-sensor-fallback-v1',variant:'40',hypothesis:'1',falsifier:'2',predicted:'40'},
+ {title:'Masas de osciloscopio y errores de referencia',id:'lab-numeric-scope-ground-v1',variant:'0.2',hypothesis:'0',falsifier:'1',predicted:'2.7'}
 ];
 async function visit(page,title){
  await page.goto('./');
