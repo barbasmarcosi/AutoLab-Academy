@@ -10,11 +10,11 @@ Las **94 lecciones** incluyen un cuaderno guiado anclado al título y al primer 
 |---|---:|---|
 | Lecturas | 94 | Registro de estudio, no habilidad |
 | Cuadernos experimentales | 94 | Diseño documentado, sin calificación ni aprobación |
-| Microcasos v2 y transferencia | 26 | Rúbrica conceptual objetiva limitada |
+| Microcasos v2 y transferencia | 32 | Rúbrica conceptual objetiva limitada |
 | Laboratorios embebidos | 4 | Evidencia simulada específica |
 | Laboratorios externos vinculados | 12 | Banco relacionado, no aprueba automáticamente la lección |
 
-**Pendientes:** 68 lecciones sin microcaso objetivo v2 y 78 sin laboratorio contextual o embebido. El cuaderno no se cuenta como simulador ni como práctica aprobada.
+**Pendientes:** 62 lecciones sin microcaso objetivo v2 y 78 sin laboratorio contextual o embebido. El cuaderno no se cuenta como simulador ni como práctica aprobada.
 
 ## Contrato técnico
 

@@ -65,6 +65,19 @@ const values=[
   'Batería necesariamente descargada','Caída resistiva local de alimentación bajo demanda','Firmware defectuoso confirmado'],1,'La comparación simultánea revela una caída localizada en el suministro a la ECU.'],
  ['pullups','Un contacto de un banco se verifica cerrado, pero el pin con pull-up sigue alto y la prueba de continuidad detecta conductor abierto. ¿Qué conclusión corresponde?',[
   'Contacto abierto normal','Pin correcto porque hay pull-up','La interrupción del cable explica la lectura alta pese al contacto cerrado'],2,'El circuito interrumpido elimina la ruta de masa y deja el nodo alto, igual que un contacto abierto.']
+,
+ ['scope','Un generador de prueba de banco verifica sonda y disparo, luego se captura una salida con pulsos de amplitud estable solo al corregir la escala temporal. ¿Qué concluís?',[
+  'El sensor debe reemplazarse','Se refutó ausencia permanente: la primera captura era insuficiente','Un osciloscopio no puede medir trenes de pulsos'],1,'La evidencia comparada demuestra que un ajuste instrumental ocultó una señal presente, sin afirmar integridad global del sistema.'],
+ ['can','Un nodo CAN aislado tiene alimentación local normal y el resto de la red transmite, pero su transceptor no presenta actividad de salida. ¿Qué hipótesis conserva prioridad?',[
+  'Terminación global abierta con certeza','Batería de tracción agotada','Investigar transceptor o habilitación del nodo en el banco, sin declarar caída total'],2,'La evidencia nueva descarta la explicación anterior de alimentación local ausente y enfoca el enlace del nodo.'],
+ ['bms','Dos módulos ficticios marcan igual tensión a temperatura controlada; el ensayo comparable entrega 48 Ah y 36 Ah. ¿Qué criterio es correcto?',[
+  'Igual voltaje no implica misma capacidad; hay evidencia sintética de capacidades distintas','Sus SOC y SOH son necesariamente idénticos','La tensión prueba que ambas celdas están defectuosas'],0,'El ensayo independiente distingue capacidad dentro de sus supuestos y refuta equiparar capacidad a voltaje puntual.'],
+ ['sensor-plausibility','Tras una noche apagado, el sensor ECT realista del banco sigue ambiente, pero el diagnóstico muestra un valor fijo programado por fallback de ECU. ¿Qué indica?',[
+  'El motor se mantuvo caliente toda la noche','La lectura del diagnóstico es sustitutiva, no temperatura física medida','El TPS es la causa demostrada'],1,'Separar señal de sensor medida y parámetro de sustitución impide reemplazos basados en un valor congelado.'],
+ ['dcdc-lv','En un modelo aislado de 12 V, la salida auxiliar DC/DC cae durante la demanda y la caída entre salida y carga resulta despreciable. ¿Dónde centrar la prueba siguiente?',[
+  'Retorno LV con falla confirmada','Pack HV defectuoso con certeza','Regulación, capacidad o habilitación del DC/DC en el modelo LV'],2,'El defecto se manifiesta ya en la fuente LV y no en el trayecto hasta la carga; no autoriza ensayos HV.'],
+ ['current-shunt','En banco protegido, un shunt medido a 20 mΩ produce 80 mV diferenciales bajo condición estable. ¿Cuál corriente ideal corresponde?',[
+  '4 A, siempre aclarando incertidumbre del valor real del shunt','40 A sin control térmico','0,4 A y resistencia irrelevante'],0,'La relación I=0,080/0,020=4 A cambia al variar R, por lo que calibración y temperatura importan.']
 
 ];
 export const TRANSFER_CASES=Object.freeze(values.map(([lessonId,context,options,answer,feedback])=>Object.freeze({
