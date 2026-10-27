@@ -14,12 +14,14 @@ const fixtures=[
  {lessonId:'mosfet-control',variant:4,hypothesis:1,falsifier:2,predicted:0.8},
  {lessonId:'inductive-load',variant:4,hypothesis:0,falsifier:2,predicted:1.6},
  {lessonId:'ground-reference-network',variant:4,hypothesis:1,falsifier:2,predicted:0.2},
- {lessonId:'dcdc-switches',variant:50,hypothesis:1,falsifier:2,predicted:6}
+ {lessonId:'dcdc-switches',variant:50,hypothesis:1,falsifier:2,predicted:6},
+ {lessonId:'sensor-plausibility',variant:40,hypothesis:1,falsifier:2,predicted:40},
+ {lessonId:'scope-reference',variant:0.2,hypothesis:0,falsifier:1,predicted:2.7}
 ];
 test('eleven independent LV and CAN experiments produce reproducible model output, never instrument claims',()=>{
- assert.equal(NUMERIC_BENCHES.length,11);
- assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.lessonId)).size,11);
- assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.caseId)).size,11);
+ assert.equal(NUMERIC_BENCHES.length,13);
+ assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.lessonId)).size,13);
+ assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.caseId)).size,13);
  assert.equal(numericBenchFor('does-not-exist'),null);
  for(const x of fixtures){
   assert.ok(numericBenchFor(x.lessonId));
