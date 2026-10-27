@@ -98,3 +98,57 @@ test('foundational 12 V and CAN lessons have in-place falsifiable reasoning with
  await expect(page.getByRole('heading',{name:/Desafío de razonamiento: CAN sin comunicación/})).toBeVisible();
  await expect(page.locator('#reasoning-hypothesis')).toBeVisible();
 });
+
+
+test('MC06 freezes explicit confidence before results, reports high-confidence mistakes and restores v2 evidence',async({page})=>{
+ await openLesson(page,'MC06+ — Deslizamiento, sensor');
+ const choose=async(step,answer,confidence,action='Congelar decisión y continuar')=>{
+  await page.locator('#reasoning-'+step).selectOption(String(answer));
+  await page.locator('#confidence-'+step).selectOption(String(confidence));
+  await page.getByRole('button',{name:action}).click();
+ };
+ await choose('hypothesis',0,.95);
+ await expect(page.getByText(/confianza subjetiva 95 %/)).toBeVisible();
+ await choose('measurement',1,.75);
+ await choose('falsifier',0,.5);
+ await choose('transfer',1,.95,'Congelar hipótesis de transferencia');
+ await page.locator('#reasoning-justification').fill(explanation);
+ await page.locator('#reasoning-limitations').fill(bounds);
+ await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
+ await expect(page.getByText(/Resultado estructurado con transferencia: 80\/100/)).toBeVisible();
+ await expect(page.getByText(/Autoconfianza \(no es parte de la nota\):/)).toContainText('4/4');
+ await expect(page.getByText(/Errores cometidos con confianza 95 %: 1/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
+ await page.locator('nav.nav button[data-id="data"]').click();
+ const download=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
+ const json=JSON.parse(await readFile(await(await download).path(),'utf8'));
+ const evidence=json.payload.cases.find(c=>c.id==='lab-reasoning-mc06-dual-fault-instrumentation-v2');
+ expect(evidence).toBeTruthy();
+ expect(evidence.passed).toBe(false);
+ expect(evidence.score).toBe(80);
+ expect(evidence.report).toContain('Declaraciones: 4/4');
+ expect(evidence.report).toContain('Errores con confianza muy alta (95 %): 1');
+ expect(evidence.report).toContain('Error cuadrático medio descriptivo: 0.3044');
+ expect(evidence.report).toContain('no una estimación fiable de calibración');
+});
+test('MC14 omitted confidences never generate fabricated calibration, even with all objective decisions correct',async({page})=>{
+ await openLesson(page,'MC14 — Identificación de caja negra');
+ await lock(page,'hypothesis',1);
+ await lock(page,'measurement',0);
+ await lock(page,'falsifier',2);
+ await page.locator('#reasoning-transfer').selectOption('0');
+ await page.getByRole('button',{name:'Congelar hipótesis de transferencia'}).click();
+ await page.locator('#reasoning-justification').fill(explanation);
+ await page.locator('#reasoning-limitations').fill(bounds);
+ await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
+ await expect(page.getByText(/Resultado estructurado con transferencia: 100\/100/)).toBeVisible();
+ await expect(page.getByText(/No se calcula índice con declaraciones incompletas/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
+ await page.locator('nav.nav button[data-id="data"]').click();
+ const download=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
+ const raw=JSON.parse(await readFile(await(await download).path(),'utf8'));
+ const record=raw.payload.cases.find(x=>x.id==='lab-reasoning-mc14-blackbox-identification-v2');
+ expect(record.passed).toBe(true);
+ expect(record.report).toContain('Declaraciones: 0/4');
+ expect(record.report).toContain('Error cuadrático medio: NO CALCULADO');
+});
