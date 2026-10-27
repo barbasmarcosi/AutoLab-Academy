@@ -3,18 +3,19 @@ import assert from'node:assert/strict';
 import{LESSON_PRACTICES,lessonPractice,practiceProgress,practiceCoverage}from'../src/lesson-practice.js';
 import{learningStages}from'../src/learning-path.js';
 import{NUMERIC_BENCHES}from'../src/numeric-inquiry.js';
+import{WAVE_INQUIRIES}from'../src/waveform-inquiry.js';
 test('all practice bridges are unique, target genuine stages and use known labs',()=>{
  const catalog=learningStages.flatMap(s=>s.lessons).map(id=>({id}));
  const coverage=practiceCoverage(catalog);
  assert.equal(catalog.length,94);
  assert.equal(coverage.total,94);
- assert.equal(coverage.mapped,22);
- assert.equal(coverage.embedded,10);
+ assert.equal(coverage.mapped,26);
+ assert.equal(coverage.embedded,14);
  assert.equal(coverage.linked,12);
- assert.equal(coverage.unmapped,72);
+ assert.equal(coverage.unmapped,68);
  assert.deepEqual(coverage.invalid,[]);
- assert.equal(new Set(LESSON_PRACTICES.map(p=>p.lessonId)).size,22);
- const supported=new Set(['rotary','rotary-thermal','rotary-heat','rotary-ports','rotary-aperture','rotary-inverse','ecu-robust','metrology','inventor','brakes','powertrain','numeric-bench']);
+ assert.equal(new Set(LESSON_PRACTICES.map(p=>p.lessonId)).size,26);
+ const supported=new Set(['rotary','rotary-thermal','rotary-heat','rotary-ports','rotary-aperture','rotary-inverse','ecu-robust','metrology','inventor','brakes','powertrain','numeric-bench','wave-inquiry']);
  assert.ok(LESSON_PRACTICES.every(p=>supported.has(p.page)&&['embedded','linked'].includes(p.kind)&&p.title.length>12&&p.prompt.length>35));
  assert.equal(lessonPractice('not-a-lesson'),null);
 });
@@ -30,6 +31,17 @@ test('all six numeric models are embedded in exactly their own lesson, with dist
   assert.equal(practiceProgress({cases:[]},model.lessonId).passed,false);
   const evidence=practiceProgress({cases:[{id:model.caseId,passed:true}]},model.lessonId);
   assert.equal(evidence.passed,true);
+ }
+});
+test('four wave lab bridges point to their specific lessons and never other evidence',()=>{
+ assert.equal(WAVE_INQUIRIES.length,4);
+ for(const w of WAVE_INQUIRIES){
+  const p=lessonPractice(w.lessonId);
+  assert.equal(p?.kind,'embedded');
+  assert.equal(p?.page,'wave-inquiry');
+  assert.equal(p?.caseId,w.caseId);
+  assert.equal(practiceProgress({cases:[]},w.lessonId).passed,false);
+  assert.equal(practiceProgress({cases:[{id:w.caseId,passed:true}]},w.lessonId).passed,true);
  }
 });
 test('reading progress never masquerades as a passed practice or vice versa',()=>{
