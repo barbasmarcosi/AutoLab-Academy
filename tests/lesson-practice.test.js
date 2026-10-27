@@ -7,12 +7,12 @@ test('all practice bridges are unique, target genuine stages and use known labs'
  const coverage=practiceCoverage(catalog);
  assert.equal(catalog.length,94);
  assert.equal(coverage.total,94);
- assert.equal(coverage.mapped,19);
- assert.equal(coverage.embedded,7);
+ assert.equal(coverage.mapped,22);
+ assert.equal(coverage.embedded,10);
  assert.equal(coverage.linked,12);
- assert.equal(coverage.unmapped,75);
+ assert.equal(coverage.unmapped,72);
  assert.deepEqual(coverage.invalid,[]);
- assert.equal(new Set(LESSON_PRACTICES.map(p=>p.lessonId)).size,19);
+ assert.equal(new Set(LESSON_PRACTICES.map(p=>p.lessonId)).size,22);
  const supported=new Set(['rotary','rotary-thermal','rotary-heat','rotary-ports','rotary-aperture','rotary-inverse','ecu-robust','metrology','inventor','brakes','powertrain','numeric-bench']);
  assert.ok(LESSON_PRACTICES.every(p=>supported.has(p.page)&&['embedded','linked'].includes(p.kind)&&p.title.length>12&&p.prompt.length>35));
  assert.equal(lessonPractice('not-a-lesson'),null);
