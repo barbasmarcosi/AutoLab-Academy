@@ -11,10 +11,10 @@ const fixtures=[
  {lessonId:'actuator-power',variant:50,hypothesis:1,falsifier:2,predicted:6},
  {lessonId:'can',variant:2,hypothesis:2,falsifier:1,predicted:60}
 ];
-test('three independent LV experiments produce reproducible model output, never instrument claims',()=>{
+test('six independent LV and CAN experiments produce reproducible model output, never instrument claims',()=>{
  assert.equal(NUMERIC_BENCHES.length,6);
- assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.lessonId)).size,3);
- assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.caseId)).size,3);
+ assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.lessonId)).size,6);
+ assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.caseId)).size,6);
  assert.equal(numericBenchFor('does-not-exist'),null);
  for(const x of fixtures){
   assert.ok(numericBenchFor(x.lessonId));
