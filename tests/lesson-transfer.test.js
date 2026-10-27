@@ -1,8 +1,14 @@
 import test from'node:test';import assert from'node:assert/strict';
 import{REASONING_CHALLENGES}from'../src/lesson-reasoning.js';
-import{TRANSFER_MODEL,TRANSFER_CASES,transferCase,transferCaseId,gradeReasoningTransfer,reasoningTransferReport,transferProgress}from'../src/lesson-transfer.js';
+import{TRANSFER_MODEL,TRANSFER_CASES,transferCase,transferCaseId,gradeReasoningTransfer,reasoningTransferReport,transferProgress,REASONING_HUMAN_REVIEW,reasoningHumanReviewGuide}from'../src/lesson-transfer.js';
 const reasoning='Una medición aislada no demuestra causalidad; contrastaré un observable independiente y abandonaré mi hipótesis original si contradice una predicción falsable. El caso debe investigarse antes de reemplazar componentes.';
 const limitations='Estos datos provienen de un banco sintético. Requieren instrumentos calibrados, condiciones reproducibles y supervisión antes de concluir sobre un vehículo real.';
+test('reasoning free text needs a separately anchored human review',()=>{
+ assert.equal(REASONING_HUMAN_REVIEW.length,5);
+ assert.equal(new Set(REASONING_HUMAN_REVIEW.map(x=>x.id)).size,5);
+ assert.ok(REASONING_HUMAN_REVIEW.every(x=>x.levels.length===4&&new Set(x.levels).size===4));
+ assert.match(reasoningHumanReviewGuide(),/Resultado de revisión humana: PENDIENTE/);
+});
 test('32 counterfactuals test transfer rather than repeating the original answer key',()=>{
  assert.equal(TRANSFER_CASES.length,REASONING_CHALLENGES.length);
  assert.equal(new Set(TRANSFER_CASES.map(x=>x.lessonId)).size,32);
@@ -17,6 +23,7 @@ test('32 counterfactuals test transfer rather than repeating the original answer
   assert.equal(full.transferCorrect,true);
   assert.match(reasoningTransferReport(base,full),/Escenario reservado/);
   assert.match(reasoningTransferReport(base,full),/sin evaluación semántica/);
+  assert.match(reasoningTransferReport(base,full),/Resultado de revisión humana: PENDIENTE/);
   const mistaken=(transfer.answer+1)%3;
   const fail=gradeReasoningTransfer({...base,transferAnswer:mistaken});
   assert.equal(fail.score,70);assert.equal(fail.passed,false);
