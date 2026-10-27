@@ -11,7 +11,7 @@ test('94 lessons have honest, complete, independently auditable evidence coverag
  assert.equal(summary.model,EVIDENCE_MODEL);
  assert.equal(summary.totals.lessons,94);
  assert.equal(summary.totals.reasoningAvailable,32);
- assert.equal(summary.totals.embeddedAvailable,10);
+ assert.equal(summary.totals.embeddedAvailable,14);
  assert.equal(summary.totals.linkedOnly,12);
  assert.equal(summary.totals.documentedTraining,0);
  assert.equal(summary.byStage.length,16);
