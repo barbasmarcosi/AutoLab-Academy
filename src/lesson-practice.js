@@ -5,6 +5,12 @@
  * existing lab, while preserving the learner's theory reading marker.
  */
 export const LESSON_PRACTICES=Object.freeze([
+ {lessonId:'pullups',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-pullup-v1',
+  title:'Pull-up con retorno resistivo en banco',prompt:'Anticipá la tensión de una entrada conectada a masa por diferentes resistencias; contrastá circuito abierto, contacto ideal y divisor real.'},
+ {lessonId:'actuator-power',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-pwm-v1',
+  title:'Mando PWM: promedio frente a corriente real',prompt:'Predecí el promedio de una señal cuadrada antes de calcularlo; diferenciá orden de control, energía entregada y respuesta del actuador.'},
+ {lessonId:'can',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-can-termination-v1',
+  title:'CAN: terminaciones equivalentes en un modelo sin energía',prompt:'Predice la resistencia equivalente de resistores paralelos sin confundir un resultado numérico con diagnóstico concluyente del bus físico.'},
  {lessonId:'voltage-dividers',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-divider-v1',
   title:'Divisor con carga: contrastá tu cálculo',prompt:'Antes de conocer la salida matemática, predecí cómo cambia Vout al poner una resistencia de carga en paralelo con la inferior.'},
  {lessonId:'rc-input',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-rc-v1',
