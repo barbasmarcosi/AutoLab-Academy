@@ -1,6 +1,7 @@
 import test from'node:test';import assert from'node:assert/strict';
 import{lessonEvidence,learningEvidenceOverview,EVIDENCE_MODEL}from'../src/learning-evidence.js';
 import{learningStages}from'../src/learning-path.js';
+import{lessonPractice}from'../src/lesson-practice.js';
 const lessonIds=learningStages.flatMap(s=>s.lessons);
 const lessons=lessonIds.map(id=>({id}));
 const progress=()=>({notes:{},cases:[],attempts:[]});
@@ -48,6 +49,8 @@ test('path recommendation advances through reading, transfer and an actual embed
  for(const id of lessonIds.slice(0,lessonIds.indexOf('mc06-dual-fault-instrumentation'))){
   p.notes['lesson-'+id]='2026-10-26';
   p.cases.push({id:caseId(id),passed:true});
+  const lab=lessonPractice(id);
+  if(lab?.kind==='embedded')p.cases.push({id:lab.caseId,passed:true});
  }
  p.notes['lesson-mc06-dual-fault-instrumentation']='2026-10-26';
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
