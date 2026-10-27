@@ -1,5 +1,5 @@
 import{reasoningChallenge}from'./lesson-reasoning.js';
-import{transferCase,transferCaseId,gradeReasoningTransfer,reasoningTransferReport}from'./lesson-transfer.js';
+import{transferCase,transferCaseId,gradeReasoningTransfer,reasoningTransferReport,REASONING_HUMAN_REVIEW}from'./lesson-transfer.js';
 import{CONFIDENCE_LEVELS,auditDecisionConfidence,confidenceReport}from'./lesson-confidence.js';
 import{choiceOrder,choiceOrderReport}from'./lesson-choice-order.js';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -64,6 +64,7 @@ export function mountLessonReasoning(root,{lessonId,record,onSaved=()=>{}}){
  ' Errores cometidos con confianza 95 %: '+currentAudit().overconfidentErrors+'.</p>'+
  '<p class="muted">'+esc(currentAudit().limitations)+'</p>'+
  '<p class="muted">'+esc(result.warning)+'</p>'+
+    '<details class="panel"><summary>Rúbrica cualitativa con revisión humana pendiente</summary><p>El texto requiere revisión profesional o de un docente; los criterios no producen nota automática.</p><ul>'+REASONING_HUMAN_REVIEW.map(c=>'<li><strong>'+esc(c.name)+'</strong>: '+esc(c.levels[2])+' / '+esc(c.levels[3])+'</li>').join('')+'</ul></details>'+
     '<div class="row">'+
       '<button class="button" type="button" data-reasoning="save" '+(recorded||saving?'disabled':'')+'>'+(recorded?'Reflexión guardada':'Guardar evidencia de razonamiento')+'</button>'+
       '<button class="button alt" type="button" data-reasoning="reset">Reintentar con nuevas decisiones</button>'+
