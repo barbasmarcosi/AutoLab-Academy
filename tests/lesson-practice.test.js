@@ -9,18 +9,18 @@ test('all practice bridges are unique, target genuine stages and use known labs'
  const coverage=practiceCoverage(catalog);
  assert.equal(catalog.length,94);
  assert.equal(coverage.total,94);
- assert.equal(coverage.mapped,26);
- assert.equal(coverage.embedded,14);
+ assert.equal(coverage.mapped,31);
+ assert.equal(coverage.embedded,19);
  assert.equal(coverage.linked,12);
- assert.equal(coverage.unmapped,68);
+ assert.equal(coverage.unmapped,63);
  assert.deepEqual(coverage.invalid,[]);
- assert.equal(new Set(LESSON_PRACTICES.map(p=>p.lessonId)).size,26);
+ assert.equal(new Set(LESSON_PRACTICES.map(p=>p.lessonId)).size,31);
  const supported=new Set(['rotary','rotary-thermal','rotary-heat','rotary-ports','rotary-aperture','rotary-inverse','ecu-robust','metrology','inventor','brakes','powertrain','numeric-bench','wave-inquiry']);
  assert.ok(LESSON_PRACTICES.every(p=>supported.has(p.page)&&['embedded','linked'].includes(p.kind)&&p.title.length>12&&p.prompt.length>35));
  assert.equal(lessonPractice('not-a-lesson'),null);
 });
-test('all six numeric models are embedded in exactly their own lesson, with distinct evidence IDs',()=>{
- assert.equal(NUMERIC_BENCHES.length,6);
+test('all eleven numeric models are embedded in exactly their own lesson, with distinct evidence IDs',()=>{
+ assert.equal(NUMERIC_BENCHES.length,11);
  const curriculumIds=new Set(learningStages.flatMap(stage=>stage.lessons));
  for(const model of NUMERIC_BENCHES){
   assert.ok(curriculumIds.has(model.lessonId));
