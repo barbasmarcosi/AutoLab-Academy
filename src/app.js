@@ -710,7 +710,7 @@ function learn(){
   '<div class="cards">'+group.map(l=>{
    const completed=Boolean(data.notes['lesson-'+l.id]);
    const p=lessonPractice(l.id),pr=practiceProgress(data,l.id);
-   const status=pr.passed?'Práctica aprobada':pr.status==='related-passed'?'Banco relacionado aprobado; lección aún sin evaluar':pr.status==='related-attempted'?'Banco relacionado practicado':pr.attempts?'Práctica realizada':p?.kind==='embedded'?'Simulador en lección':p?'Laboratorio asociado':reasoningChallenge(l.id)?'Razonamiento v2 y cuaderno científico':'Cuaderno científico · simulador pendiente';
+   const status=pr.passed?(['numeric-bench','wave-inquiry'].includes(p?.page)?'Práctica aprobada · modelo virtual, sin medición física':'Práctica aprobada'):pr.status==='related-passed'?'Banco relacionado aprobado; lección aún sin evaluar':pr.status==='related-attempted'?'Banco relacionado practicado':pr.attempts?'Práctica realizada':p?.kind==='embedded'?'Simulador en lección':p?'Laboratorio asociado':reasoningChallenge(l.id)?'Razonamiento v2 y cuaderno científico':'Cuaderno científico · simulador pendiente';
    return '<article class="panel lesson-card"><div><span class="tag '+(completed?'':'dim')+'">'+(completed?'Lectura registrada':'Por estudiar')+'</span>'+
    '<h3 style="margin-top:12px">'+esc(l.title)+'</h3><p class="muted">'+l.minutes+' minutos sugeridos · '+l.sections.length+' temas</p><p class="muted small">'+esc(status)+'</p></div>'+
    button(completed?'Revisar contenido':'Estudiar','lesson','data-id="'+attr(l.id)+'"','alt')+'</article>';
@@ -719,7 +719,8 @@ function learn(){
 }
 function lessonPracticeStatusText(id){
  const status=practiceProgress(data,id);
- return status.status==='passed'?'Práctica aprobada: hay evidencia guardada':status.status==='attempted'?'Práctica realizada, todavía sin aprobar':
+ const p=lessonPractice(id),virtual=['numeric-bench','wave-inquiry'].includes(p?.page);
+ return status.status==='passed'?(virtual?'Práctica aprobada: modelo virtual, NO competencia física':'Práctica aprobada: hay evidencia guardada'):status.status==='attempted'?(virtual?'Práctica realizada en modelo virtual, todavía sin aprobar':'Práctica realizada, todavía sin aprobar'):
   status.status==='related-passed'?'El banco relacionado fue aprobado; esta lección no tiene rúbrica propia':
   status.status==='related-attempted'?'El banco relacionado tiene intentos; no se acredita esta lección':
   status.status==='not-started'?'Práctica todavía no registrada':'No hay práctica vinculada todavía';
