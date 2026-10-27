@@ -41,6 +41,37 @@ const experiments=[
   hypotheses:['Más resistencias iguales en paralelo aumentan R equivalente','La resistencia equivalente es 120 Ω para cualquier número','Más resistencias iguales en paralelo disminuyen R equivalente'],answer:2,
   falsifiers:['El circuito tiene una ECU en cada extremo','Al agregar un resistor paralelo idéntico, la resistencia equivalente aumenta con el resto aislado','Dos resistores nominales son de 120 Ω'],falsifierAnswer:1,
   explain:'Req=120 Ω/n en paralelo ideal. Esta cuenta aislada no certifica integridad de CAN ni permite inferir resistencias conectadas a vehículos energizados.'}
+,
+ {lessonId:'resistive-loss',caseId:'lab-numeric-resistive-loss-v1',title:'Pérdida I²R: corriente, contacto y calor ideal',
+  units:'W',description:'Contacto ficticio de 0,25 Ω a resistencia constante, sin circuito energizado. Elegí corriente sintética de 2, 4 o 6 A y predecí la potencia resistiva.',
+  options:[{value:2,label:'Corriente modelo 2 A'},{value:4,label:'Corriente modelo 4 A'},{value:6,label:'Corriente modelo 6 A'}],
+  hypotheses:['Si I se duplica con R fija, la pérdida se cuadruplica','P crece linealmente con I aunque R sea fija','No se libera energía en ninguna resistencia'],answer:0,
+  falsifiers:['Un contacto que se calienta en uso real','Con R fija y condición controlada, duplicar I produce una pérdida dos veces mayor','Un cable está rotulado cobre'],falsifierAnswer:1,
+  explain:'P=I²R con resistencia CONSTANTE de 0,25 Ω; al duplicar I, P se cuadruplica. No se predice temperatura del conector, incendio ni disipación real.'},
+ {lessonId:'mosfet-control',caseId:'lab-numeric-mosfet-v1',title:'MOSFET low-side: pérdida de conducción no es umbral de puerta',
+  units:'W',description:'MOSFET IDEALMENTE saturado en conducción con RDS(on) ficticia fija de 0,050 Ω. Simulá corriente de 2, 4 o 6 A: calculá solamente la pérdida resistiva.',
+  options:[{value:2,label:'Corriente modelo 2 A'},{value:4,label:'Corriente modelo 4 A'},{value:6,label:'Corriente modelo 6 A'}],
+  hypotheses:['VGS(th) garantiza baja RDS(on) en cualquier equipo','Pconducción=I²RDS(on) suponiendo MOSFET totalmente excitado','No existen pérdidas al encender un MOSFET real'],answer:1,
+  falsifiers:['A mayor I con RDS fija crece I²R','La puerta recibe una orden PWM','Con RDS comprobada fija, el doble de corriente produce el doble de pérdida y no cuatro veces'],falsifierAnswer:2,
+  explain:'Pcond=I²·0,05 Ω para un dispositivo completamente excitado y con RDS fija; no calcula carga de puerta, transitorios, pérdidas de conmutación ni temperatura.'},
+ {lessonId:'inductive-load',caseId:'lab-numeric-inductor-energy-v1',title:'Bobina: la energía almacenada no es solo corriente',
+  units:'J',description:'Inductancia ideal L=0,20 H en un modelo sin hardware. Variá I=2, 4 o 6 A y predecí la energía magnética almacenada en régimen.',
+  options:[{value:2,label:'Corriente ideal 2 A'},{value:4,label:'Corriente ideal 4 A'},{value:6,label:'Corriente ideal 6 A'}],
+  hypotheses:['E aumenta en forma cuadrática con I para L constante','E es independiente de I','E se reduce si la corriente crece'],answer:0,
+  falsifiers:['Una bobina precisa protección de apagado','Un valor nominal de inductancia','Con L constante, el doble de I implica solo el doble de energía y no cuatro veces'],falsifierAnswer:2,
+  explain:'E=1/2·L·I². Describe energía ideal almacenada, NO velocidad de desmagnetización, flyback real ni tensiones peligrosas de desconexión.'},
+ {lessonId:'ground-reference-network',caseId:'lab-numeric-shared-return-v1',title:'Masa compartida: corriente ajena puede desplazar la referencia',
+  units:'V',description:'Retorno común de 50 mΩ con corriente total sintética de 2, 4 o 6 A. Calculá exclusivamente el salto de potencial I·R del retorno, NO una falla CAN.',
+  options:[{value:2,label:'Corriente de retorno 2 A'},{value:4,label:'Corriente de retorno 4 A'},{value:6,label:'Corriente de retorno 6 A'}],
+  hypotheses:['La referencia local es idéntica a cualquier masa bajo carga','La caída I·R aumenta proporcionalmente con la corriente si R es constante','Una caída positiva prueba el fallo de una ECU determinada'],answer:1,
+  falsifiers:['Una etiqueta de gateway','La presencia de mensajes CAN','Con R estable y la misma condición, el doble de corriente mantiene exactamente la misma caída'],falsifierAnswer:2,
+  explain:'ΔV=I·0,050 Ω. La referencia local puede moverse respecto de otro punto; no determina el origen de síntomas CAN, offsets reales ni las rutas físicas de masa.'},
+ {lessonId:'dcdc-switches',caseId:'lab-numeric-buck-v1',title:'Buck DC/DC: promedio ideal con duty y fuente LV',
+  units:'V',description:'Convertidor BUCK ideal ficticio de 12 V de entrada en conducción continua, sin pérdidas ni rizado. Elegí duty 25, 50 o 75 % y predecí Vout ideal.',
+  options:[{value:25,label:'Duty modelo 25 %'},{value:50,label:'Duty modelo 50 %'},{value:75,label:'Duty modelo 75 %'}],
+  hypotheses:['Vout se iguala siempre a Vin en cualquier duty','Vout ideal aumenta con duty según D·Vin bajo estas hipótesis','El duty determina por sí solo temperatura y calidad de regulación real'],answer:1,
+  falsifiers:['Dos duty distintos generan Vout diferentes en el modelo','El inductor está representado esquemáticamente','Con Vin fija y condiciones ideales, duty 75 % entrega menos voltaje que duty 25 %'],falsifierAnswer:2,
+  explain:'Vout≈D·Vin en un buck IDEAL de conducción continua, Vin=12 V. No simula conmutación, control de corriente, saturación, BMS, pérdidas o tensión HV.'}
 
 ];
 export const NUMERIC_BENCHES=Object.freeze(experiments.map(x=>Object.freeze({...x,
@@ -61,6 +92,11 @@ export function computeNumericBench(lessonId,variant){
  if(lessonId==='pullups')return 5*variant/(10+variant);
  if(lessonId==='actuator-power')return 12*variant/100;
  if(lessonId==='can')return 120/variant;
+ if(lessonId==='resistive-loss')return variant*variant*0.25;
+ if(lessonId==='mosfet-control')return variant*variant*0.05;
+ if(lessonId==='inductive-load')return 0.1*variant*variant;
+ if(lessonId==='ground-reference-network')return 0.05*variant;
+ if(lessonId==='dcdc-switches')return 12*variant/100;
  throw RangeError('Experimento no disponible');
 }
 /** Sensitivity table revealed only AFTER the learner freezes a prediction. */
