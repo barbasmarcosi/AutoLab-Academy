@@ -9,9 +9,9 @@ test('reasoning free text needs a separately anchored human review',()=>{
  assert.ok(REASONING_HUMAN_REVIEW.every(x=>x.levels.length===4&&new Set(x.levels).size===4));
  assert.match(reasoningHumanReviewGuide(),/Resultado de revisión humana: PENDIENTE/);
 });
-test('36 counterfactuals test transfer rather than repeating the original answer key',()=>{
+test('40 counterfactuals test transfer rather than repeating the original answer key',()=>{
  assert.equal(TRANSFER_CASES.length,REASONING_CHALLENGES.length);
- assert.equal(new Set(TRANSFER_CASES.map(x=>x.lessonId)).size,36);
+ assert.equal(new Set(TRANSFER_CASES.map(x=>x.lessonId)).size,40);
  for(const challenge of REASONING_CHALLENGES){
   const transfer=transferCase(challenge.id);assert.ok(transfer);
   assert.equal(transfer.options.length,3);assert.equal(new Set(transfer.options).size,3);

@@ -103,6 +103,19 @@ const values=[
   'Declarar toda la red caída','Transmitir arbitrariamente a un vehículo real','Investigar enlace local del transceptor o conexión de ese módulo en banco, sin concluir colapso total'],2,'La alimentación local medida desplaza la hipótesis y la red activa refuta un apagón global.'],
  ['uds-session','Una documentación de banco indica que el DID pedido solo está implementado en otra versión de firmware autorizada; el sensor entrega una señal física plausible en ensayo independiente. ¿Qué cambia?',[
   'La negativa es compatible con DID no soportado y no acredita sensor averiado','El rechazo exige sustituir sensor','Toda respuesta negativa es una falla eléctrica'],0,'La trazabilidad de la versión y un control físico independiente separan limitación de protocolo de avería del sensor.']
+,
+ ['mosfet-control','En un módulo didáctico se mantiene gate 10 V con corriente LV, pero el voltaje drenador-fuente bajo carga permanece muy alto. ¿Qué revisión corresponde?',[
+  'Investigar pérdida de conducción o trayecto de potencia sin dar por probado mando insuficiente','El umbral de gate demuestra que todo está normal','Reemplazar inmediatamente la batería HV'],0,
+  'Una excitación de puerta controlada reduce la explicación por gate insuficiente; VDS bajo corriente aporta nueva evidencia sobre la ruta de potencia.'],
+ ['inductive-load','Dos circuitos simulados parten de la misma L e I inicial. El clamp A da una caída rápida y el B una lenta, y sus curvas de tensión son diferentes. ¿Qué concluís?',[
+  'La energía inicial forzó dinámicas iguales','La ruta de protección condiciona el apagado aunque la energía inicial sea la misma','Ambos sistemas se pueden apagar físicamente sin protección'],1,
+  'Cambiar solo el clamp con condiciones iniciales constantes distingue energía almacenada de dinámica de liberación.'],
+ ['ground-reference-network','La tensión positiva respecto de batería es estable. En el nodo ECU local, su retorno presenta caída que aumenta al activarse otra carga; un canal sensor parece desplazado. ¿Qué priorizás?',[
+  'Sensor defectuoso demostrado','La red CAN completa cayó con certeza','Contrastar desplazamiento de referencia y señal diferencial local antes de condenar sensores'],2,
+  'Correlacionar corriente y caída en retorno identifica una explicación común para el offset, sin afirmar reparación física.'],
+ ['dcdc-switches','Un buck sintético con Vin=12 V y duty fijo al 50% pasa a carga más exigente: el modelo extendido predice Vout=4,8 V por límite de corriente. ¿Qué cambió?',[
+  'La aproximación ideal Vout=D·Vin ya no explica esa condición; investigar límites y control LV','El cálculo de 6 V es ley incondicional y prevalece sobre cualquier observación','El resultado demuestra batería de tracción defectuosa'],0,
+  'La limitación de corriente es una condición nueva y refuta usar una ecuación ideal como garantía universal.']
 
 ];
 export const TRANSFER_CASES=Object.freeze(values.map(([lessonId,context,options,answer,feedback])=>Object.freeze({
