@@ -6,10 +6,13 @@ const limitations='Esta evidencia no proviene de un instrumento. Hay errores de 
 const fixtures=[
  {lessonId:'voltage-dividers',variant:10,hypothesis:0,falsifier:0,predicted:5/3},
  {lessonId:'rc-input',variant:2,hypothesis:2,falsifier:1,predicted:0.2},
- {lessonId:'current-shunt',variant:12.5,hypothesis:0,falsifier:2,predicted:4}
+ {lessonId:'current-shunt',variant:12.5,hypothesis:0,falsifier:2,predicted:4},
+ {lessonId:'pullups',variant:10,hypothesis:2,falsifier:1,predicted:2.5},
+ {lessonId:'actuator-power',variant:50,hypothesis:1,falsifier:2,predicted:6},
+ {lessonId:'can',variant:2,hypothesis:2,falsifier:1,predicted:60}
 ];
 test('three independent LV experiments produce reproducible model output, never instrument claims',()=>{
- assert.equal(NUMERIC_BENCHES.length,3);
+ assert.equal(NUMERIC_BENCHES.length,6);
  assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.lessonId)).size,3);
  assert.equal(new Set(NUMERIC_BENCHES.map(x=>x.caseId)).size,3);
  assert.equal(numericBenchFor('does-not-exist'),null);
@@ -43,4 +46,7 @@ test('parameter variation follows the declared ideal causal law for each bench',
  assert.ok(d[0]<d[1]&&d[1]<d[2]&&d[2]<2.5);
  assert.deepEqual([1,2,4].map(v=>computeNumericBench('rc-input',v)),[0.1,0.2,0.4]);
  assert.deepEqual([12.5,20,25].map(v=>computeNumericBench('current-shunt',v)),[4,2.5,2]);
+ assert.deepEqual([5,10,20].map(v=>computeNumericBench('pullups',v)),[5/3,2.5,10/3]);
+ assert.deepEqual([25,50,75].map(v=>computeNumericBench('actuator-power',v)),[3,6,9]);
+ assert.deepEqual([1,2,3].map(v=>computeNumericBench('can',v)),[120,60,40]);
 });
