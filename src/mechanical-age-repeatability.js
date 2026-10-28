@@ -3,6 +3,7 @@
  * This only reports descriptive within-phase variability. Never a causal test.
  */
 import {evaluateMechanicalSnapshot,syntheticServicePair} from './mechanical-age-research.js';
+import {compareMeasurementEvidence} from './mechanical-age-evidence.js';
 export const REPLICATES_VERSION='ma00-replicated-observations-v1';
 const median=x=>{const a=[...x].sort((p,q)=>p-q),n=a.length;return n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2;};
 const range=x=>Math.max(...x)-Math.min(...x);
@@ -37,6 +38,15 @@ export function evaluateReplicatedMeasurements(sessions){
  if(new Set(results.map(x=>x.protocol)).size!==1)blockers.push('Protocolos incompatibles');
  if(new Set(results.map(x=>x.source)).size!==1)blockers.push('Procedencia incompatible');
  if(results.some(x=>x.status!=='eligible'))blockers.push('Ventana fuera del protocolo de medición');
+ if(results.some(x=>x.source!=='synthetic')){
+  if(results.some((x,i)=>x.measurementEvidence?.documented!==true||sessions[i].snapshot.measurementContext?.sessionId!==sessions[i].sessionId))blockers.push('Faltan contextos de adquisición y/o IDs de sesión consistentes');
+  const early=sessions.filter(x=>x.snapshot.phase==='before_service'),late=sessions.filter(x=>x.snapshot.phase==='after_service');
+  for(const x of early)for(const y of late){
+   const audit=compareMeasurementEvidence(x.snapshot,y.snapshot);
+   if(!audit.documented)blockers.push(...audit.blockers);
+  }
+  if(new Set(sessions.map(x=>x.snapshot.measurementContext?.sessionId)).size!==sessions.length)blockers.push('IDs de captura duplicados');
+ }
  const fields=[['medianRpm',80],['medianEctC',5],['medianLoadPct',5]];
  for(const [field,tolerance] of fields)if(range(results.map(x=>x.features[field]))>tolerance)blockers.push('Diferencia de condiciones excesiva: '+field);
  const iats=results.map(x=>x.features.medianIatC);
@@ -56,6 +66,7 @@ export function evaluateReplicatedMeasurements(sessions){
    syntheticDeviationIndex:difference('experimentalDeviationIndex')
   }:null,
   confidenceInterval:null,causalMaintenanceEffect:null,structuralWear:null,mechanicalAgeEquivalentKm:null,
+  evidenceLevel:results.every(x=>x.source==='synthetic')?'synthetic_demonstration':'operator_assertions_only',
   verdict:comparable?'Descriptivo: la diferencia entre medianas NO prueba causalidad ni supera por sí sola un umbral inferencial':'Inconcluso: los ensayos no son comparables'
  };
 }
