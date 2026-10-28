@@ -47,10 +47,24 @@ function decodeMask(hex){
  return Array.from({length:32},(_,i)=>i+1).filter(p=>(bitmap & (1 << (32-p)))!==0).map(p=>'01'+p.toString(16).toUpperCase().padStart(2,'0'));
 }
 export function auditSerialTrace(session){
- if(session?.schema!=='ma00-local-serial-receipts-v1')return {
-  version:SERIAL_TRACE_VERSION,applies:false,internallyConsistent:null,
-  errors:[],independentlyAuthenticated:false,wearInferenceAllowed:false
- };
+ if(session?.schema!=='ma00-local-serial-receipts-v1'){
+  const looksSerial=Boolean(
+   session?.supportedPidMaskRawHex!==undefined||
+   session?.supportedPids!==undefined||
+   session?.plannedCycles!==undefined||
+   session?.expectedEventCount!==undefined||
+   session?.captureAborted!==undefined||
+   session?.events?.some(e=>e&&typeof e==='object'&&
+    (has(e,'rawResponseHex')||has(e,'rawFrameSizeBytes')))
+  );
+  if(looksSerial)return {
+   version:SERIAL_TRACE_VERSION,applies:true,internallyConsistent:false,
+   errors:['Formato serial MA00 faltante o manipulado: schema obligatorio'],
+   independentlyAuthenticated:false,wearInferenceAllowed:false
+  };
+  return {version:SERIAL_TRACE_VERSION,applies:false,internallyConsistent:null,
+   errors:[],independentlyAuthenticated:false,wearInferenceAllowed:false};
+ }
  const errors=[],add=m=>errors.push(m);
  const events=session.events;
  if(!Array.isArray(events)||events.length<1||events.length>20000){
