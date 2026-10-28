@@ -88,10 +88,9 @@ def fold_points(engines):
     return result
 
 
-def _noise_sensitive(model, train, held, *, seed, level):
+def _noise_sensitive(model, sensor_sds, held, *, seed, level):
     rng=random.Random(seed)
-    stds=weighted_sensor_stats(train)
-    sds={s["index"]:s["sd"] if s["span"]>CONST_RANGE else 0.0 for s in stds}
+    sds=sensor_sds
     predictions={}
     for uid, entries in sorted(held.items()):
         outputs=[]
@@ -106,10 +105,14 @@ def _noise_sensitive(model, train, held, *, seed, level):
 
 
 def _engine_errors(per_engine):
-    # Metric: one mean absolute error per engine, then mean across engines.
+    # Seeds are repeated perturbations of the SAME engine, not 5 new engines.
+    grouped=defaultdict(list)
+    for key,entries in per_engine.items():
+        uid=key[0] if isinstance(key,tuple) else key
+        grouped[uid].extend(entries)
     values=[]
     per_horizon=defaultdict(list)
-    for entries in per_engine.values():
+    for entries in grouped.values():
         if not entries:
             continue
         errors=[abs(p-y) for cycle,y,p in entries]
@@ -152,6 +155,8 @@ def analyze_train_only(text, *, strict_counts=False):
                 train_set={uid:engines[uid] for uid in train_ids}
                 held_set={uid:engines[uid] for uid in hold_ids}
                 train_checkpoints=samples(train_set)
+                raw_stats=weighted_sensor_stats(train_checkpoints)
+                sensor_sds={s["index"]:s["sd"] if s["span"]>CONST_RANGE and s["sd"]>CONST_RANGE else 0.0 for s in raw_stats}
                 model=fit_ridge(train_checkpoints,mode,alpha)
                 if set(model["trainEngineIds"]) & set(hold_ids):
                     raise AssertionError("Engine leakage into heldout fold")
@@ -159,7 +164,7 @@ def analyze_train_only(text, *, strict_counts=False):
                 for level in LEVELS:
                     # Multiple fixed-seed perturbations, no chance to tune against TEST.
                     for seed in (SEEDS if level else SEEDS[:1]):
-                        perturb=_noise_sensitive(model,train_checkpoints,held,
+                        perturb=_noise_sensitive(model,sensor_sds,held,
                                                  seed=seed+fold*1009,level=level)
                         for uid, entries in perturb.items():
                             level_predictions[level][(uid,seed)].extend(entries)
