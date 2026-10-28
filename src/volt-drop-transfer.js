@@ -91,11 +91,11 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    return;
   }
   if(b.dataset.holdout==="grade"&&!result){
-   let g;
+   let g,reasoningText="";
    try{
     const raw=$("holdout-load").value.trim();
     if(!raw)throw Error("Primero completá la predicción de la carga.");
-    const reasoningText=$("holdout-reasoning").value.trim();
+    reasoningText=$("holdout-reasoning").value.trim();
     if(!reasoningText)throw Error("Escribí una justificación para documentar la hipótesis; no se califica por su longitud.");
     const selected=root.querySelector("[name='holdout-falsifier']:checked");
     if(!selected)throw Error("Elegí también una observación falsadora.");
