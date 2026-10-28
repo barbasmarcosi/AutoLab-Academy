@@ -50,3 +50,16 @@ GitHub Actions solo habilita R8 empírico con [MA00 NASA mechanism once]. El job
 ## Ejecución empírica opt-in solicitada
 
 El código, las seis políticas de estrés, las semillas, la potencia de perturbación, los cinco folds y los cortes fijos ya quedaron en commits anteriores. La CI ha aprobado los tests Python/R8 y la compilación antes de solicitar esta corrida. Se activa una sola auditoría contra el ZIP original NASA previamente fijado por digest; se conservarán todos los resultados, incluso si contradicen la hipótesis de la fragilidad R6. No se procesará NASA TEST ni se modificará el modelo según el resultado.
+
+
+## R8.1 — Control de la regularización (prerregistro antes del segundo contraste oficial)
+
+Inspección de los metadatos del artefacto **anterior** de R6:
+https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40744309293/artifacts/12839324707
+El modelo combinado ciclo+sensores de R6 eligió **alpha=1.0 en CV sobre TRAIN**. R8 utilizó alpha=20.0 fijo. Por ello, el resultado de R8 no permite descartar el papel de la regularización en la fragilidad extrema de R6.
+
+**Se fija un control pareado con EXACTAMENTE los mismos motores TRAIN, cinco folds, tiempos 50/100/150, seis políticas de ruido, semillas y fracción 0.10**, comparando solamente α=1.0 (selección original R6 hecha con TRAIN) y α=20.0 (R8). No añadir valores de α después de mirar los errores y no comparar los dos valores como ajuste basado en TEST. El modelo permanece independiente de NASA FD001 TEST.
+
+Se informará todo el conjunto de seis políticas para AMBOS α y sus deltas respecto de la predicción limpia. Las diferencias entre α permiten analizar **sensibilidad a la regularización** en CV interna de TRAIN, pero no atribuir sin más causalidad a un sensor ni explicar la evaluación de último punto TEST de R6. Si la fragilidad persiste solo en R6, quedan pendientes otras diferencias: distribución de checkpoints, término de vida restante, protocolo de ruido y selección del punto de inferencia.
+
+La fuente oficial se ejecutará una sola vez, únicamente para TRAIN, con el marcador [MA00 NASA alpha-control once]. Si la fuente o las pruebas fallan, no se publicarán resultados numéricos inventados. No cambia ninguna inferencia física permitida.
