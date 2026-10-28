@@ -40,6 +40,7 @@ Lesson 1: **NOT ACCEPTED, provisional 8.5/10** (reviewed 2026-10-28; not a measu
 - Immutable objective decision snapshot plus ordered virtual readings, timestamps, final explanation, falsifier and human-review pending status persist in exported evidence. This timing is client-reported, not tamper-proof proctoring.
 - A 1.25× ratio is the **didactic** threshold for a dominant drop, not an OEM acceptability or repair threshold.
 - Falsification is scored **against the student's chosen final hypothesis**, not against the hidden fault key. Each of the three hypotheses has different contradictory/supporting observations, with distinct correct answer positions; changing the final hypothesis clears the prior falsifier choice.
+- On reopening the PWA, the next independent case is selected using the latest retained v2 case result (balanced → positive → return → balanced). Malformed/old rubric entries do not steer rotation. This reduces repetition, but is **not** a secure anti-cheating mechanism or a guarantee of unseen material.
 - Reading, guided practice, independent holdout and conceptual transfer counted separately.
 - Tests: pure scientific model, held-out scenarios, evidence semantics, offline cache, and Chromium/WebKit E2E.
 
