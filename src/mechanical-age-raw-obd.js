@@ -17,7 +17,21 @@ const sortedMedian=x=>{if(!x.length)return null;const a=[...x].sort((p,q)=>p-q),
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const id=x=>typeof x==='string'&&/^[A-Za-z0-9][\w.-]{2,79}$/.test(x);
 const named=x=>typeof x==='string'&&x.trim().length>=3&&x.length<=120;
-const time=x=>typeof x==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/.test(x)&&Number.isFinite(Date.parse(x));
+const time=x=>{
+ if(typeof x!=='string')return false;
+ const parts=/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.\d+)?(Z|[+-]\d\d:\d\d)$/.exec(x);
+ if(!parts)return false;
+ const [_,y,mo,day,h,mi,s,zone]=parts;
+ const year=Number(y),month=Number(mo),d=Number(day);
+ const leap=year%4===0&&(year%100!==0||year%400===0);
+ const maxDays=[31,leap?29:28,31,30,31,30,31,31,30,31,30,31];
+ if(month<1||month>12||d<1||d>maxDays[month-1]||Number(h)>23||Number(mi)>59||Number(s)>59)return false;
+ if(zone!=='Z'){
+  const zh=Number(zone.slice(1,3)),zm=Number(zone.slice(4,6));
+  if(zh>14||zm>59||(zh===14&&zm!==0))return false;
+ }
+ return Number.isFinite(Date.parse(x));
+};
 const medianDifference=(a,b)=>Number((b-a).toFixed(4));
 
 export function auditRawObdSession(session){
