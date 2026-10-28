@@ -7,6 +7,7 @@ import{lessonPractice,practiceProgress}from'./lesson-practice.js';
 import{transferCase,transferProgress}from'./lesson-transfer.js';
 import{inquiryProgress}from'./lesson-inquiry.js';
 import{VOLT_DROP_HOLDOUT_ID}from'./volt-drop-transfer.js';
+import{DTC_HOLDOUT_ID}from'./dtc-transfer.js';
 export const EVIDENCE_MODEL='lesson-evidence-structured-v1';
 export function lessonEvidence(progress,lessonId){
  const read=Boolean(progress?.notes?.['lesson-'+lessonId]);
@@ -22,7 +23,7 @@ export function lessonEvidence(progress,lessonId){
    passed:false,attempts:0};
  const linkedLab=practice?.kind==='linked'?{
   id:practice.caseId,status:p.status,attempts:p.attempts}:null;
- const holdout=lessonId==='volt-drop'?(()=>{const attempts=(Array.isArray(progress?.cases)?progress.cases:[]).filter(x=>x?.id===VOLT_DROP_HOLDOUT_ID);return {available:true,attempts:attempts.length,passed:attempts.some(x=>x.passed===true),firstRecordedAttemptPassed:attempts.length?attempts[0].passed===true:null};})():null;
+ const holdout=(lessonId==='volt-drop'||lessonId==='motor-data')?(()=>{const holdoutId=lessonId==='volt-drop'?VOLT_DROP_HOLDOUT_ID:DTC_HOLDOUT_ID;const attempts=(Array.isArray(progress?.cases)?progress.cases:[]).filter(x=>x?.id===holdoutId);return {available:true,attempts:attempts.length,passed:attempts.some(x=>x.passed===true),firstRecordedAttemptPassed:attempts.length?attempts[0].passed===true:null};})():null;
  const assessed=reasoning.available||lab.available||Boolean(holdout);
  const checks=[read,...(reasoning.available?[reasoning.passed]:[]),...(lab.available?[lab.passed]:[]),...(holdout?[holdout.passed]:[])];
  const documented=assessed&&checks.every(Boolean);
@@ -58,7 +59,7 @@ export function learningEvidenceOverview(progress,lessons,stages){
   if(found)return found;
   const e=byLesson.get(id);
   if(!e.read)return {lessonId:id,kind:'reading',label:'Estudiar la teoría y sus límites'};
-  if(id==='volt-drop'){
+  if(id==='volt-drop'||id==='motor-data'){
    if(!e.lab.passed)return {lessonId:id,kind:'embedded-lab',label:e.lab.attempts?'Repetir banco guiado':'Experimentar con voltímetro virtual'};
    if(!e.holdout.passed)return {lessonId:id,kind:'independent-holdout',label:e.holdout.attempts?'Revisar el caso independiente':'Resolver caso reservado sin ayudas'};
   }

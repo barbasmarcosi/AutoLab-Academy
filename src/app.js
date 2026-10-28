@@ -55,7 +55,8 @@ import{mountNumericBench}from'./numeric-inquiry.js';
 import{mountWaveInquiry}from'./waveform-inquiry.js';
 import{voltDropTheoryIllustration,mountVoltDropPractice,mountVoltDropBaseline}from'./volt-drop-lesson.js';
 import{mountVoltDropHoldout}from'./volt-drop-transfer.js';
-import{dtcTheoryIllustration,mountDtcGuided}from'./dtc-lesson.js';
+import{dtcTheoryIllustration,mountDtcGuided,mountDtcBaseline}from'./dtc-lesson.js';
+import{mountDtcHoldout}from'./dtc-transfer.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
 const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...powertrainLessons,...engineeringBridgeLessons,...inventorLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...powertrainQuestions,...engineeringBridgeQuestions,...inventorQuestions,...rotaryGeometryQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions,...ecuOptimizationQuestions,...ecuRobustQuestions,...rotaryApertureQuestions,...rotaryInverseQuestions];
@@ -723,7 +724,7 @@ function learn(){
 function lessonPracticeStatusText(id){
  const status=practiceProgress(data,id);
  const p=lessonPractice(id),virtual=['numeric-bench','wave-inquiry','volt-drop','dtc-guided'].includes(p?.page);
- if(id==='volt-drop'&&status.status==='passed'){
+ if((id==='volt-drop'||id==='motor-data')&&status.status==='passed'){
   const h=lessonEvidence(data,id).holdout;
   return h?.passed?'Banco guiado y caso independiente completados · evidencia digital, no competencia física':
    'Banco guiado completado · caso independiente '+(h?.attempts?'pendiente de aprobación':'sin resolver');
@@ -766,7 +767,7 @@ function lessonPracticePanel(l){
     button('Abrir banco como pantalla completa','nav','data-id="'+attr(p.page)+'"','alt')):
    '<p>Este ejercicio funciona en su banco especializado: el enlace abre el laboratorio real, donde se evalúan predicciones y evidencia.</p>'+
    button('Ir a la práctica correspondiente','nav','data-id="'+attr(p.page)+'"'))+
-  (l.id==='volt-drop'?'<div id="volt-holdout-host" class="reasoning-host" aria-label="Caso reservado de transferencia independiente"></div>':'')+
+  (l.id==='volt-drop'?'<div id="volt-holdout-host" class="reasoning-host" aria-label="Caso reservado de transferencia independiente"></div>':l.id==='motor-data'?'<div id="dtc-holdout-host" class="reasoning-host" aria-label="Investigación DTC independiente y reservada"></div>':'')+
   (l.id==='volt-drop'?reasoning:'')+inquiry+'</section>';
 }
 function lessonView(){
@@ -778,7 +779,7 @@ function lessonView(){
  '<article class="panel lesson-body"><p class="muted">Teoría: '+(data.notes['lesson-'+l.id]?'lectura registrada':'lectura pendiente')+
  '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>'+
  '. Razonamiento: <span id="lesson-theory-reasoning-status">'+esc(lessonReasoningStatusText(l.id))+'</span>. Ninguno acredita competencia física.</p>'+
- (l.id==='volt-drop'?'<div id="volt-baseline-host"></div>':'')+sections(allSections)+(l.id==='volt-drop'?voltDropTheoryIllustration():l.id==='motor-data'?dtcTheoryIllustration():'')+'</article>'+lessonPracticePanel(l)+
+ (l.id==='volt-drop'?'<div id="volt-baseline-host"></div>':l.id==='motor-data'?'<div id="dtc-baseline-host"></div>':'')+sections(allSections)+(l.id==='volt-drop'?voltDropTheoryIllustration():l.id==='motor-data'?dtcTheoryIllustration():'')+'</article>'+lessonPracticePanel(l)+
  '<article class="panel lesson-body">'+
  '<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+
  link(l.url,'Abrir fuente y lecturas relacionadas')+
@@ -1547,6 +1548,15 @@ if(page==='learn'&&selectedLesson){
  const lessonAtMount=selectedLesson;
  const baseline=document.getElementById('volt-baseline-host');
  if(baseline)mountVoltDropBaseline(baseline);
+ const dtcBaseline=document.getElementById('dtc-baseline-host');
+ if(dtcBaseline)mountDtcBaseline(dtcBaseline);
+ const dtcHoldout=document.getElementById('dtc-holdout-host');
+ if(dtcHoldout)mountDtcHoldout(dtcHoldout,{record:saveLabEntry,history:data.cases,onSaved:()=>{
+  if(page!=='learn'||selectedLesson!==lessonAtMount)return;
+  const status=document.getElementById('lesson-practice-status'),summary=document.getElementById('lesson-theory-practice-status');
+  if(status)status.textContent=lessonPracticeStatusText(lessonAtMount);
+  if(summary)summary.textContent=lessonPracticeStatusText(lessonAtMount);
+ }});
  const holdout=document.getElementById('volt-holdout-host');
  if(holdout)mountVoltDropHoldout(holdout,{record:saveLabEntry,history:data.cases,onSaved:()=>{
   if(page!=='learn'||selectedLesson!==lessonAtMount)return;
