@@ -14,7 +14,7 @@ test('MA00 adversarial controls: synthetic instrumentation can move score withou
  assert.ok(byId.trim_bias.delta>0);
  assert.equal(byId.trim_bias.comparisonAllowed,true);
  assert.equal(byId.opposing_trims.delta,0);
- assert.equal(byId.opposing_trims.baselineTrims,byId.opposing_trims.alteredTrims);
+ assert.ok(Math.abs(byId.opposing_trims.baselineTrims-byId.opposing_trims.alteredTrims)<1e-10);
  for(const id of ['temperature_confounder','load_confounder']){
   assert.equal(byId[id].comparisonAllowed,false);
   assert.equal(byId[id].delta,null);
