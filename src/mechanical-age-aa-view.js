@@ -13,7 +13,9 @@ export function mountRawAA(root){
  function output(r){
   const heads=r.comparable?'<p><strong>Ventanas documentalmente compatibles</strong> (no verificación metrológica)</p>':'<p><strong>Comparación bloqueada</strong>: '+esc(r.blockers.join('; '))+'</p>';
   const rows=r.observedChanges?Object.entries(r.observedChanges).map(([pid,c])=>'<tr><td>'+esc(pid)+'</td><td>'+esc(c.unit)+'</td><td>'+num(c.firstMedian)+'</td><td>'+num(c.lastMedian)+'</td><td>'+num(c.lastMinusFirst)+'</td></tr>').join(''):'';
-  return '<section class="stack"><h3>Evaluación A–A</h3>'+heads
+  const serial=r.sessionAudits.filter(a=>a.traceIntegrity?.applies);
+  const provenance=serial.length?'<p>Expedientes seriales: '+serial.length+'; integridad interna del registro: '+(serial.every(a=>a.traceIntegrity.internallyConsistent)?'consistente':'rechazada')+'. <strong>Autenticidad del sensor y calibración: no verificadas.</strong></p>':'';
+  return '<section class="stack"><h3>Evaluación A–A</h3>'+heads+provenance
    +'<p>Sesiones independientes declaradas: '+r.sessionCount+'. Unidad de análisis: <strong>sesión</strong>, no respuesta individual. Evidencia física o sincronización ECU: <strong>no verificada</strong>.</p>'
    +(rows?'<table><thead><tr><th>PID</th><th>Unidad</th><th>Mediana A1</th><th>Mediana A2</th><th>Δ</th></tr></thead><tbody>'+rows+'</tbody></table>':'')
    +'<p><strong>Edad mecánica, score de salud, desgaste y causalidad:</strong> no determinados.</p>'
