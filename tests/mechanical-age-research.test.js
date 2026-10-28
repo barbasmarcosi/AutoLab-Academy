@@ -57,6 +57,8 @@ test('MA v0: protocol rejects off-state snapshots and refuses non comparable pai
  const hot=copy(before);hot.samples.forEach(s=>s.ectC+=30);
  assert.equal(evaluateMechanicalSnapshot(hot).status,'inconclusive');
  assert.equal(evaluateMechanicalSnapshot(hot).deviationIndex,null);
+ const different=copy(after);different.vehicleAlias='another-car';
+ assert.match(compareMechanicalSnapshots(before,different).blockers.join(' '),/mismo vehículo/);
  const wrong=copy(after);wrong.engineFamily='other-v6';
  const p=compareMechanicalSnapshots(before,wrong);
  assert.equal(p.comparable,false);
