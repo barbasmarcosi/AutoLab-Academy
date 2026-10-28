@@ -1544,7 +1544,7 @@ function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?l
 if(page==='learn'&&selectedLesson){
  const lessonAtMount=selectedLesson;
  const holdout=document.getElementById('volt-holdout-host');
- if(holdout)mountVoltDropHoldout(holdout,{record:saveLabEntry,onSaved:()=>{
+ if(holdout)mountVoltDropHoldout(holdout,{record:saveLabEntry,history:data.cases,onSaved:()=>{
   if(page!=='learn'||selectedLesson!==lessonAtMount)return;
   const status=document.getElementById('lesson-practice-status'),summary=document.getElementById('lesson-theory-practice-status');
   if(status)status.textContent=lessonPracticeStatusText(lessonAtMount);
