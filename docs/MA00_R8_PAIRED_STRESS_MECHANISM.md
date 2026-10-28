@@ -63,3 +63,7 @@ El modelo combinado ciclo+sensores de R6 eligió **alpha=1.0 en CV sobre TRAIN**
 Se informará todo el conjunto de seis políticas para AMBOS α y sus deltas respecto de la predicción limpia. Las diferencias entre α permiten analizar **sensibilidad a la regularización** en CV interna de TRAIN, pero no atribuir sin más causalidad a un sensor ni explicar la evaluación de último punto TEST de R6. Si la fragilidad persiste solo en R6, quedan pendientes otras diferencias: distribución de checkpoints, término de vida restante, protocolo de ruido y selección del punto de inferencia.
 
 La fuente oficial se ejecutará una sola vez, únicamente para TRAIN, con el marcador [MA00 NASA alpha-control once]. Si la fuente o las pruebas fallan, no se publicarán resultados numéricos inventados. No cambia ninguna inferencia física permitida.
+
+## Solicitud de contraste α=1 frente a α=20 sobre el ZIP original
+
+Los tests de grupo, repetibilidad, pares de perturbación y CLI ya aprobaron en la CI. Se habilita una única ejecución empírica con los dos valores de regularización fijados de antemano y el mismo conjunto TRAIN de motores simulados. Los resultados serán publicados íntegros incluso si no explican R6; **no reabrir el archivo TEST para decidir nuevas regularizaciones**.
