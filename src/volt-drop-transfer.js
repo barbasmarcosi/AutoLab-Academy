@@ -58,12 +58,12 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    "<label for='holdout-probe'>Puntas de tu voltímetro</label><select id='holdout-probe' class='field' "+(result?"disabled":"")+"><option value='positive'>A–B: cable positivo</option><option value='return'>D–E: retorno</option><option value='load'>B–D: consumidor</option></select>"+
    "<button type='button' class='button alt' data-holdout='probe' "+(result?"disabled":"")+">Medir este tramo</button>"+
    "<p role='status' aria-live='polite' id='holdout-measured'>"+esc(feedback||"Todavía no mediste ningún tramo.")+"</p>"+
-   "<p class='muted small'>Mediciones registradas: "+[...measurements].map(k=>esc(k)).join(", ")+".</p>"+
+   "<p class='muted small' id='holdout-history'>Mediciones registradas: "+[...measurements].map(k=>esc(k)).join(", ")+".</p>"+
    "<label for='holdout-load'>Calculá la tensión del consumidor usando la fuente y ambas caídas (V)</label><input class='field' type='text' inputmode='decimal' id='holdout-load' placeholder='Por ejemplo: 9,45' "+(result?"disabled":"")+">"+
    "<label for='holdout-cause'>¿En qué tramo se concentra la mayor caída?</label><select id='holdout-cause' class='field' "+(result?"disabled":"")+"><option value=''>Elegí a partir de las medidas</option><option value='positive'>Positivo</option><option value='return'>Retorno</option><option value='balanced'>Ambas caídas similares</option></select>"+
    "<fieldset class='panel'><legend>¿Qué observación refutaría la localización que elegiste?</legend>"+
    FALSIFIERS.map((o,i)=>"<label class='option'><input type='radio' name='holdout-falsifier' value='"+i+"' "+(result?"disabled":"")+">"+esc(o)+"</label>").join("")+"</fieldset>"+
-   (result?"<div class='result' role='status' aria-live='polite'><strong>Resultado objetivo del intento "+attempts+" de esta sesión: "+result.score+"/100 · "+(result.passed?"criterios cumplidos":"revisar evidencia")+"</strong>"+
+   (result?"<div class='result' id='holdout-result' role='status' aria-live='polite' tabindex='-1'><strong>Resultado objetivo del intento "+attempts+" de esta sesión: "+result.score+"/100 · "+(result.passed?"criterios cumplidos":"revisar evidencia")+"</strong>"+
     "<p>Cálculo de carga: "+(result.numeric?"correcto":"incorrecto")+". Tu valor: "+fmt(result.selected.loadPrediction)+" V · esperado: "+fmt(result.expected.loadV)+" V.</p>"+
     "<p>Localización: "+(result.causal?"correcta":"incorrecta")+". Elegiste "+esc(labels[result.selected.diagnosis])+"; según las medidas, "+esc(labels[result.expected.diagnosis])+".</p>"+
     "<p>Refutación: "+(result.falsified?"correcta":"incorrecta")+". "+esc(FALSIFIERS[0])+"</p>"+
@@ -80,9 +80,8 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    const probe=$("holdout-probe").value,value=heldOutVoltageReading(VOLT_DROP_HOLDOUT_CASES[index].id,probe);
    measurements.add(probe);
    feedback="Medición entre los extremos de "+(probe==="positive"?"positivo":probe==="return"?"retorno":"consumidor")+": "+fmt(value)+" V (bajo carga).";
-   const save={load:$("holdout-load").value,cause:$("holdout-cause").value,falsifier:root.querySelector("[name='holdout-falsifier']:checked")?.value};
-   render();$("holdout-load").value=save.load;$("holdout-cause").value=save.cause;
-   if(save.falsifier!==undefined)root.querySelector("[name='holdout-falsifier'][value='"+save.falsifier+"']").checked=true;
+   $("holdout-measured").textContent=feedback;
+   $("holdout-history").textContent="Mediciones registradas: "+[...measurements].join(", ")+".";
    return;
   }
   if(b.dataset.holdout==="grade"&&!result){
@@ -100,8 +99,8 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
     await record({id:VOLT_DROP_HOLDOUT_ID,passed:g.passed,score:g.score,at:new Date().toISOString(),attemptInSession:attempts,
      hypothesis:"Causa localizada: "+g.selected.diagnosis,conclusion:"Evaluación objetiva "+g.score+"/100",
      used:["dos-mediciones-bajo-carga","prediccion-numerica","falsacion"],reasoning:"Texto libre no calificado",
-     report:JSON.stringify({caseId:g.caseId,selected:g.selected,expected:g.expected,firstAttempt:attempts===1})});
-    result=g;feedback="";render();onSaved(g);
+     report:JSON.stringify({caseId:g.caseId,selected:g.selected,expected:g.expected,firstInThisSession:attempts===1})});
+    result=g;feedback="";render();$("holdout-result")?.focus({preventScroll:true});onSaved(g);
    }catch(e){attempts--;$("holdout-status").textContent="No se confirmó el guardado: "+String(e.message||e);}
    finally{saving=false;}
    return;
