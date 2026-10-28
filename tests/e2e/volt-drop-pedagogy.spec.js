@@ -73,9 +73,7 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await expect(page.locator("#lesson-theory-practice-status")).toContainText("caso independiente completados");
  await page.reload();
  await page.locator('nav.nav button[data-id="learn"]').click();
- await page.locator('article.lesson-card').filter({hasText:"La caída de tensión cuenta la historia"}).getByRole("button",{name:"Revisar contenido"}).click().catch(async()=>{
-   await page.locator('article.lesson-card').filter({hasText:"La caída de tensión cuenta la historia"}).getByRole("button",{name:"Estudiar"}).click();
- });
+ await page.locator('button[data-action="lesson"][data-id="volt-drop"]').click();
  await expect(page.locator("#lesson-theory-practice-status")).toContainText("caso independiente completados");
 });
 
