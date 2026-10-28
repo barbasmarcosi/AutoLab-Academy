@@ -129,3 +129,15 @@ El registro de estudio futuro deberá guardar, además de lecturas: \`anonymized
 ## Puerta documental MA00 v1
 
 Se agregó src/mechanical-age-evidence.js: las capturas externas sin metadatos documentados de sesión, reloj, adaptador, estado de lazo, A/C, ventilación, carga y ambiente **no se declaran comparables**. Una declaración completa es solo información aportada por el operador, no evidencia de calibración o autenticidad. El score sintético nunca se aplica a datos externos. Las fechas de captura con calendario imposible o sin zona horaria se rechazan; un replay con timestamps alterados no cuenta como sesión independiente. Ver [protocolo detallado](MECHANICAL_AGE_ACQUISITION_PROTOCOL_V1.md). Las evaluaciones por fila no se consideran unidades estadísticas independientes y el OBD interrogado secuencialmente no acredita sincronía entre PIDs.
+
+
+## Etapa R2 — Captura por PID y repetibilidad A–A (2026-10-28)
+
+Se incorporó un formato de recibos de **cada PID individual**, distinto de las fotografías v0 que asignaban un mismo timestamp a múltiples señales. [Diseño, ejemplos, código y límites de la captura](MECHANICAL_AGE_RAW_CAPTURE_AA_V1.md).
+
+- src/mechanical-age-raw-obd.js: auditoría de eventos individuales y comparaciones A–A de 2 a 12 sesiones sin intervención. La diferencia de medianas no es un índice de salud ni demuestra independencia estadística.
+- tools/ma00-capture-stdin.mjs: bridge receptor NDJSON; registra **marcas al recibir líneas en Node**, no tiempos ECU ni siquiera timestamps exactos de la interfaz OBD. El soporte de hardware directo sigue pendiente.
+- src/mechanical-age-aa-view.js: pantalla experimental sintética y lectura de JSON de sesiones no verificadas.
+- tests/mechanical-age-raw-obd.test.js, tests/mechanical-age-bridge.test.js, tests/mechanical-age-aa-view.test.js y pruebas E2E dedicadas, incluidas en la CI.
+
+**Limitación cardinal:** ni un host clock ni datos de buena cobertura proporcionan la «verdad terreno» de desgaste. En un estudio con solo 2 sesiones no hay cuantificación fiable de repetibilidad a largo plazo ni de la incertidumbre poblacional. La futura conexión al hardware requiere una librería/driver compatible y medir tiempos de petición/respuesta en la interfaz real, antes de interpretar transitorios de RPM o lambda. El pipeline no despliega producción ni conecta actuadores.
