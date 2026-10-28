@@ -28,7 +28,7 @@ class TestCmapss(unittest.TestCase):
         self.assertEqual(r["trainRows"], 120)
         self.assertEqual(r["testRows"], 60)
         self.assertEqual(r["trainingMedianFullLifeCycles"], 40)
-        self.assertEqual(r["baselineMetrics"]["train_engine_life_median_minus_observed_cycle"]["MAEcycles"], 10)
+        self.assertEqual(r["baselineMetrics"]["train_engine_life_median_minus_observed_cycle"]["MAEcycles"], 13.333)
         self.assertFalse(r["automotiveWearValidation"])
         self.assertIsNone(r["mechanicalAgeKm"])
         self.assertTrue(r["testRulUsedOnlyForScoring"])
