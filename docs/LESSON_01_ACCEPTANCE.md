@@ -37,3 +37,19 @@ Three scenarios are no longer sufficient to discourage memorization. The indepen
 - Only add the marker when code has stabilized, then do not push while cross-browser CI runs unless correcting a confirmed failure.
 
 - E2E must also ensure a redundant probe click leaves one and only one stored measurement, never fake additional evidence.
+
+## Design-quality review after full matrix: 2026-10-28 — 9.1 / 10 (INTERNAL)
+
+**Exactly validated code:** `8a55ee6915bafc5284c1856fd30d99905bc8a3e0`; [Actions run 40736958265](https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40736958265) finished **SUCCESS** with `npm run build`, focused Chromium and the entire configured Chromium/WebKit/mobile-WebKit E2E matrix. Both Pages artifact upload and deploy jobs were skipped as intended for PR.
+
+| Criterion | Earned / maximum | Grounded audit |
+|---|---:|---|
+| DC model, Ohm/Kirchhoff, polarities, limitations | 1.9 / 2.0 | Unit property tests for node differences; nine independently recomputed transfer cases; ideal-source scope explicitly limited |
+| Prerequisites, cold check, worked calculations, remediation | 1.8 / 2.0 | Three diagnostic misconceptions with distractor-specific feedback, two contrasted solved examples |
+| Variable-controlled practice and prediction-before-reading | 1.4 / 1.5 | Guided resistor changes, exact probes, gated evidence, and measurements invalidated after edits |
+| Independent transfer, hypothesis revisions, falsification | 1.4 / 1.5 | Nine reserved varied cases, first-probe commitment, no direct load-voltage disclosure, falsifiers bound to selected diagnosis, qualitative pending |
+| Accessible/offline/responsive interface | 1.2 / 1.5 | Focused axe and mobile test, all three browser projects pass; manual assistive-technology usability still unverified |
+| Provenance, persistence, rubric versions and regression coverage | 1.4 / 1.5 | Distinct guided/holdout evidence, historical v1/v2 handling, browser persistence checks, full exact-SHA CI |
+| **Internal design assessment** | **9.1 / 10** | **Gate met for continuing editorial work to lesson 02; no critical defects identified by configured automated tests** |
+
+**Narrow meaning:** This is a reasoned internal *design and simulation quality* assessment, **not** a demonstrated learner-effectiveness score, physical hands-on qualification, or independent human certification. Retention study with novices, qualitative written reasoning review and supervised physical transfer are still **pending**, so learner-mastery or physical-competence claims remain prohibited. A regression in subsequent commits reopens this gate.
