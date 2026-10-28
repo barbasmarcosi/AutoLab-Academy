@@ -18,6 +18,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Mechanical age unit and PWA offline tests
         run: node --test tests/mechanical-age-research.test.js tests/service-worker.test.js
+      - name: Verify source dataset audit with Python standard library
+        run: python3 -m unittest tests.science.test_mechanical_age_dataset
       - name: Full unit tests and static checks
         run: npm run build
       - name: Build independent preview bundle (without publishing)
