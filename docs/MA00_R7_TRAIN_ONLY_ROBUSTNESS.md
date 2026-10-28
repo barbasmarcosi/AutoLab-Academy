@@ -39,3 +39,7 @@ Auditoría original opt-in, solo agregados:
     python3 tools/audit_cmapss_robustness_r7.py archivo-nasa.zip > informe-r7.json
 
 La ejecución original se activa SOLO con el marcador de commit [MA00 NASA robustness once]. El código fuente, ensayos, parámetros y semillas quedaron fijados en esta rama antes de la corrida. Sin merge ni despliegue de producción.
+
+## Ejecución empírica única — protocolo congelado
+
+La CI ya validó los controles de formato e independencia por motor y la invocación CLI. Este commit habilita una sola auditoría sobre el ZIP NASA previamente fijado por SHA-256. **No se cambiarán grillas, semillas ni resultados según los errores obtenidos**; los resultados se publicarán aunque no respalden ninguna mejora. La ejecución se limita a TRAIN y genera agregados sin datos individuales.
