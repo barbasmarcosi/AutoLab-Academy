@@ -110,7 +110,7 @@ const shell=[
  "<h3>3. Verificá que comprendiste</h3><p>Corregí cada pregunta inmediatamente. Podés reintentar; la explicación muestra tu elección, la respuesta esperada y el motivo. No se califica la longitud de textos.</p>",
  choices,
  "<div class='panel stack'><h3>4. Guardá evidencia de este banco</h3>",
- "<p>Para registrar esta práctica virtual debés responder correctamente las tres preguntas, comparar los dos tramos, modificar un parámetro y diagnosticar la condición activa. Esto no acredita competencia física ni garantiza transferencia a otro caso.</p>",
+ "<p>Para registrar esta práctica virtual debés responder correctamente las tres preguntas, medir positivo y retorno con predicciones razonables (diferencia ≤ 0,15 V), modificar un parámetro y diagnosticar la condición activa. Podés repetir sin penalización: es una evaluación formativa, no un examen independiente. No acredita competencia física ni garantiza transferencia.</p>",
  "<button type='button' id='volt-save' class='button' disabled>Guardar práctica virtual</button><p id='volt-save-status' role='status' aria-live='polite'>Todavía faltan comprobaciones.</p></div>",
  "</div>"
 ].join("");
@@ -124,11 +124,12 @@ export function mountVoltDropPractice(root,{record,onSaved=()=>{}}={}){
  const $=id=>root.querySelector("#"+id);
  const read=()=>voltageDropModel({positiveOhm:Number($("volt-positive").value),returnOhm:Number($("volt-return").value),
   loadOhm:Number($("volt-load").value),energized:$("volt-power").value==="on"});
- const status=()=>{const ready=changed&&diagnosisPassed&&passedChecks.size===VOLT_DROP_CHECKS.length&&measurements.has("positive")&&measurements.has("return");
+ const status=()=>{const accurate=["positive","return"].every(k=>measurements.has(k)&&measurements.get(k).error<=0.15);
+  const ready=changed&&diagnosisPassed&&passedChecks.size===VOLT_DROP_CHECKS.length&&accurate;
   $("volt-save").disabled=!ready||recorded||saving;
   if(!recorded&&!saving)$("volt-save-status").textContent=ready?"Banco virtual completado. Podés guardar evidencia.":"Pendientes: "+[
    !changed?"variar un parámetro":null,!measurements.has("positive")||!measurements.has("return")?"medir positivo y retorno":null,
-   !diagnosisPassed?"diagnóstico correcto":null,passedChecks.size!==VOLT_DROP_CHECKS.length?"preguntas correctas "+passedChecks.size+"/"+VOLT_DROP_CHECKS.length:null].filter(Boolean).join("; ")+".";
+   !diagnosisPassed?"diagnóstico correcto":null,!accurate?"predicciones verificadas de positivo y retorno (± 0,15 V)":null,passedChecks.size!==VOLT_DROP_CHECKS.length?"preguntas correctas "+passedChecks.size+"/"+VOLT_DROP_CHECKS.length:null].filter(Boolean).join("; ")+".";
  };
  const probes={
   positive:{red:[208,60],black:[550,60],label:"A–B: cable positivo"},
@@ -224,7 +225,7 @@ export function mountVoltDropPractice(root,{record,onSaved=()=>{}}={}){
    try{const m=read();
     await record({id:VOLT_DROP_CASE_ID,at:new Date().toISOString(),score:100,passed:true,
      hypothesis:"Tramo de mayor caída bajo la misma corriente",conclusion:"Positivo "+fmt(m.positiveV)+" V; retorno "+fmt(m.returnV)+" V.",
-     used:["modelo-resistivo-lv","variacion-parametrica","medicion-predicha-dos-tramos","tres-checks-correctos","diagnostico-estructurado"],
+     used:["modelo-resistivo-lv","variacion-parametrica","medicion-predicha-dos-tramos-tolerancia-015v","tres-checks-correctos","diagnostico-estructurado"],
      reasoning:"Comparación de caídas de tensión de un circuito serie sintético; no hay evaluación de competencia física.",
      report:"Modelo DC ideal: fuente="+m.sourceV+" V, corriente="+m.currentA+" A, Rpos="+m.positiveOhm+" Ω, Rret="+m.returnOhm+" Ω, Rcarga="+m.loadOhm+" Ω."});
     recorded=true;$("volt-save-status").textContent="Práctica virtual guardada. La competencia física y el razonamiento libre siguen sin evaluar.";onSaved();
