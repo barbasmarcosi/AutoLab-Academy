@@ -76,7 +76,7 @@ export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diag
 }
 export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
  if(!root||typeof record!=="function")throw Error("Falta el guardador de evidencia");
- let index=0,measurements=new Set(),prior=null,result=null,saving=false,attempts=0,feedback="",learnerReasoning="";
+ let index=0,measurements=new Set(),prior=null,frozenAt=null,readingTrail=[],result=null,saving=false,attempts=0,feedback="",learnerReasoning="";
  const $=id=>root.querySelector("#"+id);
  const render=()=>{
   const scenario=VOLT_DROP_HOLDOUT_CASES[index];
@@ -156,7 +156,7 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
     prior=freezeVoltageDropHypothesis({caseId:VOLT_DROP_HOLDOUT_CASES[index].id,
      hypothesis:$("holdout-initial").value,prediction:$("holdout-expected").value,
      firstProbe:$("holdout-first").value,confidence:$("holdout-confidence").value});
-    feedback="";render();$("holdout-probe")?.focus({preventScroll:true});
+    frozenAt=new Date().toISOString();feedback="";render();$("holdout-probe")?.focus({preventScroll:true});
    }catch(e){$("holdout-status").textContent="Revisá el compromiso inicial: "+String(e.message);}
    return;
   }
@@ -166,6 +166,7 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    }
    const probe=$("holdout-probe").value,value=heldOutVoltageReading(VOLT_DROP_HOLDOUT_CASES[index].id,probe);
    measurements.add(probe);
+   readingTrail.push({probe,volts:value,recordedAt:new Date().toISOString()});
    feedback="Medición entre los extremos de "+(probe==="positive"?"positivo":probe==="return"?"retorno":"consumidor")+": "+fmt(value)+" V (bajo carga).";
    $("holdout-measured").textContent=feedback;
    $("holdout-history").textContent="Mediciones registradas: "+[...measurements].join(", ")+".";
@@ -190,8 +191,8 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
      hypothesis:"Causa localizada: "+g.selected.diagnosis,conclusion:"Evaluación objetiva "+g.score+"/100",
      used:["hipotesis-y-plan-congelados","dos-mediciones-bajo-carga","prediccion-numerica","revision-o-sostenimiento","falsacion","argumento-documentado-sin-nota"],
      reasoning:reasoningText,
-     report:JSON.stringify({caseId:g.caseId,initial:g.prior,revision:g.evolution,
-      measuredInOrder:[...measurements],selected:g.selected,expected:g.expected,
+     report:JSON.stringify({caseId:g.caseId,initial:{...g.prior,frozenAt},revision:g.evolution,
+      measuredInOrder:[...measurements],measurementTrail:readingTrail,selected:g.selected,expected:g.expected,
       firstInThisSession:attempts===1,qualitativeReview:"pending",reasoning:reasoningText})});
     learnerReasoning=reasoningText;result=g;feedback="";render();$("holdout-result")?.focus({preventScroll:true});onSaved(g);
    }catch(e){attempts--;$("holdout-status").textContent="No se confirmó el guardado: "+String(e.message||e);}
@@ -199,7 +200,7 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    return;
   }
   if(b.dataset.holdout==="retry"&&result){
-   index=(index+1)%VOLT_DROP_HOLDOUT_CASES.length;measurements=new Set();prior=null;result=null;feedback="";learnerReasoning="";render();
+   index=(index+1)%VOLT_DROP_HOLDOUT_CASES.length;measurements=new Set();prior=null;frozenAt=null;readingTrail=[];result=null;feedback="";learnerReasoning="";render();
   }
  });
  render();
