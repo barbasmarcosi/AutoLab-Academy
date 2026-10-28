@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import math
 import statistics
@@ -29,23 +30,34 @@ def unpack_fd001(archive: str | Path):
     data = archive.read_bytes()
     blob = hashlib.sha256(data).hexdigest()
     result = {}
-    with zipfile.ZipFile(archive, "r") as z:
-        info = z.infolist()
-        if len(info) > 50 or sum(x.file_size for x in info) > MAX_UNCOMPRESSED_BYTES:
-            raise ValueError("Archive contents too large")
-        for member in info:
-            # Ignore other FD00x subsets and folders; never extract to filesystem.
-            basename = Path(member.filename).name
-            if basename not in REQUIRED:
+    observed_names = []
+    def visit(z, depth):
+        members = z.infolist()
+        if len(members) > 65 or sum(m.file_size for m in members) > MAX_UNCOMPRESSED_BYTES:
+            raise ValueError("NASA archive member or byte limit exceeded")
+        for member in members:
+            name = Path(member.filename).name
+            observed_names.append(name[:120])
+            if member.is_dir():
                 continue
-            if member.is_dir() or member.file_size > 15_000_000:
-                raise ValueError("Expected NASA text file is invalid")
-            if basename in result:
-                raise ValueError("Duplicated NASA input within archive")
-            with z.open(member) as stream:
-                result[basename] = stream.read().decode("ascii")
+            if name in REQUIRED:
+                if member.file_size > 15_000_000 or name in result:
+                    raise ValueError("Oversize or duplicate NASA FD001 text member")
+                with z.open(member) as stream:
+                    result[name] = stream.read().decode("ascii")
+            elif name.lower().endswith(".zip") and depth == 0:
+                if member.file_size > MAX_ZIP_BYTES:
+                    raise ValueError("NASA nested ZIP too large")
+                with z.open(member) as stream:
+                    nested = stream.read()
+                with zipfile.ZipFile(io.BytesIO(nested), "r") as inner:
+                    visit(inner, 1)
+    with zipfile.ZipFile(archive, "r") as z:
+        visit(z, 0)
     if set(result) != set(REQUIRED):
-        raise ValueError("NASA FD001 train/test/RUL members not found")
+        # Members only, never raw dataset records or private IDs in failure logs.
+        raise ValueError("NASA FD001 members not found. Archive names: " +
+                         ", ".join(sorted(set(observed_names))[:24]))
     return blob, result
 
 
