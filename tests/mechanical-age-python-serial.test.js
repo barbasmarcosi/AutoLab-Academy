@@ -18,13 +18,13 @@ test('MA00 Python physical-driver output round-trips to offline JavaScript witho
  assert.equal(original.source,'provided_obd_unverified');
  assert.equal(original.instrumentClaims.ecuAcquisitionTimestampKnown,false);
  assert.equal(original.instrumentClaims.testOnlyFakeTransport,true);
- assert.equal(original.events.length,192);
+ assert.equal(original.events.length,224);
  assert.equal(original.plannedCycles,32);
- assert.equal(original.expectedEventCount,192);
+ assert.equal(original.expectedEventCount,224);
  const trace=auditSerialTrace(original);
  assert.equal(trace.applies,true);
  assert.equal(trace.internallyConsistent,true,JSON.stringify(trace.errors));
- assert.equal(trace.expectedEventCount,192);
+ assert.equal(trace.expectedEventCount,224);
  assert.equal(trace.independentlyAuthenticated,false);
  assert.equal(trace.wearInferenceAllowed,false);
  const report=auditRawObdSession(original);
@@ -84,7 +84,7 @@ test('MA00 fake transport is never independent empirical proof even if fields ar
 test('MA00 a coherent aborted raw serial frame remains auditable but unusable for A-A',()=>{
  const a=fixture(0);
  // Retain only a failed last packet, preserving a truncated original frame.
- const e=a.events[191];
+ const e=a.events[223];
  e.status='timeout';delete e.value;e.rawResponseHex='343130433141';
  e.rawFrameSizeBytes=6;
  a.captureAborted=true;
@@ -99,4 +99,32 @@ test('MA00 a coherent aborted raw serial frame remains auditable but unusable fo
  const study=evaluateAAWithoutService([a,b]);
  assert.equal(study.comparable,false);
  assert.match(study.blockers.join(' '),/Captura interrumpida/);
+});
+
+
+test('MA00 fuel-control transitions are not wear and veto serial A-A even when operator claims closed loop',()=>{
+ const a=fixture(0), b=fixture(1);
+ for(const s of [a,b])s.conditions={intervention:'none',fuelControl:'closed_loop_observed',
+  ac:'off_observed',coolingFan:'stable_observed',electricalLoads:'stable_observed',ambientC:20};
+ // Use RAW bytes and matching decoded status to model an internally consistent
+ // temporary open loop excursion; no software tampering is claimed.
+ b.events[7].rawResponseHex=Buffer.from('41030100\r>','ascii').toString('hex').toUpperCase();
+ b.events[7].rawFrameSizeBytes=9;
+ b.events[7].value=1;
+ b.events[7].fuelSystem2Status=0;
+ assert.equal(auditSerialTrace(b).internallyConsistent,true);
+ const result=evaluateAAWithoutService([a,b]);
+ assert.equal(result.comparable,false);
+ assert.match(result.blockers.join(' '),/Lazo cerrado no corroborado/);
+ assert.equal(result.observedChanges,null);
+ assert.equal(result.mechanicalAgeKm,null);
+});
+test('MA00 rejects duplicate or rearranged serial PID polls even with self-consistent bytes',()=>{
+ const s=fixture();
+ s.events[1]=structuredClone(s.events[0]);
+ s.events[1].requestAtMs=s.events[1].receivedAtMs;
+ const trace=auditSerialTrace(s);
+ assert.equal(trace.internallyConsistent,false);
+ assert.match(trace.errors.join(' '),/Orden de consulta PID/);
+ assert.throws(()=>auditRawObdSession(s),/Traza serial inconsistente/);
 });
