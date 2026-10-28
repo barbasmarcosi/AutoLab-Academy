@@ -6,12 +6,12 @@
 import{voltageDropModel}from"./volt-drop-lesson.js";
 export const VOLT_DROP_HOLDOUT_ID="lab-volt-drop-holdout-v1";
 export const VOLT_DROP_HOLDOUT_CASES=Object.freeze([
+ Object.freeze({id:"balanced",story:"Un circuito didáctico de 12 V alimenta una carga con tensión inferior a la de la fuente. No conocemos las pérdidas de sus conductores. Medí ambos tramos y decidí si alguno concentra claramente la caída o si los resultados obligan a otra interpretación.",
+  positiveOhm:0.16,returnOhm:0.15,loadOhm:2.7}),
  Object.freeze({id:"positive",story:"Un consumidor de 12 V funciona débilmente en un banco aislado. La tensión de fuente virtual se mantiene en 12,00 V. Se desconoce en qué tramo aparece la pérdida dominante.",
   positiveOhm:0.62,returnOhm:0.06,loadOhm:2.5}),
  Object.freeze({id:"return",story:"En otro equipo didáctico de 12 V la carga recibe menos tensión de lo esperado. La fuente ideal sigue estable. No disponés de las resistencias ocultas ni de una pieza identificada como culpable.",
-  positiveOhm:0.07,returnOhm:0.52,loadOhm:2.8}),
- Object.freeze({id:"balanced",story:"Un tercer circuito de 12 V tiene pérdidas en ambos tramos. Una caída similar en positivo y retorno no demuestra que estén sanos; debés decidir si alguno domina con evidencia.",
-  positiveOhm:0.16,returnOhm:0.15,loadOhm:2.7})
+  positiveOhm:0.07,returnOhm:0.52,loadOhm:2.8})
 ]);
 const FALSIFIERS=Object.freeze([
  "Medir poca caída en el tramo sospechado y una caída dominante en el otro bajo la misma carga.",
