@@ -32,6 +32,7 @@ jobs:
           python3 -m unittest discover -s tests/science -p 'test_ma00_levin_longitudinal.py'
           python3 -m unittest discover -s tests/science -p 'test_ma00_cmapss_fd001.py'
           python3 -m unittest discover -s tests/science -p 'test_ma00_cmapss_sensors.py'
+          python3 tools/benchmark_cmapss_sensors.py --help >/dev/null
       - name: Regime overlap negative controls (no real source download)
         run: node --test tests/mechanical-age-regime-overlap.test.js
       - name: Full unit tests and static checks
