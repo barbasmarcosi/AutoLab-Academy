@@ -54,8 +54,8 @@ export function auditSerialTrace(session){
    session?.plannedCycles!==undefined||
    session?.expectedEventCount!==undefined||
    session?.captureAborted!==undefined||
-   session?.events?.some(e=>e&&typeof e==='object'&&
-    (has(e,'rawResponseHex')||has(e,'rawFrameSizeBytes')))
+   (Array.isArray(session?.events)&&session.events.some(e=>e&&typeof e==='object'&&
+    (has(e,'rawResponseHex')||has(e,'rawFrameSizeBytes'))))
   );
   if(looksSerial)return {
    version:SERIAL_TRACE_VERSION,applies:true,internallyConsistent:false,
