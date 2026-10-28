@@ -130,6 +130,9 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await page.locator('nav.nav button[data-id="learn"]').click();
  await page.locator('button[data-action="lesson"][data-id="volt-drop"]').click();
  await expect(page.locator("#lesson-theory-practice-status")).toContainText("caso independiente completados");
+ await expect(page.locator("#volt-holdout-host")).toContainText("Un consumidor de 12 V funciona débilmente");
+ await expect(page.locator("#volt-holdout-host").locator("#holdout-probe")).toHaveCount(0);
+ // This is a fresh assessment, not a repeat of the solved balanced-loss case.
 });
 
 test("first lesson remains navigable at mobile width and exposes labelled instruments",async({page})=>{
