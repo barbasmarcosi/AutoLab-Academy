@@ -43,3 +43,13 @@ test('MA00 reloads offline with research modules, and rejects malformed data saf
   await expect(page.getByText(/Diferencia de índice funcional sintético/)).toBeVisible();
  }finally{await context.setOffline(false);}
 });
+
+
+test('MA00 user can falsify the scoring assumptions using deterministic negative controls',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="mechanical-age"]').click();
+ await page.getByRole('button',{name:'Intentar refutar el índice'}).click();
+ await expect(page.getByRole('heading',{name:/Controles negativos de falsación/})).toBeVisible();
+ await expect(page.getByText(/Se detectaron limitaciones del indicador/)).toBeVisible();
+ await expect(page.getByText(/STFT y LTFT se compensan/)).toBeVisible();
+ await expect(page.getByText(/El score no identifica desgaste ni causa/)).toHaveCount(0);
+});
