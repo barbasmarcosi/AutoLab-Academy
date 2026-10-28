@@ -16,7 +16,7 @@ export const BENCHMARK_VERSION='MA00-enginefault-regime-overlap-v1';
 const FIELDS=['CO','HC','Lambda'];
 const CONTEXT=['RPM','MAP','TPS'];
 const LIMIT=100000;
-const rounded=x=>x===null?null:Number(x.toFixed(5));
+const rounded=x=>x===null?null:(Math.abs(x)<0.000005?0:Number(x.toFixed(5)));
 const mean=(sum,n)=>n?sum/n:null;
 function quantileCuts(values,parts){
  const sorted=[...values].sort((a,b)=>a-b);
