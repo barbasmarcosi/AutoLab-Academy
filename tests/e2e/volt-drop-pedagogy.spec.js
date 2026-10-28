@@ -83,7 +83,9 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await expect(transfer.locator("#holdout-measured")).toContainText("retorno");
  await transfer.locator("#holdout-probe").selectOption("positive");
  await transfer.locator("[data-holdout='probe']").click();
- await expect(transfer.locator("#holdout-history")).toContainText("positive");
+ await expect(transfer.locator("#holdout-history")).toContainText("retorno D–E: 0,60 V");
+ await expect(transfer.locator("#holdout-history")).toContainText("positivo A–B: 0,64 V");
+ // The novice can compare both readings without memorizing the first one.
  // This first blind case is deliberately unlike both worked examples:
  // neither conductor has a clearly dominant loss.
  await transfer.locator("#holdout-load").fill("10,76");
