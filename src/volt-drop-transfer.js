@@ -43,15 +43,19 @@ export function freezeVoltageDropHypothesis({caseId,hypothesis,prediction,firstP
  if(prediction!==expectedPrediction)throw RangeError("La predicción debe ser compatible con la hipótesis declarada");
  return Object.freeze({caseId,hypothesis,prediction,firstProbe,confidence});
 }
-export function compareVoltageDropHypotheses(prior,final){
- if(!prior||!Object.hasOwn(labels,final)||!["positive","return","balanced","undetermined"].includes(prior.hypothesis))
+export function compareVoltageDropHypotheses(prior,final,{supported=null}={}){
+ if(!prior||!Object.hasOwn(labels,final)||!["positive","return","balanced","undetermined"].includes(prior.hypothesis)||![true,false,null].includes(supported))
   throw RangeError("Revisión de hipótesis incompleta");
- return Object.freeze({
-  initial:prior.hypothesis,final,changed:prior.hypothesis!==final,
-  interpretation:prior.hypothesis==="undetermined"?"La evidencia permitió pasar de incertidumbre explícita a una conclusión provisional.":
-   prior.hypothesis===final?"La evidencia fue compatible con la hipótesis congelada.":
-   "La evidencia contradijo la hipótesis inicial: revisarla es parte del método científico, no un error por sí mismo."
- });
+ const changed=prior.hypothesis!==final;
+ const interpretation=supported===false?
+  "La conclusión final no coincide con las mediciones del modelo. "+(changed?"La revisión fue necesaria, pero todavía insuficiente.":"La hipótesis inicial se mantuvo sin respaldo en estas lecturas."):
+  prior.hypothesis==="undetermined"?
+   (supported?"La evidencia permitió pasar de incertidumbre explícita a una conclusión provisional.":"Se pasó de incertidumbre explícita a una conclusión que todavía debe contrastarse."):
+  !changed?
+   (supported?"La evidencia fue compatible con la hipótesis congelada.":"Mantuviste la hipótesis inicial; falta contrastar si los datos la sostienen."):
+   (supported?"La evidencia contradijo la hipótesis inicial: revisarla es parte del método científico, no un error por sí mismo.":
+    "Se revisó la hipótesis inicial; falta determinar si la nueva es compatible con las lecturas.");
+ return Object.freeze({initial:prior.hypothesis,final,changed,evidenceSupported:supported,interpretation});
 }
 export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diagnosis,falsifier,prior}){
  const m=modelFor(caseId);
@@ -66,7 +70,7 @@ export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diag
  const causal=diagnosis===expected;
  const falsified=falsifier===0;
  const score=(numeric?40:0)+(causal?30:0)+(falsified?30:0);
- return {caseId,score,passed:score===100,prior:frozen,evolution:compareVoltageDropHypotheses(frozen,diagnosis),selected:{loadPrediction:parsed,diagnosis,falsifier},
+ return {caseId,score,passed:score===100,prior:frozen,evolution:compareVoltageDropHypotheses(frozen,diagnosis,{supported:causal}),selected:{loadPrediction:parsed,diagnosis,falsifier},
   expected:{loadV:m.loadV,diagnosis:expected,falsifier:0,positiveV:m.positiveV,returnV:m.returnV},
   numeric,causal,falsified,reason:"La tensión de la carga es la fuente menos ambas caídas bajo la misma condición. La falsación debe buscar una observación incompatible con la hipótesis. Caídas similares NO demuestran que ambos tramos cumplan límites OEM: solo que no hay un dominante relativo en este modelo."};
 }
@@ -82,6 +86,7 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
   if(!prior){
    root.innerHTML=header+
     "<p><strong>Momento 1: antes de medir.</strong> Con solo el síntoma, las cuatro opciones son hipótesis provisionales. Si no hay información suficiente, declaralo expresamente. Elegí qué comparación esperás observar y qué tramo vas a medir primero. La respuesta no recibe puntos por acertar antes de investigar.</p>"+
+    "<p class='muted small'>Criterio de este banco: un tramo domina si su caída supera en más del 25 % la del otro (relación superior a 1,25). Es una convención didáctica, no un umbral de reparación ni una tolerancia OEM.</p>"+
     "<label for='holdout-initial'>Hipótesis inicial (sin mediciones)</label>"+
     "<select class='field' id='holdout-initial'><option value=''>Elegí una posición provisional</option>"+
     "<option value='positive'>El positivo concentra la pérdida</option>"+
