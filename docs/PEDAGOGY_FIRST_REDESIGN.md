@@ -101,3 +101,6 @@ Do not merge or deploy production before independent review.
 ## Lesson 02 automatic quality gates
 - Corrected 94-lesson evidence-coverage test to 23 embedded labs after mapping `motor-data` (35 total mapped), with the new practice ID explicitly isolated from generic reasoning/exam IDs.
 - Focused Chromium CI now runs the second lesson's E2E for freezing the prior, enforcing the first test, collecting four observations and persisting a qualified synthetic result.
+
+## Post-submission counterfactual — lesson 02
+- The guided lab now lets a learner change one causal assumption **only after** committing and saving the original diagnosis, then compare original and predicted synthetic trim percentages. The toy table makes explicit that causal assumptions govern outcomes; it does not claim a real repair. Pure 3×3 metamorphic tests and one browser E2E exercise both incorrect and corrective changes.

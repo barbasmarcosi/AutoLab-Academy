@@ -27,6 +27,19 @@ export function dtcReading(id,test){
  if(test==="sensor")return "Comparación con referencia externa: "+c.sensor+".";
  throw RangeError("Prueba DTC desconocida");
 }
+/**
+ * Deliberately simple what-if table. Only post-submission: cannot reveal the
+ * reserved diagnosis before committing. A synthetic response is not causality
+ * demonstrated on a physical car.
+ */
+export function dtcCounterfactual(caseId,controlledChange){
+ const c=get(caseId);
+ if(!Object.hasOwn(DTC_FALSIFIERS,controlledChange))throw RangeError("Cambio controlado inválido");
+ const matched=controlledChange===caseId;
+ return Object.freeze({caseId,controlledChange,matched,before:{idle:c.idle,load:c.load},
+  after:{idle:matched?3:c.idle,load:matched?4:c.load},
+  caution:"Este es un modelo hipotético que presupone una sola causa. Una corrección del dato sintético no acredita que una reparación física funcionaría."});
+}
 export function gradeDtcGuided({caseId,initial,first,tests,diagnosis,falsifier}={}){
  get(caseId);
  if(!Object.hasOwn(labels,initial)||!DTC_TESTS.some(t=>t.id===first))throw RangeError("Hipótesis o primer ensayo inválido");
@@ -74,6 +87,10 @@ export function mountDtcGuided(root,{record,onSaved=()=>{}}={}){
    (result?"<div class='result' id='dtc-result' role='status' aria-live='polite' tabindex='-1'><strong>"+result.score+"/100 · "+(result.passed?"criterios objetivos cumplidos":"revisar evidencia")+"</strong>"+
    "<p>Diagnóstico: "+(result.causal?"correcto":"incorrecto")+". Refutación: "+(result.falsified?"correcta":"incorrecta")+". La causa modelada era "+esc(labels[result.expected])+". Revisaste la hipótesis inicial: "+(result.changed?"sí":"no")+".</p>"+
    "<p>Justificación: "+esc(why)+"</p><p>Texto pendiente de revisión cualitativa; la nota automática no acredita razonamiento libre ni habilidad física.</p></div>"+
+   "<div class='panel stack'><h4>Contrafactual después de entregar</h4><p>Ahora podés cambiar UNA causa del modelo y observar si las correcciones previstas disminuyen. Esto prueba la coherencia de nuestras reglas ficticias, no una reparación real.</p>"+
+   "<label for='dtc-counter'>Cambio simulado</label><select id='dtc-counter' class='field'>"+
+   Object.entries(labels).filter(([k])=>k!=="unknown").map(([k,v])=>"<option value='"+k+"'>Restablecer "+esc(v)+"</option>").join("")+"</select>"+
+   "<button type='button' class='button alt' data-dtc='counter'>Probar el contrafactual</button><p id='dtc-counter-result' role='status' aria-live='polite'>Sin ejecutar.</p></div>"+
    "<button type='button' class='button alt' data-dtc='again'>Otro caso</button>":
    "<label for='dtc-why'>Justificá qué pruebas discriminaron causas y qué falsaría la elegida</label>"+
    "<textarea id='dtc-why' class='field' maxlength='1200' rows='4' placeholder='La evidencia que favorece mi hipótesis es...'></textarea>"+
@@ -114,6 +131,12 @@ export function mountDtcGuided(root,{record,onSaved=()=>{}}={}){
      report:JSON.stringify({caseId:DTC_CASES[idx].id,initial,first,measurementsInOrder:tests,observations:tests.map(t=>({test:t,value:dtcReading(DTC_CASES[idx].id,t)})),selected:{diagnosis:g.diagnosis,falsifier:Number(selected.value)},expected:g.expected,qualitativeReview:"pending",reasoning:reason})});
     why=reason;result={...g,selectedFalsifier:Number(selected.value)};render();$("dtc-result")?.focus({preventScroll:true});onSaved(g);
    }catch(e){$("dtc-status").textContent="Guardado no confirmado: "+String(e.message||e);}finally{busy=false;}
+   return;
+  }
+  if(button.dataset.dtc==="counter"&&result){
+   const cf=dtcCounterfactual(DTC_CASES[idx].id,$("dtc-counter").value);
+   $("dtc-counter-result").textContent="Antes: +"+cf.before.idle+" % en ralentí y +"+cf.before.load+" % con demanda. Después: +"+
+    cf.after.idle+" % y +"+cf.after.load+" %. "+(cf.matched?"El cambio afecta la causa supuesta en este modelo.":"El cambio no modifica la causa que controla este modelo.")+" "+cf.caution;
    return;
   }
   if(button.dataset.dtc==="again"&&result){idx=(idx+1)%DTC_CASES.length;initial=null;first="";tests=[];result=null;why="";render();}

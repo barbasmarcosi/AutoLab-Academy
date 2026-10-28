@@ -1,5 +1,5 @@
 import test from'node:test';import assert from'node:assert/strict';
-import{DTC_GUIDED_ID,DTC_CASES,DTC_TESTS,DTC_FALSIFIERS,dtcReading,gradeDtcGuided,dtcTheoryIllustration}from'../src/dtc-lesson.js';
+import{DTC_GUIDED_ID,DTC_CASES,DTC_TESTS,DTC_FALSIFIERS,dtcReading,gradeDtcGuided,dtcTheoryIllustration,dtcCounterfactual}from'../src/dtc-lesson.js';
 test('three distinct diagnostic causes and discriminating synthetic observations',()=>{
  assert.equal(DTC_CASES.length,3);assert.equal(DTC_GUIDED_ID,'lab-dtc-guided-v1');
  for(const c of DTC_CASES){
@@ -24,4 +24,19 @@ test('four different tests, first-probe plan and hypothesis-relative falsifiers 
  }
  assert.throws(()=>dtcReading('none','trims'),RangeError);
  assert.throws(()=>dtcReading('air','nonexistent'),RangeError);
+});
+
+test('post-submission counterfactual changes only the scripted causal mechanism, never a physical guarantee',()=>{
+ for(const c of DTC_CASES){
+  for(const option of DTC_CASES){
+   const cf=dtcCounterfactual(c.id,option.id);
+   assert.equal(cf.matched,c.id===option.id);
+   assert.deepEqual(cf.before,{idle:c.idle,load:c.load});
+   assert.deepEqual(cf.after,cf.matched?{idle:3,load:4}:cf.before);
+   assert.match(cf.caution,/no acredita/);
+   assert.equal(Object.isFrozen(cf),true);
+  }
+ }
+ assert.throws(()=>dtcCounterfactual('air','unknown'),RangeError);
+ assert.throws(()=>dtcCounterfactual('unknown','air'),RangeError);
 });

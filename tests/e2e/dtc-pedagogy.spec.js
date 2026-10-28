@@ -32,6 +32,14 @@ test('lesson 2: DTC learner freezes an uncertain diagnosis, runs four tests, rev
  await lab.locator('[data-dtc="grade"]').click();
  await expect(lab.locator('#dtc-result')).toContainText('100/100');
  await expect(lab.locator('#dtc-result')).toContainText('pendiente de revisión cualitativa');
+ await expect(lab.locator('#dtc-counter')).toBeVisible();
+ await lab.locator('#dtc-counter').selectOption('fuel');
+ await lab.locator('[data-dtc="counter"]').click();
+ await expect(lab.locator('#dtc-counter-result')).toContainText('Después: +22 % y +6 %');
+ await lab.locator('#dtc-counter').selectOption('air');
+ await lab.locator('[data-dtc="counter"]').click();
+ await expect(lab.locator('#dtc-counter-result')).toContainText('Después: +3 % y +4 %');
+ await expect(lab.locator('#dtc-counter-result')).toContainText('no acredita');
  await expect(page.locator('#lesson-theory-practice-status')).toContainText('Práctica aprobada');
  await page.locator('nav.nav button[data-id="data"]').click();
  const download=page.waitForEvent('download');
