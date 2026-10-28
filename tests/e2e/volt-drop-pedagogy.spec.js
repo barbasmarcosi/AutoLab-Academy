@@ -89,7 +89,14 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  // This first blind case is deliberately unlike both worked examples:
  // neither conductor has a clearly dominant loss.
  await transfer.locator("#holdout-load").fill("10,76");
+ // The falsifier must follow the diagnosis the student actually selects;
+ // selecting another diagnosis invalidates the previous refutation choice.
+ await transfer.locator("#holdout-cause").selectOption("positive");
+ await expect(transfer.locator("#holdout-falsifier-field")).toContainText("poca caída en positivo");
+ await transfer.locator("input[name='holdout-falsifier'][value='0']").check();
  await transfer.locator("#holdout-cause").selectOption("balanced");
+ await expect(transfer.locator("#holdout-falsifier-field")).toContainText("una caída claramente dominante");
+ await expect(transfer.locator("input[name='holdout-falsifier']:checked")).toHaveCount(0);
  await transfer.locator("input[name='holdout-falsifier'][value='2']").check();
  // No credit until the student records an independent explanation.
  await transfer.locator("[data-holdout='grade']").click();
