@@ -1,4 +1,5 @@
 import{test,expect}from'@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import{readFile}from'node:fs/promises';
 test('lesson 2: before reading DTC misconception baseline is ungraded and gives individual explanations',async({page})=>{
  await page.goto('./');
@@ -91,4 +92,17 @@ test('lesson 2: offline learner transfer goes to next reserved scenario after pr
  await page.getByRole('button',{name:'Academia',exact:true}).click();
  await page.locator('.lesson-card').filter({hasText:'DTC y parámetros: síntomas, no sentencias'}).getByRole('button',{name:'Estudiar'}).click();
  await expect(page.locator('#dtc-holdout-host')).toContainText('Banco R02');
+});
+
+test('lesson 2: reserved transfer is keyboard reachable and WCAG AA at mobile width',async({page})=>{
+ await page.setViewportSize({width:375,height:812});
+ await page.goto('./');
+ await page.getByRole('button',{name:'Academia',exact:true}).click();
+ await page.locator('.lesson-card').filter({hasText:'DTC y parámetros: síntomas, no sentencias'}).getByRole('button',{name:'Estudiar'}).click();
+ await expect(page.locator('#dtc-baseline-host')).toBeVisible();
+ await expect(page.locator('#dtc-holdout-host')).toBeVisible();
+ const violations=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze()).violations;
+ expect(violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)}))).toEqual([]);
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1);
+ expect(overflow).toBe(false);
 });
