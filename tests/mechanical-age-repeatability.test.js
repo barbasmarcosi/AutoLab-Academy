@@ -32,14 +32,43 @@ test('MA00: no comparable result across different engines or uncontrolled temper
  const hotter=copy(s);hotter[3].snapshot.samples.forEach(x=>x.ectC+=7);
  assert.match(evaluateReplicatedMeasurements(hotter).blockers.join(' '),/condiciones|protocolo/i);
 });
-test('MA00: externally provided observational sessions remain unscored and noncausal',()=>{
+test('MA00: external replicated sessions without acquisition evidence must abstain',()=>{
  const s=syntheticReplicatedServiceCase();
  for(const item of s)item.snapshot.source='provided_obd_unverified';
  const r=evaluateReplicatedMeasurements(s);
- assert.equal(r.comparable,true);
+ assert.equal(r.comparable,false);
+ assert.equal(r.observedDifferences,null);
+ assert.equal(r.baseline,null);
+ assert.equal(r.causalMaintenanceEffect,null);
+ assert.equal(r.evidenceLevel,'operator_assertions_only');
+ assert.match(r.blockers.join(' '),/contextos de adquisición/);
+});
+
+test('MA00: complete operator claims permit descriptive repeatability, still not wear inference',()=>{
+ const s=syntheticReplicatedServiceCase();
+ for(let i=0;i<s.length;i++){
+  const item=s[i];
+  item.snapshot.source='provided_obd_unverified';
+  item.snapshot.measurementContext={
+   sessionId:item.sessionId,
+   capturedAt:new Date(Date.UTC(2026,9,1+(i<2?0:1),11,i%2*20,0)).toISOString(),
+   adapterModel:'Research logger v1',softwareVersion:'MA00 capture v1',
+   serviceEventId:'service-001',ambientC:21,clock:'monotonic_observed',
+   fuelControl:'closed_loop_observed',ac:'off_observed',
+   coolingFan:'stable_observed',electricalLoads:'stable_observed'
+  };
+ }
+ const r=evaluateReplicatedMeasurements(s);
+ assert.equal(r.comparable,true,JSON.stringify(r.blockers));
+ assert.equal(r.evidenceLevel,'operator_assertions_only');
  assert.equal(r.observedDifferences.syntheticDeviationIndex,null);
  assert.equal(r.baseline.experimentalDeviationIndex,null);
  assert.equal(r.after.experimentalDeviationIndex,null);
  assert.equal(r.causalMaintenanceEffect,null);
+ assert.equal(r.confidenceInterval,null);
  assert.ok(Number.isFinite(r.observedDifferences.medianCombinedFuelTrim));
+ s[2].snapshot.measurementContext.ac='on_observed';
+ const compromised=evaluateReplicatedMeasurements(s);
+ assert.equal(compromised.comparable,false);
+ assert.equal(compromised.observedDifferences,null);
 });
