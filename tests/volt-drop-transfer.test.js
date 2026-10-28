@@ -5,7 +5,7 @@ import{lessonEvidence,learningEvidenceOverview}from"../src/learning-evidence.js"
 import{learningStages}from"../src/learning-path.js";
 
 test("independent cases have disjoint causal localizations and consistent Kirchhoff balance",()=>{
- assert.equal(VOLT_DROP_HOLDOUT_CASES.length,2);
+ assert.equal(VOLT_DROP_HOLDOUT_CASES.length,3);
  assert.ok(VOLT_DROP_HOLDOUT_ID.startsWith("lab-volt-drop-holdout-"));
  assert.equal(new Set(VOLT_DROP_HOLDOUT_CASES.map(x=>x.id)).size,2);
  for(const c of VOLT_DROP_HOLDOUT_CASES){
@@ -15,6 +15,7 @@ test("independent cases have disjoint causal localizations and consistent Kirchh
  }
  assert.ok(heldOutVoltageReading("positive","positive")>heldOutVoltageReading("positive","return"));
  assert.ok(heldOutVoltageReading("return","return")>heldOutVoltageReading("return","positive"));
+ assert.ok(Math.abs(heldOutVoltageReading("balanced","return")-heldOutVoltageReading("balanced","positive"))<0.1);
 });
 test("full measurement, causal choice and falsifier are necessary; numeric uncertainty is explicit",()=>{
  for(const c of VOLT_DROP_HOLDOUT_CASES){
