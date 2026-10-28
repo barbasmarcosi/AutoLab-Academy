@@ -29,6 +29,8 @@ jobs:
         run: |
           python3 -m unittest discover -s tests/science -p 'test_mechanical_age_dataset.py'
           python3 -m unittest discover -s tests/science -p 'test_ma00_elm327_serial.py'
+      - name: Regime overlap negative controls (no real source download)
+        run: node --test tests/mechanical-age-regime-overlap.test.js
       - name: Full unit tests and static checks
         run: npm run build
       - name: Build independent preview bundle (without publishing)
@@ -50,7 +52,9 @@ jobs:
 
   empirical-enginefault:
     name: Audit pinned real laboratory sensor dataset (no model training)
-    if: github.event_name == 'workflow_dispatch'
+    # Opt-in research benchmark: explicit dispatch or ONE commit tagged for the audit.
+    # Normal pushes never re-download the identical pinned source.
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[MA00 empirical once]')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -68,11 +72,17 @@ jobs:
         run: |
           node tools/audit-enginefaultdb.mjs /tmp/ma00/EngineFaultDB_Final.csv > /tmp/ma00/enginefault-audit.json
           node -e 'const a=require(process.argv[1]); console.log(JSON.stringify({rows:a.observationCount,classes:a.faultClassCounts,duplicates:a.exactDuplicateRows,labelRuns:a.contiguousLabelRuns,wearGroundTruth:a.wearGroundTruthPresent,sourceBlob:a.provenance.gitBlobSha},null,2))' /tmp/ma00/enginefault-audit.json
+      - name: Evaluate operational confounding with coarsened RPM/MAP/TPS overlap
+        run: |
+          node tools/benchmark-enginefaultdb.mjs /tmp/ma00/EngineFaultDB_Final.csv > /tmp/ma00/enginefault-regime-overlap.json
+          node -e 'const x=require(process.argv[1]); for(const s of x.sensitivityGrid) for(const [label,c] of Object.entries(s.comparisons)) console.log(JSON.stringify({grid:s.requestedBins,group:label,overlapCells:c.overlapCells,matchedFraction:c.matchedWeightFractionOfSmallerGroup,rawCO:c.rawMeanDelta.CO,regimeMatchedCO:c.matchedRegimeDelta?.CO??null,eligible:c.interpretationAllowed}));' /tmp/ma00/enginefault-regime-overlap.json
       - name: Upload aggregated audit only — never raw third-party data
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ma00-enginefault-aggregated-audit
-          path: /tmp/ma00/enginefault-audit.json
+          path: |
+            /tmp/ma00/enginefault-audit.json
+            /tmp/ma00/enginefault-regime-overlap.json
           retention-days: 14
 
   empirical-dieselobd:
