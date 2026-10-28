@@ -4,7 +4,7 @@
  * committing a full response. Retakes use a different fault localization.
  */
 import{voltageDropModel}from"./volt-drop-lesson.js";
-export const VOLT_DROP_HOLDOUT_ID="lab-volt-drop-holdout-v1";
+export const VOLT_DROP_HOLDOUT_ID="lab-volt-drop-holdout-v2";
 export const VOLT_DROP_HOLDOUT_CASES=Object.freeze([
  Object.freeze({id:"balanced",story:"Un circuito didáctico de 12 V alimenta una carga con tensión inferior a la de la fuente. No conocemos las pérdidas de sus conductores. Medí ambos tramos y decidí si alguno concentra claramente la caída o si los resultados obligan a otra interpretación.",
   positiveOhm:0.16,returnOhm:0.15,loadOhm:2.7}),
