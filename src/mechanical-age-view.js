@@ -1,11 +1,12 @@
 import {MECHANICAL_AGE_VERSION,syntheticServicePair,evaluateMechanicalSnapshot,compareMechanicalSnapshots} from './mechanical-age-research.js';
 import {syntheticReplicatedServiceCase,evaluateReplicatedMeasurements} from './mechanical-age-repeatability.js';
 import {runMechanicalAgeFalsification} from './mechanical-age-falsification.js';
+import {rawAAShell,mountRawAA} from './mechanical-age-aa-view.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=v=>v===null?'no disponible':Number(v).toFixed(2);
 export function mechanicalAgeShell(){
  return '<section class="stack"><div class="eyebrow">AUTOMOTIVE R&D · MA00</div><h1>Edad mecánica · laboratorio experimental</h1>'
-  +'<p>Analizá una foto OBD con un protocolo reproducible y contrastá antes/después de mantenimiento. <strong>No mide edad real, desgaste estructural, vida restante ni diagnostica averías.</strong></p><div id="mechanical-age-explorer"></div></section>';
+  +'<p>Analizá una foto OBD con un protocolo reproducible y contrastá antes/después de mantenimiento. <strong>No mide edad real, desgaste estructural, vida restante ni diagnostica averías.</strong></p><div id="mechanical-age-explorer"></div>'+rawAAShell()+'</section>';
 }
 export function mountMechanicalAgeLab(root){
  if(!root)throw Error('Falta contenedor de investigación MA00');
@@ -61,4 +62,6 @@ export function mountMechanicalAgeLab(root){
   render();
  });
  render();
+ const aaRoot=typeof document!=='undefined'?document.getElementById('ma-aa-explorer'):null;
+ if(aaRoot)mountRawAA(aaRoot);
 }
