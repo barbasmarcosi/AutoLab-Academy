@@ -91,7 +91,7 @@ export function compareMechanicalSnapshots(before,after){
  return {
   model:MECHANICAL_AGE_VERSION,comparable,blockers,before:a,after:b,measurementEvidence:evidence,
   deltaDeviationIndex:comparable&&a.deviationIndex!==null&&b.deviationIndex!==null?b.deviationIndex-a.deviationIndex:null,
-  interpretation:comparable?(a.deviationIndex===null?'Variables observadas comparables, pero SIN puntuación de datos externos no calibrados':'Cambio observado en índice sintético; causalidad y desgaste NO identificados'):'No comparar índices bajo condiciones dispares',
+  interpretation:comparable?(a.deviationIndex===null?'Variables observadas comparables, pero SIN puntuación de datos externos no calibrados':'Cambio observado en índice sintético; causalidad y desgaste NO identificados'):(a.source==='provided_obd_unverified'?'Comparación documental no acreditada; SIN puntuación de datos externos no calibrados':'No comparar índices bajo condiciones dispares'),
   mechanicalAgeChangeKm:null,structuralRejuvenationClaim:false
  };
 }
