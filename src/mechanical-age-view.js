@@ -44,6 +44,10 @@ export function mountMechanicalAgeLab(root){
    try{
     if(state.before.length>200000||state.after.length>200000)throw RangeError('Expediente demasiado grande');
     const a=JSON.parse(state.before),z=JSON.parse(state.after);
+    // User JSON is untrusted even when it self-declares source:'synthetic'.
+    // Only the exact bundled demonstration can use the illustrative synthetic score.
+    const intactDemo=state.before===JSON.stringify(demo.before,null,2)&&state.after===JSON.stringify(demo.after,null,2);
+    if(!intactDemo){a.source='provided_obd_unverified';z.source='provided_obd_unverified';}
     state.result=compareMechanicalSnapshots(a,z);
    }catch(error){state.error='No se pudo evaluar: '+error.message;}
   }
