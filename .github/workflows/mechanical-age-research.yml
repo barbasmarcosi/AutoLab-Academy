@@ -29,6 +29,8 @@ jobs:
         run: |
           python3 -m unittest discover -s tests/science -p 'test_mechanical_age_dataset.py'
           python3 -m unittest discover -s tests/science -p 'test_ma00_elm327_serial.py'
+          python3 -m unittest discover -s tests/science -p 'test_ma00_levin_longitudinal.py'
+          python3 -m unittest discover -s tests/science -p 'test_ma00_cmapss_fd001.py'
       - name: Regime overlap negative controls (no real source download)
         run: node --test tests/mechanical-age-regime-overlap.test.js
       - name: Full unit tests and static checks
@@ -115,4 +117,30 @@ jobs:
         with:
           name: ma00-dieselobd-aggregated-inventory
           path: /tmp/ma00/dieselobd-audit.json
+          retention-days: 14
+
+
+  empirical-cmapss:
+    name: NASA FD001 aggregate-only simulated-engine baseline
+    # Never fetch the dataset on routine push. Single research marker or dispatch.
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[MA00 NASA once]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Get official NASA item 6 archive (no mirror, no extracted upload)
+        run: |
+          mkdir -p /tmp/ma00
+          curl -fSL --retry 1 --max-time 150 --max-filesize 35000000 \
+            "https://phm-datasets.s3.amazonaws.com/NASA/6.+Turbofan+Engine+Degradation+Simulation+Data+Set.zip" \
+            -o /tmp/ma00/cmapss-source.zip
+      - name: Check archive, independent engine split and benchmark train-only priors
+        run: |
+          python3 tools/benchmark_cmapss_fd001.py /tmp/ma00/cmapss-source.zip > /tmp/ma00/cmapss-aggregate.json
+          python3 -c 'import json; d=json.load(open("/tmp/ma00/cmapss-aggregate.json")); print(json.dumps({k:d[k] for k in ("schema","sourceArchiveSha256","trainEngines","testEngines","trainRows","testRows","baselineMetrics","automotiveWearValidation")},indent=2))'
+      - name: Publish NASA aggregate metrics only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ma00-nasa-fd001-aggregate
+          path: /tmp/ma00/cmapss-aggregate.json
           retention-days: 14
