@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
 import {rawAAShell,mountRawAA} from '../src/mechanical-age-aa-view.js';
 import {syntheticAAReceiptPair} from '../src/mechanical-age-raw-obd.js';
 function harness(){
@@ -44,5 +45,26 @@ test('MA00 raw A-A UI escapes errors and refuses undocumented service',()=>{
  input('ma-aa-json',JSON.stringify(external));
  click('evaluate');
  assert.match(root.innerHTML,/Comparación bloqueada/);
+ assert.doesNotMatch(root.innerHTML,/Mediana A1/);
+});
+
+
+test('MA00 UI exposes internal byte consistency separately from physical sensor authenticity',()=>{
+ const {root,click,input}=harness();
+ const a=JSON.parse(execFileSync('python3',['tests/science/ma00_fake_serial_fixture.py','0'],{encoding:'utf8'}));
+ const b=JSON.parse(execFileSync('python3',['tests/science/ma00_fake_serial_fixture.py','1'],{encoding:'utf8'}));
+ mountRawAA(root);
+ input('ma-aa-json',JSON.stringify([a,b]));
+ click('evaluate');
+ assert.match(root.innerHTML,/Comparación bloqueada/);
+ assert.match(root.innerHTML,/Expedientes seriales: 2/);
+ assert.match(root.innerHTML,/integridad interna del registro: consistente/);
+ assert.match(root.innerHTML,/Autenticidad del sensor y calibración: no verificadas/);
+ assert.match(root.innerHTML,/Transporte simulado/);
+ a.events[0].value+=12;
+ input('ma-aa-json',JSON.stringify([a,b]));
+ click('evaluate');
+ assert.match(root.innerHTML,/No se pudo evaluar A–A/);
+ assert.match(root.innerHTML,/Traza serial inconsistente/);
  assert.doesNotMatch(root.innerHTML,/Mediana A1/);
 });
