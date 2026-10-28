@@ -81,16 +81,17 @@ test('MA v0: local measurement features are not global wear measurements',()=>{
  assert.equal(a.remainingUsefulLife,null);
 });
 
-test('MA v0: real-world uploaded/unverified readings never receive an arbitrary age or functional score',()=>{
+test('MA v0: user supplied data without metrology context cannot be compared or scored',()=>{
  const {before,after}=syntheticServicePair();
  before.source='provided_obd_unverified';after.source='provided_obd_unverified';
  const p=compareMechanicalSnapshots(before,after);
- assert.equal(p.comparable,true);
+ assert.equal(p.comparable,false);
  assert.equal(p.deltaDeviationIndex,null);
  assert.equal(p.before.deviationIndex,null);
  assert.equal(p.after.deviationIndex,null);
  assert.equal(p.before.scoringStatus,'not_calibrated_external_data');
  assert.match(p.interpretation,/SIN puntuación/);
+ assert.match(p.blockers.join(' '),/measurementContext/);
  assert.equal(p.before.mechanicalAgeEquivalentKm,null);
 });
 test('MA v0: huge logging gaps and implausible sample frequencies reject the measurement protocol',()=>{
