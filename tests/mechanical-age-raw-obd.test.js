@@ -142,3 +142,24 @@ test('MA00 refuses repeatability inference from an aborted serial acquisition, e
  assert.equal(study.mechanicalAgeKm,null);
  assert.match(study.blockers.join('; '),/Captura interrumpida/);
 });
+
+
+test('MA00 A-A absolute warm-idle gates reject comparable-looking but invalid physical regimes',()=>{
+ const examples=[
+  {pid:'010C',change:e=>e.value+=1700,reason:/RPM fuera de rango/},
+  {pid:'0105',change:e=>e.value-=30,reason:/ECT fuera de régimen/},
+  {pid:'0104',change:e=>e.value+=45,reason:/Carga fuera de condición/},
+  {pid:'0105',change:(e,i)=>{if(i%2)e.value+=8;},reason:/ECT fuera de régimen/}
+ ];
+ for(const {pid,change,reason} of examples){
+  const sessions=setup();
+  for(const session of sessions){
+   let idx=0;
+   for(const e of session.events)if(e.pid===pid)change(e,idx++);
+  }
+  const r=evaluateAAWithoutService(sessions);
+  assert.equal(r.comparable,false,JSON.stringify({pid,reason:String(reason)}));
+  assert.equal(r.observedChanges,null);
+  assert.match(r.blockers.join(' '),reason);
+ }
+});
