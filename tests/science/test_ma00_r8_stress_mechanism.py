@@ -119,6 +119,22 @@ class TestR8(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,"SHA-256"):
                 experiment._take_only_training(p)
 
+    def test_original_r6_alpha_one_and_r8_alpha_twenty_hold_all_else_fixed(self):
+        reference=self.report
+        prior=experiment.analyze_train_only(self.text,alpha=1.0)
+        self.assertEqual(prior["alphaFixed"],1.0)
+        self.assertEqual(reference["alphaFixed"],20.0)
+        self.assertEqual(prior["seedValues"],reference["seedValues"])
+        self.assertEqual(prior["observedCheckpoints"],reference["observedCheckpoints"])
+        for policy in experiment.POLICIES:
+            a=prior["policies"][policy]
+            b=reference["policies"][policy]
+            self.assertEqual(a["independentEngineCount"],b["independentEngineCount"])
+            self.assertEqual(a["uniqueEngineCheckpointCount"],b["uniqueEngineCheckpointCount"])
+            self.assertEqual(a["predictionsIncludingPerturbations"],b["predictionsIncludingPerturbations"])
+        with self.assertRaisesRegex(ValueError,"preregistered alpha"):
+            experiment.analyze_train_only(self.text,alpha=0.01)
+
     def test_reject_too_few_engines_and_unauthorized_source(self):
         with self.assertRaisesRegex(ValueError,"At least 10"):
             experiment.analyze_train_only("\n".join(self.text.splitlines()[:35]))
