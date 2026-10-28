@@ -107,7 +107,7 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  const downloaded=page.waitForEvent("download");
  await page.locator('[data-action="export"]').click();
  const backup=JSON.parse(await readFile(await(await downloaded).path(),"utf8"));
- const saved=backup.payload.cases.filter(x=>x.id==="lab-volt-drop-holdout-v1").at(-1);
+ const saved=backup.payload.cases.filter(x=>x.id==="lab-volt-drop-holdout-v2").at(-1);
  expect(saved?.passed).toBe(true);
  const evidence=JSON.parse(saved.report);
  expect(evidence.initial).toMatchObject({caseId:"balanced",hypothesis:"return",prediction:"return",firstProbe:"return",confidence:"high"});
