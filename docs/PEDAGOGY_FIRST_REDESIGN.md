@@ -88,3 +88,8 @@ Do not merge or deploy production before independent review.
 ## 2026-10-28: initial diagnostic
 - Three pre-reading questions about potential reference, zero-current drop and correct two-probe placement are ungraded, unpersisted and specifically remediated. The interaction freezes only once per view and never increases mastery or progress.
 - This is automated pedagogical scaffolding, not observed validation with real novices; evidence gate and 8.5/10 provisional status remain.
+
+## Full cross-browser milestone on a PR SHA
+- Normal PR CI: unit/static/build plus focused Chromium. A milestone explicitly sets `<!-- [FULL_E2E_MILESTONE] -->` in the PR body before pushing; this runs the full Chromium/WebKit/mobile WebKit suite ONCE. Remove the marker once started.
+- PR events NEVER upload or deploy Pages, including the full-suite milestone. Publishing needs a separate GitHub Pages Actions run with `full_suite=true`.
+- Automated testing cannot substitute for actual beginner comprehension and human evaluation of written reasoning.
