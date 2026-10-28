@@ -111,24 +111,29 @@ def _engine_errors(per_engine):
         uid=key[0] if isinstance(key,tuple) else key
         grouped[uid].extend(entries)
     values=[]
-    per_horizon=defaultdict(list)
-    for entries in grouped.values():
+    per_horizon=defaultdict(lambda:defaultdict(list))
+    for uid,entries in grouped.items():
         if not entries:
             continue
         errors=[abs(p-y) for cycle,y,p in entries]
         values.append(sum(errors)/len(errors))
         for (cycle,y,p) in entries:
-            per_horizon[cycle].append(abs(p-y))
+            per_horizon[cycle][uid].append(abs(p-y))
     if not values:
         raise ValueError("No eligible held-out engine checkpoints")
     return {
         "engineCount":len(values),
-        "checkpointCount":sum(len(v) for v in per_horizon.values()),
+        "uniqueEngineCheckpointCount":sum(len(v) for v in per_horizon.values()),
+        "perturbedPredictionCount":sum(len(a) for v in per_horizon.values() for a in v.values()),
         "engineBalancedMAE":round(sum(values)/len(values),3),
         "maxEngineMeanAE":round(max(values),3),
         "byObservedCycle":{
-            str(cycle):{"engines":len(v),"MAE":round(sum(v)/len(v),3)}
-            for cycle,v in sorted(per_horizon.items())
+            str(cycle):{
+                "engines":len(engine_errors),
+                "perturbedPredictions":sum(len(a) for a in engine_errors.values()),
+                "MAE":round(sum(sum(a)/len(a) for a in engine_errors.values())/len(engine_errors),3)
+            }
+            for cycle,engine_errors in sorted(per_horizon.items())
         },
     }
 
@@ -146,6 +151,7 @@ def analyze_train_only(text, *, strict_counts=False):
     for mode in MODES:
         by_alpha={}
         for alpha in ALPHAS:
+            fold_coefficients=[]
             # Train-only deterministic outer GroupKFold; alpha fixed and reported,
             # not selected using heldout results, and no NASA TEST labels read.
             level_predictions={lv:defaultdict(list) for lv in LEVELS}
@@ -158,6 +164,7 @@ def analyze_train_only(text, *, strict_counts=False):
                 raw_stats=weighted_sensor_stats(train_checkpoints)
                 sensor_sds={s["index"]:s["sd"] if s["span"]>CONST_RANGE and s["sd"]>CONST_RANGE else 0.0 for s in raw_stats}
                 model=fit_ridge(train_checkpoints,mode,alpha)
+                fold_coefficients.append(sum(abs(z) for z in model["beta"][1:]))
                 if set(model["trainEngineIds"]) & set(hold_ids):
                     raise AssertionError("Engine leakage into heldout fold")
                 held=fold_points(held_set)
@@ -178,6 +185,7 @@ def analyze_train_only(text, *, strict_counts=False):
             stressed=by_level["0.1"]["engineBalancedMAE"]
             by_alpha[str(int(alpha))]={
                 "noiseByTrainStandardDeviation":by_level,
+                "foldMeanStandardizedCoefficientL1":round(statistics.mean(fold_coefficients),3),
                 "stressToCleanMAERatio":round(stressed/clean,3) if clean>0 else None,
             }
         report[mode]=by_alpha
