@@ -13,11 +13,31 @@ export const VOLT_DROP_HOLDOUT_CASES=Object.freeze([
  Object.freeze({id:"return",story:"En otro equipo didáctico de 12 V la carga recibe menos tensión de lo esperado. La fuente ideal sigue estable. No disponés de las resistencias ocultas ni de una pieza identificada como culpable.",
   positiveOhm:0.07,returnOhm:0.52,loadOhm:2.8})
 ]);
-const FALSIFIERS=Object.freeze([
- "Medir bajo la misma carga un patrón contrario al elegido: un tramo opuesto claramente dominante o una diferencia grande donde se predijo igualdad.",
- "Repetir la tensión de fuente en reposo, sin medir los tramos.",
- "Reemplazar piezas a partir del síntoma sin comprobar otra hipótesis."
-]);
+// Contrasting evidence must be case-specific; a fixed "first answer is right"
+// would reward recognition of the UI rather than scientific falsification.
+export const VOLT_DROP_FALSIFIERS=Object.freeze({
+ balanced:Object.freeze({
+  options:Object.freeze([
+   "Las caídas de positivo y retorno siguen siendo próximas con la misma carga.",
+   "La fuente ideal conserva 12 V en reposo; no se repiten las caídas de los cables.",
+   "Una nueva medición bajo la misma carga encuentra una caída claramente dominante en uno de los dos cables."
+  ]),answer:2
+ }),
+ positive:Object.freeze({
+  options:Object.freeze([
+   "Una nueva medición bajo la misma carga muestra poca caída en positivo y retorno claramente dominante.",
+   "La caída del positivo continúa siendo claramente mayor que la del retorno.",
+   "La fuente ideal conserva 12 V en reposo, sin datos sobre las caídas bajo carga."
+  ]),answer:0
+ }),
+ return:Object.freeze({
+  options:Object.freeze([
+   "La fuente ideal conserva 12 V en reposo, sin medir los conductores bajo carga.",
+   "Una nueva medición bajo la misma carga muestra poco descenso en retorno y caída claramente dominante en positivo.",
+   "El retorno sigue mostrando la caída claramente superior bajo la misma carga."
+  ]),answer:1
+ })
+});
 const labels={positive:"tramo positivo",return:"tramo de retorno",balanced:"sin tramo dominante"};
 const probeLabels={positive:"positivo A–B",return:"retorno D–E",load:"consumidor B–D"};
 const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -65,14 +85,14 @@ export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diag
  if(!Array.isArray(measurements)||measurements[0]!==frozen.firstProbe||!measurements.includes("positive")||!measurements.includes("return"))throw RangeError("Falta respetar el primer ensayo congelado o las dos mediciones independientes");
  const parsed=typeof loadPrediction==="number"?loadPrediction:Number(String(loadPrediction).trim().replace(",","."));
  if(!Number.isFinite(parsed)||parsed<0||parsed>24)throw RangeError("Predicción de tensión inválida");
- if(!Object.hasOwn(labels,diagnosis)||!Number.isInteger(falsifier)||falsifier<0||falsifier>=FALSIFIERS.length)throw RangeError("Decisiones inválidas");
+ if(!Object.hasOwn(labels,diagnosis)||!Number.isInteger(falsifier)||falsifier<0||falsifier>=VOLT_DROP_FALSIFIERS[caseId].options.length)throw RangeError("Decisiones inválidas");
  const expected=m.positiveV>m.returnV*1.25?"positive":m.returnV>m.positiveV*1.25?"return":"balanced";
  const numeric=Math.abs(parsed-m.loadV)<=0.12;
  const causal=diagnosis===expected;
- const falsified=falsifier===0;
+ const falsified=falsifier===VOLT_DROP_FALSIFIERS[caseId].answer;
  const score=(numeric?40:0)+(causal?30:0)+(falsified?30:0);
  return {caseId,score,passed:score===100,prior:frozen,evolution:compareVoltageDropHypotheses(frozen,diagnosis,{supported:causal}),selected:{loadPrediction:parsed,diagnosis,falsifier},
-  expected:{loadV:m.loadV,diagnosis:expected,falsifier:0,positiveV:m.positiveV,returnV:m.returnV},
+  expected:{loadV:m.loadV,diagnosis:expected,falsifier:VOLT_DROP_FALSIFIERS[caseId].answer,positiveV:m.positiveV,returnV:m.returnV},
   numeric,causal,falsified,reason:"La tensión de la carga es la fuente menos ambas caídas bajo la misma condición. La falsación debe buscar una observación incompatible con la hipótesis. Caídas similares NO demuestran que ambos tramos cumplan límites OEM: solo que no hay un dominante relativo en este modelo."};
 }
 export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
@@ -129,7 +149,7 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    "<select id='holdout-cause' class='field' "+(result?"disabled":"")+">"+
    "<option value=''>Elegí según los datos</option><option value='positive'>Positivo</option><option value='return'>Retorno</option><option value='balanced'>Ambas caídas similares</option></select>"+
    "<fieldset class='panel'><legend>¿Qué observación refutaría la localización final?</legend>"+
-   FALSIFIERS.map((o,i)=>"<label class='option'><input type='radio' name='holdout-falsifier' value='"+i+"' "+(result?"disabled":"")+">"+esc(o)+"</label>").join("")+"</fieldset>"+
+   VOLT_DROP_FALSIFIERS[scenario.id].options.map((o,i)=>"<label class='option'><input type='radio' name='holdout-falsifier' value='"+i+"' "+(result?"disabled":"")+">"+esc(o)+"</label>").join("")+"</fieldset>"+
    (result?"":
     "<label for='holdout-reasoning'>Explicá qué evidencia hizo sostener o revisar la hipótesis inicial y qué la refutaría</label>"+
     "<textarea class='field' id='holdout-reasoning' rows='4' maxlength='1200' aria-describedby='holdout-reasoning-help' placeholder='Comparo ambas caídas, justifico mi localización y describo qué lectura la contradice.'></textarea>"+
@@ -139,7 +159,7 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
     "<strong>Resultado objetivo del intento "+attempts+" de esta sesión: "+result.score+"/100 · "+(result.passed?"criterios cumplidos":"revisar evidencia")+"</strong>"+
     "<p>Cálculo: "+(result.numeric?"correcto":"incorrecto")+". Tu lectura calculada: "+fmt(result.selected.loadPrediction)+" V; valor del modelo: "+fmt(result.expected.loadV)+" V.</p>"+
     "<p>Localización: "+(result.causal?"correcta":"incorrecta")+". Elegiste "+esc(labels[result.selected.diagnosis])+"; según el modelo: "+esc(labels[result.expected.diagnosis])+".</p>"+
-    "<p>Refutación: "+(result.falsified?"correcta":"incorrecta")+". "+esc(FALSIFIERS[0])+"</p>"+
+    "<p>Refutación: "+(result.falsified?"correcta":"incorrecta")+". Tu elección: "+esc(VOLT_DROP_FALSIFIERS[scenario.id].options[result.selected.falsifier])+". Observación que realmente contradice la hipótesis: "+esc(VOLT_DROP_FALSIFIERS[scenario.id].options[result.expected.falsifier])+"</p>"+
     "<p><strong>Comparación con tu hipótesis congelada:</strong> "+esc(result.evolution.interpretation)+
     " Antes: "+esc(prior.hypothesis==="undetermined"?"indeterminado":labels[prior.hypothesis])+
     "; después: "+esc(labels[result.selected.diagnosis])+".</p>"+
