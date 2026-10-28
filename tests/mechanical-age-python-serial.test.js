@@ -52,7 +52,9 @@ test('MA00 byte/value mismatch, tampering and misleading completion fail closed'
   x=>{x.plannedCycles=99;},
   x=>{x.expectedEventCount=0;},
   x=>{x.captureAborted=true;},
-  x=>{x.instrumentClaims.ecuAcquisitionTimestampKnown=true;}
+  x=>{x.instrumentClaims.ecuAcquisitionTimestampKnown=true;},
+  x=>{delete x.schema;},
+  x=>{x.schema='ma00-bridge-receipts-v1';}
  ];
  for(const change of attacks){
   const modified=copy(original);
