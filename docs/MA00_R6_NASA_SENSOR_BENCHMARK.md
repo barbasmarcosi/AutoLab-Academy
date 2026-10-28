@@ -29,3 +29,7 @@ FD001 es una simulación específica de turbofanes aeronáuticos con envejecimie
 ## Evaluación oficial única — solicitud controlada
 
 Las familias de modelo, los pesos de entrenamiento, los folds, las regularizaciones (1, 20 y 200), el estrés de ruido y las métricas se fijaron en la rama **antes** de realizar el contraste con las etiquetas test de NASA. El marcador de este commit habilita una sola descarga del ZIP cuyo SHA-256 ya quedó fijado en R5. Cualquier fallo del modelo, rendimiento inferior a las referencias o sensibilidad al ruido deberá publicarse sin reajustar parámetros según los resultados de test.
+
+## Incidencia controlada del primer lanzamiento
+
+El primer intento con datos oficiales no produjo informe: el script Python funcionaba como módulo en los tests pero, invocado por ruta de archivo en Actions, no podía resolver el paquete local `tools`. Se corrigió el punto de entrada y se agregó una prueba CLI específica en la CI. **No hubo evaluación de etiquetas test ni resultados empíricos de sensor en ese intento.** Esta nueva ejecución está habilitada de forma única para obtener la primera comparación válida, sin alterar los modelos, folds, hiperparámetros ni los controles previamente fijados.
