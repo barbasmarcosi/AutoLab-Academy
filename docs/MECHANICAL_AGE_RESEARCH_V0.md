@@ -47,3 +47,38 @@ D mide una desviación funcional artificial de 0 a 100, NO salud %, edad, desgas
 Ejecutar: node --test tests/mechanical-age-research.test.js tests/service-worker.test.js ; npm run build ; npm run build:site (con npm ci previamente).
 
 El workflow mechanical-age-research.yml valida esta rama solamente, sin deploy ni merge. La investigación sintética no puede certificar mecánica ni justificar intervenciones de riesgo.
+
+
+## Evidencia empírica ejecutada (2026-10-28)
+
+Estos números proceden de los **archivos originales** recuperados por las Actions en esta rama, fijados a commits y blobs Git inmutables. El workflow **no añade las bases de terceros al repositorio**, únicamente artefactos agregados de auditoría.
+
+### EngineFaultDB, fuente inspeccionada
+
+- Commit de origen c63f23ba048761d9c2a2c95d8fb4c0392a3c63d3; blob del CSV f68678f7e08a6902ac2955d18d7fbb2624ae6b8a; 5.334.236 bytes.
+- 55.999 filas, 15 columnas (14 variables más Fault).
+- Clases: Fault=0 16.000; Fault=1 10.998; Fault=2 15.000; Fault=3 14.001.
+- Un registro completo duplicado exactamente. Las cuatro clases están en **cuatro bloques consecutivos**, de modo que el orden de filas tampoco constituye un eje de tiempo verificable.
+- AFR es casi determinísticamente 14,7 × Lambda, con error absoluto medio de redondeo ~0,003678 y máximo ~0,0078; no se deben contar como dos observaciones independientes.
+- No hay columna VIN/unidad, timestamp, odómetro, intervención de mantenimiento ni deterioro estructural verificado. El propio estudio reporta ensayos sobre un mismo motor C14NE. **No puede evaluar generalización entre vehículos ni edad mecánica**.
+- Script ejecutable: tools/audit-enginefaultdb.mjs. Verifica byte count y SHA Git blob antes de emitir el JSON de auditoría; la CI descarga de un commit fijo y solo publica agregados.
+
+### DieselOBD, dos libros XLSX originales inspeccionados
+
+- Commit de origen a9c96dc146aeeb62ef75d3b453c238f5379ccff5; blobs MASTER_TRAIN_X.xlsx=ca5fcf99ae8d2edc7c04b5636a1b18839df7dd52, MASTER_TEST_X.xlsx=f76b794fac48ee3f2ad74214757272e7ab2cd9e6.
+- MASTER_TRAIN_X.xlsx: **118.477 filas de datos, 27 columnas**; MASTER_TEST_X.xlsx: **33.838 filas de datos, 27 columnas**; total 152.315 filas.
+- Cada libro muestra 11 PIDs documentados y 14 columnas DTC. **No aparece un campo explícito de identidad de vehículo reconocido por la auditoría**; el número de vehículos independientes es *desconocido* para estos archivos transformados, **NO cero vehículos**. La descripción pública menciona ocho vehículos pero no restituye la agrupación de cada fila.
+- Por tanto, no se puede demostrar separación vehículo-a-vehículo entre training y test, aunque los nombres indiquen que están separados. **No presentar sus métricas de filas como validación de generalización**.
+- Script tools/audit_dieselobd_workbooks.py usa openpyxl para leer los XLSX originales y valida blob Git/bytes antes de contar; no reimplementa XLSX y no inventa ID o edad.
+
+### Gates no negociables descubiertos al auditar
+
+1. **Edad/vida/desgaste físico:** siempre "no determinado" hasta contar con una verdad-terreno independiente. Ninguno de los dos conjuntos tiene etiquetas de vida útil.
+2. **Modelos supervisados por vehículo:** no entrenar/declarar resultados de generalización con train/test sin ID de vehículo. Reunir datos con ID anónimo y sesiones identificadas o fuente alternativa.
+3. **Pseudorreplicación:** las muestras OBD correlacionadas no son motores independientes; las clases de EngineFaultDB están en bloques, y las 152.315 filas de DieselOBD NO representan 152.315 unidades.
+4. **Calibración de scores:** los parámetros 0,4/0,6 y umbrales del indicador D se ejecutan **exclusivamente para el ejemplo sintético**. Datos OBD externos: características y condiciones, sin score.
+5. **Repetibilidad:** nuevo src/mechanical-age-repeatability.js exige al menos dos sesiones distintas antes y dos después, confronta condiciones y muestra rangos entre sesiones sin fabricar p-value, intervalo de confianza ni efecto causal.
+
+## Balance crítico de MA00
+
+**Resultado obtenido:** pipeline y evidencias reproducibles, calidad estructural de dos bases públicas, captura y normalización básica, abstención ante falta de inferencia, laboratorio sintético con replicación. **No obtenido:** predicción de desgaste real, modelo calibrado por familia, capacidad de comparar motores reales, pronóstico de vida/edad mecánica. **Riesgo decisivo:** incluso un clasificador de fallas muy preciso puede ser incapaz de estimar la degradación. El trabajo prioritario siguiente es conseguir cohortes longitudinales con identidad por vehículo y medidas físicas, no subir la complejidad del modelo.
