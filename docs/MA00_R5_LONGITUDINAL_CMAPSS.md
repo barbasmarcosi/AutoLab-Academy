@@ -63,3 +63,25 @@ La implementación y los tests sintéticos se fijaron antes de la ejecución. Es
 ## Diagnóstico de empaquetado (sin inferencia)
 
 Primer intento de descargar NASA item 6: conexión y transferencia correctas, pero la estructura del ZIP no exponía directamente los miembros FD001; la auditoría se abortó sin publicar métricas. Se añadió soporte para un ZIP anidado de un solo nivel (sin extraer a disco), límites de tamaño, detección de miembros duplicados y prueba adversarial. El segundo intento solo será válido si el inventario real corresponde a FD001.
+
+
+## Resultado empírico FD001 — auditoría ejecutada (28/10/2026)
+
+Ejecución de referencia: https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40740567370
+Artefacto agregado (sin datos originales): https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40740567370/artifacts/12839626193
+
+El archivo oficial descargado tenía SHA-256:
+c9c5dec12a945a82e8bb4446589d7fb3cc057b5e5d81fa1a12e25ee9912ad3b2
+
+El paquete de NASA tiene un ZIP anidado. Hubo un primer intento abortado por estructura inesperada, seguido de un cambio que valida el ZIP externo y el ZIP interior sin extraerlos al filesystem. El job de auditoría empírica finalizó en SUCCESS, sin afirmar que su CI general fuese verde (una aserción de test esperaba otra cadena para el rechazo de entradas duplicadas).
+
+Inventario observado: FD001 train = 100 motores, 20.631 filas; FD001 test = 100 motores, 13.096 filas. Mediana de vida total de los motores TRAIN = 199 ciclos; mediana de RUL sobre filas TRAIN = 103 ciclos.
+
+| Baseline preregistrada | MAE por motor TEST (ciclos) | RMSE por motor TEST (ciclos) |
+| --- | ---: | ---: |
+| Mediana constante TRAIN | 39,080 | 49,820 |
+| Mediana duración total TRAIN - ciclos TEST | 31,050 | 39,849 |
+
+La segunda baseline reduce MAE en aproximadamente **20,5 %**. Este beneficio está determinado principalmente por conocer cuántos ciclos ya observamos de cada motor simulado: **no representa detección de desgaste mediante sensores**. Un futuro modelo de sensores deberá superar estas referencias sobre motores completos, sin tuning sobre TEST.
+
+**No transferir:** estos errores son de trayectorias simuladas de turbofanes; NASA no demuestra ni autoriza que se puedan convertir a km, salud %, RUL de motores automotrices o envejecimiento estructural real. LEVIN no se ha descargado ni auditado empíricamente.
