@@ -1,0 +1,49 @@
+import {MECHANICAL_AGE_VERSION,syntheticServicePair,evaluateMechanicalSnapshot,compareMechanicalSnapshots} from './mechanical-age-research.js';
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=v=>v===null?'no disponible':Number(v).toFixed(2);
+export function mechanicalAgeShell(){
+ return '<section class="stack"><div class="eyebrow">AUTOMOTIVE R&D · MA00</div><h1>Edad mecánica · laboratorio experimental</h1>'
+  +'<p>Analizá una foto OBD con un protocolo reproducible y contrastá antes/después de mantenimiento. <strong>No mide edad real, desgaste estructural, vida restante ni diagnostica averías.</strong></p><div id="mechanical-age-explorer"></div></section>';
+}
+export function mountMechanicalAgeLab(root){
+ if(!root)throw Error('Falta contenedor de investigación MA00');
+ const demo=syntheticServicePair();
+ const state={before:JSON.stringify(demo.before,null,2),after:JSON.stringify(demo.after,null,2),result:null,error:''};
+ function summary(r,title){
+  return '<div class="panel stack"><h3>'+esc(title)+'</h3><p><strong>Estado:</strong> '+esc(r.status)+'. <strong>Índice de desviación funcional experimental:</strong> '+(r.deviationIndex===null?'No calculable':r.deviationIndex+'/100')+'.</p>'
+   +'<p>RPM mediana '+fmt(r.features.medianRpm)+'; dispersión robusta RPM '+fmt(r.features.rpmRobustSigma)+'; ECT '+fmt(r.features.medianEctC)+' °C; carga '+fmt(r.features.medianLoadPct)+' %; STFT+LTFT '+fmt(r.features.medianCombinedTrimPct)+' puntos porcentuales.</p>'
+   +(r.exclusion.length?'<p role="note">Exclusiones: '+esc(r.exclusion.join('; '))+'</p>':'')
+   +'<p class="muted">Procedencia: '+esc(r.provenance)+'; muestras: '+r.sampleCount+'. Edad equivalente: <strong>no determinada</strong>. Desgaste estructural: <strong>no determinado</strong>.</p></div>';
+ }
+ function render(){
+  root.innerHTML='<div class="panel stack"><h2>Diseño experimental MA00 · '+esc(MECHANICAL_AGE_VERSION)+'</h2>'
+   +'<p role="note">Ejemplo 100 % sintético precargado. Podés sustituirlo con un expediente JSON de lecturas OBD de origen conocido, sin importar VIN, patente ni datos personales. Los umbrales son didácticos, no tolerancias del fabricante. No se guardan lecturas en esta pantalla.</p>'
+   +'<label for="ma-before">Medición ANTES del service (JSON, 20-10000 muestras)</label>'
+   +'<textarea class="field" id="ma-before" rows="7" spellcheck="false" maxlength="200000">'+esc(state.before)+'</textarea>'
+   +'<label for="ma-after">Medición DESPUÉS del service (JSON)</label>'
+   +'<textarea class="field" id="ma-after" rows="7" spellcheck="false" maxlength="200000">'+esc(state.after)+'</textarea>'
+   +'<div class="row"><button class="button" type="button" data-ma="evaluate">Evaluar ambas mediciones</button>'
+   +'<button class="button alt" type="button" data-ma="demo">Restaurar ejemplo sintético</button></div>'
+   +'</div><div role="status" aria-live="polite">'+(state.error?'<p>'+esc(state.error)+'</p>':'')+'</div>'
+   +(state.result?summary(state.result.before,'Antes del mantenimiento')+summary(state.result.after,'Después del mantenimiento')
+     +'<div class="panel stack"><h2>Comparación</h2><p><strong>'+ (state.result.comparable?'Condiciones comparables':'Comparación no válida')+'</strong></p>'
+     +(state.result.comparable?'<p>Diferencia de índice funcional: '+fmt(state.result.deltaDeviationIndex)+' puntos (después − antes). No significa reducción demostrada de desgaste o edad.</p>':'<p>'+esc(state.result.blockers.join('; '))+'</p>')
+     +'<p class="muted">Prohibido traducir este índice a kilómetros, salud %, longevidad, falla específica o rejuvenecimiento. Los cambios podrían explicarse por mantenimiento, ambiente y sensores.</p></div>':'');
+ }
+ root.addEventListener('input',ev=>{if(ev.target.id==='ma-before')state.before=ev.target.value; if(ev.target.id==='ma-after')state.after=ev.target.value;});
+ root.addEventListener('click',ev=>{
+  const b=ev.target.closest('[data-ma]');if(!b)return;
+  state.result=null;state.error='';
+  if(b.dataset.ma==='demo'){
+   state.before=JSON.stringify(demo.before,null,2);state.after=JSON.stringify(demo.after,null,2);
+  }else if(b.dataset.ma==='evaluate'){
+   try{
+    if(state.before.length>200000||state.after.length>200000)throw RangeError('Expediente demasiado grande');
+    const a=JSON.parse(state.before),z=JSON.parse(state.after);
+    state.result=compareMechanicalSnapshots(a,z);
+   }catch(error){state.error='No se pudo evaluar: '+error.message;}
+  }
+  render();
+ });
+ render();
+}
