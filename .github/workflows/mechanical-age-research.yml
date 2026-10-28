@@ -32,7 +32,9 @@ jobs:
           python3 -m unittest discover -s tests/science -p 'test_ma00_levin_longitudinal.py'
           python3 -m unittest discover -s tests/science -p 'test_ma00_cmapss_fd001.py'
           python3 -m unittest discover -s tests/science -p 'test_ma00_cmapss_sensors.py'
+          python3 -m unittest discover -s tests/science -p 'test_ma00_r7_robustness.py'
           python3 tools/benchmark_cmapss_sensors.py --help >/dev/null
+          python3 tools/audit_cmapss_robustness_r7.py --help >/dev/null
       - name: Regime overlap negative controls (no real source download)
         run: node --test tests/mechanical-age-regime-overlap.test.js
       - name: Full unit tests and static checks
@@ -125,9 +127,9 @@ jobs:
   empirical-cmapss:
     name: NASA FD001 aggregate-only simulated-engine baseline
     # Never fetch the dataset on routine push. Single research marker or dispatch.
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[MA00 NASA once]') || contains(github.event.head_commit.message, '[MA00 NASA sensors once]')
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[MA00 NASA once]') || contains(github.event.head_commit.message, '[MA00 NASA sensors once]') || contains(github.event.head_commit.message, '[MA00 NASA robustness once]')
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Get official NASA item 6 archive (no mirror, no extracted upload)
@@ -137,6 +139,7 @@ jobs:
             "https://phm-datasets.s3.amazonaws.com/NASA/6.+Turbofan+Engine+Degradation+Simulation+Data+Set.zip" \
             -o /tmp/ma00/cmapss-source.zip
       - name: Check archive, independent engine split and benchmark train-only priors
+        if: "!contains(github.event.head_commit.message, '[MA00 NASA robustness once]')"
         run: |
           python3 tools/benchmark_cmapss_fd001.py /tmp/ma00/cmapss-source.zip > /tmp/ma00/cmapss-aggregate.json
           python3 -c 'import json; d=json.load(open("/tmp/ma00/cmapss-aggregate.json")); print(json.dumps({k:d[k] for k in ("schema","sourceArchiveSha256","trainEngines","testEngines","trainRows","testRows","baselineMetrics","automotiveWearValidation")},indent=2))'
@@ -145,6 +148,11 @@ jobs:
         run: |
           python3 tools/benchmark_cmapss_sensors.py /tmp/ma00/cmapss-source.zip > /tmp/ma00/cmapss-sensor-aggregate.json
           python3 -c 'import json; d=json.load(open("/tmp/ma00/cmapss-sensor-aggregate.json")); print(json.dumps({"trainEngines":d["trainEngines"],"testEngines":d["testEngines"],"baselineMetrics":d["baselineMetrics"],"sensorModels":{k:v["testMetrics"] for k,v in d["sensorModels"].items()},"cycleSensorBeatsNonSensorBaseline":d["cycleSensorBeatsNonSensorBaseline"],"automotiveWearValidated":d["automotiveWearValidated"]},indent=2))'
+      - name: R7 audit TRAIN folds only, never reuse consumed NASA test labels
+        if: contains(github.event.head_commit.message, '[MA00 NASA robustness once]')
+        run: |
+          python3 tools/audit_cmapss_robustness_r7.py /tmp/ma00/cmapss-source.zip > /tmp/ma00/cmapss-r7-train-only.json
+          python3 -c 'import json; d=json.load(open("/tmp/ma00/cmapss-r7-train-only.json")); print(json.dumps({"schema":d["schema"],"sourceArchiveSha256":d["sourceArchiveSha256"],"trainEngines":d["trainEngines"],"testLabelsRead":d["rulTestLabelsRead"],"sensorDiagnostics":d["sensorDiagnostics"],"groupSummaries":{mode:{alpha:{"cleanMAE":x["noiseByTrainStandardDeviation"]["0.0"]["engineBalancedMAE"],"stressMAE":x["noiseByTrainStandardDeviation"]["0.1"]["engineBalancedMAE"],"L1":x["foldMeanStandardizedCoefficientL1"]} for alpha,x in by_alpha.items()} for mode,by_alpha in d["groups"].items()}},indent=2))'
       - name: Publish NASA aggregate metrics only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -152,4 +160,5 @@ jobs:
           path: |
             /tmp/ma00/cmapss-aggregate.json
             /tmp/ma00/cmapss-sensor-aggregate.json
+            /tmp/ma00/cmapss-r7-train-only.json
           retention-days: 14
