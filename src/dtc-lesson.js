@@ -143,3 +143,44 @@ export function mountDtcGuided(root,{record,onSaved=()=>{}}={}){
  });
  render();
 }
+
+/** Ungraded pre-reading misconception screen. No durable record or proficiency claims. */
+export const DTC_BASELINE=Object.freeze([
+ {id:"code",q:"Un P0171 aparece en un vehículo. ¿Qué se puede concluir solo con ese DTC?",
+  options:["Que la sonda lambda está averiada","Que se detectó una condición compatible con mezcla pobre bajo criterios de monitorización","Que el inyector debe cambiarse"],answer:1,
+  why:"Un código informa una condición detectada; no identifica por sí mismo un componente culpable."},
+ {id:"trim",q:"En un modelo en lazo cerrado aparece una corrección positiva de combustible. ¿Qué significa?",
+  options:["El controlador intenta aumentar el combustible suministrado según su realimentación","El sensor está necesariamente dañado","Se midió directamente la presión de combustible"],answer:0,
+  why:"Una corrección positiva describe una acción de control, no una medición física independiente ni su causa."},
+ {id:"contrast",q:"¿Cuál de estas evidencias separa mejor aire no medido de falta de suministro en este banco ficticio?",
+  options:["La presencia aislada de P0171","La repetición del mismo DTC","Un contraste de estanqueidad y presión bajo condiciones controladas"],answer:2,
+  why:"Se necesitan observables diferentes que predigan resultados incompatibles entre mecanismos alternativos."}
+].map(x=>Object.freeze({...x,options:Object.freeze(x.options)})));
+export function evaluateDtcBaseline(answers={}){
+ if(!answers||typeof answers!=="object"||Array.isArray(answers))throw RangeError("Respuestas de entrada inválidas");
+ return DTC_BASELINE.map(q=>{
+  const selected=answers[q.id];
+  if(!Number.isInteger(selected)||selected<0||selected>=q.options.length)throw RangeError("Completá las tres preguntas");
+  return Object.freeze({id:q.id,selected,correct:selected===q.answer,why:q.why});
+ });
+}
+export function mountDtcBaseline(root){
+ if(!root)return;
+ root.innerHTML="<section class='panel stack' aria-label='Ideas previas sobre códigos de falla'><h2>Antes de leer: ¿qué creés que informa un DTC?</h2>"+
+  "<p>Evaluación de entrada sin nota ni almacenamiento. Respondé antes de mirar ejemplos, luego contrastá tus ideas.</p>"+
+  DTC_BASELINE.map(q=>"<fieldset class='panel'><legend>"+esc(q.q)+"</legend>"+q.options.map((s,i)=>"<label class='option'><input type='radio' name='dtc-baseline-"+q.id+"' value='"+i+"'>"+esc(s)+"</label>").join("")+"</fieldset>").join("")+
+  "<button type='button' class='button alt' id='dtc-baseline-check'>Comparar mis ideas</button><div id='dtc-baseline-result' role='status' aria-live='polite'>Sin revisar.</div></section>";
+ root.querySelector("#dtc-baseline-check").addEventListener("click",()=>{
+  try{
+   const answers=Object.fromEntries(DTC_BASELINE.map(q=>{
+    const selected=root.querySelector("input[name='dtc-baseline-"+q.id+"']:checked");
+    if(!selected)throw RangeError("Respondé las tres preguntas antes de comparar.");
+    return[q.id,Number(selected.value)];
+   }));
+   const evaluations=evaluateDtcBaseline(answers);
+   root.querySelector("#dtc-baseline-result").innerHTML="<h3>Contraste inicial, sin nota</h3><ol>"+
+    evaluations.map((x,i)=>"<li><strong>"+(x.correct?"Concepto compatible":"Revisá esta idea")+"</strong>: "+esc(x.why)+"</li>").join("")+
+    "</ol><p>El resultado no se guarda ni certifica destrezas.</p>";
+  }catch(error){root.querySelector("#dtc-baseline-result").textContent=error.message;}
+ });
+}
