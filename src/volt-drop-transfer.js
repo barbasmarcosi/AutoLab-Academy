@@ -9,7 +9,9 @@ export const VOLT_DROP_HOLDOUT_CASES=Object.freeze([
  Object.freeze({id:"positive",story:"Un consumidor de 12 V funciona débilmente en un banco aislado. La tensión de fuente virtual se mantiene en 12,00 V. Se desconoce en qué tramo aparece la pérdida dominante.",
   positiveOhm:0.62,returnOhm:0.06,loadOhm:2.5}),
  Object.freeze({id:"return",story:"En otro equipo didáctico de 12 V la carga recibe menos tensión de lo esperado. La fuente ideal sigue estable. No disponés de las resistencias ocultas ni de una pieza identificada como culpable.",
-  positiveOhm:0.07,returnOhm:0.52,loadOhm:2.8})
+  positiveOhm:0.07,returnOhm:0.52,loadOhm:2.8}),
+ Object.freeze({id:"balanced",story:"Un tercer circuito de 12 V tiene pérdidas en ambos tramos. Una caída similar en positivo y retorno no demuestra que estén sanos; debés decidir si alguno domina con evidencia.",
+  positiveOhm:0.16,returnOhm:0.15,loadOhm:2.7})
 ]);
 const FALSIFIERS=Object.freeze([
  "Medir poca caída en el tramo sospechado y una caída dominante en el otro bajo la misma carga.",
@@ -44,7 +46,7 @@ export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diag
  const score=(numeric?40:0)+(causal?30:0)+(falsified?30:0);
  return {caseId,score,passed:score===100,selected:{loadPrediction:parsed,diagnosis,falsifier},
   expected:{loadV:m.loadV,diagnosis:expected,falsifier:0,positiveV:m.positiveV,returnV:m.returnV},
-  numeric,causal,falsified,reason:"La tensión de la carga es la fuente menos las caídas de positivo y retorno, bajo la misma condición. La prueba de refutación debe medir lo contrario de lo que predice tu hipótesis."};
+  numeric,causal,falsified,reason:"La tensión de la carga es la fuente menos ambas caídas bajo la misma condición. La falsación debe buscar una observación incompatible con la hipótesis. Caídas similares NO demuestran que ambos tramos cumplan límites OEM: solo que no hay un dominante relativo en este modelo."};
 }
 export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
  if(!root||typeof record!=="function")throw Error("Falta el guardador de evidencia");
