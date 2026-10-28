@@ -57,3 +57,7 @@ El workflow mechanical-age-research.yml ejecuta el cálculo empírico cuando se 
 | Cualquier caso | Falta cohorte longitudinal y referencia mecánica independiente | Edad equivalente, salud %, RUL |
 
 Los gases CO/HC de laboratorio tampoco son PIDs estándar garantizados de un adaptador ELM327. Ninguna de estas mediciones establece valores OEM para el índice D de MA00.
+
+## Ejecución empírica única (solicitud)
+
+Este commit de investigación activa una sola auditoría de datos originales fijados por hash en GitHub Actions. El script y las reglas de análisis se comprometieron antes de activar la descarga. El resultado solo será considerado evidencia cuando la CI concluya y publique el artefacto agregado. No se ha autorizado el despliegue ni la inferencia de desgaste.
