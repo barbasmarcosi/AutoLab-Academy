@@ -1,4 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
+import {readFile} from 'node:fs/promises';
 import {test,expect} from "@playwright/test";
 test("lesson 1: learn, predict, place probes, correct mistakes, save guided and independent evidence",async({page})=>{
  await page.goto("./");
@@ -59,12 +60,30 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await lab.locator("#volt-save").click();
  await expect(lab.locator("#volt-save-status")).toContainText("guardada");
  await expect(page.locator("#lesson-theory-practice-status")).toContainText("Banco guiado completado");
- // Separate unseen case, without showing its hidden resistances.
+ // Before measuring, freeze an explicit (possibly wrong) hypothesis and
+ // a discriminating plan. A wrong initial guess is not graded as a failure.
  const transfer=page.locator("#volt-holdout-host");
+ await expect(transfer.locator("#holdout-probe")).toHaveCount(0);
+ await expect(transfer.locator("#holdout-locked")).toHaveCount(0);
+ await transfer.locator("[data-holdout='freeze']").click();
+ await expect(transfer.locator("#holdout-status")).toContainText("Revisá el compromiso");
+ await transfer.locator("#holdout-initial").selectOption("return");
+ await transfer.locator("#holdout-expected").selectOption("return");
+ await transfer.locator("#holdout-first").selectOption("return");
+ await transfer.locator("#holdout-confidence").selectOption("high");
+ await transfer.locator("[data-holdout='freeze']").click();
+ await expect(transfer.locator("#holdout-locked")).toContainText("retorno");
+ await expect(transfer.locator("#holdout-probe")).toBeVisible();
  await transfer.locator("#holdout-probe").selectOption("positive");
  await transfer.locator("[data-holdout='probe']").click();
+ await expect(transfer.locator("#holdout-measured")).toContainText("Primero medí el tramo");
+ await expect(transfer.locator("#holdout-history")).not.toContainText("positive");
  await transfer.locator("#holdout-probe").selectOption("return");
  await transfer.locator("[data-holdout='probe']").click();
+ await expect(transfer.locator("#holdout-measured")).toContainText("retorno");
+ await transfer.locator("#holdout-probe").selectOption("positive");
+ await transfer.locator("[data-holdout='probe']").click();
+ await expect(transfer.locator("#holdout-history")).toContainText("positive");
  // This first blind case is deliberately unlike both worked examples:
  // neither conductor has a clearly dominant loss.
  await transfer.locator("#holdout-load").fill("10,76");
@@ -77,8 +96,23 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await transfer.locator("[data-holdout='grade']").click();
  await expect(transfer.locator("#holdout-result")).toContainText("Resultado objetivo del intento 1");
  await expect(transfer.getByText("criterios cumplidos",{exact:false})).toBeVisible();
- await expect(transfer.getByText("El texto fue guardado pero sigue pendiente de revisión cualitativa humana",{exact:false})).toBeVisible();
+ await expect(transfer.getByText("El argumento está guardado y pendiente de revisión cualitativa humana",{exact:false})).toBeVisible();
+ await expect(transfer.locator("#holdout-result")).toContainText("La evidencia contradijo la hipótesis inicial");
+ await expect(transfer.locator("#holdout-result")).toContainText("después: sin tramo dominante");
  await expect(page.locator("#lesson-theory-practice-status")).toContainText("caso independiente completados");
+ // Persist both commitments and their order, not just the automatically graded score.
+ await page.locator('nav.nav button[data-id="data"]').click();
+ const downloaded=page.waitForEvent("download");
+ await page.locator('[data-action="export"]').click();
+ const backup=JSON.parse(await readFile(await(await downloaded).path(),"utf8"));
+ const saved=backup.payload.cases.filter(x=>x.id==="lab-volt-drop-holdout-v1").at(-1);
+ expect(saved?.passed).toBe(true);
+ const evidence=JSON.parse(saved.report);
+ expect(evidence.initial).toMatchObject({caseId:"balanced",hypothesis:"return",prediction:"return",firstProbe:"return",confidence:"high"});
+ expect(evidence.measuredInOrder).toEqual(["return","positive"]);
+ expect(evidence.revision).toMatchObject({initial:"return",final:"balanced",changed:true});
+ expect(evidence.qualitativeReview).toBe("pending");
+ expect(saved.reasoning).toContain("Las caídas medidas");
  await page.reload();
  await page.locator('nav.nav button[data-id="learn"]').click();
  await page.locator('button[data-action="lesson"][data-id="volt-drop"]').click();
@@ -109,4 +143,35 @@ test("first lesson WCAG 2.1 A and AA audit on desktop and narrow mobile viewport
  await expect(page.locator("#volt-holdout-host")).toBeVisible();
  const report=await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
  expect(report.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)}))).toEqual([]);
+});
+
+test("reserved case must start from a coherent frozen hypothesis, allow uncertainty and reset on retry",async({page})=>{
+ await page.goto("./");
+ await page.locator('nav.nav button[data-id="learn"]').click();
+ await page.locator('article.lesson-card').filter({hasText:"La caída de tensión cuenta la historia"})
+  .getByRole("button",{name:"Estudiar"}).click();
+ const transfer=page.locator("#volt-holdout-host");
+ await transfer.locator("#holdout-initial").selectOption("undetermined");
+ await transfer.locator("#holdout-expected").selectOption("balanced");
+ await transfer.locator("[data-holdout='freeze']").click();
+ await expect(transfer.locator("#holdout-status")).toContainText("La predicción debe ser compatible");
+ await expect(transfer.locator("#holdout-probe")).toHaveCount(0);
+ await transfer.locator("#holdout-expected").selectOption("need-evidence");
+ await transfer.locator("#holdout-first").selectOption("positive");
+ await transfer.locator("[data-holdout='freeze']").click();
+ await expect(transfer.locator("#holdout-locked")).toContainText("Información insuficiente");
+ await transfer.locator("#holdout-probe").selectOption("positive");
+ await transfer.locator("[data-holdout='probe']").click();
+ await transfer.locator("#holdout-probe").selectOption("return");
+ await transfer.locator("[data-holdout='probe']").click();
+ await transfer.locator("#holdout-load").fill("10,76");
+ await transfer.locator("#holdout-cause").selectOption("balanced");
+ await transfer.locator("input[name='holdout-falsifier'][value='0']").check();
+ await transfer.locator("#holdout-reasoning").fill("Antes no tenía evidencia suficiente. Ahora las dos caídas son próximas; si una lectura nueva contradijera esa igualdad cambiaría la conclusión.");
+ await transfer.locator("[data-holdout='grade']").click();
+ await expect(transfer.locator("#holdout-result")).toContainText("La evidencia permitió pasar de incertidumbre");
+ await transfer.locator("[data-holdout='retry']").click();
+ await expect(transfer.locator("#holdout-initial")).toBeVisible();
+ await expect(transfer.locator("#holdout-probe")).toHaveCount(0);
+ await expect(transfer.locator("#holdout-locked")).toHaveCount(0);
 });
