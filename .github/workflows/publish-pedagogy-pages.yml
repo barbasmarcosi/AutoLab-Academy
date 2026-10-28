@@ -1,0 +1,62 @@
+name: Publish validated AutoLab Academy milestones to Pages
+on:
+  workflow_run:
+    workflows:
+      - Test and deploy AutoLab Academy
+    types: [completed]
+    branches: [feature/pedagogy-first-redesign]
+
+permissions:
+  contents: read
+
+# Never cancel an in-flight static-site deployment.
+concurrency:
+  group: autolab-pages-milestone-publication
+  cancel-in-progress: false
+
+jobs:
+  build_milestone:
+    # Workflow runs on the default branch (authorized for github-pages),
+    # but builds the exact feature commit already verified in another run.
+    # Forks, PR workflow runs, nonmilestone commits and failed checks cannot publish.
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'feature/pedagogy-first-redesign' &&
+          github.event.workflow_run.head_repository.full_name == github.repository &&
+          contains(github.event.workflow_run.head_commit.message, '[pages-milestone]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout previously validated immutable milestone SHA
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Rebuild the validated milestone for GitHub Pages
+        run: |
+          npm run build
+          npm run build:site
+      - name: Upload milestone Pages bundle
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: ./site/AutoLab-Academy
+
+  deploy:
+    needs: build_milestone
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy tested milestone from the default branch workflow
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

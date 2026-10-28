@@ -9,6 +9,9 @@ permissions:
   contents: read
 jobs:
   verify:
+    # Adding the release router is an infrastructure change, not a request
+    # to publish an unrelated older snapshot from main.
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[pages-router]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
