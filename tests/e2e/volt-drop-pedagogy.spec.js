@@ -1,6 +1,5 @@
 import {test,expect} from "@playwright/test";
-
-test("lesson 1 teaches before testing, explains wrong answers and records real virtual interaction",async({page})=>{
+test("lesson 1: learn, predict, place probes, correct mistakes, save guided and independent evidence",async({page})=>{
  await page.goto("./");
  await page.getByRole("button",{name:"Academia",exact:true}).click();
  await page.locator(".lesson-card").first().getByRole("button",{name:"Estudiar"}).click();
@@ -22,17 +21,44 @@ test("lesson 1 teaches before testing, explains wrong answers and records real v
  await lab.locator("[data-volt-check='load']").click();
  await lab.locator("input[name='volt-probe'][value='0']").check();
  await lab.locator("[data-volt-check='probe']").click();
- await lab.locator("#volt-points").selectOption("return");
+ await expect(lab.locator("#volt-save")).toBeDisabled();
+ // Changing parameters must invalidate measurements. A correct hypothesis
+ // is impossible without actual probe operations on both cables.
  await lab.locator("#volt-points").selectOption("positive");
- // One controlled intervention invalidates any previous diagnosis.
+ await lab.locator("#volt-prediction").fill("0,48");
+ await lab.locator("#volt-measure").click();
+ await expect(lab.locator("#volt-reading")).toContainText("0,48 V");
+ await lab.locator("#volt-points").selectOption("return");
+ await lab.locator("#volt-prediction").fill("1,92");
+ await lab.locator("#volt-measure").click();
+ await expect(lab.locator("#volt-reading")).toContainText("1,92 V");
  await lab.locator("#volt-positive").focus();
  await page.keyboard.press("End");
  await expect(lab.locator("#volt-positive-value")).toContainText("1,00");
+ await expect(lab.locator("#volt-measurements")).toContainText("Todavía no realizaste");
+ await lab.locator("#volt-points").selectOption("positive");
+ await lab.locator("#volt-prediction").fill("3,53");
+ await lab.locator("#volt-measure").click();
+ await lab.locator("#volt-points").selectOption("return");
+ await lab.locator("#volt-prediction").fill("1,41");
+ await lab.locator("#volt-measure").click();
  await lab.locator("#volt-diagnosis").selectOption("positive");
  await lab.locator("#volt-diagnose").click();
  await expect(lab.locator("#volt-diagnosis-result")).toContainText("Correcto");
  await expect(lab.locator("#volt-save")).toBeEnabled();
  await lab.locator("#volt-save").click();
  await expect(lab.locator("#volt-save-status")).toContainText("guardada");
- await expect(page.locator("#lesson-theory-practice-status")).toContainText("Práctica aprobada");
+ await expect(page.locator("#lesson-theory-practice-status")).toContainText("Banco guiado completado");
+ // Separate unseen case, without showing its hidden resistances.
+ const transfer=page.locator("#volt-holdout-host");
+ await transfer.locator("#holdout-probe").selectOption("positive");
+ await transfer.locator("[data-holdout='probe']").click();
+ await transfer.locator("#holdout-probe").selectOption("return");
+ await transfer.locator("[data-holdout='probe']").click();
+ await transfer.locator("#holdout-load").fill("9,43");
+ await transfer.locator("#holdout-cause").selectOption("positive");
+ await transfer.locator("input[name='holdout-falsifier'][value='0']").check();
+ await transfer.locator("[data-holdout='grade']").click();
+ await expect(transfer.getByText("Resultado objetivo del intento 1")).toBeVisible();
+ await expect(transfer.getByText("criterios cumplidos",{exact:false})).toBeVisible();
 });
