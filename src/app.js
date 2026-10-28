@@ -734,7 +734,7 @@ function lessonPracticeStatusText(id){
 }
 function lessonReasoningStatusText(id){
  const r=transferProgress(data,id);
- return r.status==='passed'?'Razonamiento y transferencia aprobados':r.status==='attempted'?'Transferencia todavía no aprobada':r.status==='legacy-passed'?'Ejercicio anterior aprobado; transferencia v2 pendiente':r.status==='unmapped'?'Sin ejercicio de razonamiento asociado':'Razonamiento y transferencia pendientes';
+ return r.status==='passed'?'Decisiones objetivas correctas; texto pendiente de revisión':r.status==='attempted'?'Transferencia todavía no aprobada':r.status==='legacy-passed'?'Ejercicio anterior registrado; transferencia v3 pendiente':r.status==='unmapped'?'Sin ejercicio de razonamiento asociado':'Razonamiento y transferencia pendientes';
 }
 function inquiryStatusText(id){
  const n=inquiryProgress(data,id).attempts;

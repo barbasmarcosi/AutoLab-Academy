@@ -38,6 +38,8 @@ test('40 counterfactuals test transfer rather than repeating the original answer
   assert.equal(transferProgress({cases:[]},challenge.id).status,'not-started');
   const legacy=transferProgress({cases:[{id:'lab-reasoning-'+challenge.id+'-v1',passed:true}]},challenge.id);
   assert.equal(legacy.status,'legacy-passed');assert.equal(legacy.passed,false);
+   const previous=transferProgress({cases:[{id:'lab-reasoning-'+challenge.id+'-v2',passed:true,score:100}]},challenge.id);
+   assert.equal(previous.status,'legacy-passed');assert.equal(previous.passed,false,'v2 score cannot certify v3 rubric');
   assert.deepEqual(transferProgress({cases:[{id:transferCaseId(challenge.id),passed:true}]},challenge.id),{status:'passed',attempts:1,passed:true,legacy:false});
  }
 });

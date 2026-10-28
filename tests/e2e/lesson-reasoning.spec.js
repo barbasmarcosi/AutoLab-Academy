@@ -36,14 +36,14 @@ test('MC06 lesson: freeze three logical predictions, reveal feedback and save ev
  await expect(page.getByText('Rúbrica cualitativa con revisión humana pendiente')).toBeVisible();
  await expect(page.locator('#lesson-reasoning-status')).toContainText('pendiente');
  await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
- await expect(page.locator('#lesson-reasoning-status')).toContainText('Razonamiento y transferencia aprobados');
- await expect(page.locator('#lesson-theory-reasoning-status')).toContainText('Razonamiento y transferencia aprobados');
+ await expect(page.locator('#lesson-reasoning-status')).toContainText('Decisiones objetivas correctas; texto pendiente de revisión');
+ await expect(page.locator('#lesson-theory-reasoning-status')).toContainText('Decisiones objetivas correctas; texto pendiente de revisión');
  await expect(page.locator('#lesson-practice-status')).toContainText('no registrada');
  await expect(page.getByText(/Teoría: lectura pendiente/)).toBeVisible();
  await page.locator('nav.nav button[data-id="data"]').click();
  const pending=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
  const raw=await readFile(await(await pending).path(),'utf8');
- const record=JSON.parse(raw).payload.cases.find(c=>c.id==='lab-reasoning-mc06-dual-fault-instrumentation-v2');
+ const record=JSON.parse(raw).payload.cases.find(c=>c.id==='lab-reasoning-mc06-dual-fault-instrumentation-v3');
  expect(record?.passed).toBe(true);
  expect(record?.report).toContain('Predicción congelada');
  expect(record?.report).toContain('Transferencia congelada');
@@ -52,7 +52,7 @@ test('MC06 lesson: freeze three logical predictions, reveal feedback and save ev
  await page.reload();
  await page.locator('nav.nav button[data-id="learn"]').click();
  await page.locator('article.lesson-card').filter({hasText:'MC06+ — Deslizamiento, sensor'}).getByRole('button',{name:'Estudiar'}).click();
- await expect(page.locator('#lesson-reasoning-status')).toContainText('Razonamiento y transferencia aprobados');
+ await expect(page.locator('#lesson-reasoning-status')).toContainText('Decisiones objetivas correctas; texto pendiente de revisión');
 });
 test('MC14: missing and incorrect reasoning decisions remain fail-closed, retake does not erase prior evidence',async({page})=>{
  await openLesson(page,'MC14 — Identificación de caja negra');
@@ -80,12 +80,12 @@ test('MC14: missing and incorrect reasoning decisions remain fail-closed, retake
  await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
  await expect(page.getByText(/Resultado estructurado con transferencia: 100\/100/)).toBeVisible();
  await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
- await expect(page.locator('#lesson-reasoning-status')).toContainText('aprobados');
+ await expect(page.locator('#lesson-reasoning-status')).toContainText('correctas');
  await page.locator('nav.nav button[data-id="portfolio"]').click();
  await expect(page.locator('.stat-label').filter({hasText:'Razonamientos guiados'})).toBeVisible();
  await expect(page.locator('.stat-label').filter({hasText:'Prácticas y laboratorios'})).toBeVisible();
  await page.locator('#portfolio-filter').selectOption('reasoning');
- await expect(page.getByText(/Razonamiento y transferencia v2 — Caja negra: modelos indistinguibles/)).toHaveCount(2);
+ await expect(page.getByText(/Razonamiento y transferencia v3 — Caja negra: modelos indistinguibles/)).toHaveCount(2);
  await page.locator('#portfolio-filter').selectOption('lab');
  await expect(page.getByText(/Razonamiento guiado — Caja negra: modelos indistinguibles/)).toHaveCount(0);
 });
@@ -105,13 +105,13 @@ test('MOSFET causal transfer v2 does not auto-approve its separate numeric bench
  await expect(page.getByText(/Resultado estructurado con transferencia: 100\/100/)).toBeVisible();
  await expect(page.getByText('Rúbrica cualitativa con revisión humana pendiente')).toBeVisible();
  await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
- await expect(page.locator('#lesson-reasoning-status')).toContainText('Razonamiento y transferencia aprobados');
+ await expect(page.locator('#lesson-reasoning-status')).toContainText('Decisiones objetivas correctas; texto pendiente de revisión');
  await expect(page.locator('#lesson-practice-status')).toContainText('todavía no registrada');
  await expect(page.getByText(/Teoría: lectura pendiente/)).toBeVisible();
  await page.locator('nav.nav button[data-id="data"]').click();
  const download=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
  const exported=JSON.parse(await readFile(await(await download).path(),'utf8'));
- const saved=exported.payload.cases.find(x=>x.id==='lab-reasoning-mosfet-control-v2');
+ const saved=exported.payload.cases.find(x=>x.id==='lab-reasoning-mosfet-control-v3');
  expect(saved?.passed).toBe(true);
  expect(saved?.report).toContain('Resultado de revisión humana: PENDIENTE');
 });
@@ -151,7 +151,7 @@ test('MC06 freezes explicit confidence before results, reports high-confidence m
  await page.locator('nav.nav button[data-id="data"]').click();
  const download=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
  const json=JSON.parse(await readFile(await(await download).path(),'utf8'));
- const evidence=json.payload.cases.find(c=>c.id==='lab-reasoning-mc06-dual-fault-instrumentation-v2');
+ const evidence=json.payload.cases.find(c=>c.id==='lab-reasoning-mc06-dual-fault-instrumentation-v3');
  expect(evidence).toBeTruthy();
  expect(evidence.passed).toBe(false);
  expect(evidence.score).toBe(80);
@@ -176,7 +176,7 @@ test('MC14 omitted confidences never generate fabricated calibration, even with 
  await page.locator('nav.nav button[data-id="data"]').click();
  const download=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
  const raw=JSON.parse(await readFile(await(await download).path(),'utf8'));
- const record=raw.payload.cases.find(x=>x.id==='lab-reasoning-mc14-blackbox-identification-v2');
+ const record=raw.payload.cases.find(x=>x.id==='lab-reasoning-mc14-blackbox-identification-v3');
  expect(record.passed).toBe(true);
  expect(record.report).toContain('Declaraciones: 0/4');
  expect(record.report).toContain('Error cuadrático medio: NO CALCULADO');
@@ -204,7 +204,7 @@ test('options reorder deterministically while canonical answer values remain sta
  await page.locator('nav.nav button[data-id="data"]').click();
  const d=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
  const exported=JSON.parse(await readFile(await (await d).path(),'utf8'));
- const session=exported.payload.cases.find(x=>x.id==='lab-reasoning-mc06-dual-fault-instrumentation-v2');
+ const session=exported.payload.cases.find(x=>x.id==='lab-reasoning-mc06-dual-fault-instrumentation-v3');
  expect(session?.report).toContain('Semilla de presentación: 1');
  expect(session?.report).toContain('Paso measurement — índices originales mostrados: 0, 2, 1');
  expect(session?.report).toContain('Transferencia — índices originales mostrados: 1, 2, 0');

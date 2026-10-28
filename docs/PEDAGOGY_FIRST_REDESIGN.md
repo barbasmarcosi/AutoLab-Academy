@@ -61,5 +61,11 @@ Do not merge or deploy production before independent review.
 - At initial commit `9f161591`, the GitHub Actions `verify` job completed successfully with full E2E; the `deploy` job was correctly skipped on a PR. Vercel's separate build-rate-limit status does not indicate a GitHub Actions test failure.
 - To reduce PR turnaround, every PR runs static/unit, site build, and a focused Chromium E2E. Full Chromium, WebKit, mobile WebKit E2E runs on a main push or explicitly on `workflow_dispatch` with `full_suite=true`. Dispatch on this feature branch can deploy via GitHub Pages without Vercel.
 - A green focused check is NOT equivalent to a green full cross-browser release milestone.
-- Automated 100/100 scores in the general reasoning engine now represent only objective decisions; explanations and caveats remain under human review. Historical v2 results may reflect earlier scoring; do not reinterpret or mix cohorts without versioning.
+- Automated 100/100 scores in the general reasoning engine now represent only objective decisions; explanations and caveats remain under human review. Historical v2 results used an earlier scoring rule: v3 records have distinct IDs/model keys and old v1/v2 attempts remain visible as legacy, never satisfying new v3 progress.
 - Lesson 1 is still **8.5/10 provisional / NOT ACCEPTED** pending novice comprehension, real keyboard/mobile/offline acceptance and a milestone check on the current commit. Lessons 2–94 are unapproved. Never invent learner-validated scores.
+
+
+## Evidence migration: v3 and first-lesson progression
+- General transfer model/id advanced to `autolab-reasoning-transfer-v3` / `lab-reasoning-{lessonId}-v3`. Old v1/v2 attempts remain visible, but cannot complete the new rubric. Portfolio explicitly distinguishes prior v2 and current v3.
+- `volt-drop` requires reading, embedded guided bank, and its dedicated independent `lab-volt-drop-holdout-v2` only. It must NOT additionally require generic reasoning transfer that its lesson UI does not mount.
+- v3 transfer is a record of **objective choices**, not a certification that free-text causal reasoning is correct.

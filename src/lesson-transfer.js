@@ -5,7 +5,7 @@
  * the choices are objective and never assess semantic correctness of prose.
  */
 import{reasoningChallenge,gradeReasoning}from'./lesson-reasoning.js';
-export const TRANSFER_MODEL='autolab-reasoning-transfer-v2';
+export const TRANSFER_MODEL='autolab-reasoning-transfer-v3';
 
 /** Human-only review; unrelated to the four objectively graded decisions. */
 export const REASONING_HUMAN_REVIEW=Object.freeze([
@@ -123,7 +123,7 @@ export const TRANSFER_CASES=Object.freeze(values.map(([lessonId,context,options,
 })));
 const registry=new Map(TRANSFER_CASES.map(x=>[x.lessonId,x]));
 export function transferCase(lessonId){return registry.get(lessonId)||null;}
-export function transferCaseId(lessonId){return 'lab-reasoning-'+lessonId+'-v2';}
+export function transferCaseId(lessonId){return 'lab-reasoning-'+lessonId+'-v3';}
 export function gradeReasoningTransfer({lessonId,answers,transferAnswer,reasoning,limitations}){
  const transfer=transferCase(lessonId);
  if(!reasoningChallenge(lessonId)||!transfer)throw RangeError('Lección sin prueba de transferencia');
@@ -155,7 +155,7 @@ export function transferProgress(progress,lessonId){
  if(!transferCase(lessonId))return {status:'unmapped',attempts:0,passed:false,legacy:false};
  const cases=Array.isArray(progress?.cases)?progress.cases:[];
  const modern=cases.filter(x=>x?.id===transferCaseId(lessonId));
- const legacy=cases.some(x=>x?.id==='lab-reasoning-'+lessonId+'-v1'&&x?.passed===true);
+ const legacy=cases.some(x=>(x?.id==='lab-reasoning-'+lessonId+'-v1'||x?.id==='lab-reasoning-'+lessonId+'-v2')&&x?.passed===true);
  const passed=modern.some(x=>x.passed===true);
  return {status:passed?'passed':modern.length?'attempted':legacy?'legacy-passed':'not-started',
   attempts:modern.length,passed,legacy};

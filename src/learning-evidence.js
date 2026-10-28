@@ -10,7 +10,8 @@ import{VOLT_DROP_HOLDOUT_ID}from'./volt-drop-transfer.js';
 export const EVIDENCE_MODEL='lesson-evidence-structured-v1';
 export function lessonEvidence(progress,lessonId){
  const read=Boolean(progress?.notes?.['lesson-'+lessonId]);
- const practice=lessonPractice(lessonId),transfer=transferCase(lessonId);
+ // The first lesson has a dedicated independent holdout, not a mounted generic transfer.
+ const practice=lessonPractice(lessonId),transfer=lessonId==='volt-drop'?null:transferCase(lessonId);
  const p=practiceProgress(progress,lessonId);
  const t=transferProgress(progress,lessonId);
  const reasoning=transfer?{available:true,status:t.status,passed:t.passed===true,attempts:t.attempts}:{

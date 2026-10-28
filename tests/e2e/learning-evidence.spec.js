@@ -3,7 +3,7 @@ async function itinerary(page){
  await page.locator('nav.nav button[data-id="path"]').click();
  await expect(page.getByRole('heading',{name:'Aprendizaje por niveles'})).toBeVisible();
 }
-test('path makes reading and v2 transfer independent and recommends evidence rather than next passive reading',async({page})=>{
+test('path makes reading and v3 transfer independent and recommends evidence rather than next passive reading',async({page})=>{
  await page.goto('./');await itinerary(page);
  await expect(page.getByText('Transferencias contrafactuales aprobadas')).toBeVisible();
  await expect(page.getByText('Laboratorios embebidos aprobados')).toBeVisible();
@@ -37,7 +37,7 @@ test('path makes reading and v2 transfer independent and recommends evidence rat
  await expect(page.locator('#next-evidence-reason')).toContainText('Experimentar con voltímetro virtual');
  await expect(page.getByRole('button',{name:'Abrir siguiente actividad'})).toBeVisible();
 });
-test('MC06 recommendation requires genuine v2 transfer then its own embedded lab',async({page})=>{
+test('MC06 recommendation requires genuine v3 transfer then its own embedded lab',async({page})=>{
  await page.goto('./');
  await page.evaluate(async()=>{
   const {loadProgress,saveProgress}=await import('./src/core.js');
@@ -48,7 +48,7 @@ test('MC06 recommendation requires genuine v2 transfer then its own embedded lab
   const ids=learningStages.flatMap(s=>s.lessons);
   for(const id of ids.slice(0,ids.indexOf('mc06-dual-fault-instrumentation'))){
    p.notes['lesson-'+id]='2026-10-26T16:00:00Z';
-   if(transferCase(id))p.cases.push({id:'lab-reasoning-'+id+'-v2',at:'2026-10-26T16:00:01Z',score:100,passed:true});
+   if(transferCase(id))p.cases.push({id:'lab-reasoning-'+id+'-v3',at:'2026-10-26T16:00:01Z',score:100,passed:true});
    const practice=lessonPractice(id);
    if(practice?.kind==='embedded')p.cases.push({id:practice.caseId,at:'2026-10-26T16:00:02Z',score:100,passed:true});
   }
@@ -61,7 +61,7 @@ test('MC06 recommendation requires genuine v2 transfer then its own embedded lab
  await page.evaluate(async()=>{
   const {loadProgress,saveProgress}=await import('./src/core.js');
   const p=await loadProgress();
-  p.cases.push({id:'lab-reasoning-mc06-dual-fault-instrumentation-v2',at:new Date().toISOString(),score:100,passed:true});
+  p.cases.push({id:'lab-reasoning-mc06-dual-fault-instrumentation-v3',at:new Date().toISOString(),score:100,passed:true});
   await saveProgress(p);
  });
  await page.reload();await itinerary(page);
