@@ -3,7 +3,7 @@ import unittest
 
 from tools.ma00_elm327_serial import (
     ORDER, SETUP, ProtocolError, _port_name,
-    capture_mode01, decode_mode01, _reply,
+    capture_mode01, decode_mode01, decode_supported_pids, _reply,
 )
 
 
@@ -31,11 +31,14 @@ class FakeSerial:
     def flush(self):
         pass
 
+    def reset_input_buffer(self):
+        self._read.clear()
+
 
 def good_serial():
     return FakeSerial([
         b"\rOK\r>" for _ in SETUP
-    ] + [
+    ] + [b"41 00 FF FF FF FF\r>"] + [
         b"41 0C 1A F8\r>",
         b"41 05 7D\r>",
         b"41 04 80\r>",
@@ -88,14 +91,18 @@ class TestMode01(unittest.TestCase):
     def test_fake_serial_capture_and_time_provenance(self):
         port = good_serial()
         data = capture(port)
-        self.assertEqual(port.sent, list(SETUP) + list(ORDER))
-        self.assertTrue(all(x in SETUP or x in ORDER for x in port.sent))
+        self.assertEqual(port.sent, list(SETUP) + ["0100"] + list(ORDER))
+        self.assertTrue(all(x in SETUP or x in ORDER or x == "0100" for x in port.sent))
         self.assertEqual(data["schema"], "ma00-local-serial-receipts-v1")
         self.assertEqual(data["source"], "provided_obd_unverified")
         self.assertEqual(data["clock"], "host_monotonic_receive")
         self.assertIsNone(data["conditions"])
         self.assertIsNone(data["independentMechanicalReference"])
         self.assertFalse(data["instrumentClaims"]["ecuAcquisitionTimestampKnown"])
+        self.assertFalse(data["captureAborted"])
+        self.assertIsNone(data["abortReason"])
+        self.assertIn("010C", data["supportedPids"])
+        self.assertEqual(data["supportedPidMaskRawHex"], b"41 00 FF FF FF FF\r>".hex().upper())
         self.assertEqual(len(data["events"]), 6)
         self.assertTrue(all(e["status"] == "ok" for e in data["events"]))
         self.assertTrue(all(e["receivedAtMs"] >= e["requestAtMs"] for e in data["events"]))
@@ -106,7 +113,7 @@ class TestMode01(unittest.TestCase):
         self.assertFalse("healthScore" in data)
 
     def test_partial_reply_is_not_a_valid_measurement(self):
-        responses = [b"\rOK\r>" for _ in SETUP] + [
+        responses = [b"\rOK\r>" for _ in SETUP] + [b"41 00 FF FF FF FF\r>"] + [
             b"NO DATA\r>",  # real returned nonvalue
             b"41057D\r>", b"410480\r>", b"410690\r>",
             b"410780\r>", b"410F46\r>"
@@ -134,9 +141,47 @@ class TestMode01(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             _reply(FakeSerial([]), "04", __import__("time").monotonic, 0.2)
 
+    def test_supported_pid_mask_rejects_missing_and_ambiguous_ecu_data(self):
+        expected = decode_supported_pids(b"41 00 FF FF FF FF\r>")
+        self.assertTrue(set(ORDER).issubset(expected))
+        self.assertEqual(decode_supported_pids(b"0100\r41 00 FF FF FF FF\r>"), expected)
+        for bad in (
+            b"NO DATA\r>", b"41 00 FF FF FF FF",
+            b"4100FFFFFFFF\r4100FFFFFFFF\r>", b"4100FFFFFFFFFF\r>",
+            b"7E804100FFFFFFFF\r>", b"\xff\r>"
+        ):
+            with self.subTest(frame=bad), self.assertRaises(ProtocolError):
+                decode_supported_pids(bad)
+        missing = FakeSerial([b"\rOK\r>" for _ in SETUP] + [b"410000000000\r>"])
+        with self.assertRaisesRegex(ProtocolError, "unsupported"):
+            capture(missing)
+        self.assertEqual(missing.sent, list(SETUP) + ["0100"])
+
+    def test_optional_iat_not_queried_if_bitmap_does_not_advertise_support(self):
+        mask = 0xFFFFFFFF & ~(1 << (32 - 15))
+        no_iat = FakeSerial([b"\rOK\r>" for _ in SETUP] +
+                            [("4100%08X\r>" % mask).encode("ascii")] +
+                            [b"410C1AF8\r>", b"41057D\r>", b"410480\r>",
+                             b"410690\r>", b"410780\r>"])
+        data = capture(no_iat)
+        self.assertFalse(data["captureAborted"])
+        self.assertNotIn("010F", no_iat.sent)
+        self.assertEqual(len(data["events"]), 5)
+
+    def test_partial_response_aborts_before_another_pid_can_be_misattributed(self):
+        port = FakeSerial([b"\rOK\r>" for _ in SETUP] +
+                          [b"4100FFFFFFFF\r>"] + [b"410C1A"])
+        data = capture(port)
+        self.assertTrue(data["captureAborted"])
+        self.assertEqual(data["events"][0]["status"], "timeout")
+        self.assertEqual(data["events"][0]["rawResponseHex"], b"410C1A".hex().upper())
+        self.assertEqual(len(data["events"]), 1)
+        self.assertEqual(port.sent, list(SETUP) + ["0100", "010C"])
+        self.assertNotIn("0105", port.sent)
+
     def test_cannot_mutate_pid_allowlist_or_induce_actuator_commands(self):
         data = capture(good_serial())
-        self.assertEqual(data["instrumentClaims"]["serviceCommandsSent"], list(ORDER))
+        self.assertEqual(data["instrumentClaims"]["serviceCommandsSent"], ["0100"] + list(ORDER))
         self.assertNotIn("03", data["instrumentClaims"]["serviceCommandsSent"])
         self.assertNotIn("04", data["instrumentClaims"]["serviceCommandsSent"])
         for bad in ("03", "04", "08", "2F", "0101", "0902", "ATMA", "ATSH", "ATZ"):
