@@ -46,3 +46,7 @@ Empírico opt-in sobre el ZIP previamente fijado (publica JSON agregado únicame
     python3 tools/audit_cmapss_stress_mechanism_r8.py official-nasa.zip > r8-train-only.json
 
 GitHub Actions solo habilita R8 empírico con [MA00 NASA mechanism once]. El job no debe ejecutar las tareas R5/R6 que leen etiquetas TEST durante esa corrida. Sin merge ni deploy.
+
+## Ejecución empírica opt-in solicitada
+
+El código, las seis políticas de estrés, las semillas, la potencia de perturbación, los cinco folds y los cortes fijos ya quedaron en commits anteriores. La CI ha aprobado los tests Python/R8 y la compilación antes de solicitar esta corrida. Se activa una sola auditoría contra el ZIP original NASA previamente fijado por digest; se conservarán todos los resultados, incluso si contradicen la hipótesis de la fragilidad R6. No se procesará NASA TEST ni se modificará el modelo según el resultado.
