@@ -78,3 +78,23 @@ Todo esto se verificó con un adaptador falso en software: el funcionamiento fí
 **Límite explícito:** consistencia interna no equivale a autenticidad, integridad criptográfica, calibración instrumental, simultaneidad de PIDs o verdad-terreno del desgaste. Si un tercero manipula coherentemente todos los campos, la validación interna no puede detectarlo; para autenticidad se necesitarían protocolos externos y evidencia independiente. No hay ningún indicador de edad mecánica disponible para capturas reales.
 
 **Endurecimiento del esquema (R3.3):** un JSON que contiene respuestas crudas o metadatos seriales pero carece del identificador obligatorio de esquema, o declara otro esquema, se rechaza sin convertirse silenciosamente a un registro OBD genérico. Esto impide que la omisión accidental del encabezado desactive el control de consistencia, pero no autentica un archivo que sea manipulado de manera coherente.
+
+
+## R3.4 — Estado real de control de combustible (PID 0103)
+
+**Cambio de criterio:** ya no alcanza con que el operador declare lazo cerrado mientras la ECU informa otra estrategia. El conector interroga **PID 0103 en cada ciclo** antes de RPM, ECT, carga y correcciones de combustible, y guarda los dos bytes de estado. El módulo JS de la PWA verifica de nuevo ambos bytes, junto con el valor categórico y el orden de captura; un estado inválido o reordenado impide importar el archivo como medición íntegra.
+
+Según SAE J1979 (p. ej. https://law.resource.org/pub/us/cfr/ibr/005/sae.j1979.2002.pdf, definición de PID 03) el estado del sistema 1 puede ser: 01 lazo abierto por condiciones iniciales, **02 lazo cerrado con realimentación de oxígeno**, 04 lazo abierto por condiciones de operación, 08 lazo abierto por avería, 10 hex lazo cerrado con fallo de sensor. El byte del sistema 2 se guarda de forma separada. **Estos valores son códigos discretos, no una variable física continua**, por lo que PID 0103 no participa en deltas de medianas ni índices de desgaste.
+
+En registros seriales, MA00 exige al menos diez lecturas del estado por sesión, **valor 02 en cada observación del sistema 1**, y para el segundo sistema solo ausencia de estado (00) o el mismo lazo cerrado (02). Cualquier transición a lazo abierto, fallo de sensor o estado no soportado bloquea la **comparación descriptiva**. Se sigue solicitando la confirmación del operador sobre ventilador, A/C, cargas y ausencia de mantenimiento; un PID de estado observado no reemplaza el control del resto de condiciones. No se agregan comandos de escritura.
+
+**Impacto sobre compatibilidad:** los archivos del conector anterior no incluyen 0103 y ya no bastan para el nuevo ensayo A–A de registros seriales. Conservarlos para auditoría histórica, no rellenar 0103 artificialmente ni convertirlos a sesiones científicamente completas. Las demostraciones v0 sintéticas (no seriales) siguen siendo posibles. Una ECU que no anuncie 0103 en su máscara no cumple este estudio particular; eso no demuestra avería del vehículo.
+
+**Ensayo piloto propuesto:**
+1. Probar el lector USB/serial sin circular y registrar modelo/firmware/puerto/protocolo; confirmar ventilación y seguridad.
+2. Capturar una sesión exploratoria y revisar los porcentajes de respuestas perdidas, la distribución de intervalos por PID y la cantidad de abortos. No forzar interpretaciones cuando el adaptador sea lento.
+3. Documentar con una planilla externa el régimen de ralentí, aire acondicionado apagado, electroventilador, temperatura ambiente, batería y cargas. No guardar VIN, dominio, nombre ni fotos personales.
+4. Repetir A1/A2 **sin intervenciones** en días/sesiones diferentes, como mínimo dos para explorar la variación y más para cuantificarla rigurosamente. Identificar sesión y operador de manera anónima. No reutilizar timestamps para simular independencia.
+5. Contrastar mediciones funcionales con instrumentación independiente. No definir una edad mecánica o vida útil con base únicamente en 0103, trims y RPM.
+
+**Límite del resultado:** PID 0103 confirma una **declaración de la ECU**, no una prueba externa de que el control de mezcla o los sensores funcionen correctamente. La estimación de desgaste estructural continúa sin validar.
