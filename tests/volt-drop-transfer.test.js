@@ -7,7 +7,7 @@ import{learningStages}from"../src/learning-path.js";
 test("independent cases have disjoint causal localizations and consistent Kirchhoff balance",()=>{
  assert.equal(VOLT_DROP_HOLDOUT_CASES.length,3);
  assert.ok(VOLT_DROP_HOLDOUT_ID.startsWith("lab-volt-drop-holdout-"));
- assert.equal(new Set(VOLT_DROP_HOLDOUT_CASES.map(x=>x.id)).size,2);
+ assert.equal(new Set(VOLT_DROP_HOLDOUT_CASES.map(x=>x.id)).size,3);
  for(const c of VOLT_DROP_HOLDOUT_CASES){
   const p=heldOutVoltageReading(c.id,"positive"),r=heldOutVoltageReading(c.id,"return"),l=heldOutVoltageReading(c.id,"load");
   assert.ok(Math.abs(p+r+l-12)<1e-9);
