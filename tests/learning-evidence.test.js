@@ -51,10 +51,10 @@ test('path recommendation: theory then guided lab, reserved transfer and objecti
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
  assert.equal(snapshot.nextTask.kind,'independent-holdout');
  assert.equal(snapshot.byLesson.get('volt-drop').documented,false);
- p.cases.push({id:'lab-volt-drop-holdout-v1',passed:false});
+ p.cases.push({id:'lab-volt-drop-holdout-v2',passed:false});
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
  assert.equal(snapshot.nextTask.kind,'independent-holdout');
- p.cases.push({id:'lab-volt-drop-holdout-v1',passed:true,attempt:2});
+ p.cases.push({id:'lab-volt-drop-holdout-v2',passed:true,attempt:2});
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
  assert.equal(snapshot.byLesson.get('volt-drop').documented,true);
  assert.equal(snapshot.byLesson.get('volt-drop').holdout.firstRecordedAttemptPassed,false);
