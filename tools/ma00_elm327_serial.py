@@ -200,6 +200,10 @@ def capture_mode01(
                 except ProtocolError as exc:
                     event["status"] = "error"
                     event["parseError"] = str(exc)
+                    # An unexpected frame may be delayed bytes from a prior
+                    # query. Do not assign any later response to another PID.
+                    capture_aborted = True
+                    abort_reason = "ELM response untrusted; reset/reconnect before another capture"
             events.append(event)
             if capture_aborted:
                 break
