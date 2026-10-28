@@ -51,3 +51,10 @@ La salida incluye un expediente estructurado; **no sirve para validar A–A** po
 - Nunca describir el resultado actual como «edad mecánica», «salud %», deterioro estructural o vida remanente.
 
 **Código:** src/mechanical-age-raw-obd.js, tools/ma00-capture-stdin.mjs, src/mechanical-age-aa-view.js; pruebas tests/mechanical-age-raw-obd.test.js, tests/mechanical-age-bridge.test.js, tests/mechanical-age-aa-view.test.js y tests/e2e/mechanical-age.spec.js. Todo se implementa en research/mechanical-age-obd-v0 sin fusionar ni desplegar.
+
+
+## Puerta R3.2: validez del régimen físico de A–A
+
+Se detectó un falso positivo metodológico: dos capturas a 3.000 RPM podrían presentar medianas similares y aprobar una comparación declarada como «ralentí». La evaluación A–A ahora exige **también en cada sesión** RPM medianas 550–1150, ECT mediana 75–110 °C con amplitud observada ≤5 °C y carga mediana ≤35 % con amplitud ≤10 puntos. Estos números son **límites experimentales provisionales**, no umbrales OEM ni referencias de desgaste. Un motor concreto puede necesitar otra ventana por familia y contexto; en ese caso el estudio debe definirse/validarse antes de aceptar resultados.
+
+Se conservan como controles adversariales las condiciones estables pero físicamente ajenas al ralentí (RPM altas, refrigerante frío, carga excesiva), y las variables térmicas inestables dentro de una sesión. Ninguno de estos controles acredita que la ECU midió todos los canales simultáneamente.
