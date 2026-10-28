@@ -30,6 +30,9 @@ from tools.audit_cmapss_robustness_r7 import (
 
 SCHEMA="ma00-r8-paired-noise-mechanism-train-only-v1"
 ALPHA=20.0
+# Original R6 TRAIN-CV chose alpha=1.0; R8 began with alpha=20.0.
+# Compare both on TRAIN only. Never select based on previously consumed TEST.
+ALLOWED_ALPHA=(1.0,20.0)
 LEVEL=.10
 SEEDS=(7,29,53,83,107)
 # The R6 control is a verbatim relative-scale protocol: add one normal draw
@@ -157,7 +160,9 @@ def _score(predictions):
     }
 
 
-def analyze_train_only(training_text,*,strict=False):
+def analyze_train_only(training_text,*,strict=False,alpha=ALPHA):
+    if alpha not in ALLOWED_ALPHA:
+        raise ValueError("Only preregistered alpha=1 or alpha=20 permitted")
     engines=read_sensor_trajectories(training_text)
     if len(engines)<10:
         raise ValueError("At least 10 independent training engines needed")
@@ -172,7 +177,7 @@ def analyze_train_only(training_text,*,strict=False):
         if train_ids & held_ids:
             raise AssertionError("R8 engine leakage")
         train_records=samples({uid:engines[uid] for uid in train_ids})
-        model=fit_ridge(train_records,"cycle_sensors",ALPHA)
+        model=fit_ridge(train_records,"cycle_sensors",alpha)
         if set(model["trainEngineIds"]) & held_ids:
             raise AssertionError("Train/heldout overlap")
         sensor_sds=_sd_by_index(train_records)
@@ -231,7 +236,7 @@ def analyze_train_only(training_text,*,strict=False):
         "trainTestSeparationPreserved":True,
         "testTrajectoriesParsed":False,
         "testRulLabelsRead":False,
-        "alphaFixed":ALPHA,"noiseStdFraction":LEVEL,
+        "alphaFixed":alpha,"noiseStdFraction":LEVEL,
         "seedValues":list(SEEDS),
         "observedCheckpoints":list(CHECKPOINTS),
         "constantSensorIndicesFromTrainFolds":sorted(constant_sensors),
@@ -254,9 +259,9 @@ def analyze_train_only(training_text,*,strict=False):
     }
 
 
-def run_archive(archive):
+def run_archive(archive,*,alpha=ALPHA):
     digest,train=_take_only_training(archive)
-    report=analyze_train_only(train,strict=True)
+    report=analyze_train_only(train,strict=True,alpha=alpha)
     report["officialZipSha256"]=digest
     return report
 
@@ -264,5 +269,6 @@ def run_archive(archive):
 if __name__=="__main__":
     cli=argparse.ArgumentParser(description="MA00 R8 paired TRAIN-only sensor stress mechanism")
     cli.add_argument("original_nasa_zip")
+    cli.add_argument("--alpha",type=float,choices=ALLOWED_ALPHA,default=ALPHA)
     args=cli.parse_args()
-    print(json.dumps(run_archive(args.original_nasa_zip),ensure_ascii=False,indent=2))
+    print(json.dumps(run_archive(args.original_nasa_zip,alpha=args.alpha),ensure_ascii=False,indent=2))
