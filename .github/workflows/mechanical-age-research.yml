@@ -129,7 +129,7 @@ jobs:
   empirical-cmapss:
     name: NASA FD001 aggregate-only simulated-engine baseline
     # Never fetch the dataset on routine push. Single research marker or dispatch.
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[MA00 NASA once]') || contains(github.event.head_commit.message, '[MA00 NASA sensors once]') || contains(github.event.head_commit.message, '[MA00 NASA robustness once]') || contains(github.event.head_commit.message, '[MA00 NASA mechanism once]')
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[MA00 NASA once]') || contains(github.event.head_commit.message, '[MA00 NASA sensors once]') || contains(github.event.head_commit.message, '[MA00 NASA robustness once]') || contains(github.event.head_commit.message, '[MA00 NASA mechanism once]') || contains(github.event.head_commit.message, '[MA00 NASA alpha-control once]')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -141,7 +141,7 @@ jobs:
             "https://phm-datasets.s3.amazonaws.com/NASA/6.+Turbofan+Engine+Degradation+Simulation+Data+Set.zip" \
             -o /tmp/ma00/cmapss-source.zip
       - name: Check archive, independent engine split and benchmark train-only priors
-        if: "!contains(github.event.head_commit.message, '[MA00 NASA robustness once]') && !contains(github.event.head_commit.message, '[MA00 NASA mechanism once]')"
+        if: "!contains(github.event.head_commit.message, '[MA00 NASA robustness once]') && !contains(github.event.head_commit.message, '[MA00 NASA mechanism once]') && !contains(github.event.head_commit.message, '[MA00 NASA alpha-control once]')"
         run: |
           python3 tools/benchmark_cmapss_fd001.py /tmp/ma00/cmapss-source.zip > /tmp/ma00/cmapss-aggregate.json
           python3 -c 'import json; d=json.load(open("/tmp/ma00/cmapss-aggregate.json")); print(json.dumps({k:d[k] for k in ("schema","sourceArchiveSha256","trainEngines","testEngines","trainRows","testRows","baselineMetrics","automotiveWearValidation")},indent=2))'
@@ -160,6 +160,12 @@ jobs:
         run: |
           python3 tools/audit_cmapss_stress_mechanism_r8.py /tmp/ma00/cmapss-source.zip > /tmp/ma00/cmapss-r8-train-only.json
           python3 -c 'import json; x=json.load(open("/tmp/ma00/cmapss-r8-train-only.json")); print(json.dumps({"schema":x["schema"],"sha256":x["officialZipSha256"],"trainingEngines":x["trainingEngines"],"testRulLabelsRead":x["testRulLabelsRead"],"constantSensorIndices":x["constantSensorIndicesFromTrainFolds"],"results":{p:{"MAE":r["engineBalancedMAEcycles"],"medianMAE":r["medianEngineMAEcycles"],"engines":r["independentEngineCount"]} for p,r in x["policies"].items()}},indent=2))'
+      - name: R8.1 compare R6 alpha 1 vs R8 alpha 20 only on TRAIN
+        if: contains(github.event.head_commit.message, '[MA00 NASA alpha-control once]')
+        run: |
+          python3 tools/audit_cmapss_stress_mechanism_r8.py /tmp/ma00/cmapss-source.zip --alpha 1 > /tmp/ma00/cmapss-r8-alpha1.json
+          python3 tools/audit_cmapss_stress_mechanism_r8.py /tmp/ma00/cmapss-source.zip --alpha 20 > /tmp/ma00/cmapss-r8-alpha20.json
+          python3 -c 'import json; a=json.load(open("/tmp/ma00/cmapss-r8-alpha1.json")); b=json.load(open("/tmp/ma00/cmapss-r8-alpha20.json")); print(json.dumps({"sha256":a["officialZipSha256"],"testLabelsRead":a["testRulLabelsRead"] or b["testRulLabelsRead"],"results":{x["alphaFixed"]:{k:{"MAE":v["engineBalancedMAEcycles"],"independentEngines":v["independentEngineCount"]} for k,v in x["policies"].items()} for x in (a,b)}},indent=2))'
       - name: Publish NASA aggregate metrics only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -169,4 +175,6 @@ jobs:
             /tmp/ma00/cmapss-sensor-aggregate.json
             /tmp/ma00/cmapss-r7-train-only.json
             /tmp/ma00/cmapss-r8-train-only.json
+            /tmp/ma00/cmapss-r8-alpha1.json
+            /tmp/ma00/cmapss-r8-alpha20.json
           retention-days: 14
