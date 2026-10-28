@@ -86,3 +86,10 @@ Permitido: estadísticas descriptivas, sensibilidades sintéticas, auditoría de
 Prohibido por ahora: porcentajes de salud, edad en km/años, vida útil remanente, causalidad del service o diagnóstico certificado.
 
 **Implementación:** src/mechanical-age-evidence.js, tests/mechanical-age-evidence.test.js, src/mechanical-age-research.js y src/mechanical-age-repeatability.js. El catálogo y auditorías empíricas están en docs/MECHANICAL_AGE_RESEARCH_V0.md.
+
+
+## Nueva comprobación de observabilidad en v0
+
+El módulo src/mechanical-age-signal-quality.js informa por canal (RPM, trims, carga, ECT/IAT si existen) cantidad de valores distintos, máxima meseta de lecturas exactamente iguales y fracción sin cambios. Marca **mesetas ≥80 % de una ventana de al menos 20 observaciones**, un umbral **exploratorio** y no un test validado de falla. Una meseta puede significar cuantización, mala actualización del sensor o una magnitud físicamente estable. **No se elimina, interpola ni reemplaza ninguna lectura.** No produce score, error de edad ni diagnóstico de sensor. La estimación de muestras estadísticamente independientes y la sincronía por PID continúan **sin determinarse**.
+
+Ensayos adversariales: tests/mechanical-age-signal-quality.test.js, tests/mechanical-age-evidence.test.js y tests/mechanical-age-repeatability.test.js.
