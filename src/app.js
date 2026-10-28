@@ -761,15 +761,15 @@ function lessonPracticePanel(l){
 }
 function lessonView(){
  const l=lessons.find(x=>x.id===selectedLesson);if(!l)return learn();
- const first=l.sections.slice(0,2),last=l.sections.slice(2);
+ const allSections=l.sections;
  const sections=items=>items.map(([h,t])=>'<h2>'+esc(h)+'</h2><p>'+esc(t)+'</p>').join('');
  return button('← Volver a academia','nav','data-id="learn"','alt small')+
  '<div class="section"></div>'+heading('LECCIÓN · '+l.topic.toUpperCase(),l.title,'Comprendé, formulá hipótesis, comprobá y justificá.')+
  '<article class="panel lesson-body"><p class="muted">Teoría: '+(data.notes['lesson-'+l.id]?'lectura registrada':'lectura pendiente')+
  '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>'+
  '. Razonamiento: <span id="lesson-theory-reasoning-status">'+esc(lessonReasoningStatusText(l.id))+'</span>. Ninguno acredita competencia física.</p>'+
- sections(first)+'</article>'+lessonPracticePanel(l)+
- '<article class="panel lesson-body">'+sections(last)+
+ sections(allSections)+'</article>'+lessonPracticePanel(l)+
+ '<article class="panel lesson-body">'+
  '<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+
  link(l.url,'Abrir fuente y lecturas relacionadas')+
  '<div class="section">'+button('Registrar lectura y volver','complete-lesson','data-id="'+attr(l.id)+'"')+'</div></article>';
