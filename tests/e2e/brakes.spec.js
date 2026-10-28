@@ -1,0 +1,22 @@
+import{test,expect}from'@playwright/test';
+test('MC08 energy model: hypotheses, objective assessment, portfolio and persistence',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="brakes"]').click();
+ await expect(page.getByRole('heading',{name:'Brake Energy Research Lab'})).toBeVisible();
+ await page.locator('#br-speed').selectOption('80');
+ await page.locator('#br-mu').selectOption('0.3');
+ await page.locator('#br-energy').selectOption('quadruple');
+ await page.locator('#br-distance').selectOption('quadruple');
+ await page.locator('#br-mass-effect').selectOption('same');
+ await page.getByRole('button',{name:'Congelar hipótesis y simular'}).click();
+ await expect(page.getByText('Resultados de física ideal, NO distancias de seguridad vial')).toBeVisible();
+ await page.locator('#br-reason').fill('La energía cinética E igual a medio de m por v al cuadrado y la distancia ideal v cuadrado sobre dos mu g hacen que duplicar la velocidad multiplique por cuatro ambas.');
+ await page.locator('#br-limits').fill('Sin transferencia dinámica de carga, ABS real, pendiente ni neumáticos medidos; los valores no deben utilizarse para tomar decisiones de seguridad vial.');
+ await page.getByRole('button',{name:'Evaluar explicación'}).click();
+ await expect(page.getByText(/Resultado: 100\/100/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar investigación MC08'}).click();
+ await expect(page.getByRole('button',{name:'Evidencia registrada'})).toBeDisabled();
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('MC08 — Investigación de energía de frenado')).toBeVisible();
+ await page.reload();await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('MC08 — Investigación de energía de frenado')).toBeVisible();
+});

@@ -1,3 +1,32 @@
+import{rotaryShell,mountRotaryLab}from'./rotary-view.js';
+import{thermalShell,mountThermalLab}from'./rotary-thermal-view.js';
+import{heatTransferShell,mountHeatTransfer}from'./rotary-heat-view.js';
+import{portBurnShell,mountPortBurnLab}from'./rotary-port-burn-view.js';
+import{apertureShell,mountApertureLab}from'./rotary-aperture-view.js';
+import{apertureInverseShell,mountApertureInverse}from'./rotary-aperture-inverse-view.js';
+import{rotaryInverseLessons,rotaryInverseQuestions}from'./rotary-aperture-inverse-curriculum.js';
+import{rotaryApertureLessons,rotaryApertureQuestions}from'./rotary-aperture-curriculum.js';
+import{ecuOptimizationShell,mountECUOptimization}from'./ecu-optimization-view.js';
+import{robustResearchShell,mountRobustResearch}from'./ecu-robust-view.js';
+import{ecuRobustLessons,ecuRobustQuestions}from'./ecu-robust-curriculum.js';
+import{ecuOptimizationLessons,ecuOptimizationQuestions}from'./ecu-optimization-curriculum.js';
+import{rotaryPortBurnLessons,rotaryPortBurnQuestions}from'./rotary-port-burn-curriculum.js';
+import{rotaryHeatLessons,rotaryHeatQuestions}from'./rotary-heat-curriculum.js';
+import{rotaryThermalLessons,rotaryThermalQuestions}from'./rotary-thermal-curriculum.js';
+import{rotaryGeometryLessons,rotaryGeometryQuestions}from'./rotary-geometry-curriculum.js';
+import{sealLabShell,mountSealLab}from'./rotary-seal-view.js';
+import{metrologyShell,mountMetrology}from'./metrology-view.js';
+import{inventorLessons,inventorQuestions}from'./inventor-curriculum.js';
+import{inventorShell,mountInventorLab}from'./inventor-blackbox-view.js';
+import{adversarialShell,mountAdversarialLab}from'./rotary-instrument-view.js';
+import{brakesShell,mountBrakeLab}from'./brake-view.js';
+import{powertrainShell,mountPowertrainLab}from'./powertrain-view.js';
+import{mechanicsLessons,mechanicsQuestions}from'./mechanics-curriculum.js';
+import{mechanicsSystemsLessons,mechanicsSystemsQuestions}from'./mechanics-systems-curriculum.js';
+import{chassisSystemsLessons,chassisSystemsQuestions}from'./chassis-systems-curriculum.js';
+import{powertrainLessons,powertrainQuestions}from'./powertrain-curriculum.js';
+import{engineeringBridgeLessons,engineeringBridgeQuestions}from'./engineering-bridge-curriculum.js';
+import{mechanicsExamStages,mechanicsStageQuestions}from'./mechanics-exams.js';
 import{tracks,lessons as baseLessons,questions as baseQuestions,cases as baseCases,resources}from'./content.js';
 import{additionalLessons,additionalQuestions}from'./curriculum-advanced.js';
 import{ecuLessons,ecuQuestions}from'./ecu-curriculum.js';
@@ -16,9 +45,20 @@ import{FUEL_CASES,createFuelSession,fuelFrame,fuelProbe,gradeFuelSession,fuelRep
 import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSession,generateTrace,traceSummary,gradeTraceSession,traceReport}from'./temporal-trace-lab.js';
 import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDifferential,differentialTrace,differentialReport}from'./fault-discrimination.js';
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
+import{learningEvidenceOverview,lessonEvidence}from'./learning-evidence.js';
+import{lessonPractice,practiceProgress,practiceCoverage}from'./lesson-practice.js';
+import{REASONING_CHALLENGES,reasoningChallenge}from'./lesson-reasoning.js';
+import{transferProgress}from'./lesson-transfer.js';
+import{mountLessonReasoning}from'./lesson-reasoning-view.js';
+import{mountInquiryNotebook,inquiryProgress}from'./lesson-inquiry.js';
+import{mountNumericBench}from'./numeric-inquiry.js';
+import{mountWaveInquiry}from'./waveform-inquiry.js';
+import{voltDropTheoryIllustration,mountVoltDropPractice,mountVoltDropBaseline}from'./volt-drop-lesson.js';
+import{mountVoltDropHoldout}from'./volt-drop-transfer.js';
+import{dtcTheoryIllustration,mountDtcGuided}from'./dtc-lesson.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
-const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions];
+const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...powertrainLessons,...engineeringBridgeLessons,...inventorLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...powertrainQuestions,...engineeringBridgeQuestions,...inventorQuestions,...rotaryGeometryQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions,...ecuOptimizationQuestions,...ecuRobustQuestions,...rotaryApertureQuestions,...rotaryInverseQuestions];
 import{additionalCases}from'./cases-advanced.js';
 import{assessCase,caseReport}from'./workshop-engine.js';
 import{multiFaultCases,evaluateMultiFault,multiFaultReport}from'./differential-lab.js';
@@ -72,7 +112,7 @@ function saveDiagnosticDraft(immediate=false){
 }
 function nav(next){if(diagnosticTransferTraining&&!diagnosticTransferGrades)saveDiagnosticDraft(true);page=next;exam=null;training=null;multiTraining=null;multiResult=null;ecuTraining=null;ecuResult=null;differentialTraining=null;differentialResult=null;traceTraining=null;traceResult=null;fuelTraining=null;fuelResult=null;misfireTraining=null;misfireResult=null;integralTraining=null;integralResult=null;integralReport=null;examResult=null;caseResult=null;transferTraining=null;transferResults=null;diagnosticTransferTraining=null;diagnosticTransferGrades=null;render();document.getElementById('main-content')?.focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});}
 function heading(label,title,description=''){return '<div class="eyebrow">'+esc(label)+'</div><h1 tabindex="-1">'+esc(title)+'</h1>'+(description?'<p class="muted lead">'+esc(description)+'</p>':'');}
-function layout(body){const focusId=root.contains(document.activeElement)?document.activeElement.id:'';const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['coach','Plan de estudio'],['exams','Exámenes'],['analytics','Errores por pregunta'],['challenges','Retos medidos'],['transfer','Transferencia'],['diagtransfer','Transferencia diagnóstica'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['misfire','Balance de cilindros'],['integrative','Taller Integrador'],['portfolio','Portafolio'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<a class="skip-link" href="#main-content">Saltar al contenido principal</a><div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.9.17</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main" id="main-content" tabindex="-1"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+storageUnsavedBanner()+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';if(focusId)document.getElementById(focusId)?.focus({preventScroll:true});}
+function layout(body){const focusId=root.contains(document.activeElement)?document.activeElement.id:'';const menus=[['home','Panel'],['learn','Academia'],['path','Itinerario'],['coach','Plan de estudio'],['exams','Exámenes'],['analytics','Errores por pregunta'],['challenges','Retos medidos'],['transfer','Transferencia'],['diagtransfer','Transferencia diagnóstica'],['cases','Taller virtual'],['ecu','Banco ECU'],['differential','Diagnóstico diferencial'],['temporal','Capturas temporales'],['fuel','Inyección OBD'],['misfire','Balance de cilindros'],['integrative','Taller Integrador'],['portfolio','Portafolio'],['rotary','Rotary Engineering'],['rotary-thermal','Termodinámica RW2/RW3'],['rotary-heat','Pérdidas térmicas RW5'],['rotary-ports','Puertos y combustión RW6/RW7'],['rotary-aperture','Geometría de puertos RW6+'],['rotary-inverse','Metrología inversa RW6++'],['ecu-optimization','Optimización ECU RW8'],['ecu-robust','Robustez ECU RW8+'],['rotary-seals','Diagnóstico rotativo RW4'],['metrology','Metrología MC01'],['inventor','Inventor’s Bench MC14'],['rotary-instruments','Instrumentación RW4+'],['brakes','Frenado MC08'],['powertrain','Tren motriz MC06'],['labs','Laboratorios'],['resources','Recursos'],['data','Mis datos']];root.innerHTML='<a class="skip-link" href="#main-content">Saltar al contenido principal</a><div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">A</span><div>AutoLab<span class="brand-accent"> Academy</span><small>ENGINEERING LEARNING LAB</small></div></div><nav class="nav" aria-label="Navegación principal">'+menus.map(([id,label])=>'<button class="'+(page===id?'active':'')+'" data-action="nav" data-id="'+id+'" '+(page===id?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="sidebar-footer"><span class="tag">Versión 1.9.17</span><p>Progreso local, sin cuenta ni servidor. Guardá un respaldo periódicamente.</p></div></aside><main class="main" id="main-content" tabindex="-1"><div class="topbar"><div class="eyebrow">DIAGNÓSTICO ELECTRÓNICO · HEV/EV</div><span class="tag dim">Modo offline</span></div>'+storageUnsavedBanner()+body+'<footer>AutoLab Academy · Formación y simulación educativa. No acredita intervenciones de alta tensión ni reemplaza supervisión profesional.</footer></main></div>';if(focusId)document.getElementById(focusId)?.focus({preventScroll:true});}
 function home(){const attempted=data.attempts.length;const average=attempted?Math.round(data.attempts.reduce((a,x)=>a+x.percentage,0)/attempted):0;const due=reviewOverview(data,questions).due;const topics=completedTopics(data,questions);return '<section class="hero"><div><div class="eyebrow">TU CENTRO DE ENTRENAMIENTO</div><h1>Aprendé a encontrar la causa, no solo el código.</h1><p>Estudiá electrónica automotriz, entrená con fallas reproducibles y evaluá tu razonamiento antes de trabajar con vehículos reales.</p><div class="row">'+button('Iniciar examen diagnóstico','start-exam','data-topic="all"')+button('Mi plan de estudio','nav','data-id="coach"','alt')+button('Retos de medición','nav','data-id="challenges"','alt')+button('Practicar transferencia','nav','data-id="transfer"','alt')+button('Diagnóstico en situaciones nuevas','nav','data-id="diagtransfer"','alt')+button('Explorar lecciones','nav','data-id="learn"','alt')+'</div></div><div class="hero-icon" aria-hidden="true">⌁</div></section><section class="grid"><div class="panel"><div class="stat-number">'+attempted+'</div><div class="stat-label">Exámenes rendidos</div></div><div class="panel"><div class="stat-number">'+average+'%</div><div class="stat-label">Promedio de evaluaciones</div></div><div class="panel"><div class="stat-number">'+due+'</div><div class="stat-label">Preguntas para repasar</div></div></section><div class="section"><h2>Mapa de competencias</h2></div><section class="grid two">'+tracks.map(t=>{const s=topics.find(x=>x.topic===t.id);const last=data.attempts.filter(a=>a.topic===t.id).at(-1);return '<article class="panel"><div class="row spaced"><span class="tag dim">'+t.id.toUpperCase()+'</span><span class="muted">'+(last?last.percentage+'%':'Sin evaluar')+'</span></div><h3>'+esc(t.title)+'</h3><p class="muted">'+esc(t.subtitle)+'</p><div class="progress"><span style="width:'+(last?last.percentage:0)+'%"></span></div><p class="muted small">'+(s?.passed||0)+' exámenes aprobados con ≥85%</p>'+button('Entrenar este tema','start-exam','data-topic="'+t.id+'"','alt small')+'</article>';}).join('')+'</section><div class="section"><h2>Próximo desafío</h2></div><div class="panel row spaced"><div><h3>Diagnóstico: arranque lento</h3><p class="muted">Caso práctico con hipótesis, mediciones y diagnóstico de causa raíz.</p></div>'+button('Abrir caso','start-case','data-id="case-ground"')+'</div>';}
 
 
@@ -558,23 +598,35 @@ function studyCoachView(){
 
 function pathView(){
  const status=evaluateLearningPath(data,lessons);
+ const evidence=learningEvidenceOverview(data,lessons,learningStages);
+ const recommendation=evidence.nextTask;
  return heading('ITINERARIO TÉCNICO','Aprendizaje por niveles','Ruta orientativa y accesible sin bloqueo. Las lecturas y los exámenes se cuentan por separado; ninguna etapa acredita experiencia real.')+
  '<div class="grid two"><div class="panel"><div class="stat-number">'+status.read+'/'+status.total+'</div><p class="stat-label">Lecturas registradas</p></div>'+
  '<div class="panel"><div class="stat-number">'+status.approvedTopics+'/5</div><p class="stat-label">Áreas con al menos un examen ≥85%</p></div></div>'+
- '<div class="section"><h2>Tu siguiente contenido sugerido</h2></div><div class="panel">'+(status.nextLesson?
- '<h3>'+esc(lessons.find(l=>l.id===status.nextLesson)?.title||status.nextLesson)+'</h3>'+
- '<p class="muted">Podés avanzar a cualquier nivel; la sugerencia se basa exclusivamente en lecturas registradas.</p>'+
- button('Estudiar siguiente lección','path-lesson','data-id="'+attr(status.nextLesson)+'"'):
- '<h3>Recorrido de lecturas registrado</h3><p>Podés seguir repasando, rindiendo y realizando prácticas.</p>')+'</div>'+
+ '<div class="grid two"><div class="panel"><div class="stat-number">'+evidence.totals.reasoningPassed+'/'+evidence.totals.reasoningAvailable+'</div><p class="stat-label">Transferencias contrafactuales aprobadas</p></div>'+
+ '<div class="panel"><div class="stat-number">'+evidence.totals.embeddedPassed+'/'+evidence.totals.embeddedAvailable+'</div><p class="stat-label">Laboratorios embebidos aprobados</p></div></div>'+
+ '<div class="section"><h2>Siguiente evidencia sugerida</h2></div><div class="panel">'+(recommendation?
+ '<h3>'+esc(lessons.find(l=>l.id===recommendation.lessonId)?.title||recommendation.lessonId)+'</h3>'+
+ '<p class="muted" id="next-evidence-reason">'+esc(recommendation.label)+'. El siguiente paso prioriza criterios sin probar antes de proponer otra lectura; podés navegar a cualquier lección.</p>'+
+ button('Abrir siguiente actividad','path-lesson','data-id="'+attr(recommendation.lessonId)+'"'):
+ '<h3>Sin actividades evaluables pendientes en la ruta disponible</h3><p>Esto no es una certificación: hay contenidos aún sin rúbrica propia, y toda práctica real requiere supervisión.</p>')+'</div>'+
  '<div class="section"><h2>Tres etapas del recorrido</h2></div>'+
  '<div class="stack">'+status.stages.map(stage=>
  '<article class="panel"><div class="row spaced"><div><span class="tag dim">ETAPA '+stage.order+'</span><h2 style="margin:12px 0 4px">'+esc(stage.name)+'</h2><p class="muted">'+esc(stage.subtitle)+'</p></div>'+
  '<strong>'+stage.read+'/'+stage.total+' lecturas</strong></div>'+
+ '<p class="muted small">Transferencia contrafactual: '+evidence.byStage.find(x=>x.id===stage.id).reasoningPassed+'/'+evidence.byStage.find(x=>x.id===stage.id).reasoningAvailable+
+ ' · Laboratorios embebidos: '+evidence.byStage.find(x=>x.id===stage.id).labPassed+'/'+evidence.byStage.find(x=>x.id===stage.id).labAvailable+
+ ' · Evidencia documental formativa: '+evidence.byStage.find(x=>x.id===stage.id).documentedTraining+' (no certificación)</p>'+
  '<div class="progress"><span style="width:'+Math.round(stage.read/stage.total*100)+'%"></span></div>'+
  '<p class="muted">'+esc(stage.goal)+'</p>'+
  '<div class="path-lessons">'+stage.lessons.map(id=>{
-  const l=lessons.find(x=>x.id===id),done=Boolean(data.notes['lesson-'+id]);
-  return '<button class="path-lesson" data-action="path-lesson" data-id="'+attr(id)+'"><span aria-hidden="true">'+(done?'✓':'○')+'</span><span>'+esc(l?.title||id)+'</span><small>'+esc(l?.topic||'')+'</small></button>';
+  const l=lessons.find(x=>x.id===id),e=evidence.byLesson.get(id);
+  const details=[e.read?'Lectura registrada':'Lectura pendiente'];
+  if(e.reasoning.available)details.push(e.reasoning.passed?'Transferencia aprobada':'Transferencia pendiente');
+  if(e.lab.available)details.push(e.lab.passed?'Laboratorio aprobado':'Laboratorio pendiente');
+  if(e.linkedLab)details.push('Banco vinculado (no acredita esta lección)');
+  if(!e.assessed)details.push('Sin rúbrica individual');
+  return '<button class="path-lesson" data-action="path-lesson" data-id="'+attr(id)+'"><span aria-hidden="true">'+(e.read?'✓':'○')+'</span><span>'+esc(l?.title||id)+'</span><small>'+esc((l?.topic||'')+' · '+details.join(' · '))+'</small></button>';
  }).join('')+'</div>'+
  (stage.id==='ecu'?'<div class="row" style="margin-top:16px">'+button('Practicar en Banco ECU','nav','data-id="ecu"')+'</div>':'')+
  (stage.id==='components'?'<div class="row" style="margin-top:16px">'+button('Abrir laboratorio de componentes','open-components')+'</div>':'')+
@@ -584,7 +636,7 @@ function pathView(){
  (stage.id==='misfire'?'<div class="row" style="margin-top:16px">'+button('Practicar balance de cilindros','nav','data-id="misfire"')+'</div>':'')+
  (stage.id==='integrative'?'<div class="row" style="margin-top:16px">'+button('Abrir Taller Integrador','nav','data-id="integrative"')+'</div>':'')+
  '</article>').join('')+'</div>'+
- '<div class="notice">El avance por lectura no se interpreta como dominio de un tema. El puntaje de selección múltiple tampoco demuestra aptitud para diagnóstico real ni intervención HV.</div>';
+ '<div class="notice">El registro de lectura, las '+evidence.totals.reasoningPassed+' transferencias y los '+evidence.totals.embeddedPassed+' laboratorios aprobados son evidencias independientes. '+evidence.totals.notAssessed+' lecciones todavía carecen de evaluación individual. Ninguno acredita experiencia en taller, diagnóstico físico o intervención HV.</div>';
 }
 function ecuMenu(){
  return heading('BANCO ECU','Investigar controladores sin cambiarlos a ciegas','Cinco modelos de banco sintético. Anticipá la observación antes de solicitarla y fundamentá por qué confirma o refuta tu diagnóstico.')+
@@ -653,20 +705,85 @@ function ecuSummary(c){
 function learn(){
  const done=lessons.filter(l=>Boolean(data.notes['lesson-'+l.id])).length;
  return heading('ACADEMIA','Biblioteca de diagnóstico aplicado',lessons.length+' lecciones orientadas a interpretar mediciones, diagnosticar sin sustituir piezas al azar y trabajar con evidencia.')+
+ '<div class="notice">Lectura, práctica y examen son evidencias diferentes. '+practiceCoverage(lessons).mapped+' lecciones están vinculadas a laboratorios; '+practiceCoverage(lessons).embedded+' permiten practicar aquí mismo. Además, hay '+REASONING_CHALLENGES.length+' ejercicios de razonamiento falsable en sus lecciones. Cada lección incluye un cuaderno científico sin nota; las 76 rúbricas v2 faltantes y los simuladores propios siguen pendientes.</div>'+
  '<div class="panel row spaced"><div><strong>'+done+' de '+lessons.length+' lecturas registradas</strong><p class="muted small">El registro es de lectura, no acredita dominio técnico.</p></div><span class="tag dim">Cinco especialidades</span></div>'+
  tracks.map(t=>{
   const group=lessons.filter(l=>l.topic===t.id),completed=group.filter(l=>data.notes['lesson-'+l.id]).length;
   return '<div class="section"><h2>'+esc(t.title)+'</h2><span class="tag dim">'+completed+'/'+group.length+' lecturas</span></div>'+
   '<div class="cards">'+group.map(l=>{
    const completed=Boolean(data.notes['lesson-'+l.id]);
+   const p=lessonPractice(l.id),pr=practiceProgress(data,l.id);
+   const status=pr.passed?(['numeric-bench','wave-inquiry'].includes(p?.page)?'Práctica aprobada · modelo virtual, sin medición física':'Práctica aprobada'):pr.status==='related-passed'?'Banco relacionado aprobado; lección aún sin evaluar':pr.status==='related-attempted'?'Banco relacionado practicado':pr.attempts?'Práctica realizada':p?.kind==='embedded'?'Simulador en lección':p?'Laboratorio asociado':reasoningChallenge(l.id)?'Razonamiento v2 y cuaderno científico':'Cuaderno científico · simulador pendiente';
    return '<article class="panel lesson-card"><div><span class="tag '+(completed?'':'dim')+'">'+(completed?'Lectura registrada':'Por estudiar')+'</span>'+
-   '<h3 style="margin-top:12px">'+esc(l.title)+'</h3><p class="muted">'+l.minutes+' minutos sugeridos · '+l.sections.length+' temas</p></div>'+
+   '<h3 style="margin-top:12px">'+esc(l.title)+'</h3><p class="muted">'+l.minutes+' minutos sugeridos · '+l.sections.length+' temas</p><p class="muted small">'+esc(status)+'</p></div>'+
    button(completed?'Revisar contenido':'Estudiar','lesson','data-id="'+attr(l.id)+'"','alt')+'</article>';
   }).join('')+'</div>';
  }).join('');
 }
-function lessonView(){const l=lessons.find(x=>x.id===selectedLesson);if(!l)return learn();return button('← Volver a academia','nav','data-id="learn"','alt small')+'<div class="section"></div>'+heading('LECCIÓN · '+l.topic.toUpperCase(),l.title,'Lectura orientada a diagnóstico y evidencia.')+'<article class="panel lesson-body">'+l.sections.map(([h,t])=>'<h2>'+esc(h)+'</h2><p>'+esc(t)+'</p>').join('')+'<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+link(l.url,'Abrir fuente y lecturas relacionadas')+'<div class="section">'+button('Registrar lectura y volver','complete-lesson','data-id="'+attr(l.id)+'"')+'</div></article>';}
-
+function lessonPracticeStatusText(id){
+ const status=practiceProgress(data,id);
+ const p=lessonPractice(id),virtual=['numeric-bench','wave-inquiry','volt-drop','dtc-guided'].includes(p?.page);
+ if(id==='volt-drop'&&status.status==='passed'){
+  const h=lessonEvidence(data,id).holdout;
+  return h?.passed?'Banco guiado y caso independiente completados · evidencia digital, no competencia física':
+   'Banco guiado completado · caso independiente '+(h?.attempts?'pendiente de aprobación':'sin resolver');
+ }
+ return status.status==='passed'?(virtual?'Práctica aprobada: modelo virtual, NO competencia física':'Práctica aprobada: hay evidencia guardada'):status.status==='attempted'?(virtual?'Práctica realizada en modelo virtual, todavía sin aprobar':'Práctica realizada, todavía sin aprobar'):
+  status.status==='related-passed'?'El banco relacionado fue aprobado; esta lección no tiene rúbrica propia':
+  status.status==='related-attempted'?'El banco relacionado tiene intentos; no se acredita esta lección':
+  status.status==='not-started'?'Práctica todavía no registrada':'No hay práctica vinculada todavía';
+}
+function lessonReasoningStatusText(id){
+ if(id==='volt-drop')return transferProgress(data,id).passed?'Transferencia conceptual opcional realizada; el caso independiente es la prueba principal':'Transferencia conceptual opcional; no es requisito para completar esta lección';
+ const r=transferProgress(data,id);
+ return r.status==='passed'?'Decisiones objetivas correctas; texto pendiente de revisión':r.status==='attempted'?'Transferencia todavía no aprobada':r.status==='legacy-passed'?'Ejercicio anterior registrado; transferencia v3 pendiente':r.status==='unmapped'?'Sin ejercicio de razonamiento asociado':'Razonamiento y transferencia pendientes';
+}
+function inquiryStatusText(id){
+ const n=inquiryProgress(data,id).attempts;
+ return n+' diseño'+(n===1?'':'s')+' documentado'+(n===1?'':'s')+' · sin calificación ni aprobación';
+}
+function lessonPracticePanel(l){
+ const p=lessonPractice(l.id);
+ const inquiry='<div id="lesson-inquiry-host" class="reasoning-host" aria-label="Cuaderno de diseño experimental de la lección"></div>'+
+  '<p id="lesson-inquiry-status" class="muted">'+esc(inquiryStatusText(l.id))+'</p>';
+ const reasoning=reasoningChallenge(l.id)?
+  '<div id="lesson-reasoning-host" class="reasoning-host" aria-label="Actividad de razonamiento de esta lección"></div>'+
+  '<p id="lesson-reasoning-status" class="muted">'+esc(lessonReasoningStatusText(l.id))+'</p>':'';
+ if(!p)return '<section class="panel stack lesson-practice"><h2>Aplicación de criterios</h2>'+
+  reasoning+'<p>'+(reasoningChallenge(l.id)?
+  'Este microcaso entrena inferencias, pruebas y falsación. La transferencia y el cuaderno están disponibles; esta lección no tiene simulador instrumental propio.':
+  'Todavía no hay simulador ni rúbrica objetiva individual. Podés diseñar y documentar una investigación; esto no acredita práctica.')+'</p>'+
+  inquiry+'</section>';
+ return '<section class="panel stack lesson-practice" aria-label="Práctica vinculada a la lección">'+
+  '<div class="eyebrow">DEL CONCEPTO A LA HIPÓTESIS</div><h2>'+esc(p.title)+'</h2>'+
+  '<p><strong>Antes de observar:</strong> '+esc(p.prompt)+'</p>'+
+  '<p id="lesson-practice-status" class="muted" role="status">'+esc(lessonPracticeStatusText(l.id))+'</p>'+
+  (l.id==='volt-drop'?'':reasoning)+
+  (p.kind==='embedded'?
+   '<div class="lesson-practice-body" id="lesson-practice-host" aria-label="Simulador real integrado"></div>'+
+   (['numeric-bench','wave-inquiry','volt-drop','dtc-guided'].includes(p.page)?'<p class="muted small">Banco calculado y sintético integrado en esta lección; no es una medición real ni acredita competencias físicas.</p>':
+    '<p class="muted small">El mismo laboratorio sigue disponible desde el menú. Guardar evidencia práctica no equivale a marcar la lectura.</p>'+
+    button('Abrir banco como pantalla completa','nav','data-id="'+attr(p.page)+'"','alt')):
+   '<p>Este ejercicio funciona en su banco especializado: el enlace abre el laboratorio real, donde se evalúan predicciones y evidencia.</p>'+
+   button('Ir a la práctica correspondiente','nav','data-id="'+attr(p.page)+'"'))+
+  (l.id==='volt-drop'?'<div id="volt-holdout-host" class="reasoning-host" aria-label="Caso reservado de transferencia independiente"></div>':'')+
+  (l.id==='volt-drop'?reasoning:'')+inquiry+'</section>';
+}
+function lessonView(){
+ const l=lessons.find(x=>x.id===selectedLesson);if(!l)return learn();
+ const allSections=l.sections;
+ const sections=items=>items.map(([h,t])=>'<h2>'+esc(h)+'</h2><p>'+esc(t)+'</p>').join('');
+ return button('← Volver a academia','nav','data-id="learn"','alt small')+
+ '<div class="section"></div>'+heading('LECCIÓN · '+l.topic.toUpperCase(),l.title,'Comprendé, formulá hipótesis, comprobá y justificá.')+
+ '<article class="panel lesson-body"><p class="muted">Teoría: '+(data.notes['lesson-'+l.id]?'lectura registrada':'lectura pendiente')+
+ '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>'+
+ '. Razonamiento: <span id="lesson-theory-reasoning-status">'+esc(lessonReasoningStatusText(l.id))+'</span>. Ninguno acredita competencia física.</p>'+
+ (l.id==='volt-drop'?'<div id="volt-baseline-host"></div>':'')+sections(allSections)+(l.id==='volt-drop'?voltDropTheoryIllustration():l.id==='motor-data'?dtcTheoryIllustration():'')+'</article>'+lessonPracticePanel(l)+
+ '<article class="panel lesson-body">'+
+ '<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+
+ link(l.url,'Abrir fuente y lecturas relacionadas')+
+ '<div class="section">'+button('Registrar lectura y volver','complete-lesson','data-id="'+attr(l.id)+'"')+'</div></article>';
+}
 
 function errorAnalyticsView(){
  const report=summarizeAnswerEvidence(data,questions);
@@ -715,6 +832,7 @@ function examMenu(){
  '<div class="panel"><h3>15 preguntas · Todas las áreas</h3><p class="muted">Tres preguntas de cada una de las cinco especialidades. Las respuestas y explicaciones se muestran al finalizar. Objetivo interno: ≥85%.</p>'+
  button('Iniciar evaluación acumulativa','start-exam','data-topic="cumulative"')+'</div>'+
  '<div class="section"><h2>Exámenes por área</h2></div><div class="grid two">'+tracks.map(t=>'<div class="panel"><span class="tag dim">'+esc(t.id.toUpperCase())+'</span><h3>'+esc(t.title)+'</h3><p class="muted">'+questions.filter(q=>q.topic===t.id).length+' preguntas disponibles</p>'+button('Examinar área','start-exam','data-topic="'+t.id+'"','alt')+'</div>').join('')+'</div>'+
+ '<div class="section"><h2>Exámenes por etapa de mecánica MC00–MC14</h2></div><div class="grid two">'+mechanicsExamStages.map(s=>'<div class="panel"><h3>'+esc(s.label)+'</h3><p class="muted">'+mechanicsStageQuestions(questions,s.id).length+' preguntas del bloque · 6 preguntas por intento · criterio de aprobación 85 %.</p>'+button('Examinar etapa','start-exam','data-topic="mc-stage:'+s.id+'"','alt')+'</div>').join('')+'</div>'+ 
  '<div class="section"><h2>Repaso personalizado FSRS</h2></div>'+
  '<div class="panel"><p class="muted">'+stats.due+' preguntas vencidas; '+stats.upcoming+' próximas durante la semana. El calendario se adapta después de cada respuesta, tomando también tu confianza declarada.</p>'+
  '<div class="row">'+button('Repasar preguntas vencidas','review',stats.due===0?'disabled':'','alt')+
@@ -725,7 +843,7 @@ function examMenu(){
 function startExam(topic,review=false){
  const dueSet=new Set(dueReviews(data));
  const pool=topic==='targeted'?selectErrorRetake(summarizeAnswerEvidence(data,questions),questions,10):
-  review?questions.filter(q=>dueSet.has(q.id)):questions.filter(q=>topic==='all'||topic==='cumulative'||q.topic===topic);
+  review?questions.filter(q=>dueSet.has(q.id)):topic.startsWith('mc-stage:')?mechanicsStageQuestions(questions,topic.slice('mc-stage:'.length)):questions.filter(q=>topic==='all'||topic==='cumulative'||q.topic===topic);
  if(!pool.length){toast('No hay preguntas disponibles para este repaso.');return;}
  const selected=topic==='targeted'?[...pool]:topic==='cumulative'&&!review?selectCumulativeQuestions(pool,15):[...pool].sort(()=>Math.random()-.5).slice(0,review?15:topic==='all'?10:6);
  exam={topic,questions:selected,at:0,answers:{},confidence:{},review};
@@ -1068,11 +1186,12 @@ function multiSummary(c){
 }
 function portfolioView(){
  const snap=portfolioSnapshot(data,lessons);
- const visible=snap.events.filter(e=>portfolioFilter==='all'||(portfolioFilter==='exam'?e.kind==='exam':portfolioFilter==='lab'?e.kind==='lab':e.kind!=='exam'&&e.kind!=='lab')).slice(0,40);
+ const visible=snap.events.filter(e=>portfolioFilter==='all'||(portfolioFilter==='exam'?e.kind==='exam':portfolioFilter==='lab'?e.kind==='lab':portfolioFilter==='reasoning'?e.kind==='reasoning':portfolioFilter==='inquiry'?e.kind==='inquiry':e.kind!=='exam'&&e.kind!=='lab'&&e.kind!=='reasoning'&&e.kind!=='inquiry')).slice(0,40);
  const num=n=>String(n);
  return heading('PORTAFOLIO','Evidencias de tu formación','Historial de simulaciones, repasos y lecturas guardado exclusivamente en este navegador; sin certificaciones ni afirmaciones de experiencia real.')+
  '<div class="grid"><div class="panel"><div class="stat-number">'+num(snap.totals.exams)+'</div><div class="stat-label">Exámenes teóricos</div></div>'+
- '<div class="panel"><div class="stat-number">'+num(snap.totals.practices)+'</div><div class="stat-label">Prácticas registradas</div></div>'+
+ '<div class="panel"><div class="stat-number">'+num(snap.totals.practices)+'</div><div class="stat-label">Prácticas y laboratorios</div></div>'+
+ '<div class="panel"><div class="stat-number">'+num(snap.totals.reasoning)+'</div><div class="stat-label">Razonamientos guiados</div></div>'+
  '<div class="panel"><div class="stat-number">'+num(snap.totals.completedLessons)+'/'+num(snap.totals.knownLessons)+'</div><div class="stat-label">Lecciones registradas</div></div></div>'+
  '<div class="panel" style="margin-top:14px"><h3>Registro profesional en formación</h3>'+
  '<p class="muted">Las puntuaciones de exámenes, casos y laboratorios no son comparables y las justificaciones todavía requieren un revisor humano. El informe exporta solo lo registrado localmente.</p>'+
@@ -1080,9 +1199,9 @@ function portfolioView(){
  '<p class="muted small">Estudio estimado registrado: '+snap.totals.studyMinutes+' min · Preguntas programadas: '+snap.totals.reviewItems+' · Tarjetas FSRS: '+snap.totals.fsrsItems+'</p></div>'+
  '<div class="section"><h2>Actividad reciente</h2></div>'+
  '<div class="panel"><label for="portfolio-filter">Filtrar registros</label><select id="portfolio-filter" class="field">'+
- [['all','Todos'],['exam','Exámenes'],['diagnostic','Diagnóstico y retos'],['lab','Laboratorios']].map(([id,label])=>'<option value="'+id+'" '+(portfolioFilter===id?'selected':'')+'>'+label+'</option>').join('')+'</select>'+
+ [['all','Todos'],['exam','Exámenes'],['diagnostic','Diagnóstico y retos'],['lab','Laboratorios'],['reasoning','Razonamientos guiados'],['inquiry','Cuadernos científicos']].map(([id,label])=>'<option value="'+id+'" '+(portfolioFilter===id?'selected':'')+'>'+label+'</option>').join('')+'</select>'+
  (visible.length?'<div class="portfolio-list">'+visible.map(e=>
- '<div class="portfolio-entry"><div class="row spaced"><strong>'+esc(e.title)+'</strong><span class="tag dim">'+e.score+'/100</span></div>'+
+ '<div class="portfolio-entry"><div class="row spaced"><strong>'+esc(e.title)+'</strong><span class="tag dim">'+(e.kind==='inquiry'?'Sin calificación':e.score+'/100')+'</span></div>'+
  '<p class="muted small">'+esc(e.at?.slice(0,10)||'sin fecha')+' · '+esc(e.kind)+'</p>'+
  (e.evidence.length?'<p class="muted small">Pruebas: '+esc(e.evidence.join(', '))+'</p>':'')+
  (e.reasoning?'<details><summary>Ver razonamiento registrado</summary><p>'+esc(e.reasoning)+'</p></details>':'')+
@@ -1423,7 +1542,55 @@ body+='<div class="section"><h2>Análisis de mensajes por ID</h2></div><div clas
 
 function resourceView(){return heading('FUENTES Y HERRAMIENTAS','Biblioteca externa','Priorizamos documentación pública y software maduro. Algunos recursos requieren conexión o instalación en PC.')+'<section class="cards">'+resources.map(r=>'<div class="panel"><span class="tag dim">'+esc(r.topic)+'</span><h3>'+esc(r.title)+'</h3>'+link(r.url,'Abrir recurso oficial')+'</div>').join('')+'</section><div class="section"><h2>Laboratorios prácticos</h2></div><div class="panel"><p class="muted">Ya podés importar capturas candump y analizar una muestra CAN sintética; CircuitJS está disponible como herramienta externa integrada bajo demanda. PyBaMM continúa pendiente.</p>'+button('Ir a laboratorios','nav','data-id="labs"')+'</div>';}
 function dataView(){return heading('DATOS PERSONALES','Tu progreso te pertenece','Se guarda en IndexedDB de este navegador. Si cambiás de equipo o borrás datos del sitio, necesitás un respaldo.')+'<div class="notice">Los respaldos JSON no están cifrados. Guardalos en un lugar privado. El límite de importación es 24 MB, con validación adicional del contenido.</div><div class="grid two"><div class="panel"><h3>Exportar respaldo</h3><p class="muted">Descarga un JSON portable con intentos, resultados de casos, repeticiones y notas.</p>'+button('Descargar respaldo','export')+'</div><div class="panel"><h3>Importar respaldo</h3><p class="muted">Reemplaza el progreso local luego de validar el archivo. Guardá una copia antes de importar.</p><label class="button alt" for="import-file">Elegir archivo JSON</label><input class="sr-only" type="file" id="import-file" accept=".json,application/json"></div></div><div class="section"><h2>Notas privadas</h2></div><div class="panel"><label for="notebook">Hipótesis, dudas y procedimientos aprendidos</label><textarea class="field" id="notebook" maxlength="10000">'+esc(data.notes.general||'')+'</textarea><div class="row" style="margin-top:14px">'+button('Guardar notas','save-notes')+'</div></div><div class="section"><h2>Reinicio</h2></div><div class="panel"><p class="muted">Borrar todo es irreversible si no conservás una exportación.</p>'+button('Borrar progreso local','reset','','danger')+'</div>';}
-function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='analytics'?errorAnalyticsView():page==='path'?pathView():page==='coach'?studyCoachView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='temporal'?(traceTraining?temporalView():temporalMenu()):page==='fuel'?(fuelTraining?fuelView():fuelMenu()):page==='misfire'?(misfireTraining?misfireView():misfireMenu()):page==='integrative'?(integralTraining?integrativeView():integrativeMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='transfer'?(transferTraining?transferView():transferMenu()):page==='diagtransfer'?(diagnosticTransferTraining?diagnosticTransferView():diagnosticTransferMenu()):page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);}
+function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?lessonView():learn()):page==='exams'?(exam?examView():examMenu()):page==='analytics'?errorAnalyticsView():page==='path'?pathView():page==='coach'?studyCoachView():page==='ecu'?(ecuTraining?ecuView():ecuMenu()):page==='differential'?(differentialTraining?differentialView():differentialMenu()):page==='temporal'?(traceTraining?temporalView():temporalMenu()):page==='fuel'?(fuelTraining?fuelView():fuelMenu()):page==='misfire'?(misfireTraining?misfireView():misfireMenu()):page==='integrative'?(integralTraining?integrativeView():integrativeMenu()):page==='cases'?(multiTraining?multiView():training?caseView():caseMenu()):page==='portfolio'?portfolioView():page==='challenges'?(quantitative?challengeView():challengeMenu()):page==='transfer'?(transferTraining?transferView():transferMenu()):page==='diagtransfer'?(diagnosticTransferTraining?diagnosticTransferView():diagnosticTransferMenu()):page==='rotary'?rotaryShell():page==='rotary-thermal'?thermalShell():page==='rotary-heat'?heatTransferShell():page==='rotary-ports'?portBurnShell():page==='rotary-aperture'?apertureShell():page==='rotary-inverse'?apertureInverseShell():page==='ecu-optimization'?ecuOptimizationShell():page==='ecu-robust'?robustResearchShell():page==='rotary-seals'?sealLabShell():page==='metrology'?metrologyShell():page==='inventor'?inventorShell():page==='rotary-instruments'?adversarialShell():page==='brakes'?brakesShell():page==='powertrain'?powertrainShell():page==='labs'?labView():page==='resources'?resourceView():dataView();layout(body);const saveLabEntry=async entry=>{const before=data.cases;data.cases=[...before,entry].slice(-500);if(!await persist()){data.cases=before;throw Error('Guardado no confirmado');}};if(page==='rotary')mountRotaryLab(document.getElementById('rotary-explorer'),{record:saveLabEntry});if(page==='rotary-thermal')mountThermalLab(document.getElementById('rotary-thermal-explorer'),{record:saveLabEntry});if(page==='rotary-heat')mountHeatTransfer(document.getElementById('rotary-heat-explorer'),{record:saveLabEntry});if(page==='rotary-ports')mountPortBurnLab(document.getElementById('rotary-port-burn-explorer'),{record:saveLabEntry});if(page==='rotary-aperture')mountApertureLab(document.getElementById('rotary-aperture-explorer'),{record:saveLabEntry});if(page==='rotary-inverse')mountApertureInverse(document.getElementById('rotary-aperture-inverse-explorer'),{record:saveLabEntry});if(page==='ecu-optimization')mountECUOptimization(document.getElementById('ecu-optimization-explorer'),{record:saveLabEntry});if(page==='ecu-robust')mountRobustResearch(document.getElementById('ecu-robust-explorer'),{record:saveLabEntry});if(page==='rotary-seals')mountSealLab(document.getElementById('rotary-seal-lab'),{record:saveLabEntry});if(page==='metrology')mountMetrology(document.getElementById('metrology-explorer'),{record:saveLabEntry});if(page==='inventor')mountInventorLab(document.getElementById('inventor-explorer'),{record:saveLabEntry});if(page==='rotary-instruments')mountAdversarialLab(document.getElementById('rotary-instrument-explorer'),{record:saveLabEntry});if(page==='brakes')mountBrakeLab(document.getElementById('brake-explorer'),{record:saveLabEntry});if(page==='powertrain')mountPowertrainLab(document.getElementById('powertrain-explorer'),{record:saveLabEntry});
+if(page==='learn'&&selectedLesson){
+ const lessonAtMount=selectedLesson;
+ const baseline=document.getElementById('volt-baseline-host');
+ if(baseline)mountVoltDropBaseline(baseline);
+ const holdout=document.getElementById('volt-holdout-host');
+ if(holdout)mountVoltDropHoldout(holdout,{record:saveLabEntry,history:data.cases,onSaved:()=>{
+  if(page!=='learn'||selectedLesson!==lessonAtMount)return;
+  const status=document.getElementById('lesson-practice-status'),summary=document.getElementById('lesson-theory-practice-status');
+  if(status)status.textContent=lessonPracticeStatusText(lessonAtMount);
+  if(summary)summary.textContent=lessonPracticeStatusText(lessonAtMount);
+ }});
+ const reasonNode=document.getElementById('lesson-reasoning-host');
+ if(reasonNode)mountLessonReasoning(reasonNode,{lessonId:lessonAtMount,record:saveLabEntry,onSaved:()=>{
+  if(page==='learn'&&selectedLesson===lessonAtMount){
+   const status=document.getElementById('lesson-reasoning-status');
+   if(status)status.textContent=lessonReasoningStatusText(lessonAtMount);
+   const summary=document.getElementById('lesson-theory-reasoning-status');
+   if(summary)summary.textContent=lessonReasoningStatusText(lessonAtMount);
+  }
+ }});
+ const notebook=document.getElementById('lesson-inquiry-host');
+ if(notebook)mountInquiryNotebook(notebook,{lesson:lessons.find(x=>x.id===lessonAtMount),record:saveLabEntry,onSaved:()=>{
+  if(page==='learn'&&selectedLesson===lessonAtMount){
+   const status=document.getElementById('lesson-inquiry-status');
+   if(status)status.textContent=inquiryStatusText(lessonAtMount);
+  }
+ }});
+ const practice=lessonPractice(selectedLesson);
+ if(practice?.kind==='embedded'){
+  const lessonAtMount=selectedLesson;
+  const mounts={powertrain:mountPowertrainLab,inventor:mountInventorLab,rotary:mountRotaryLab,'ecu-robust':mountRobustResearch,
+   'numeric-bench':(node,opts)=>mountNumericBench(node,{...opts,lessonId:lessonAtMount}),
+   'wave-inquiry':(node,opts)=>mountWaveInquiry(node,{...opts,lessonId:lessonAtMount}),
+   'volt-drop':mountVoltDropPractice,'dtc-guided':mountDtcGuided};
+  const node=document.getElementById('lesson-practice-host'),mount=mounts[practice.page];
+  if(node&&mount){
+   mount(node,{record:async entry=>{
+     await saveLabEntry(entry);
+     if(selectedLesson!==lessonAtMount||page!=='learn')return;
+     const label=document.getElementById('lesson-practice-status');
+     const summary=document.getElementById('lesson-theory-practice-status');
+     if(label)label.textContent=lessonPracticeStatusText(lessonAtMount);
+     if(summary)summary.textContent=lessonPracticeStatusText(lessonAtMount);
+   }});
+  }
+ }
+}
+}
 document.addEventListener('input',event=>{
 if(diagnosticTransferTraining&&!diagnosticTransferGrades&&['diagtransfer-reason','diagtransfer-limits'].includes(event.target.id)){
  const s=diagnosticTransferTraining,c=s.scenario.cases[s.index],a=s.answers[c.id];

@@ -1,0 +1,35 @@
+import{test,expect}from'@playwright/test';
+test('RW6++ biased instrument exceeds assumed tolerance: recover interval, diagnose and persist',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-inverse"]').click();
+ await expect(page.getByRole('heading',{name:'Inverse Port Metrology Lab'})).toBeVisible();
+ await page.locator('#ai-radius').selectOption('20');
+ await page.locator('#ai-radius-band').selectOption('0.15');
+ await page.locator('#ai-u').selectOption('0.25');
+ await page.locator('#ai-bias').selectOption('0.04');
+ await page.locator('#ai-tolerance').selectOption('0.02');
+ await page.locator('#ai-cover').selectOption('no');
+ await page.locator('#ai-sense').selectOption('borde');
+ await page.locator('#ai-physical').selectOption('no');
+ await page.locator('#ai-radius-predict').selectOption('no');
+ await page.getByRole('button',{name:'Congelar predicciones y recuperar apertura'}).click();
+ await expect(page.getByText('Inversión de área inventada: tolerancia absoluta determinista')).toBeVisible();
+ await expect(page.getByText(/¿Intervalo contiene verdad sintética\? No/)).toBeVisible();
+ await expect(page.getByText('Conjunto factible: comparación radio conocido frente a radio dentro de una banda')).toBeVisible();
+ await expect(page.getByText(/inconsistencia detectada; sin solución/)).toBeVisible();
+ await page.locator('#ai-reason').fill('El área del segmento circular cambia de modo no lineal. Si el sesgo de área excede el intervalo supuesto, la inversa entrega un rango que puede excluir el valor verdadero, aunque la fórmula geométrica sea exacta.');
+ await page.locator('#ai-limits').fill('Los intervalos son ficticios: no se ha medido la máscara, calibrado un instrumento, identificado el CAD del Wankel ni determinado u respecto de la posición angular del rotor.');
+ await page.getByRole('button',{name:'Evaluar inferencia inversa'}).click();
+ await expect(page.getByText(/Resultado: 100\/100/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar expediente RW6++'}).click();
+ await expect(page.getByRole('button',{name:'Evidencia registrada'})).toBeDisabled();
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('RW6++ — Metrología geométrica inversa')).toBeVisible();
+ await page.reload();await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('RW6++ — Metrología geométrica inversa')).toBeVisible();
+});
+test('RW6++ cannot calculate or save before locking three hypotheses',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-inverse"]').click();
+ await page.getByRole('button',{name:'Congelar predicciones y recuperar apertura'}).click();
+ await expect(page.getByText(/Completá las cuatro predicciones/)).toBeVisible();
+ await expect(page.getByRole('button',{name:'Guardar expediente RW6++'})).toHaveCount(0);
+});

@@ -1,0 +1,35 @@
+import{test,expect}from'@playwright/test';
+test('RW6+ exact circular segment vs equal-area rectangle, stored offline evidence',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-aperture"]').click();
+ await expect(page.getByRole('heading',{name:'Port Aperture Geometry Lab'})).toBeVisible();
+ await page.locator('#ra-radius').selectOption('20');
+ await page.locator('#ra-u').selectOption('0.25');
+ await page.locator('#ra-steps').selectOption('512');
+ await page.locator('#ra-predict').selectOption('rectangular');
+ await page.locator('#ra-physical').selectOption('no');
+ await page.getByRole('button',{name:'Congelar hipótesis y medir apertura'}).click();
+ await expect(page.getByText('Geometría plana: áreas de puertos de igual superficie máxima')).toBeVisible();
+ await expect(page.getByText('Comparación del área circular analítica e integración por punto medio')).toBeVisible();
+ await expect(page.locator('svg[role="img"]')).toBeVisible();
+ await page.locator('#ra-reason').fill('Con idéntico total de mm cuadrados, un disco empieza a descubrirse de manera no lineal debido al ancho variable de sus rebanadas. Una integral independiente permite contrastar el resultado analítico.');
+ await page.locator('#ra-limits').fill('No se conoce la posición real de sellos, CAD de carcasa, coeficiente de descarga ni diferencial de presión; son formas planas hipotéticas y no hay caudal real.');
+ await page.getByRole('button',{name:'Evaluar investigación RW6+'}).click();
+ await expect(page.getByText(/Resultado: 100\/100/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar expediente RW6+'}).click();
+ await expect(page.getByRole('button',{name:'Evidencia registrada'})).toBeDisabled();
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('RW6+ — Geometría y apertura de puertos')).toBeVisible();
+ await page.reload();await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('RW6+ — Geometría y apertura de puertos')).toBeVisible();
+});
+test('RW6+ changed sweep fraction reverses predicted winner and incomplete hypotheses fail closed',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-aperture"]').click();
+ await page.getByRole('button',{name:'Congelar hipótesis y medir apertura'}).click();
+ await expect(page.getByText(/Primero completá las dos predicciones/)).toBeVisible();
+ await expect(page.getByRole('button',{name:'Guardar expediente RW6+'})).toHaveCount(0);
+ await page.locator('#ra-u').selectOption('0.75');
+ await page.locator('#ra-predict').selectOption('circular');
+ await page.locator('#ra-physical').selectOption('no');
+ await page.getByRole('button',{name:'Congelar hipótesis y medir apertura'}).click();
+ await expect(page.getByText(/Resultado puramente geométrico: circular tiene mayor/)).toBeVisible();
+});

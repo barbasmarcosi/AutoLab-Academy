@@ -1,0 +1,65 @@
+import{test,expect}from'@playwright/test';
+import{readFile}from'node:fs/promises';
+test('MC14 virtual black box freezes hypotheses, checks held-out evidence and restores portfolio offline',async({page,context})=>{
+ await page.goto('./');
+ await page.locator('nav.nav button[data-id="inventor"]').click();
+ await expect(page.getByRole('heading',{name:/Inventor’s Bench/})).toBeVisible();
+ await page.evaluate(()=>{Math.random=()=>0;});
+ await page.getByRole('button',{name:'Crear experimento reproducible'}).click();
+ await expect(page.getByText(/semilla 1/)).toBeVisible();
+ await page.locator('#inv-initial').selectOption('clip');
+ await page.getByRole('button',{name:'Congelar hipótesis'}).click();
+ await expect(page.getByText(/Hipótesis congelada/)).toBeVisible();
+ await page.locator('#inv-training').selectOption('high');
+ await page.getByRole('button',{name:/Congelar y revelar Barrido discriminante/}).click();
+ await expect(page.getByText(/lectura: 2\.50/)).toBeVisible();
+ await page.locator('#inv-holdout').selectOption('high');
+ await page.getByRole('button',{name:/Congelar y revelar Validación retenida/}).click();
+ await page.locator('#inv-final').selectOption('linear');
+ await page.locator('#inv-reason').fill('Los dos baselines son idénticos en las tres funciones. El ensayo de 3 V permite elegir un modelo lineal y la entrada no usada de 4 V contrasta su extrapolación sin retocar su fórmula.');
+ await page.locator('#inv-limit').fill('Los números son ficticios, no son señales de sensores reales y carecen de calibración, incertidumbre estadística y parámetros OEM para realizar intervenciones físicas.');
+ await page.getByRole('button',{name:'Evaluar investigación'}).click();
+ await expect(page.getByText(/Resultado: 100\/100/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar expediente MC14'}).click();
+ await expect(page.getByRole('button',{name:'Evidencia registrada'})).toBeDisabled();
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('MC14 — Caja negra virtual')).toBeVisible();
+ await page.reload();await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('MC14 — Caja negra virtual')).toBeVisible();
+ await page.locator('nav.nav button[data-id="data"]').click();
+ const download=page.waitForEvent('download');
+ await page.locator('[data-action="export"]').click();
+ const json=await readFile(await (await download).path(),'utf8');
+ const backup=JSON.parse(json);
+ const saved=backup.payload.cases.find(c=>c.id==='lab-inventor-blackbox-v1');
+ expect(saved).toBeTruthy();
+ expect(saved.report).toContain('Semilla reproducible: 1');
+ expect(saved.report).toContain('synthetic_virtual_blackbox');
+ expect(saved.report).toContain('holdout');
+ page.on('dialog',dialog=>dialog.accept());
+ await page.locator('[data-action="reset"]').click();
+ await page.locator('nav.nav button[data-id="data"]').click();
+ await page.locator('#import-file').setInputFiles({name:'mc14-backup.json',mimeType:'application/json',buffer:Buffer.from(json)});
+ await expect.poll(()=>page.evaluate(async()=>{
+  const {loadProgress}=await import('./src/core.js');
+  const state=await loadProgress();
+  return state.cases.some(c=>c.id==='lab-inventor-blackbox-v1');
+ })).toBe(true);
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('MC14 — Caja negra virtual')).toBeVisible();
+ await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
+ await context.setOffline(true);
+ try{await page.reload();await page.locator('nav.nav button[data-id="inventor"]').click();await expect(page.getByRole('heading',{name:/Inventor’s Bench/})).toBeVisible();}
+ finally{await context.setOffline(false);}
+});
+test('MC14 refuses reveal unless prior prediction is explicitly frozen',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="inventor"]').click();
+ await page.getByRole('button',{name:'Crear experimento reproducible'}).click();
+ await page.getByRole('button',{name:'Congelar hipótesis'}).click();
+ await expect(page.getByText(/Elegí una hipótesis inicial/)).toBeVisible();
+ await page.locator('#inv-initial').selectOption('curved');
+ await page.getByRole('button',{name:'Congelar hipótesis'}).click();
+ await page.getByRole('button',{name:/Congelar y revelar Barrido discriminante/}).click();
+ await expect(page.getByText(/Predecí la clase de lectura/)).toBeVisible();
+ await expect(page.locator('#inv-holdout')).toHaveCount(0);
+});
