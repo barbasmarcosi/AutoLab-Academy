@@ -57,7 +57,7 @@ test('path recommendation: theory then guided lab, reserved transfer and objecti
  p.cases.push({id:'lab-volt-drop-holdout-v1',passed:true,attempt:2});
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
  assert.equal(snapshot.byLesson.get('volt-drop').documented,true);
- assert.equal(snapshot.byLesson.get('volt-drop').holdout.firstAttemptPassed,false);
+ assert.equal(snapshot.byLesson.get('volt-drop').holdout.firstRecordedAttemptPassed,false);
  assert.equal(snapshot.nextTask.lessonId,'motor-data');
  for(const id of lessonIds.slice(0,lessonIds.indexOf('mc06-dual-fault-instrumentation'))){
   p.notes['lesson-'+id]='2026-10-26';
