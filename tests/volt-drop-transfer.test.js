@@ -43,7 +43,8 @@ test("reserved case evidence is not mistaken for guided bank or conceptual reaso
  let e=lessonEvidence(base,"volt-drop");
  assert.equal(e.read,true);
  assert.equal(e.lab.passed,true);
- assert.equal(e.reasoning.passed,true);
+ assert.equal(e.reasoning.available,false,'La lección 1 no requiere el motor genérico oculto');
+ assert.equal(e.reasoning.passed,false);
  assert.equal(e.holdout.passed,false);
  assert.equal(e.documented,false);
  const previousRubric={...base,cases:[...base.cases,{id:"lab-volt-drop-holdout-v1",passed:true}]};
