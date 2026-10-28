@@ -130,3 +130,15 @@ test('MA00 A-A cannot claim repeatability from brief burst or large per-PID acqu
  assert.equal(b.comparable,false);
  assert.match(b.blockers.join(' '),/Cadencia/);
 });
+
+
+test('MA00 refuses repeatability inference from an aborted serial acquisition, even with full PID coverage',()=>{
+ const sessions=setup();
+ sessions[1].captureAborted=true;
+ sessions[1].abortReason='ELM timeout after enough samples';
+ const study=evaluateAAWithoutService(sessions);
+ assert.equal(study.comparable,false);
+ assert.equal(study.observedChanges,null);
+ assert.equal(study.mechanicalAgeKm,null);
+ assert.match(study.blockers.join('; '),/Captura interrumpida/);
+});
