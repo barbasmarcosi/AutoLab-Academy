@@ -35,3 +35,5 @@ Three scenarios are no longer sufficient to discourage memorization. The indepen
 ## Protected expensive milestone runs
 - CI `concurrency` isolates explicitly marked full-suite PR runs by the event SHA, so normal PR pushes cancel other rapid checks but **cannot cancel the protected milestone**. Full suites still do not publish to Pages.
 - Only add the marker when code has stabilized, then do not push while cross-browser CI runs unless correcting a confirmed failure.
+
+- E2E must also ensure a redundant probe click leaves one and only one stored measurement, never fake additional evidence.
