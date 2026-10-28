@@ -108,3 +108,25 @@ test('MA00 raw quality: a plateau is ambiguous, not a fault or mechanical age',(
  assert.equal(r.sensorAcquisitionTimeKnown,false);
  assert.equal(r.structuralWear,null);
 });
+
+
+test('MA00 A-A cannot claim repeatability from brief burst or large per-PID acquisition gaps',()=>{
+ const short=setup();
+ for(const session of short)for(const e of session.events){
+  e.requestAtMs/=20;e.receivedAtMs/=20;
+ }
+ const a=evaluateAAWithoutService(short);
+ assert.equal(a.comparable,false);
+ assert.match(a.blockers.join(' '),/Duración|Cadencia/);
+ assert.equal(a.observedChanges,null);
+
+ const stalled=setup();
+ for(const e of stalled[1].events){
+  if(e.receivedAtMs>=15500){
+   e.receivedAtMs+=20000;e.requestAtMs+=20000;
+  }
+ }
+ const b=evaluateAAWithoutService(stalled);
+ assert.equal(b.comparable,false);
+ assert.match(b.blockers.join(' '),/Cadencia/);
+});
