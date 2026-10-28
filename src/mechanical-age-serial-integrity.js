@@ -7,6 +7,7 @@
  */
 export const SERIAL_TRACE_VERSION='ma00-raw-serial-integrity-v1';
 const specs=Object.freeze({
+ '0103':{length:2,unit:'enum',decode:b=>b[0]},
  '010C':{length:2,unit:'rpm',decode:b=>(b[0]*256+b[1])/4},
  '0105':{length:1,unit:'C',decode:b=>b[0]-40},
  '0104':{length:1,unit:'%',decode:b=>b[0]*100/255},
@@ -38,6 +39,7 @@ function decodePid(pid,hex){
  const line=oneLine(rawText(hex),pid);
  if(!/^[0-9A-F]+$/.test(line)||line.length!==4+spec.length*2||!line.startsWith('41'+pid.slice(2)))throw RangeError('Respuesta no corresponde al PID esperado');
  const bytes=Array.from({length:spec.length},(_,i)=>parseInt(line.slice(4+i*2,6+i*2),16));
+ if(pid==='0103'&&!([0,1,2,4,8,16].includes(bytes[0])&&[0,1,2,4,8,16].includes(bytes[1])))throw RangeError('Estado de combustible inválido');
  return spec.decode(bytes);
 }
 function decodeMask(hex){
@@ -88,6 +90,7 @@ export function auditSerialTrace(session){
  for(let i=0;i<events.length;i++){
   const e=events[i];
   if(!e||typeof e!=='object'||!has(specs,e.pid)){add('PID inválido en evento '+i);continue;}
+  if(active.length&&e.pid!==active[i%active.length])add('Orden de consulta PID alterado en evento '+i);
   if(!support.includes(e.pid))add('PID no anunciado en el bitmap en evento '+i);
   if(e.unit!==specs[e.pid].unit)add('Unidad incorrecta en evento '+i);
   if(typeof e.rawFrameSizeBytes!=='number'||e.rawFrameSizeBytes!==e.rawResponseHex?.length/2)add('Longitud RAW no coincide en evento '+i);
@@ -96,6 +99,11 @@ export function auditSerialTrace(session){
    const raw=rawText(e.rawResponseHex);
    if(e.status==='ok'){
     const decoded=decodePid(e.pid,e.rawResponseHex);
+    if(e.pid==='0103'){
+     const hex=oneLine(rawText(e.rawResponseHex),'0103');
+     const second=parseInt(hex.slice(6,8),16);
+     if(e.fuelSystem2Status!==second)add('Estado de combustible del sistema 2 no corresponde a bytes originales en evento '+i);
+    }else if(has(e,'fuelSystem2Status'))add('Estado de sistema 2 aparece en un PID incorrecto en evento '+i);
     if(typeof e.value!=='number'||!Number.isFinite(e.value)||Math.abs(e.value-decoded)>1e-8)add('Valor numérico no corresponde a bytes originales en evento '+i);
    }else if(e.status==='error'||e.status==='timeout'){
     if(has(e,'value')&&e.value!==null)add('Fallo con valor no autorizado en evento '+i);
