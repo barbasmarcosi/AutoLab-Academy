@@ -45,6 +45,9 @@ test("reserved case evidence is not mistaken for guided bank or conceptual reaso
  assert.equal(e.reasoning.passed,true);
  assert.equal(e.holdout.passed,false);
  assert.equal(e.documented,false);
+ const previousRubric={...base,cases:[...base.cases,{id:"lab-volt-drop-holdout-v1",passed:true}]};
+ assert.equal(lessonEvidence(previousRubric,"volt-drop").holdout.passed,false,
+  "An earlier attempt without a frozen prior must not earn the stronger v2 accreditation");
  const p={...base,cases:[...base.cases,{id:VOLT_DROP_HOLDOUT_ID,passed:true,attempt:1}]};
  e=lessonEvidence(p,"volt-drop");
  assert.equal(e.holdout.passed,true);
