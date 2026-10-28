@@ -16,8 +16,12 @@ import json
 import math
 import random
 import statistics
+import sys
 from pathlib import Path
 
+# Direct CLI invocation has tools/ as sys.path[0]; add the repository root.
+# This module remains importable by unittest without installation.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.benchmark_cmapss_fd001 import (
     evaluate_fd001, unpack_fd001, parse_test_rul, REQUIRED,
 )
