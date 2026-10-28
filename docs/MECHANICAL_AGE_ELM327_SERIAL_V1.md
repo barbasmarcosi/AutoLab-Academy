@@ -1,0 +1,54 @@
+# MA00 R3 — Capturador serial ELM327 experimental (solo lectura)
+
+**Estado (28/10/2026):** se implementó un cliente local de captura serial en tools/ma00_elm327_serial.py, con pySerial opcional y pruebas automatizadas sobre bytes simulados. **Todavía no se conectó ni validó con una ECU o un vehículo físico.** No hay cálculo de desgaste ni edad mecánica.
+
+## Propósito
+
+Evitar reconstruir una falsa «instantánea» de múltiples PIDs leídos en secuencia. Se reutiliza pyserial==3.5, una biblioteca existente: https://pyserial.readthedocs.io/en/latest/pyserial_api.html
+
+Solo interroga los PID estándar del Servicio 01: 010C RPM, 0105 ECT, 0104 carga calculada, 0106 STFT banco 1, 0107 LTFT banco 1, 010F IAT. Ningún comando suministrado por el usuario llega al bus sin pasar por el allowlist. No envía servicios para borrar DTC, reprogramar ECU ni controlar actuadores. Los únicos comandos de configuración ELM son ATE0, ATL0, ATS0, ATH0 y ATSP0, de presentación/adaptador.
+
+## Instalación local y prueba
+
+En una computadora con Python 3.10+ y un ELM327 serial (USB o Bluetooth SPP vinculado a un puerto COM/tty):
+
+~~~sh
+python -m pip install -r requirements-ma00-serial.txt
+python tools/ma00_elm327_serial.py --port COM3 --session aa-session-001 --vehicle anon-auto-001 --engine motor-familia-001 --adapter "ELM327 USB experimental" --cycles 32 --out ma00-session-001.json
+~~~
+
+En Linux usar /dev/ttyUSB0 o /dev/rfcomm0 si está configurado. No se implementó Bluetooth BLE o Wi-Fi; esta herramienta corre en la computadora, no directamente en la PWA. Solo permite puertos locales explícitos y nunca busca dispositivos ni conecta automáticamente. No usar durante la conducción; probar con el vehículo detenido y ventilación adecuada, lejos de componentes calientes o móviles.
+
+## Significado y límites de timestamps
+
+Cada respuesta produce:
+- PID, unidad, valor si pudo verificarse la trama, o estado error/timeout sin valor;
+- requestAtMs: tiempo monotónico del proceso **antes de escribir** al puerto serial;
+- receivedAtMs: tiempo monotónico del proceso **al recibir el prompt ELM**;
+- rawResponseHex y rawFrameSizeBytes: bytes originales para auditoría posterior, incluso en caso de fallo, y parseError cuando corresponda.
+
+Estos tiempos incluyen transporte USB/Bluetooth, serial, ELM, procesamiento en ECU y scheduling del host. **NO** son el tiempo real de sensado interno de la ECU ni una medición aislada de su latencia. Tampoco demuestran que STFT y RPM se hayan obtenido al mismo instante.
+
+## Seguridad e integridad
+
+- Respuestas con varios mensajes ECU, PID incorrecto, hex truncado, encabezado inesperado, texto de error, prompt faltante o formato no ASCII son errores: no se inventan muestras.
+- Hay límites de tamaño de trama, duración de cada solicitud, número de ciclos y velocidades seriales; el adaptador no recibe comandos OBD arbitrarios.
+- Los datos físicos se marcan provided_obd_unverified. Nunca se convierten a synthetic por elegir una opción de UI.
+- El registro deja conditions y referencia mecánica independientes como null. El operador debe documentar físicamente las condiciones antes de aplicar el protocolo A–A; el programa no se atribuye una verificación inexistente.
+- Los archivos son locales, se crean sin sobrescritura con permisos restringidos. No incluir VIN, patente, nombres ni datos personales; no subir capturas a repositorios públicos.
+
+## Pruebas de software
+
+Ejecutar:
+
+~~~sh
+python -m unittest discover -s tests/science -p 'test_ma00_elm327_serial.py'
+~~~
+
+Pruebas deterministas con un FakeSerial que simula respuestas, errores, tramas ambiguas, eco, PIDs incorrectos, unidades, protocolo de handshake y whitelists. Esas pruebas verifican lógica de software, **NO** comportamiento sobre un auto.
+
+## Investigación posterior
+
+Primero: verificar varios adaptadores concretos en modo solo lectura, tiempos host, pérdida de datos y compatibilidad PID. Segundo: repetir A–A en motores reales **sin intervención** entre sesiones y con contexto documentado; contar sesiones independientes, no filas. Tercero: comparar contra instrumentos y wear ground truth físico. **No hay todavía base científica para edad equivalente en kilómetros, porcentaje de salud ni vida remanente.**
+
+Documentos relacionados: MECHANICAL_AGE_RAW_CAPTURE_AA_V1.md y MECHANICAL_AGE_ACQUISITION_PROTOCOL_V1.md. CI de la rama de investigación sin merge y sin deploy de producción.
