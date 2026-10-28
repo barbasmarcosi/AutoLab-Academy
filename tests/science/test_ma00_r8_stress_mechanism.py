@@ -82,11 +82,8 @@ class TestR8(unittest.TestCase):
 
     def test_constant_sensors_identified_and_r7_clean_stability(self):
         self.assertIn(21,self.report["constantSensorIndicesFromTrainFolds"])
-        self.assertEqual(
-            self.report["policies"]["clean"]["engineBalancedMAEcycles"],
-            self.report["policies"]["r6_operating_only"]["engineBalancedMAEcycles"]
-            if False else self.report["policies"]["clean"]["engineBalancedMAEcycles"]
-        )
+        self.assertEqual(self.report["cleanVsStressedDifferences"]["clean"],0)
+        self.assertGreaterEqual(self.report["policies"]["clean"]["engineBalancedMAEcycles"],0)
         self.assertEqual(len(self.report["byFeatureGroupExpectedLinearPerturbationBeforeClipping"]["measurement"]),21)
         self.assertEqual(len(self.report["byFeatureGroupExpectedLinearPerturbationBeforeClipping"]["operating"]),3)
         # Guard against false claims of extra independent engines from noise.
