@@ -24,3 +24,29 @@ jobs:
         run: npm run build
       - name: Build independent preview bundle (without publishing)
         run: npm run build:site
+
+  empirical-enginefault:
+    name: Audit pinned real laboratory sensor dataset (no model training)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Fetch published dataset at immutable upstream commit
+        run: |
+          mkdir -p /tmp/ma00
+          curl -fSL --retry 2 --max-time 90 --max-filesize 6000000 \
+            "https://raw.githubusercontent.com/leoxthomas/EngineFaultDB/c63f23ba048761d9c2a2c95d8fb4c0392a3c63d3/EngineFaultDB_Final.csv" \
+            -o /tmp/ma00/EngineFaultDB_Final.csv
+      - name: Verify git blob SHA and audit every source row
+        run: |
+          node tools/audit-enginefaultdb.mjs /tmp/ma00/EngineFaultDB_Final.csv > /tmp/ma00/enginefault-audit.json
+          node -e 'const a=require(process.argv[1]); console.log(JSON.stringify({rows:a.observationCount,classes:a.faultClassCounts,duplicates:a.exactDuplicateRows,labelRuns:a.contiguousLabelRuns,wearGroundTruth:a.wearGroundTruthPresent,sourceBlob:a.provenance.gitBlobSha},null,2))' /tmp/ma00/enginefault-audit.json
+      - name: Upload aggregated audit only — never raw third-party data
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ma00-enginefault-aggregated-audit
+          path: /tmp/ma00/enginefault-audit.json
+          retention-days: 14
