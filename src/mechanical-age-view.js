@@ -16,6 +16,8 @@ export function mountMechanicalAgeLab(root){
    +'<p>RPM mediana '+fmt(r.features.medianRpm)+'; dispersión robusta RPM '+fmt(r.features.rpmRobustSigma)+'; ECT '+fmt(r.features.medianEctC)+' °C; carga '+fmt(r.features.medianLoadPct)+' %; STFT+LTFT '+fmt(r.features.medianCombinedTrimPct)+' puntos porcentuales.</p>'
    +(r.exclusion.length?'<p role="note">Exclusiones: '+esc(r.exclusion.join('; '))+'</p>':'')
    +'<p class="muted">Evidencia de adquisición: '+esc(r.measurementEvidence.completeness)+'; verificación instrumental independiente: ninguna.</p>'
+   +'<p class="muted">Sincronización entre PIDs: no verificada. Alertas de observabilidad: '+r.signalObservability.warnings.length+'.</p>'
+   +(r.signalObservability.warnings.length?'<ul>'+r.signalObservability.warnings.map(w=>'<li>'+esc(w)+'</li>').join('')+'</ul>':'')
    +'<p class="muted">Procedencia: '+esc(r.provenance)+'; muestras: '+r.sampleCount+'. Edad equivalente: <strong>no determinada</strong>. Desgaste estructural: <strong>no determinado</strong>.</p></div>';
  }
  function render(){
