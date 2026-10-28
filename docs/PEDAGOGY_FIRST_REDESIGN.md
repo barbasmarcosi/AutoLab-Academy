@@ -43,7 +43,7 @@ Lesson 1: **NOT ACCEPTED, provisional 8.5/10** (reviewed 2026-10-28; not a measu
 2. Novice comprehension/user-testing has NOT been performed; no claim of 9/10 without it.
 3. The established conceptual transfer engine still requires lengthy free-text fields which receive no semantic scoring. This is transparently described, but remains a pedagogy gap.
 4. Guided practice allows formative retries; its 100/100 is not independent mastery and must never be sold as such.
-5. In the reserved case, a successful retry is evidence of a successful attempt, not first-try competence. A separate first-attempt result is recorded.
+5. In the reserved case, a successful retry is evidence of a successful attempt, not first-try competence. The earliest **retained** attempt can be inspected; the capped 500-entry progress log cannot certify a lifetime first-attempt rate.
 
 **Next critical review**: watch a novice complete the lesson without assistance; inspect first-try correctness and ability to explain the mechanism on another unseen numerical case; check keyboard, 375px mobile viewport, screen reader announcements, offline study, and backup round-trip. Certify only after all gates and scores ≥9/10.
 
