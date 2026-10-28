@@ -50,3 +50,34 @@ jobs:
           name: ma00-enginefault-aggregated-audit
           path: /tmp/ma00/enginefault-audit.json
           retention-days: 14
+
+  empirical-dieselobd:
+    name: Inventory pinned real DieselOBD train/test workbooks
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Install XLSX reader (do not reinvent workbook parsing)
+        run: python3 -m pip install --disable-pip-version-check openpyxl==3.1.5
+      - name: Fetch upstream snapshot by immutable commit
+        run: |
+          mkdir -p /tmp/ma00
+          curl -fSL --retry 2 --max-time 120 --max-filesize 10000000 \
+            "https://raw.githubusercontent.com/AbouAbdallah-Lounis/OBD-Dataset/a9c96dc146aeeb62ef75d3b453c238f5379ccff5/MASTER_TRAIN_X.xlsx" \
+            -o /tmp/ma00/MASTER_TRAIN_X.xlsx
+          curl -fSL --retry 2 --max-time 120 --max-filesize 3000000 \
+            "https://raw.githubusercontent.com/AbouAbdallah-Lounis/OBD-Dataset/a9c96dc146aeeb62ef75d3b453c238f5379ccff5/MASTER_TEST_X.xlsx" \
+            -o /tmp/ma00/MASTER_TEST_X.xlsx
+      - name: Verify blob hashes and measure actual workbook coverage
+        run: |
+          python3 tools/audit_dieselobd_workbooks.py /tmp/ma00/MASTER_TRAIN_X.xlsx /tmp/ma00/MASTER_TEST_X.xlsx > /tmp/ma00/dieselobd-audit.json
+          python3 -c 'import json; data=json.load(open("/tmp/ma00/dieselobd-audit.json")); print(json.dumps([{"file":f["sourceFile"],"sheets":[{"rows":s["rows"],"columns":s["columnCount"],"vehicles":s["distinctVehicleCount"],"pids":s["obdPidColumns"],"dtcs":s["dtcColumns"]} for s in f["sheets"]]} for f in data],indent=2))'
+      - name: Publish aggregate-only workbook inventory
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ma00-dieselobd-aggregated-inventory
+          path: /tmp/ma00/dieselobd-audit.json
+          retention-days: 14
