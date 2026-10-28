@@ -7,7 +7,7 @@ test('EngineFault audit detects class-run confounding and derived AFR without cl
  const csv=[header,row(0),row(0),row(1,2400,1.1),row(1,2400,1.1)].join('\n')+'\n';
  const a=auditEngineFaultCsv(csv);
  assert.equal(a.observationCount,4);
- assert.equal(a.exactDuplicateRows,1);
+ assert.equal(a.exactDuplicateRows,2); // one duplicate in each synthetic class
  assert.deepEqual(a.faultClassCounts,{'0':2,'1':2});
  assert.equal(a.contiguousLabelRuns,2);
  assert.equal(a.afrLambdaMeanAbsResidual147,0);
