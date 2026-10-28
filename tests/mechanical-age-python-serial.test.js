@@ -109,7 +109,7 @@ test('MA00 fuel-control transitions are not wear and veto serial A-A even when o
  // Use RAW bytes and matching decoded status to model an internally consistent
  // temporary open loop excursion; no software tampering is claimed.
  b.events[7].rawResponseHex=Buffer.from('41030100\r>','ascii').toString('hex').toUpperCase();
- b.events[7].rawFrameSizeBytes=9;
+ b.events[7].rawFrameSizeBytes=10;
  b.events[7].value=1;
  b.events[7].fuelSystem2Status=0;
  assert.equal(auditSerialTrace(b).internallyConsistent,true);
