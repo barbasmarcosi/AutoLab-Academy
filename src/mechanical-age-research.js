@@ -43,8 +43,11 @@ export function evaluateMechanicalSnapshot(record){
  const trim=trims?median(samples.map(s=>s.stftPct+s.ltftPct)):null;
  const iat=hasIat?median(values('iatC')):null;
  const elapsedSec=(samples.at(-1).timeMs-samples[0].timeMs)/1000;
+ const intervals=samples.slice(1).map((row,i)=>row.timeMs-samples[i].timeMs);
+ const medianIntervalMs=median(intervals),maxIntervalMs=Math.max(...intervals);
  const exclusion=[];
  if(elapsedSec<19)exclusion.push('Duración menor de 19 s');
+ if(medianIntervalMs<100||medianIntervalMs>5000||maxIntervalMs>Math.max(5000,4*medianIntervalMs))exclusion.push('Muestreo irregular/no representativo: huecos o frecuencia fuera del protocolo educativo');
  if(ect<75||ect>110||temperatureRange>5)exclusion.push('Refrigerante fuera de condiciones térmicas v0');
  if(rpm<550||rpm>1150)exclusion.push('Régimen fuera de rango educativo de ralentí');
  if(load>35||loadRange>10)exclusion.push('Carga no comparable/estable');
@@ -52,13 +55,14 @@ export function evaluateMechanicalSnapshot(record){
  const eligible=exclusion.length===0;
  const speedDeviation=bound((rpmRobustSigma-4)/55,0,1);
  const trimDeviation=trim===null?null:bound((Math.abs(trim)-5)/20,0,1);
- const deviationIndex=eligible?Math.round(100*(.4*speedDeviation+.6*trimDeviation)):null;
+ // An arbitrary weighted score must never be applied to externally supplied OBD as if it were calibrated.
+ const deviationIndex=eligible&&source==='synthetic'?Math.round(100*(.4*speedDeviation+.6*trimDeviation)):null;
  return {
   model:MECHANICAL_AGE_VERSION,protocol,phase,source,engineFamily:engineFamily.trim(),
-  sampleCount:samples.length,elapsedSec,
+  sampleCount:samples.length,elapsedSec,medianIntervalMs,maxIntervalMs,
   status:eligible?'eligible':'inconclusive',exclusion,vehicleAlias:vehicleAlias.trim(),
   features:{medianRpm:rpm,rpmRobustSigma,medianEctC:ect,medianLoadPct:load,medianIatC:iat,medianCombinedTrimPct:trim,temperatureRange,loadRange},
-  deviationIndex,
+  deviationIndex,scoringStatus:source==='synthetic'?'demonstration_only':'not_calibrated_external_data',
   structuralWear:null,mechanicalAgeEquivalentKm:null,remainingUsefulLife:null,
   indexMeaning:'Desviación exploratoria 0-100 en ralentí controlado, NO porcentaje de desgaste, salud o edad',
   thresholdsMeaning:'Umbrales educativos arbitrarios, sin calibración OEM ni validación clínica/mecánica',
@@ -82,8 +86,8 @@ export function compareMechanicalSnapshots(before,after){
  const comparable=blockers.length===0;
  return {
   model:MECHANICAL_AGE_VERSION,comparable,blockers,before:a,after:b,
-  deltaDeviationIndex:comparable?b.deviationIndex-a.deviationIndex:null,
-  interpretation:comparable?'Cambio observado en desviación funcional tras service; causalidad y desgaste NO identificados':'No comparar índices bajo condiciones dispares',
+  deltaDeviationIndex:comparable&&a.deviationIndex!==null&&b.deviationIndex!==null?b.deviationIndex-a.deviationIndex:null,
+  interpretation:comparable?(a.deviationIndex===null?'Variables observadas comparables, pero SIN puntuación de datos externos no calibrados':'Cambio observado en índice sintético; causalidad y desgaste NO identificados'):'No comparar índices bajo condiciones dispares',
   mechanicalAgeChangeKm:null,structuralRejuvenationClaim:false
  };
 }
