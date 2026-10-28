@@ -53,3 +53,23 @@ test('MA00 user can falsify the scoring assumptions using deterministic negative
  await expect(page.locator('li').filter({hasText:'STFT y LTFT se compensan'})).toBeVisible();
  await expect(page.getByText(/El score no identifica desgaste ni causa/)).toHaveCount(0);
 });
+
+
+test('MA00 A-A receipt-level demo runs offline-friendly and never labels functional drift as wear',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="mechanical-age"]').click();
+ await expect(page.getByRole('heading',{name:/A–A: repetibilidad sin intervención/})).toBeVisible();
+ await page.getByRole('button',{name:'Ensayo A–A sintético'}).click();
+ await expect(page.getByRole('heading',{name:'Evaluación A–A'})).toBeVisible();
+ await expect(page.getByText(/Ventanas documentalmente compatibles/)).toBeVisible();
+ await expect(page.getByText(/Edad mecánica, score de salud, desgaste y causalidad/)).toBeVisible();
+ await expect(page.getByText(/Evidencia física o sincronización ECU/)).toBeVisible();
+ await page.getByRole('button',{name:'Limpiar'}).click();
+ await expect(page.getByRole('heading',{name:'Evaluación A–A'})).toHaveCount(0);
+});
+test('MA00 A-A rejects forged contradictory or incomplete data without showing a delta',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="mechanical-age"]').click();
+ await page.locator('#ma-aa-json').fill('[{"invalid":"<script>alert(1)</script>"}]');
+ await page.getByRole('button',{name:'Evaluar sesiones aportadas'}).click();
+ await expect(page.getByText(/No se pudo evaluar A–A/)).toBeVisible();
+ await expect(page.locator('script')).toHaveCount(0);
+});
