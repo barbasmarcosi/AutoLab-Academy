@@ -1,6 +1,6 @@
 # MA00 — Edad mecánica: investigación exploratoria OBD v0
 
-**Estado (2026-10-28):** prototipo sintético, NO calibrado, integrado en el menú «Edad mecánica R&D» de esta rama. Aún no se ha probado con vehículos reales ni auditado filas de datasets externos. NO mide edad real, desgaste permanente ni vida remanente.
+**Estado (2026-10-28):** prototipo no calibrado integrado en «Edad mecánica R&D». Se ejecutaron auditorías de archivos reales de EngineFaultDB y DieselOBD (véase evidencia más abajo), pero **no hay mediciones físicas de motores para validar envejecimiento ni muestras OBD instrumentadas propias**. NO mide edad real, desgaste permanente ni vida remanente. Para el contrato de evidencia y las limitaciones temporales por PID, ver [protocolo de adquisición MA00 v1](MECHANICAL_AGE_ACQUISITION_PROTOCOL_V1.md).
 
 ## Hipótesis falsable
 
@@ -21,7 +21,7 @@ Magnitudes exploratorias (sin respaldo empírico de envejecimiento):
 
 D mide una desviación funcional artificial de 0 a 100, NO salud %, edad, desgaste, pronóstico ni diagnóstico. Pesos y umbrales son decisiones didácticas que deberán retirarse/calibrarse. Si faltan trims (p.ej. diésel) el índice queda inconcluso: no imputar señales inexistentes. Desgaste estructural, edad equivalente y RUL: siempre null. Las mediciones no se guardan; todo queda en RAM de la vista hasta navegar o recargar. El ejemplo se genera con syntheticServicePair() y no usa coches reales.
 
-## Inventario de datos públicos (documentación verificada; archivos todavía NO descargados ni perfilados)
+## Inventario de fuentes (catálogo inicial; EngineFaultDB y DieselOBD auditados posteriormente)
 
 | Fuente | Para qué sirve | Brecha principal |
 | --- | --- | --- |
@@ -124,3 +124,8 @@ El registro de estudio futuro deberá guardar, además de lecturas: \`anonymized
 
 
 **Ejecución y costos de CI (28/10/2026):** los cambios de rama ejecutan validación del módulo, tests unitarios, compilación y E2E; las descargas de EngineFaultDB y DieselOBD quedaron bajo `workflow_dispatch` manual para evitar rehacer auditorías idénticas en cada commit. La verificación de procedencia sigue fijada por commit/blob y los informes anteriores no cambian. Pushes superados se cancelan para no gastar minutos innecesarios; ninguna ejecución despliega producción.
+
+
+## Puerta documental MA00 v1
+
+Se agregó src/mechanical-age-evidence.js: las capturas externas sin metadatos documentados de sesión, reloj, adaptador, estado de lazo, A/C, ventilación, carga y ambiente **no se declaran comparables**. Una declaración completa es solo información aportada por el operador, no evidencia de calibración o autenticidad. El score sintético nunca se aplica a datos externos. Las fechas de captura con calendario imposible o sin zona horaria se rechazan; un replay con timestamps alterados no cuenta como sesión independiente. Ver [protocolo detallado](MECHANICAL_AGE_ACQUISITION_PROTOCOL_V1.md). Las evaluaciones por fila no se consideran unidades estadísticas independientes y el OBD interrogado secuencialmente no acredita sincronía entre PIDs.
