@@ -200,9 +200,13 @@ export function mountVoltDropPractice(root,{record,onSaved=()=>{}}={}){
    if(!m.energized&&k!=="source"){
     $("volt-reading").textContent="Con el circuito abierto, el voltímetro del modelo no define automáticamente diferencias entre todos los puntos. Cerrá el circuito para medir caídas bajo carga.";return;
    }
-   measurements.set(k,{observed,predicted,error:Math.abs(observed-predicted)});
-   $("volt-reading").textContent=probes[k].label+": predicción "+fmt(predicted)+" V; instrumento virtual "+fmt(observed)+
-    " V. Error absoluto "+fmt(Math.abs(observed-predicted))+" V. Revisá I × R y las hipótesis.";
+   const error=Math.abs(observed-predicted),tolerance=0.15;
+   measurements.set(k,{observed,predicted,error});
+   const resistance={positive:m.positiveOhm,return:m.returnOhm,load:m.loadOhm}[k];
+   $("volt-reading").textContent=(error<=tolerance?"Predicción compatible. ":"Predicción fuera de tolerancia: corregí y volvé a medir. ")+
+    probes[k].label+": anticipaste "+fmt(predicted)+" V y mediste "+fmt(observed)+" V. Diferencia "+fmt(error)+" V. "+
+    (k==="source"?"La fuente ideal del modelo entrega "+fmt(m.sourceV)+" V.":
+     "Cálculo: I "+fmt(m.currentA)+" A × R "+fmt(resistance)+" Ω = "+fmt(observed)+" V.");
    updateMeasuredList();status();return;
   }
   if(event.target.id==="volt-diagnose"){
