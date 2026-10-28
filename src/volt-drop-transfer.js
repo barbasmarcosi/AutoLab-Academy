@@ -97,7 +97,7 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    }catch(e){$("holdout-status").textContent="Falta evidencia: "+String(e.message);return;}
    saving=true;attempts++;
    try{
-    await record({id:VOLT_DROP_HOLDOUT_ID,passed:g.passed,score:g.score,at:new Date().toISOString(),attempt:attempts,
+    await record({id:VOLT_DROP_HOLDOUT_ID,passed:g.passed,score:g.score,at:new Date().toISOString(),attemptInSession:attempts,
      hypothesis:"Causa localizada: "+g.selected.diagnosis,conclusion:"Evaluación objetiva "+g.score+"/100",
      used:["dos-mediciones-bajo-carga","prediccion-numerica","falsacion"],reasoning:"Texto libre no calificado",
      report:JSON.stringify({caseId:g.caseId,selected:g.selected,expected:g.expected,firstAttempt:attempts===1})});
