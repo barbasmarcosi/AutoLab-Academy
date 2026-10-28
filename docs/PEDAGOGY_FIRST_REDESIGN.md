@@ -74,3 +74,8 @@ Do not merge or deploy production before independent review.
 ## Independent-case numeric leakage closed
 - The lesson-1 independent holdout no longer exposes a load-voltage probe before submitting the numerical load prediction. Only two conductor measurements, under the same load, may be submitted to its grading function. A third direct probe or a duplicated probe fails closed.
 - The load-voltage model value is revealed after submission for corrective feedback. The learner must compute it as source minus the two observed conductor drops; tests explicitly reject direct answer disclosure in the assessment UI and grader.
+
+
+## CI coverage guard
+- The focused Chromium gate includes not only the lesson-1 holdout/offline flows but representative MC06/MC14/MOSFET conceptual transfers and progression/legacy evidence tests, guarding the v3 scoring migration at browser level.
+- Publishing to the existing GitHub Pages environment on manual feature-branch dispatch requires explicit `full_suite=true`. The default quick manual validation does not silently overwrite production.
