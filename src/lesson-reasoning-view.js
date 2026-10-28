@@ -56,8 +56,8 @@ export function mountLessonReasoning(root,{lessonId,record,onSaved=()=>{}}){
     '<button type="button" class="button" data-reasoning="grade">Revelar devoluciones y evaluar</button>';
   }else{
    html+='<h3>Devolución por criterio</h3>'+
-    result.original.stepResults.map((item,i)=>'<div class="panel"><p><strong>'+esc(scenario.steps[i].title)+': '+(item.correct?'Coincide con el modelo':'Revisar hipótesis')+'</strong></p><p>'+esc(item.feedback)+'</p></div>').join('')+
-    '<div class="panel"><p><strong>Transferencia: '+(result.transferCorrect?'Coincide con el modelo':'Revisar hipótesis')+'</strong></p><p>'+esc(transfer.feedback)+'</p></div>'+
+    result.original.stepResults.map((item,i)=>'<div class="panel"><p><strong>'+esc(scenario.steps[i].title)+': '+(item.correct?'Correcto':'Incorrecto')+'</strong></p><p>Tu respuesta: '+esc(scenario.steps[i].options[item.selected])+'</p><p>Respuesta esperada: '+esc(scenario.steps[i].options[item.expected])+'</p><p>'+esc(item.feedback)+'</p></div>').join('')+
+    '<div class="panel"><p><strong>Transferencia: '+(result.transferCorrect?'Correcto':'Incorrecto')+'</strong></p><p>Tu respuesta: '+esc(transfer.options[result.transfer.selected])+'</p><p>Respuesta esperada: '+esc(transfer.options[result.transfer.expected])+'</p><p>'+esc(transfer.feedback)+'</p></div>'+
     '<p><strong>Resultado estructurado con transferencia: '+result.score+'/100</strong> · '+(result.passed?'Criterios cumplidos':'Volvé a plantear el caso')+'</p>'+
     '<p><strong>Autoconfianza (no es parte de la nota):</strong> '+currentAudit().declared+'/4 decisiones declaradas.'+
  (currentAudit().complete?' Error cuadrático medio descriptivo: '+currentAudit().meanSquaredError.toFixed(4)+'.':' No se calcula índice con declaraciones incompletas.')+
