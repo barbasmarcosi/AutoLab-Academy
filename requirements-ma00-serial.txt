@@ -1,0 +1,3 @@
+# Optional LOCAL hardware access only. Python standard library covers tests.
+# pySerial project: https://pyserial.readthedocs.io/en/latest/pyserial_api.html
+pyserial==3.5
