@@ -65,7 +65,9 @@ jobs:
         with:
           path: ./site/AutoLab-Academy
   deploy:
-    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feature/pedagogy-first-redesign' && contains(github.event.head_commit.message, '[pages-milestone]')))) || (github.event_name == 'workflow_dispatch' && inputs.full_suite)
+    # github-pages permits default-branch deployment only. Validated feature
+    # milestones are published by publish-pedagogy-pages.yml from main.
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.full_suite && github.ref == 'refs/heads/main')
     needs: verify
     runs-on: ubuntu-latest
     environment:

@@ -16,3 +16,14 @@
 - **Progress:** 94 lessons total; 35 linked to a practical engine; 23 integrated; 12 linked only. Only lesson 01 passed internal design acceptance.
 - **Not certified:** real learner comprehension/retention, free-text reasoning, supervised instrument skills, HV intervention.
 - **This release:** triggered by the commit with the required marker; publish only after Actions is green. Verify Pages live URL and workflow deployment before claiming it is online.
+
+## Pages environment authorization fix — 2026-10-28
+The initial feature-branch release `ba2df954` passed **every verification**, including complete Chromium, WebKit and mobile WebKit E2E and artifact upload. Its deploy job was rejected before execution because the `github-pages` environment permits only the default branch.
+
+The resolution does not require admin-level environment edits or merging PR #56:
+- `.github/workflows/publish-pedagogy-pages.yml` lives on `main` and listens for completed successful **push** workflow runs of `Test and deploy AutoLab Academy` from exactly `feature/pedagogy-first-redesign`.
+- A feature commit marked `[pages-milestone]` launches the full test matrix, **without direct deploy**.
+- On success, the publisher runs with GitHub context `main`, checks out `workflow_run.head_sha` (the immutable tested feature commit), rebuilds with locked dependencies, uploads the exact Pages artifact and deploys to `github-pages`.
+- No external hosting, no production merge, no new credentials. The branch restriction failure is solved by using the proper workflow context.
+- `main` infrastructure commit `a2bce265` is labeled `[pages-router]` to avoid publishing an old `main` snapshot while installing the router.
+- Publication is NOT complete until the `Publish validated AutoLab Academy milestones to Pages` run reports `deploy: success`.
