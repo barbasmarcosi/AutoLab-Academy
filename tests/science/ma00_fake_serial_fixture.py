@@ -21,6 +21,8 @@ class Clock:
 
 
 def reply(pid, i, variant):
+    if pid == "0103":
+        return b"41030200\r>"  # closed-loop fuel system 1, second absent
     if pid == "010C":
         return f"410C{(800 + ((i + variant) % 3) * 2) * 4:04X}\r>".encode()
     if pid == "0105":
