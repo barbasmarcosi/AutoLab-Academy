@@ -67,3 +67,29 @@ La fuente oficial se ejecutará una sola vez, únicamente para TRAIN, con el mar
 ## Solicitud de contraste α=1 frente a α=20 sobre el ZIP original
 
 Los tests de grupo, repetibilidad, pares de perturbación y CLI ya aprobaron en la CI. Se habilita una única ejecución empírica con los dos valores de regularización fijados de antemano y el mismo conjunto TRAIN de motores simulados. Los resultados serán publicados íntegros incluso si no explican R6; **no reabrir el archivo TEST para decidir nuevas regularizaciones**.
+
+
+## Resultados observados — NASA original, solo TRAIN (28/10/2026)
+
+**Experimento R8 fijo α20:**
+https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40788434034/artifacts/12859234369
+
+**Control α1 (selección histórica R6) frente a α20 (R8), con idénticos folds/cortes/políticas/semillas:**
+https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40788770570/artifacts/12859913425
+
+Ambos se ejecutaron con el ZIP original previamente fijado por SHA-256, 100 motores simulados TRAIN, cortes 50/100/150 (100/100/93 motores elegibles), 293 pares motor-corte y 5 perturbaciones pareadas por par. **No se abrieron ni evaluaron las etiquetas NASA FD001 TEST**, anteriormente utilizadas en R6.
+
+| Política de ruido a 10% sigma | α1 MAE ciclos | α20 MAE ciclos |
+| --- | ---: | ---: |
+| Sin ruido | 31,387 | 31,623 |
+| Solo sensores variables | 31,437 | 31,649 |
+| Solo variables operativas | 31,389 | 31,624 |
+| Todos los sensores (incluidos casi constantes) | 31,437 | 31,649 |
+| **Todos los canales no temporales (política R6)** | **31,439** | **31,650** |
+| Sensores variables + variables operativas | 31,439 | 31,650 |
+
+**Lectura rigurosa:** en esta población y estos cortes, ni perturbar conjuntamente los 24 canales ni emplear el α original de R6 reproduce una degradación de MAE semejante a la de R6 TEST (de 21,951 a 222,766). Los efectos pareados son muy pequeños: +0,052 ciclos para α1 y +0,027 para α20. No respalda una explicación de la fragilidad R6 mediante canales constantes, variables de operación o el cambio α1→20 **en este diseño**.
+
+Sin embargo, el diseño R8 **no replica la distribución de checkpoints finales de TEST**, ni la misma semilla global, ni su condición de truncamiento. Por ello R8 NO demuestra que el resultado de R6 sea falso. Las hipótesis todavía abiertas incluyen distribución de observaciones, adaptación a últimos prefijos, desplazamiento de distribución en TEST, y diferencias de aleatoriedad/perturbación. No mirar de nuevo TEST FD001 para seleccionar correcciones.
+
+**Decisión:** mantener como resultado adversarial R6 y prohibir toda afirmación de robustez física. Próximo trabajo: banco independiente con simulación diferente (p. ej. otra configuración NASA) y protocolo fijado antes de abrir etiquetas, o captura física controlada, siempre sin convertir ciclos aeronáuticos a km automotrices.
