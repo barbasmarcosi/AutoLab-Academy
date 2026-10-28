@@ -52,7 +52,8 @@ class MA00R7Tests(unittest.TestCase):
                     score=outcome["noiseByTrainStandardDeviation"][str(level)]
                     self.assertEqual(score["independentEngines"],10)
                     self.assertEqual(score["engineCount"],10) # not 50 for five seeds
-                    self.assertGreater(score["checkpointCount"],0)
+                    self.assertGreater(score["uniqueEngineCheckpointCount"],0)
+                    self.assertEqual(score["perturbedPredictionCount"],score["uniqueEngineCheckpointCount"] * (5 if level else 1))
                     self.assertGreaterEqual(score["engineBalancedMAE"],0)
         self.assertEqual(original,self.raw)
 
@@ -92,8 +93,9 @@ class MA00R7Tests(unittest.TestCase):
         }
         result=_engine_errors(repeated)
         self.assertEqual(result["engineCount"],2)
-        self.assertEqual(result["checkpointCount"],4)
-        self.assertEqual(result["byObservedCycle"]["50"]["engines"],4)
+        self.assertEqual(result["uniqueEngineCheckpointCount"],2)
+        self.assertEqual(result["perturbedPredictionCount"],4)
+        self.assertEqual(result["byObservedCycle"]["50"]["engines"],2)
         self.assertEqual(result["engineBalancedMAE"],7.5)
 
     def test_rejects_too_few_engines_and_damaged_columns(self):
