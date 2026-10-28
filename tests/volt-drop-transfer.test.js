@@ -40,6 +40,6 @@ test("reserved case evidence is not mistaken for guided bank or conceptual reaso
  const p={...base,cases:[...base.cases,{id:VOLT_DROP_HOLDOUT_ID,passed:true,attempt:1}]};
  e=lessonEvidence(p,"volt-drop");
  assert.equal(e.holdout.passed,true);
- assert.equal(e.holdout.firstAttemptPassed,true);
+ assert.equal(e.holdout.firstRecordedAttemptPassed,true);
  assert.equal(e.documented,true);
 });
