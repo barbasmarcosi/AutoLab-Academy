@@ -87,6 +87,8 @@ const shell=[
  "<rect x='245' y='122' width='170' height='46' rx='8' fill='#17374b' stroke='#ffb76a' stroke-width='2'/>"+
  "<text x='330' y='150' text-anchor='middle' fill='#ffffff' font-size='15'>Retorno</text>"+
  "<text x='174' y='54' fill='currentColor' font-size='17'>+</text><text x='174' y='166' fill='currentColor' font-size='17'>−</text>"+
+ "<text x='208' y='40' text-anchor='middle' fill='currentColor' font-size='15'>A</text><text x='550' y='40' text-anchor='middle' fill='currentColor' font-size='15'>B</text>"+
+ "<text x='550' y='183' text-anchor='middle' fill='currentColor' font-size='15'>D</text><text x='208' y='183' text-anchor='middle' fill='currentColor' font-size='15'>E</text>"+
  "<circle id='volt-probe-red' cx='208' cy='60' r='9' fill='#fa6868' stroke='#ffffff' stroke-width='2'/>"+
  "<circle id='volt-probe-black' cx='550' cy='60' r='9' fill='#1f2937' stroke='#ffffff' stroke-width='2'/>"+
  "</svg>"+
