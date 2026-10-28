@@ -96,9 +96,27 @@ export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diag
   expected:{loadV:m.loadV,diagnosis:expected,falsifier:VOLT_DROP_FALSIFIERS[diagnosis].answer,positiveV:m.positiveV,returnV:m.returnV},
   numeric,causal,falsified,reason:"La tensión de la carga es la fuente menos ambas caídas bajo la misma condición. La falsación debe buscar una observación incompatible con la hipótesis. Caídas similares NO demuestran que ambos tramos cumplan límites OEM: solo que no hay un dominante relativo en este modelo."};
 }
-export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
+/**
+ * Picks a different case after an earlier locally retained v2 submission.
+ * Old-rubric or malformed entries cannot steer the selection.
+ * This is anti-repetition for offline training, NOT examination security.
+ */
+export function nextVoltageDropHoldoutIndex(history=[]){
+ if(!Array.isArray(history))return 0;
+ for(let i=history.length-1;i>=0;i--){
+  const entry=history[i];
+  if(entry?.id!==VOLT_DROP_HOLDOUT_ID||typeof entry.report!=="string")continue;
+  try{
+   const data=JSON.parse(entry.report);
+   const index=VOLT_DROP_HOLDOUT_CASES.findIndex(x=>x.id===data?.caseId);
+   if(index>=0)return (index+1)%VOLT_DROP_HOLDOUT_CASES.length;
+  }catch{}
+ }
+ return 0;
+}
+export function mountVoltDropHoldout(root,{record,onSaved=()=>{},history=[]}={}){
  if(!root||typeof record!=="function")throw Error("Falta el guardador de evidencia");
- let index=0,measurements=new Set(),prior=null,frozenAt=null,readingTrail=[],result=null,saving=false,attempts=0,feedback="",learnerReasoning="";
+ let index=nextVoltageDropHoldoutIndex(history),measurements=new Set(),prior=null,frozenAt=null,readingTrail=[],result=null,saving=false,attempts=0,feedback="",learnerReasoning="";
  const $=id=>root.querySelector("#"+id);
  const render=()=>{
   const scenario=VOLT_DROP_HOLDOUT_CASES[index];
