@@ -14,7 +14,8 @@ const has=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
 
 export function evaluateMechanicalSnapshot(record){
  if(!record||typeof record!=='object'||Array.isArray(record))throw TypeError('Se requiere un expediente');
- const {engineFamily,protocol,phase,source,samples}=record;
+ const {engineFamily,vehicleAlias,protocol,phase,source,samples}=record;
+ if(typeof vehicleAlias!=='string'||vehicleAlias.trim().length<3||vehicleAlias.length>80)throw RangeError('Identificador anónimo de vehículo requerido');
  if(typeof engineFamily!=='string'||engineFamily.trim().length<3||engineFamily.length>100)throw RangeError('Familia de motor requerida');
  if(protocol!==PROTOCOL)throw RangeError('Protocolo de ensayo no reconocido');
  if(!['before_service','after_service'].includes(phase))throw RangeError('Fase de service inválida');
@@ -55,7 +56,7 @@ export function evaluateMechanicalSnapshot(record){
  return {
   model:MECHANICAL_AGE_VERSION,protocol,phase,source,engineFamily:engineFamily.trim(),
   sampleCount:samples.length,elapsedSec,
-  status:eligible?'eligible':'inconclusive',exclusion,
+  status:eligible?'eligible':'inconclusive',exclusion,vehicleAlias:vehicleAlias.trim(),
   features:{medianRpm:rpm,rpmRobustSigma,medianEctC:ect,medianLoadPct:load,medianIatC:iat,medianCombinedTrimPct:trim,temperatureRange,loadRange},
   deviationIndex,
   structuralWear:null,mechanicalAgeEquivalentKm:null,remainingUsefulLife:null,
@@ -70,6 +71,7 @@ export function compareMechanicalSnapshots(before,after){
  const blockers=[];
  if(a.phase!=='before_service'||b.phase!=='after_service')blockers.push('Orden antes/después inválido');
  if(a.engineFamily!==b.engineFamily)blockers.push('Familias de motor distintas');
+ if(a.vehicleAlias!==b.vehicleAlias)blockers.push('No es el mismo vehículo');
  if(a.source!==b.source)blockers.push('Procedencia distinta');
  if(a.status!=='eligible'||b.status!=='eligible')blockers.push('Algún ensayo no cumple el protocolo');
  if(Math.abs(a.features.medianRpm-b.features.medianRpm)>80)blockers.push('Régimen de ralentí no comparable');
@@ -90,7 +92,7 @@ export function syntheticServicePair(){
  const make=(phase)=>{
   const before=phase==='before_service';
   return {
-   engineFamily:'demo-gasoline-inline4',protocol:PROTOCOL,phase,source:'synthetic',
+   engineFamily:'demo-gasoline-inline4',vehicleAlias:'demo-unit-001',protocol:PROTOCOL,phase,source:'synthetic',
    samples:Array.from({length:40},(_,i)=>({
     timeMs:i*1000,rpm:800+(before?24:5)*Math.sin(i*1.37),
     ectC:89+Math.sin(i*.2),loadPct:18+Math.sin(i*.15),
