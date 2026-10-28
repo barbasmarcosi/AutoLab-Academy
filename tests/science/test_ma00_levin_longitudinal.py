@@ -17,7 +17,7 @@ def fixture(records, headers=FIELDS):
     temp = tempfile.TemporaryDirectory()
     path = Path(temp.name) / "private-telematics.csv"
     with path.open("w", newline="", encoding="utf8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=headers)
+        writer = csv.DictWriter(handle, fieldnames=headers, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(records)
     return temp, path
