@@ -114,7 +114,7 @@ def decode_supported_pids(raw: bytes) -> set[str]:
     if not raw.endswith(b">") or len(raw) > 1024:
         raise ProtocolError("Supported-PID response incomplete")
     try:
-        lines = [re.sub(r"\\s+", "", x) for x in raw[:-1].decode("ascii").upper().replace("\\n", "\\r").split("\\r") if x.strip()]
+        lines = [re.sub(r"\s+", "", x) for x in raw[:-1].decode("ascii").upper().replace("\n", "\r").split("\r") if x.strip()]
     except UnicodeDecodeError as exc:
         raise ProtocolError("Supported-PID response is non-ASCII") from exc
     lines = [x for x in lines if x != SUPPORTED_QUERY]
