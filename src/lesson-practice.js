@@ -5,6 +5,8 @@
  * existing lab, while preserving the learner's theory reading marker.
  */
 export const LESSON_PRACTICES=Object.freeze([
+ {lessonId:'volt-drop',page:'volt-drop',kind:'embedded',caseId:'lab-volt-drop-guided-v1',
+  title:'Banco guiado: medí, predecí y localizá una caída resistiva',prompt:'Aplicá I × R a fuente ideal, positivo, retorno y carga; variá una resistencia, compará dos lecturas y recibí corrección específica.'},
  {lessonId:'sensor-plausibility',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-sensor-fallback-v1',
   title:'ECT: valor sustitutivo frente a temperatura de referencia',prompt:'Estimá la diferencia entre un valor diagnóstico congelado por fallback y una referencia física sintética. Discriminá lectura de ECU de estado real.'},
  {lessonId:'scope-reference',page:'numeric-bench',kind:'embedded',caseId:'lab-numeric-scope-ground-v1',
