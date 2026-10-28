@@ -59,3 +59,7 @@ No activar score de edad, porcentaje de salud ni RUL de autos reales. El próxim
 ## Solicitud controlada de auditoría externa
 
 La implementación y los tests sintéticos se fijaron antes de la ejecución. Esta revisión solicita **una única lectura del archivo oficial NASA** para comparar las dos baselines preregistradas, sin entrenamiento sobre las etiquetas test ni publicación de las trayectorias originales. La evidencia empírica deberá provenir del artefacto agregado de CI y conservar su digest SHA-256.
+
+## Diagnóstico de empaquetado (sin inferencia)
+
+Primer intento de descargar NASA item 6: conexión y transferencia correctas, pero la estructura del ZIP no exponía directamente los miembros FD001; la auditoría se abortó sin publicar métricas. Se añadió soporte para un ZIP anidado de un solo nivel (sin extraer a disco), límites de tamaño, detección de miembros duplicados y prueba adversarial. El segundo intento solo será válido si el inventario real corresponde a FD001.
