@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {VOLT_DROP_CASE_ID,VOLT_DROP_CHECKS,voltageDropModel,checkVoltageDropAnswer,diagnoseVoltageDrop,voltDropTheoryIllustration,voltageDropNodes} from "../src/volt-drop-lesson.js";
+import {VOLT_DROP_CASE_ID,VOLT_DROP_CHECKS,voltageDropModel,checkVoltageDropAnswer,diagnoseVoltageDrop,voltDropTheoryIllustration,voltageDropNodes,VOLT_DROP_BASELINE,evaluateVoltDropBaseline} from "../src/volt-drop-lesson.js";
 import {lessonPractice,practiceProgress} from "../src/lesson-practice.js";
 
 test("lesson-1 worked example obeys Ohm and Kirchhoff equations",()=>{
@@ -65,4 +65,17 @@ test("signed potential model obeys voltage reference and Kirchhoff laws for vari
  assert.throws(()=>voltageDropNodes(voltageDropModel({energized:false})),RangeError);
  assert.match(voltDropTheoryIllustration(),/11,52 V/);
  assert.match(voltDropTheoryIllustration(),/−0,48 V/);
+});
+
+test("cold misconception diagnostic checks all answer variants without assessing competence",()=>{
+ assert.equal(VOLT_DROP_BASELINE.length,3);
+ const right=Object.fromEntries(VOLT_DROP_BASELINE.map(q=>[q.id,q.answer]));
+ assert.ok(evaluateVoltDropBaseline(right).every(x=>x.correct));
+ for(const q of VOLT_DROP_BASELINE)for(let i=0;i<q.options.length;i++){
+  const result=evaluateVoltDropBaseline({...right,[q.id]:i}).find(x=>x.id===q.id);
+  assert.equal(result.correct,i===q.answer);
+  assert.ok(result.why.length>28&&result.review.length>20);
+ }
+ assert.throws(()=>evaluateVoltDropBaseline({reference:1}),RangeError);
+ assert.throws(()=>evaluateVoltDropBaseline({...right,idle:3}),RangeError);
 });

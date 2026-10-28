@@ -84,3 +84,7 @@ Do not merge or deploy production before independent review.
 - Added explicit closed-loop A/B/D/E potentials relative to E, positive/negative voltmeter polarity and the distinction from unsigned magnitude in the guided simulation. Clarified that the open-circuit node model is underdetermined.
 - Added deterministic metamorphic tests over multiple positive/return resistances checking all node drops, sign reversal and Kirchhoff closure.
 - Clarified that the generic conceptual transfer in lesson 1 is optional; its dedicated independent holdout is the actual progression gate.
+
+## 2026-10-28: initial diagnostic
+- Three pre-reading questions about potential reference, zero-current drop and correct two-probe placement are ungraded, unpersisted and specifically remediated. The interaction freezes only once per view and never increases mastery or progress.
+- This is automated pedagogical scaffolding, not observed validation with real novices; evidence gate and 8.5/10 provisional status remain.

@@ -34,6 +34,48 @@ export function voltageDropNodes(model){
  if(!model?.energized||![model.sourceV,model.positiveV,model.returnV,model.loadV].every(Number.isFinite))throw RangeError("Solo el circuito cerrado tiene los potenciales definidos por este modelo");
  return Object.freeze({A:model.sourceV,B:model.sourceV-model.positiveV,D:model.returnV,E:0});
 }
+/** Diagnostic entry questions. Ungraded, local to a single visit, never accreditation. */
+export const VOLT_DROP_BASELINE=Object.freeze([
+ {id:"reference",question:"¿Qué compara un voltímetro con puntas en A y B?",options:["Un potencial absoluto de A.","La diferencia de potencial entre A y B.","La resistencia del circuito."],answer:1,
+  why:["Falta la referencia: la tensión se mide entre puntos.","Correcto: dos puntas, dos potenciales y su diferencia.","Una lectura de tensión no es una resistencia total."],review:"Antes de empezar: electricidad sin misterio"},
+ {id:"idle",question:"Si I = 0 A en un cable ideal de resistencia R, ¿cuánta tensión cae en él?",options:["0 V, incluso si R es elevada.","Siempre toda la tensión de la fuente.","0 V demuestra que R es nula."],answer:0,
+  why:["Correcto: I × R = 0 V cuando la corriente es cero.","La tensión de la fuente no es necesariamente la caída del cable.","Una lectura nula sin carga no demuestra que la resistencia sea nula."],review:"Carga, reposo y por qué la diferencia importa"},
+ {id:"probes",question:"Para medir la caída del positivo con carga, ¿dónde apoyás las puntas?",options:["En serie, sustituyendo el cable.","En una masa arbitraria y un positivo cualquiera.","En paralelo, en los dos extremos del mismo tramo."],answer:2,
+  why:["El voltímetro compara, no sustituye, el conductor.","Una referencia arbitraria no aísla el tramo que querés medir.","Correcto: ambos extremos bajo la misma condición de carga."],review:"¿Dónde van las puntas del voltímetro?"}
+].map(q=>Object.freeze({...q,options:Object.freeze(q.options),why:Object.freeze(q.why)})));
+export function evaluateVoltDropBaseline(answers){
+ if(!answers||typeof answers!=="object"||Array.isArray(answers))throw RangeError("Respuestas inválidas");
+ return VOLT_DROP_BASELINE.map(q=>{
+  const selected=answers[q.id];if(!Number.isInteger(selected)||selected<0||selected>=q.options.length)throw RangeError("Respondé las tres preguntas");
+  return {id:q.id,correct:selected===q.answer,selected:q.options[selected],expected:q.options[q.answer],why:q.why[selected],review:q.review};
+ });
+}
+export function mountVoltDropBaseline(root){
+ if(!root)return;
+ const esc=v=>String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ root.innerHTML="<section class='panel stack' aria-label='Chequeo de ideas previas'><h2>Antes de leer: ¿qué pensás?</h2>"+
+ "<p>Elegí sin buscar las respuestas. No tiene nota, no se guarda ni acredita una habilidad. Si dudás, usá la devolución para orientar tu estudio.</p>"+
+ VOLT_DROP_BASELINE.map(q=>"<fieldset class='panel'><legend>"+esc(q.question)+"</legend>"+
+ q.options.map((o,i)=>"<label class='option'><input type='radio' name='baseline-"+q.id+"' value='"+i+"'>"+esc(o)+"</label>").join("")+"</fieldset>").join("")+
+ "<button type='button' class='button alt' id='volt-baseline-submit'>Comparar mis ideas</button><div role='status' aria-live='polite' id='volt-baseline-feedback'>Sin revisar.</div></section>";
+ root.querySelector("#volt-baseline-submit").addEventListener("click",()=>{
+  try{
+   const answers=Object.fromEntries(VOLT_DROP_BASELINE.map(q=>{
+    const el=root.querySelector("input[name='baseline-"+q.id+"']:checked");
+    if(!el)throw RangeError("Respondé las tres preguntas antes de ver la devolución.");
+    return [q.id,Number(el.value)];
+   }));
+   const report=evaluateVoltDropBaseline(answers);
+   root.querySelector("#volt-baseline-feedback").innerHTML="<h3>Devolución diagnóstica (sin nota)</h3>"+
+    report.map(v=>"<div class='panel'><p><strong>"+(v.correct?"Idea inicial compatible":"Idea inicial para revisar")+"</strong></p>"+
+    "<p>Tu respuesta: "+esc(v.selected)+". Esperada: "+esc(v.expected)+".</p><p>"+esc(v.why)+"</p>"+
+    "<p><strong>Volvé a leer:</strong> "+esc(v.review)+"</p></div>").join("")+
+    "<p>Cambiar una idea ante la evidencia es parte del aprendizaje científico.</p>";
+   root.querySelector("#volt-baseline-submit").disabled=true;
+   for(const input of root.querySelectorAll("input[name^='baseline-']"))input.disabled=true;
+  }catch(err){root.querySelector("#volt-baseline-feedback").textContent=err.message;}
+ });
+}
 export function checkVoltageDropAnswer(id,choice){
  const q=VOLT_DROP_CHECKS.find(x=>x.id===id);
  if(!q||!Number.isInteger(choice)||choice<0||choice>=q.options.length)throw RangeError("Respuesta inválida");

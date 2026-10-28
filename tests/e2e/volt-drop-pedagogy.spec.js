@@ -6,6 +6,17 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await page.getByRole("button",{name:"Academia",exact:true}).click();
  await page.locator(".lesson-card").first().getByRole("button",{name:"Estudiar"}).click();
  const lesson=page.locator("#main-content");
+ const baseline=page.locator("#volt-baseline-host");
+ await expect(baseline.getByText("Antes de leer: ¿qué pensás?")).toBeVisible();
+ await baseline.locator("#volt-baseline-submit").click();
+ await expect(baseline.locator("#volt-baseline-feedback")).toContainText("Respondé las tres");
+ await baseline.locator("input[name='baseline-reference'][value='0']").check();
+ await baseline.locator("input[name='baseline-idle'][value='0']").check();
+ await baseline.locator("input[name='baseline-probes'][value='2']").check();
+ await baseline.locator("#volt-baseline-submit").click();
+ await expect(baseline.locator("#volt-baseline-feedback")).toContainText("Idea inicial para revisar");
+ await expect(baseline.locator("#volt-baseline-feedback")).toContainText("Volvé a leer:");
+ await expect(baseline.locator("#volt-baseline-submit")).toBeDisabled();
  await expect(lesson.getByText("Ejemplo resuelto, paso a paso")).toBeVisible();
  await expect(lesson.getByText("Resistencia total:",{exact:false})).toBeVisible();
  const lab=page.locator("#lesson-practice-host");
