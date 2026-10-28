@@ -1,5 +1,5 @@
 import test from'node:test';import assert from'node:assert/strict';
-import{DTC_GUIDED_ID,DTC_CASES,DTC_TESTS,DTC_FALSIFIERS,dtcReading,gradeDtcGuided,dtcTheoryIllustration,dtcCounterfactual}from'../src/dtc-lesson.js';
+import{DTC_GUIDED_ID,DTC_CASES,DTC_TESTS,DTC_FALSIFIERS,dtcReading,gradeDtcGuided,dtcTheoryIllustration,dtcCounterfactual,DTC_BASELINE,evaluateDtcBaseline}from'../src/dtc-lesson.js';
 test('three distinct diagnostic causes and discriminating synthetic observations',()=>{
  assert.equal(DTC_CASES.length,3);assert.equal(DTC_GUIDED_ID,'lab-dtc-guided-v1');
  for(const c of DTC_CASES){
@@ -39,4 +39,14 @@ test('post-submission counterfactual changes only the scripted causal mechanism,
  }
  assert.throws(()=>dtcCounterfactual('air','unknown'),RangeError);
  assert.throws(()=>dtcCounterfactual('unknown','air'),RangeError);
+});
+
+test('pre-reading DTC baseline is graded only in-memory and tests common misconceptions',()=>{
+ const good=Object.fromEntries(DTC_BASELINE.map(q=>[q.id,q.answer]));
+ assert.equal(DTC_BASELINE.length,3);
+ assert.equal(evaluateDtcBaseline(good).filter(x=>x.correct).length,3);
+ const poor=Object.fromEntries(DTC_BASELINE.map(q=>[q.id,(q.answer+1)%3]));
+ assert.equal(evaluateDtcBaseline(poor).filter(x=>x.correct).length,0);
+ assert.throws(()=>evaluateDtcBaseline({...good,code:4}),RangeError);
+ assert.throws(()=>evaluateDtcBaseline({}),RangeError);
 });
