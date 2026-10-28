@@ -13,7 +13,7 @@ test('path makes reading and v2 transfer independent and recommends evidence rat
  await expect(page.getByText('Sin ejercicio de razonamiento asociado')).toHaveCount(0);
  await page.getByRole('button',{name:'Registrar lectura y volver'}).click();
  await itinerary(page);
- await expect(page.locator('#next-evidence-reason')).toContainText('Resolver hipótesis y transferencia');
+ await expect(page.locator('#next-evidence-reason')).toContainText('Experimentar con voltímetro virtual');
  const result=await page.evaluate(async()=>{
   const {loadProgress,saveProgress}=await import('./src/core.js');
   const p=await loadProgress();
@@ -25,7 +25,7 @@ test('path makes reading and v2 transfer independent and recommends evidence rat
  });
  expect(result).toBeTruthy();
  await page.reload();await itinerary(page);
- await expect(page.locator('#next-evidence-reason')).toContainText('Resolver hipótesis y transferencia');
+ await expect(page.locator('#next-evidence-reason')).toContainText('Experimentar con voltímetro virtual');
  await page.evaluate(async()=>{
   const {loadProgress,saveProgress}=await import('./src/core.js');
   const p=await loadProgress();
@@ -34,7 +34,7 @@ test('path makes reading and v2 transfer independent and recommends evidence rat
   await saveProgress(p);
  });
  await page.reload();await itinerary(page);
- await expect(page.locator('#next-evidence-reason')).toContainText('Estudiar la teoría');
+ await expect(page.locator('#next-evidence-reason')).toContainText('Experimentar con voltímetro virtual');
  await expect(page.getByRole('button',{name:'Abrir siguiente actividad'})).toBeVisible();
 });
 test('MC06 recommendation requires genuine v2 transfer then its own embedded lab',async({page})=>{
@@ -52,6 +52,7 @@ test('MC06 recommendation requires genuine v2 transfer then its own embedded lab
    const practice=lessonPractice(id);
    if(practice?.kind==='embedded')p.cases.push({id:practice.caseId,at:'2026-10-26T16:00:02Z',score:100,passed:true});
   }
+  p.cases.push({id:'lab-volt-drop-holdout-v1',at:'2026-10-26T16:00:03Z',score:100,passed:true});
   p.notes['lesson-mc06-dual-fault-instrumentation']='2026-10-26T16:00:00Z';
   await saveProgress(p);
  });
