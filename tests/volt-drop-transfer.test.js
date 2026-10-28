@@ -1,6 +1,6 @@
 import test from"node:test";
 import assert from"node:assert/strict";
-import{VOLT_DROP_HOLDOUT_CASES,VOLT_DROP_HOLDOUT_ID,heldOutVoltageReading,gradeVoltageDropHoldout,freezeVoltageDropHypothesis,compareVoltageDropHypotheses,VOLT_DROP_FALSIFIERS}from"../src/volt-drop-transfer.js";
+import{VOLT_DROP_HOLDOUT_CASES,VOLT_DROP_HOLDOUT_ID,heldOutVoltageReading,gradeVoltageDropHoldout,freezeVoltageDropHypothesis,compareVoltageDropHypotheses,VOLT_DROP_FALSIFIERS,nextVoltageDropHoldoutIndex}from"../src/volt-drop-transfer.js";
 import{lessonEvidence,learningEvidenceOverview}from"../src/learning-evidence.js";
 import{learningStages}from"../src/learning-path.js";
 
@@ -129,4 +129,16 @@ test("a falsifier is objectively relative to the selected conclusion, even if th
  const wrong=gradeVoltageDropHoldout({...base,falsifier:VOLT_DROP_FALSIFIERS.balanced.answer});
  assert.equal(wrong.falsified,false);
  assert.equal(wrong.score,40);
+});
+
+test("offline reopening rotates to the next retained unseen scenario without trusting v1 or malformed records",()=>{
+ const record=(caseId,id=VOLT_DROP_HOLDOUT_ID)=>({id,report:JSON.stringify({caseId})});
+ assert.equal(nextVoltageDropHoldoutIndex(),0);
+ assert.equal(nextVoltageDropHoldoutIndex([record("balanced")]),1);
+ assert.equal(nextVoltageDropHoldoutIndex([record("balanced"),record("positive")]),2);
+ assert.equal(nextVoltageDropHoldoutIndex([record("return")]),0);
+ assert.equal(nextVoltageDropHoldoutIndex([record("return"),{id:VOLT_DROP_HOLDOUT_ID,report:"{broken"}]),0);
+ assert.equal(nextVoltageDropHoldoutIndex([record("return"),record("positive","lab-volt-drop-holdout-v1")]),0);
+ assert.equal(nextVoltageDropHoldoutIndex([{id:VOLT_DROP_HOLDOUT_ID,report:JSON.stringify({caseId:"invalid"})}]),0);
+ assert.equal(nextVoltageDropHoldoutIndex({notAnArray:true}),0);
 });
