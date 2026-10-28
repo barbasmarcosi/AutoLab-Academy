@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import {test,expect} from "@playwright/test";
 test("lesson 1: learn, predict, place probes, correct mistakes, save guided and independent evidence",async({page})=>{
  await page.goto("./");
@@ -93,4 +94,14 @@ test("first lesson remains navigable at mobile width and exposes labelled instru
  await lab.locator("#volt-measure").click();
  await expect(lab.locator("#volt-reading")).toContainText("Predicción compatible");
  await expect(lab.locator("#volt-measurements")).toContainText("D–E");
+});
+
+test("first lesson WCAG 2.1 A and AA audit on desktop and narrow mobile viewport",async({page})=>{
+ await page.setViewportSize({width:375,height:812});
+ await page.goto("./");
+ await page.locator('nav.nav button[data-id="learn"]').click();
+ await page.locator('article.lesson-card').filter({hasText:"La caída de tensión cuenta la historia"}).getByRole("button",{name:"Estudiar"}).click();
+ await expect(page.locator("#volt-holdout-host")).toBeVisible();
+ const report=await new AxeBuilder({page}).withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
+ expect(report.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)}))).toEqual([]);
 });
