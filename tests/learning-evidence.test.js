@@ -11,7 +11,7 @@ test('94 lessons have honest, complete, independently auditable evidence coverag
  assert.equal(summary.model,EVIDENCE_MODEL);
  assert.equal(summary.totals.lessons,94);
  assert.equal(summary.totals.reasoningAvailable,40);
- assert.equal(summary.totals.embeddedAvailable,21);
+ assert.equal(summary.totals.embeddedAvailable,22);
  assert.equal(summary.totals.linkedOnly,12);
  assert.equal(summary.totals.documentedTraining,0);
  assert.equal(summary.byStage.length,16);
@@ -44,6 +44,9 @@ test('path recommendation advances through reading, transfer and an actual embed
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
  assert.equal(snapshot.nextTask.label,'Revisar hipótesis y transferencia');
  p.cases.push({id:caseId('volt-drop'),passed:true});
+ snapshot=learningEvidenceOverview(p,lessons,learningStages);
+ assert.deepEqual({id:snapshot.nextTask.lessonId,kind:snapshot.nextTask.kind},{id:'volt-drop',kind:'embedded-lab'});
+ p.cases.push({id:'lab-volt-drop-guided-v1',passed:true});
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
  assert.equal(snapshot.nextTask.lessonId,'motor-data');
  for(const id of lessonIds.slice(0,lessonIds.indexOf('mc06-dual-fault-instrumentation'))){
