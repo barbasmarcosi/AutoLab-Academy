@@ -70,9 +70,14 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await transfer.locator("#holdout-load").fill("10,76");
  await transfer.locator("#holdout-cause").selectOption("balanced");
  await transfer.locator("input[name='holdout-falsifier'][value='0']").check();
+ // No credit until the student records an independent explanation.
+ await transfer.locator("[data-holdout='grade']").click();
+ await expect(transfer.locator("#holdout-status")).toContainText("Escribí una justificación");
+ await transfer.locator("#holdout-reasoning").fill("Las caídas medidas en ambos conductores son casi iguales, por lo que no hay un tramo dominante. Cambiaría de hipótesis si otra medición bajo la misma carga mostrara una diferencia sustancial.");
  await transfer.locator("[data-holdout='grade']").click();
  await expect(transfer.locator("#holdout-result")).toContainText("Resultado objetivo del intento 1");
  await expect(transfer.getByText("criterios cumplidos",{exact:false})).toBeVisible();
+ await expect(transfer.getByText("El texto fue guardado pero sigue pendiente de revisión cualitativa humana",{exact:false})).toBeVisible();
  await expect(page.locator("#lesson-theory-practice-status")).toContainText("caso independiente completados");
  await page.reload();
  await page.locator('nav.nav button[data-id="learn"]').click();
