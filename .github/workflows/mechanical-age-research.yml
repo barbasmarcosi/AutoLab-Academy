@@ -25,8 +25,10 @@ jobs:
         run: node --test tests/mechanical-age-research.test.js tests/service-worker.test.js
       - name: Validate raw PID capture bridge and AA no-intervention research
         run: node --test tests/mechanical-age-raw-obd.test.js tests/mechanical-age-bridge.test.js tests/mechanical-age-aa-view.test.js
-      - name: Verify source dataset audit with Python standard library
-        run: python3 -m unittest discover -s tests/science -p 'test_mechanical_age_dataset.py'
+      - name: Verify source dataset audit and mock ELM327 serial (no connected hardware)
+        run: |
+          python3 -m unittest discover -s tests/science -p 'test_mechanical_age_dataset.py'
+          python3 -m unittest discover -s tests/science -p 'test_ma00_elm327_serial.py'
       - name: Full unit tests and static checks
         run: npm run build
       - name: Build independent preview bundle (without publishing)
