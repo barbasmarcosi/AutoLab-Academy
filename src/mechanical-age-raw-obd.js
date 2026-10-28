@@ -6,6 +6,7 @@
 import {auditSerialTrace} from './mechanical-age-serial-integrity.js';
 export const RAW_OBD_VERSION='ma00-raw-pid-receipts-v1';
 const PID=Object.freeze({
+ '0103':{channel:'fuelSystem1Status',unit:'enum',min:0,max:16},
  '010C':{channel:'rpm',unit:'rpm',min:0,max:16383.75},
  '0105':{channel:'ectC',unit:'C',min:-40,max:215},
  '0104':{channel:'loadPct',unit:'%',min:0,max:100},
@@ -119,6 +120,13 @@ function gateAA(audits,sessions){
  const required=['010C','0105','0104','0106','0107'];
  for(const [i,a] of audits.entries()){
   if(a.elapsedHostReceiptMs<19000)blockers.push('Duración host de A–A inferior a 19 s en sesión '+(i+1));
+  if(sessions[i].schema==='ma00-local-serial-receipts-v1'){
+   const states=sessions[i].events.filter(e=>e.pid==='0103');
+   if(states.length<10||states.some(e=>e.status!=='ok'||e.value!==2||![0,2].includes(e.fuelSystem2Status)))
+    blockers.push('Lazo cerrado no corroborado en todos los ciclos por PID 0103, sesión '+(i+1));
+   if(!a.channels['0103']||a.channels['0103'].failFraction>0.2)
+    blockers.push('Cobertura insuficiente de PID 0103 en sesión '+(i+1));
+  }
   for(const pid of required){
    const c=a.channels[pid];
    if(!c||c.success<10||c.failFraction>0.2)blockers.push('Cobertura por PID insuficiente en sesión '+(i+1)+': '+pid);
@@ -148,7 +156,7 @@ export function evaluateAAWithoutService(sessions){
  const comparable=blockers.length===0;
  const first=audits[0],last=audits[audits.length-1];
  const changes=comparable?Object.fromEntries(
-  Object.keys(first.channels).filter(pid=>audits.every(a=>a.channels[pid]?.median!==null)).map(pid=>[
+  Object.keys(first.channels).filter(pid=>pid!=='0103'&&audits.every(a=>a.channels[pid]?.median!==null)).map(pid=>[
    pid,{unit:first.channels[pid].unit,firstMedian:first.channels[pid].median,
     lastMedian:last.channels[pid].median,
     lastMinusFirst:medianDifference(first.channels[pid].median,last.channels[pid].median),
