@@ -7,7 +7,7 @@ export const MECHANICAL_AGE_VERSION='ma-obd-controlled-idle-v0';
 export const PROTOCOL='warm-idle-fixed-load-v0';
 const bound=(x,min,max)=>Math.max(min,Math.min(max,x));
 const median=xs=>{const a=[...xs].sort((a,b)=>a-b),k=a.length>>1;return a.length%2?a[k]:(a[k-1]+a[k])/2;};
-const mad=xs=>median(xs.map(x=>Math.abs(x-median(xs))));
+const mad=xs=>{const center=median(xs);return median(xs.map(x=>Math.abs(x-center)));};
 const finite=(x,min,max)=>typeof x==='number'&&Number.isFinite(x)&&x>=min&&x<=max;
 const fields={rpm:[0,7500],ectC:[-40,150],loadPct:[0,100],stftPct:[-100,100],ltftPct:[-100,100],iatC:[-40,125]};
 const has=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
