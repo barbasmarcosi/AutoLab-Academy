@@ -25,3 +25,7 @@ Referencia R5 con el mismo FD001: mediana de RUL train constante (MAE test 39,08
 FD001 es una simulación específica de turbofanes aeronáuticos con envejecimiento simulado. Un descenso de MAE no demuestra desgaste automotriz identificable ni permite pronóstico de cualquier motor OBD-II. El primer ensayo de datos reales necesitará controles operacionales, historial, identificación por motor y referencia independiente de compresión/leak-down/blow-by/lubricación.
 
 **Implementación:** tools/benchmark_cmapss_sensors.py. **Controles:** tests/science/test_ma00_cmapss_sensors.py. Se ejecutarán las pruebas sintéticas en toda CI; descarga y evaluación del dataset original exclusivamente en un commit marcado y sobre digest fijado. Sólo se publica el JSON agregado; no el dataset completo.
+
+## Evaluación oficial única — solicitud controlada
+
+Las familias de modelo, los pesos de entrenamiento, los folds, las regularizaciones (1, 20 y 200), el estrés de ruido y las métricas se fijaron en la rama **antes** de realizar el contraste con las etiquetas test de NASA. El marcador de este commit habilita una sola descarga del ZIP cuyo SHA-256 ya quedó fijado en R5. Cualquier fallo del modelo, rendimiento inferior a las referencias o sensibilidad al ruido deberá publicarse sin reajustar parámetros según los resultados de test.
