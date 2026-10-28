@@ -35,3 +35,14 @@ test('MA00 rejects forged JSON and escapes user supplied HTML',()=>{
  assert.match(root.innerHTML,/demo-unit-001/);
  assert.doesNotMatch(root.innerHTML,/No se pudo evaluar/);
 });
+
+test('MA00 shows repeated-session uncertainty instead of treating 160 sensor rows as 160 engines',()=>{
+ const {root,click}=fakeRoot();
+ mountMechanicalAgeLab(root);
+ assert.match(root.innerHTML,/repetibilidad 2 \+ 2/i);
+ click('replicates');
+ assert.match(root.innerHTML,/4 sesiones sintéticas/);
+ assert.match(root.innerHTML,/Unidades experimentales: 4 sesiones/);
+ assert.match(root.innerHTML,/Sin intervalo de confianza/);
+ assert.match(root.innerHTML,/NO prueba causalidad/);
+});
