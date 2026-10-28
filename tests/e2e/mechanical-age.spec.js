@@ -71,5 +71,5 @@ test('MA00 A-A rejects forged contradictory or incomplete data without showing a
  await page.locator('#ma-aa-json').fill('[{"invalid":"<script>alert(1)</script>"}]');
  await page.getByRole('button',{name:'Evaluar sesiones aportadas'}).click();
  await expect(page.getByText(/No se pudo evaluar A–A/)).toBeVisible();
- await expect(page.locator('script')).toHaveCount(0);
+ await expect(page.locator('script').filter({hasText:'alert(1)'})).toHaveCount(0);
 });
