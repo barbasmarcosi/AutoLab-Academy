@@ -48,7 +48,7 @@ class TestCmapss(unittest.TestCase):
             good.replace("1 2 ", "1 1 ", 1),
             good.replace("2 2 ", "2 5 ", 1),
             good.replace("1 1 ", "3 1 ", 1),
-            good.replace("0.03", "nan", 1),
+            good.replace("1.01", "nan", 1),
             "1 1 2 3",
         ):
             with self.subTest(broken=broken[:30]), self.assertRaises(ValueError):
