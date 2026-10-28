@@ -77,16 +77,23 @@ const shell=[
  "<text x='658' y='109' text-anchor='middle' fill='#ffffff' font-size='15'>Consumidor</text>"+
  "<rect x='245' y='122' width='170' height='46' rx='8' fill='#17374b' stroke='#ffb76a' stroke-width='2'/>"+
  "<text x='330' y='150' text-anchor='middle' fill='#ffffff' font-size='15'>Retorno</text>"+
- "<text x='174' y='54' fill='currentColor' font-size='17'>+</text><text x='174' y='166' fill='currentColor' font-size='17'>−</text></svg>"+
- "<figcaption>Esquema de serie, ilustrativo y no apto para cableado real. Para medir la caída de cada tramo, compará su entrada y salida con el instrumento virtual.</figcaption></figure>",
+ "<text x='174' y='54' fill='currentColor' font-size='17'>+</text><text x='174' y='166' fill='currentColor' font-size='17'>−</text>"+
+ "<circle id='volt-probe-red' cx='208' cy='60' r='9' fill='#fa6868' stroke='#ffffff' stroke-width='2'/>"+
+ "<circle id='volt-probe-black' cx='550' cy='60' r='9' fill='#1f2937' stroke='#ffffff' stroke-width='2'/>"+
+ "</svg>"+
+ "<figcaption>Esquema funcional de serie, no plano de conexiones. Los dos círculos resaltados son las puntas del voltímetro virtual; podés escoger el tramo mediante la lista accesible.</figcaption></figure>",
  "<div class='grid two'><div><label for='volt-positive'>Resistencia del cable positivo (Ω): <output id='volt-positive-value'>0,10</output></label><input id='volt-positive' type='range' min='0.02' max='1' step='0.02' value='0.10'></div>",
  "<div><label for='volt-return'>Resistencia del retorno (Ω): <output id='volt-return-value'>0,40</output></label><input id='volt-return' type='range' min='0.02' max='1' step='0.02' value='0.40'></div>",
  "<div><label for='volt-load'>Resistencia del consumidor (Ω): <output id='volt-load-value'>2,00</output></label><input id='volt-load' type='range' min='1' max='6' step='0.5' value='2'></div>",
  "<div><label for='volt-power'>Condición del circuito</label><select class='field' id='volt-power'><option value='on'>Carga conectada y activa</option><option value='off'>Circuito abierto, I = 0 A</option></select></div></div>",
  "<div class='panel' id='volt-model' role='status' aria-live='polite'></div>",
- "<p><strong>Colocá el voltímetro virtual:</strong> siempre entre los dos extremos de un elemento, sin interrumpir el circuito.</p>",
- "<label for='volt-points'>Puntos de medición</label><select id='volt-points' class='field'><option value='positive'>Extremo inicial y final del cable positivo</option><option value='return'>Extremo inicial y final del retorno</option><option value='load'>Bornes del consumidor</option><option value='source'>Bornes de la fuente ideal</option></select>",
- "<p class='result' id='volt-reading' role='status' aria-live='polite'></p>",
+ "<p><strong>Colocá el voltímetro virtual:</strong> elegí los extremos del elemento, anticipá la caída y presioná Medir. El instrumento está en paralelo; no interrumpe la corriente.</p>",
+ "<label for='volt-points'>Dos extremos entre los que medir</label><select id='volt-points' class='field'><option value='positive'>A–B: cable positivo</option><option value='return'>D–E: retorno</option><option value='load'>B–D: consumidor</option><option value='source'>A–E: fuente ideal</option></select>",
+ "<p id='volt-probe-location' class='muted' role='status'>Puntas sobre cable positivo (A–B).</p>",
+ "<label for='volt-prediction'>Predicción de la lectura (V, magnitud)</label><input type='text' id='volt-prediction' class='field' inputmode='decimal' maxlength='24' placeholder='Ejemplo: 0,48'>",
+ "<button type='button' id='volt-measure' class='button'>Medir entre estos puntos</button>",
+ "<p class='result' id='volt-reading' role='status' aria-live='polite'>Escribí tu predicción y medí para revelar la lectura.</p>",
+ "<div class='panel'><h4>Lecturas hechas bajo la condición actual</h4><ul id='volt-measurements'><li>Todavía no realizaste una medición.</li></ul></div>",
  "<p class='muted small'>Actividad sugerida: observá las caídas con 0,40 Ω de retorno, bajá ese valor a 0,04 Ω y repetí ambas mediciones. Después aumentá solo el positivo. Compará qué hipótesis corresponde a cada situación.</p>",
  "<h3>2. Diagnosticá con evidencia</h3><p>Con la carga activa, medí cable positivo y retorno. ¿Dónde está la mayor caída? Si ambas son parecidas (diferencia menor al 25 %), marcá que no hay una localización dominante en este modelo.</p>",
  "<label for='volt-diagnosis'>Hipótesis sobre el tramo dominante</label><select id='volt-diagnosis' class='field'><option value=''>Elegí una hipótesis</option><option value='positive'>Mayor caída en cable positivo</option><option value='return'>Mayor caída en retorno</option><option value='balanced'>Caídas similares; ninguna domina</option></select>",
@@ -103,7 +110,7 @@ export function mountVoltDropPractice(root,{record,onSaved=()=>{}}={}){
  if(!root||typeof record!=="function")throw Error("Se requiere guardar evidencia de práctica");
  root.innerHTML=shell;
  let changed=false,recorded=false,saving=false;
- const passedChecks=new Set(),measurements=new Set();
+ const passedChecks=new Set(),measurements=new Map();
  let diagnosisPassed=false;
  const $=id=>root.querySelector("#"+id);
  const read=()=>voltageDropModel({positiveOhm:Number($("volt-positive").value),returnOhm:Number($("volt-return").value),
@@ -114,25 +121,49 @@ export function mountVoltDropPractice(root,{record,onSaved=()=>{}}={}){
    !changed?"variar un parámetro":null,!measurements.has("positive")||!measurements.has("return")?"medir positivo y retorno":null,
    !diagnosisPassed?"diagnóstico correcto":null,passedChecks.size!==VOLT_DROP_CHECKS.length?"preguntas correctas "+passedChecks.size+"/"+VOLT_DROP_CHECKS.length:null].filter(Boolean).join("; ")+".";
  };
+ const probes={
+  positive:{red:[208,60],black:[550,60],label:"A–B: cable positivo"},
+  return:{red:[550,145],black:[208,145],label:"D–E: retorno"},
+  load:{red:[660,60],black:[660,145],label:"B–D: consumidor"},
+  source:{red:[105,60],black:[105,145],label:"A–E: fuente ideal"}
+ };
+ const updateProbes=()=>{
+  const k=$("volt-points").value,p=probes[k];
+  for(const [id,xy] of [["volt-probe-red",p.red],["volt-probe-black",p.black]]){
+   $(id).setAttribute("cx",String(xy[0]));$(id).setAttribute("cy",String(xy[1]));
+  }
+  $("volt-probe-location").textContent="Puntas marcadas en "+p.label+". El modelo muestra magnitudes, no el signo asociado a invertir la polaridad.";
+ };
+ const updateMeasuredList=()=>{
+  $("volt-measurements").innerHTML=measurements.size?[...measurements].map(([key,m])=>
+   "<li>"+escapeHtml(probes[key].label)+": "+fmt(m.observed)+" V (predijiste "+fmt(m.predicted)+" V; diferencia absoluta "+fmt(m.error)+" V)</li>").join(""):"<li>Todavía no realizaste una medición.</li>";
+ };
  const display=()=>{
   const m=read();
   $("volt-positive-value").textContent=fmt(m.positiveOhm);
   $("volt-return-value").textContent=fmt(m.returnOhm);
   $("volt-load-value").textContent=fmt(m.loadOhm);
   $("volt-model").innerHTML="<strong>Fuente ideal "+fmt(m.sourceV)+" V · Corriente "+fmt(m.currentA)+" A</strong>"+
-   "<p>Caída positivo: <strong>"+fmt(m.positiveV)+" V</strong> · caída retorno: <strong>"+fmt(m.returnV)+" V</strong> · consumidor: <strong>"+fmt(m.loadV)+" V</strong>.</p>"+
-   (m.energized?"<p>Balance de la malla activa: "+fmt(m.positiveV)+" + "+fmt(m.returnV)+" + "+fmt(m.loadV)+" = <strong>"+fmt(m.balanceV)+" V</strong>.</p>":
-   "<p>El circuito está abierto: no hay corriente ni caída resistiva. Los 12 V de la fuente quedarían sobre la interrupción, no modelada como resistor. No sumes las caídas de los resistores para inferir la tensión de la fuente en esta condición.</p>");
-  const k=$("volt-points").value;
-  if(k==="positive"||k==="return")measurements.add(k);
-  const v={positive:m.positiveV,return:m.returnV,load:m.loadV,source:m.sourceV}[k];
-  $("volt-reading").textContent="Lectura virtual entre esos dos puntos: "+fmt(v)+" V"+(m.energized?" bajo carga.":" con circuito abierto.");
+   "<p>Los valores de cada tramo se ocultan hasta que selecciones sus extremos, anotes una predicción y midas.</p>"+
+   (m.energized?"<p>La suma de las caídas resistivas de la malla debe ser "+fmt(m.sourceV)+" V.</p>":
+   "<p>Circuito abierto: no circula corriente por los resistores. La fuente conserva 12 V; la diferencia aparece sobre la apertura no modelada como resistor.</p>");
+  updateProbes();
+  updateMeasuredList();
   status();
  };
  ["volt-positive","volt-return","volt-load","volt-power"].forEach(id=>$(id).addEventListener("input",()=>{
-  changed=true;diagnosisPassed=false;$("volt-diagnosis-result").textContent="Cambiaste el circuito: volvé a contrastar tu hipótesis.";display();
+  if(id!=="volt-power")changed=true;
+  measurements.clear();diagnosisPassed=false;
+  $("volt-diagnosis-result").textContent="Cambiaste la condición: repetí las mediciones y volvé a contrastar.";
+  $("volt-reading").textContent="Los resultados anteriores ya no corresponden: predecí y medí nuevamente.";
+  $("volt-prediction").value="";
+  display();
  }));
- $("volt-points").addEventListener("change",display);
+ $("volt-points").addEventListener("change",()=>{
+  $("volt-prediction").value="";
+  $("volt-reading").textContent="Nueva referencia seleccionada. Escribí la predicción antes de medir.";
+  updateProbes();
+ });
  root.addEventListener("click",async event=>{
   const check=event.target.closest("[data-volt-check]");
   if(check){
@@ -146,8 +177,28 @@ export function mountVoltDropPractice(root,{record,onSaved=()=>{}}={}){
     (grade.correct?"":" "+escapeHtml(grade.explanation))+"</p>";
    status();return;
   }
+  if(event.target.id==="volt-measure"){
+   const raw=$("volt-prediction").value.trim().replace(",",".");
+   const predicted=Number(raw);
+   if(!raw||!Number.isFinite(predicted)||predicted<0||predicted>24){
+    $("volt-reading").textContent="Escribí primero una predicción numérica válida, entre 0 y 24 V.";return;
+   }
+   const m=read(),k=$("volt-points").value;
+   const observed={positive:m.positiveV,return:m.returnV,load:m.loadV,source:m.sourceV}[k];
+   if(!m.energized&&k!=="source"){
+    $("volt-reading").textContent="Con el circuito abierto, el voltímetro del modelo no define automáticamente diferencias entre todos los puntos. Cerrá el circuito para medir caídas bajo carga.";return;
+   }
+   measurements.set(k,{observed,predicted,error:Math.abs(observed-predicted)});
+   $("volt-reading").textContent=probes[k].label+": predicción "+fmt(predicted)+" V; instrumento virtual "+fmt(observed)+
+    " V. Error absoluto "+fmt(Math.abs(observed-predicted))+" V. Revisá I × R y las hipótesis.";
+   updateMeasuredList();status();return;
+  }
   if(event.target.id==="volt-diagnose"){
    if($("volt-power").value!=="on"){$("volt-diagnosis-result").textContent="Activá la carga para localizar la caída.";diagnosisPassed=false;status();return;}
+   if(!measurements.has("positive")||!measurements.has("return")){
+    $("volt-diagnosis-result").textContent="Primero medí explícitamente ambos tramos, en esta misma condición activa.";
+    diagnosisPassed=false;status();return;
+   }
    const value=$("volt-diagnosis").value;
    if(!value){$("volt-diagnosis-result").textContent="Elegí una hipótesis.";return;}
    const r=diagnoseVoltageDrop(read(),value);
@@ -164,7 +215,7 @@ export function mountVoltDropPractice(root,{record,onSaved=()=>{}}={}){
    try{const m=read();
     await record({id:VOLT_DROP_CASE_ID,at:new Date().toISOString(),score:100,passed:true,
      hypothesis:"Tramo de mayor caída bajo la misma corriente",conclusion:"Positivo "+fmt(m.positiveV)+" V; retorno "+fmt(m.returnV)+" V.",
-     used:["modelo-resistivo-lv","variacion-parametrica","medicion-dos-tramos","tres-checks-correctos","diagnostico-estructurado"],
+     used:["modelo-resistivo-lv","variacion-parametrica","medicion-predicha-dos-tramos","tres-checks-correctos","diagnostico-estructurado"],
      reasoning:"Comparación de caídas de tensión de un circuito serie sintético; no hay evaluación de competencia física.",
      report:"Modelo DC ideal: fuente="+m.sourceV+" V, corriente="+m.currentA+" A, Rpos="+m.positiveOhm+" Ω, Rret="+m.returnOhm+" Ω, Rcarga="+m.loadOhm+" Ω."});
     recorded=true;$("volt-save-status").textContent="Práctica virtual guardada. La competencia física y el razonamiento libre siguen sin evaluar.";onSaved();
