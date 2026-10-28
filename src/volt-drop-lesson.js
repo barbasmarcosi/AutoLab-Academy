@@ -67,6 +67,18 @@ const choices=VOLT_DROP_CHECKS.map(q=>
 const shell=[
  "<div class='stack'><h3>1. Investigá un circuito controlado</h3>",
  "<p>El banco virtual incluye fuente, cable positivo, carga resistiva y retorno. Cambiá <strong>una variable por vez</strong> y observá en qué tramo se concentra la caída. No son valores de referencia OEM.</p>",
+ "<figure class='panel'><svg role='img' aria-label='Lazo de corriente continua: fuente de 12 voltios, cable positivo, consumidor y retorno en serie' viewBox='0 0 760 196' style='width:100%;height:auto'>"+
+ "<path d='M105 60 H660 V145 H105 V60' fill='none' stroke='currentColor' stroke-width='3' stroke-linejoin='round'/>"+
+ "<rect x='38' y='72' width='130' height='62' rx='10' fill='#17374b' stroke='#60d9c7' stroke-width='2'/>"+
+ "<text x='103' y='94' text-anchor='middle' fill='#ffffff' font-size='16'>Fuente</text><text x='103' y='116' text-anchor='middle' fill='#ffffff' font-size='16'>12 V CC</text>"+
+ "<rect x='242' y='40' width='164' height='46' rx='8' fill='#17374b' stroke='#60d9c7' stroke-width='2'/>"+
+ "<text x='324' y='68' text-anchor='middle' fill='#ffffff' font-size='15'>Cable positivo</text>"+
+ "<rect x='566' y='80' width='184' height='48' rx='8' fill='#17374b' stroke='#60d9c7' stroke-width='2'/>"+
+ "<text x='658' y='109' text-anchor='middle' fill='#ffffff' font-size='15'>Consumidor</text>"+
+ "<rect x='245' y='122' width='170' height='46' rx='8' fill='#17374b' stroke='#ffb76a' stroke-width='2'/>"+
+ "<text x='330' y='150' text-anchor='middle' fill='#ffffff' font-size='15'>Retorno</text>"+
+ "<text x='174' y='54' fill='currentColor' font-size='17'>+</text><text x='174' y='166' fill='currentColor' font-size='17'>−</text></svg>"+
+ "<figcaption>Esquema de serie, ilustrativo y no apto para cableado real. Para medir la caída de cada tramo, compará su entrada y salida con el instrumento virtual.</figcaption></figure>",
  "<div class='grid two'><div><label for='volt-positive'>Resistencia del cable positivo (Ω): <output id='volt-positive-value'>0,10</output></label><input id='volt-positive' type='range' min='0.02' max='1' step='0.02' value='0.10'></div>",
  "<div><label for='volt-return'>Resistencia del retorno (Ω): <output id='volt-return-value'>0,40</output></label><input id='volt-return' type='range' min='0.02' max='1' step='0.02' value='0.40'></div>",
  "<div><label for='volt-load'>Resistencia del consumidor (Ω): <output id='volt-load-value'>2,00</output></label><input id='volt-load' type='range' min='1' max='6' step='0.5' value='2'></div>",
@@ -109,8 +121,8 @@ export function mountVoltDropPractice(root,{record,onSaved=()=>{}}={}){
   $("volt-load-value").textContent=fmt(m.loadOhm);
   $("volt-model").innerHTML="<strong>Fuente ideal "+fmt(m.sourceV)+" V · Corriente "+fmt(m.currentA)+" A</strong>"+
    "<p>Caída positivo: <strong>"+fmt(m.positiveV)+" V</strong> · caída retorno: <strong>"+fmt(m.returnV)+" V</strong> · consumidor: <strong>"+fmt(m.loadV)+" V</strong>.</p>"+
-   "<p>Balance: "+fmt(m.positiveV)+" + "+fmt(m.returnV)+" + "+fmt(m.loadV)+" = <strong>"+fmt(m.balanceV)+" V</strong>"+
-   (m.energized?".":" (circuito abierto: sin corriente, la fuente conserva sus 12 V ideales; no se afirma tensión en puntos no modelados).")+"</p>";
+   (m.energized?"<p>Balance de la malla activa: "+fmt(m.positiveV)+" + "+fmt(m.returnV)+" + "+fmt(m.loadV)+" = <strong>"+fmt(m.balanceV)+" V</strong>.</p>":
+   "<p>El circuito está abierto: no hay corriente ni caída resistiva. Los 12 V de la fuente quedarían sobre la interrupción, no modelada como resistor. No sumes las caídas de los resistores para inferir la tensión de la fuente en esta condición.</p>");
   const k=$("volt-points").value;
   if(k==="positive"||k==="return")measurements.add(k);
   const v={positive:m.positiveV,return:m.returnV,load:m.loadV,source:m.sourceV}[k];
