@@ -90,7 +90,7 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  // neither conductor has a clearly dominant loss.
  await transfer.locator("#holdout-load").fill("10,76");
  await transfer.locator("#holdout-cause").selectOption("balanced");
- await transfer.locator("input[name='holdout-falsifier'][value='0']").check();
+ await transfer.locator("input[name='holdout-falsifier'][value='2']").check();
  // No credit until the student records an independent explanation.
  await transfer.locator("[data-holdout='grade']").click();
  await expect(transfer.locator("#holdout-status")).toContainText("Escribí una justificación");
@@ -172,7 +172,7 @@ test("reserved case must start from a coherent frozen hypothesis, allow uncertai
  await transfer.locator("[data-holdout='probe']").click();
  await transfer.locator("#holdout-load").fill("10,76");
  await transfer.locator("#holdout-cause").selectOption("balanced");
- await transfer.locator("input[name='holdout-falsifier'][value='0']").check();
+ await transfer.locator("input[name='holdout-falsifier'][value='2']").check();
  await transfer.locator("#holdout-reasoning").fill("Antes no tenía evidencia suficiente. Ahora las dos caídas son próximas; si una lectura nueva contradijera esa igualdad cambiaría la conclusión.");
  await transfer.locator("[data-holdout='grade']").click();
  await expect(transfer.locator("#holdout-result")).toContainText("La evidencia permitió pasar de incertidumbre");
