@@ -56,7 +56,16 @@ export function voltDropTheoryIllustration(){
   "<li><strong>Tensión en consumidor:</strong> 4,80 × 2,00 = <strong>9,60 V</strong>.</li></ol>",
   "<p><strong>Comprobación:</strong> 0,48 + 1,92 + 9,60 = 12,00 V. La fuente no desapareció: parte de su tensión se pierde en conexiones y menos llega a la carga.</p>",
   "<p><strong>Ahora pensá:</strong> si desconectás la carga e I = 0 A, las caídas en los cables de este modelo son 0 V, aunque la resistencia del retorno siga siendo 0,40 Ω. Medir solo en vacío ocultaría el problema.</p>",
-  "<p class='muted small'>Supuestos: corriente continua estable, resistencias constantes, fuente de tensión ideal y voltímetro ideal. No modela temperatura, inductancia, química de batería ni comportamiento de un motor de arranque real.</p></section>"
+  "<p class='muted small'>Supuestos: corriente continua estable, resistencias constantes, fuente de tensión ideal y voltímetro ideal. No modela temperatura, inductancia, química de batería ni comportamiento de un motor de arranque real.</p></section>",
+  "<section class='panel stack' aria-label='Segundo ejemplo progresivo'><h2>Segundo ejemplo: cambiá de hipótesis</h2>"+
+  "<p>Otro banco ideal de 12 V tiene un consumidor de 3 Ω, un cable positivo de 0,60 Ω y un retorno de 0,10 Ω. Antes de abrir la resolución, estimá: ¿cuál es la corriente, cuál cable pierde más tensión y cuánto recibe la carga?</p>"+
+  "<details><summary>Mostrar resolución cuando hayas calculado</summary><ol>"+
+  "<li>Resistencia total = 3,00 + 0,60 + 0,10 = 3,70 Ω.</li>"+
+  "<li>Corriente I = 12 / 3,70 ≈ 3,24 A.</li>"+
+  "<li>Positivo: 3,243 × 0,60 ≈ 1,95 V; retorno: 3,243 × 0,10 ≈ 0,32 V.</li>"+
+  "<li>Carga: 3,243 × 3 ≈ 9,73 V. Suma sin redondear: 12 V.</li></ol>"+
+  "<p>Ahora la pérdida dominante está en el positivo, no en el retorno. La hipótesis depende de las <strong>mediciones bajo carga</strong>; no del nombre de la pieza ni de suponer que siempre falla la masa.</p></details>"+
+  "<p><strong>Glosario para el diagnóstico:</strong> hipótesis = explicación provisional; observación = dato medido con referencia y condición; predicción = resultado que esperarías si la hipótesis fuera correcta; falsador = resultado que la debilita. El voltímetro mide un tramo, no decide automáticamente la reparación.</p></section>"
  ].join("");
 }
 const choices=VOLT_DROP_CHECKS.map(q=>
