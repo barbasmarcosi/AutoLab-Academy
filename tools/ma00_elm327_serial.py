@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-VERSION = "ma00-elm327-serial-v1"
+VERSION = "ma00-elm327-serial-v2"
 # SAE J1979 Mode 01. PID, channel name, unit and response length.
 PIDS = {
     "010C": ("rpm", "rpm", 2),
@@ -28,6 +28,7 @@ PIDS = {
     "010F": ("iatC", "C", 1),
 }
 ORDER = ("010C", "0105", "0104", "0106", "0107", "010F")
+SUPPORTED_QUERY = "0100"  # Mode 01 supported PIDs 01-20; read-only
 # Adapter presentation/protocol negotiation. Never writes to ECU via service 02+.
 SETUP = ("ATE0", "ATL0", "ATS0", "ATH0", "ATSP0")
 UNITS = {pid: entry[1] for pid, entry in PIDS.items()}
@@ -82,7 +83,7 @@ def decode_mode01(pid: str, response: bytes) -> float:
 def _reply(serial_port, command: str, monotonic: Callable[[], float],
            timeout_s: float) -> tuple[bytes, float, float, str]:
     """Deadline and byte cap prevent unbounded reads/false complete frames."""
-    if command not in SETUP and command not in PIDS:
+    if command not in SETUP and command not in PIDS and command != SUPPORTED_QUERY:
         raise ProtocolError("Transmitted command not allowlisted")
     started = monotonic()
     packet = (command + "\r").encode("ascii")
@@ -106,6 +107,21 @@ def _reply(serial_port, command: str, monotonic: Callable[[], float],
     if len(buffer) >= 1024 and status != "received":
         raise ProtocolError("Adapter reply exceeded 1024 bytes")
     return bytes(buffer), started, finished, status
+
+
+def decode_supported_pids(raw: bytes) -> set[str]:
+    """Parse exact Mode01/00 bitmap. No unsupported PID is silently probed."""
+    if not raw.endswith(b">") or len(raw) > 1024:
+        raise ProtocolError("Supported-PID response incomplete")
+    try:
+        lines = [re.sub(r"\\s+", "", x) for x in raw[:-1].decode("ascii").upper().replace("\\n", "\\r").split("\\r") if x.strip()]
+    except UnicodeDecodeError as exc:
+        raise ProtocolError("Supported-PID response is non-ASCII") from exc
+    lines = [x for x in lines if x != SUPPORTED_QUERY]
+    if len(lines) != 1 or not re.fullmatch(r"4100[0-9A-F]{8}", lines[0]):
+        raise ProtocolError("Supported-PID mask ambiguous or invalid")
+    mask = int(lines[0][4:], 16)
+    return {f"01{pid:02X}" for pid in range(1, 33) if mask & (1 << (32 - pid))}
 
 
 def _setup_adapter(serial_port, monotonic, timeout_s: float):
@@ -146,10 +162,23 @@ def capture_mode01(
     # Capture start is BEFORE handshake; mono relative origin is shared.
     start = monotonic()
     wall = now().isoformat()
+    # Discard stale receive-side bytes ONCE at the start. Never mask later
+    # protocol desynchronization by blindly flushing between measurements.
+    serial_port.reset_input_buffer()
     _setup_adapter(serial_port, monotonic, timeout_s)
+    supported_raw, _, _, preflight_state = _reply(serial_port, SUPPORTED_QUERY, monotonic, timeout_s)
+    if preflight_state != "received":
+        raise ProtocolError("Could not retrieve mandatory Mode01 PID support bitmap")
+    supported = decode_supported_pids(supported_raw)
+    mandatory = set(ORDER) - {"010F"}  # IAT may be unavailable
+    if not mandatory.issubset(supported):
+        raise ProtocolError("Required Mode01 PIDs unsupported: " + ",".join(sorted(mandatory - supported)))
+    active_pids = tuple(pid for pid in ORDER if pid in supported)
     events = []
+    capture_aborted = False
+    abort_reason = None
     for _ in range(cycles):
-        for pid in ORDER:
+        for pid in active_pids:
             raw, before, after, state = _reply(serial_port, pid, monotonic, timeout_s)
             event = {
                 "pid": pid, "unit": UNITS[pid],
@@ -160,6 +189,10 @@ def capture_mode01(
             }
             if state != "received":
                 event["status"] = "timeout"
+                # Late bytes could be interpreted as another PID's response.
+                # Stop immediately; retain the failed measurement as evidence.
+                capture_aborted = True
+                abort_reason = "ELM prompt timeout; subsequent responses may be desynchronized"
             else:
                 try:
                     event["value"] = decode_mode01(pid, raw)
@@ -168,19 +201,27 @@ def capture_mode01(
                     event["status"] = "error"
                     event["parseError"] = str(exc)
             events.append(event)
+            if capture_aborted:
+                break
+        if capture_aborted:
+            break
     return {
         "schema": "ma00-local-serial-receipts-v1", "sessionId": session_id,
         "vehicleAlias": vehicle_alias, "engineFamily": engine_family,
         "adapterModel": adapter_model, "softwareVersion": VERSION,
         "capturedAt": wall, "source": "provided_obd_unverified",
         "clock": "host_monotonic_receive", "conditions": None, "events": events,
+        "captureAborted": capture_aborted, "abortReason": abort_reason,
+        "supportedPidMaskRawHex": supported_raw.hex().upper(),
+        "supportedPids": sorted(supported),
         "instrumentClaims": {
             "hostRequestTimestamp": "before_serial_write",
             "hostReceiptTimestamp": "after_elm_prompt",
             "ecuAcquisitionTimestampKnown": False,
             "transportLatencyCalibrated": False,
             "protocol": "ELM327 ATSP0 auto, service 01 only",
-            "serviceCommandsSent": list(ORDER),
+            "serviceCommandsSent": [SUPPORTED_QUERY] + list(active_pids),
+            "commandListMeans": "allowlist, not a per-event sent-command log",
         },
         "independentMechanicalReference": None,
         "warning": "Only host-side timestamps; ECU acquisition time unknown. "
@@ -231,6 +272,7 @@ def main(argv=None) -> int:
     print(json.dumps({
         "saved_to": str(path), "events": len(record["events"]),
         "errors": sum(x["status"] != "ok" for x in record["events"]),
+        "capture_aborted": record["captureAborted"],
         "mechanical_age_calculated": False
     }))
     return 0
