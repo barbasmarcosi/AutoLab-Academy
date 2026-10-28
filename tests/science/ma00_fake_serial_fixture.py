@@ -2,7 +2,11 @@
 """Cross-runtime contract fixture. Fake byte transport, NOT an ELM327 or vehicle."""
 import json
 import sys
+from pathlib import Path
 from datetime import datetime, timezone
+
+# Works when executed as a file from the repository root, without pip install.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from tools.ma00_elm327_serial import ORDER, SETUP, capture_mode01
 
