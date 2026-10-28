@@ -100,6 +100,8 @@ class TestMode01(unittest.TestCase):
         self.assertTrue(all(e["status"] == "ok" for e in data["events"]))
         self.assertTrue(all(e["receivedAtMs"] >= e["requestAtMs"] for e in data["events"]))
         self.assertEqual(data["events"][0]["value"], 1726)
+        self.assertEqual(data["events"][0]["rawResponseHex"], b"41 0C 1A F8\r>".hex().upper())
+        self.assertGreater(data["events"][0]["rawFrameSizeBytes"], 0)
         self.assertFalse("mechanicalAgeKm" in data)
         self.assertFalse("healthScore" in data)
 
@@ -113,6 +115,8 @@ class TestMode01(unittest.TestCase):
         data = capture(port)
         self.assertEqual(data["events"][0]["status"], "error")
         self.assertNotIn("value", data["events"][0])
+        self.assertIn("parseError", data["events"][0])
+        self.assertEqual(data["events"][0]["rawResponseHex"], b"NO DATA\r>".hex().upper())
         self.assertTrue(all(e["status"] == "ok" for e in data["events"][1:]))
 
     def test_rejects_fake_setup_ack(self):
