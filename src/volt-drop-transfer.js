@@ -94,7 +94,7 @@ export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diag
  const frozen=freezeVoltageDropHypothesis({...prior,caseId:prior?.caseId});
  if(frozen.caseId!==caseId)throw RangeError("La hipótesis inicial pertenece a otro caso");
  if(!Array.isArray(measurements)||measurements.length!==2||measurements[0]!==frozen.firstProbe||new Set(measurements).size!==2||!measurements.includes("positive")||!measurements.includes("return"))throw RangeError("Falta respetar el primer ensayo congelado o las dos mediciones independientes");
- if(typeof loadPrediction!=="number"&&(!String(loadPrediction??"").trim()||!/^\\d+(?:[.,]\\d+)?$/.test(String(loadPrediction).trim())))throw RangeError("Predicción numérica obligatoria");
+ if(typeof loadPrediction!=="number"&&(!String(loadPrediction??"").trim()||!/^\d+(?:[.,]\d+)?$/.test(String(loadPrediction).trim())))throw RangeError("Predicción numérica obligatoria");
  const parsed=typeof loadPrediction==="number"?loadPrediction:Number(String(loadPrediction).trim().replace(",","."));
  if(!Number.isFinite(parsed)||parsed<0||parsed>24)throw RangeError("Predicción de tensión inválida");
  if(!Object.hasOwn(labels,diagnosis)||!Number.isInteger(falsifier)||falsifier<0||falsifier>=VOLT_DROP_FALSIFIERS[diagnosis]?.options.length)throw RangeError("Decisiones inválidas");
