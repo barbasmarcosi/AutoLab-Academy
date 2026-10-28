@@ -121,3 +121,6 @@ Estas fuentes se localizaron en sus fichas públicas; **no se han descargado ni 
 ### Consecuencia para diseño de base de datos
 
 El registro de estudio futuro deberá guardar, además de lecturas: \`anonymizedEngineId\`, \`independentSessionId\`, \`captureTime\`, \`prePostServicePhase\`, \`serviceEventId\`, \`engineFamily\`, \`sensorSource\`, \`closedLoopEvidence\`, \`ambientAndAccessoryContext\`, \`instrumentCalibration\` y \`independentMechanicalReference\`. No introducir VIN, patente, propietario ni otros identificadores personales en artefactos de CI. La ausencia de estos metadatos bloqueará inferencias sobre edad, incluso si existen cientos de miles de filas.
+
+
+**Ejecución y costos de CI (28/10/2026):** los cambios de rama ejecutan validación del módulo, tests unitarios, compilación y E2E; las descargas de EngineFaultDB y DieselOBD quedaron bajo `workflow_dispatch` manual para evitar rehacer auditorías idénticas en cada commit. La verificación de procedencia sigue fijada por commit/blob y los informes anteriores no cambian. Pushes superados se cancelan para no gastar minutos innecesarios; ninguna ejecución despliega producción.
