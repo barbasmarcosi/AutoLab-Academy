@@ -21,7 +21,7 @@ export function lessonEvidence(progress,lessonId){
    passed:false,attempts:0};
  const linkedLab=practice?.kind==='linked'?{
   id:practice.caseId,status:p.status,attempts:p.attempts}:null;
- const holdout=lessonId==='volt-drop'?(()=>{const attempts=(Array.isArray(progress?.cases)?progress.cases:[]).filter(x=>x?.id===VOLT_DROP_HOLDOUT_ID);return {available:true,attempts:attempts.length,passed:attempts.some(x=>x.passed===true),firstAttemptPassed:attempts[0]?.passed===true};})():null;
+ const holdout=lessonId==='volt-drop'?(()=>{const attempts=(Array.isArray(progress?.cases)?progress.cases:[]).filter(x=>x?.id===VOLT_DROP_HOLDOUT_ID);return {available:true,attempts:attempts.length,passed:attempts.some(x=>x.passed===true),firstRecordedAttemptPassed:attempts.length?attempts[0].passed===true:null};})():null;
  const assessed=reasoning.available||lab.available||Boolean(holdout);
  const checks=[read,...(reasoning.available?[reasoning.passed]:[]),...(lab.available?[lab.passed]:[]),...(holdout?[holdout.passed]:[])];
  const documented=assessed&&checks.every(Boolean);
