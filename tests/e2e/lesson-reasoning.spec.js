@@ -21,7 +21,7 @@ test('MC06 lesson: freeze three logical predictions, reveal feedback and save ev
  await expect(page.getByText('Congelado',{exact:true})).toHaveCount(1);
  await lock(page,'measurement',1);
  await lock(page,'falsifier',0);
- await expect(page.getByText(/Transferencia: Coincide con el modelo/)).toHaveCount(0);
+ await expect(page.getByText(/Transferencia: Correcto/)).toHaveCount(0);
  await expect(page.getByRole('button',{name:'Revelar devoluciones y evaluar'})).toHaveCount(0);
  await page.getByRole('button',{name:'Congelar hipótesis de transferencia'}).click();
  await expect(page.getByText(/Seleccioná una conclusión de transferencia/)).toBeVisible();
@@ -32,7 +32,7 @@ test('MC06 lesson: freeze three logical predictions, reveal feedback and save ev
  await page.locator('#reasoning-limitations').fill(bounds);
  await page.getByRole('button',{name:'Revelar devoluciones y evaluar'}).click();
  await expect(page.getByText(/Resultado estructurado con transferencia: 100\/100/)).toBeVisible();
- await expect(page.getByText(/Transferencia: Coincide con el modelo/)).toBeVisible();
+ await expect(page.getByText(/Transferencia: Correcto/)).toBeVisible();
  await expect(page.getByText('Rúbrica cualitativa con revisión humana pendiente')).toBeVisible();
  await expect(page.locator('#lesson-reasoning-status')).toContainText('pendiente');
  await page.getByRole('button',{name:'Guardar evidencia de razonamiento'}).click();
@@ -119,8 +119,9 @@ test('MOSFET causal transfer v2 does not auto-approve its separate numeric bench
 test('foundational 12 V and CAN lessons have in-place falsifiable reasoning without claiming physical simulators',async({page})=>{
  await openLesson(page,'La caída de tensión cuenta la historia');
  await expect(page.getByRole('heading',{name:/Desafío de razonamiento: Arranque lento/})).toBeVisible();
- await expect(page.getByText(/Este microcaso entrena inferencias/)).toBeVisible();
- await expect(page.locator('#lesson-practice-host')).toHaveCount(0);
+ await expect(page.locator('#lesson-practice-host')).toBeVisible();
+ await expect(page.locator('#volt-holdout-host')).toBeVisible();
+ await expect(page.getByText(/Fuente ideal 12,00 V/)).toBeVisible();
  await page.locator('nav.nav button[data-id="learn"]').click();
  await page.locator('article.lesson-card').filter({hasText:'CAN: más allá de los dos cables'}).getByRole('button',{name:'Estudiar'}).click();
  await expect(page.getByRole('heading',{name:/Desafío de razonamiento: CAN sin comunicación/})).toBeVisible();
