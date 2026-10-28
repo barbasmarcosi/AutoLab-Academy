@@ -753,7 +753,7 @@ function lessonPracticePanel(l){
   (l.id==='volt-drop'?'':reasoning)+
   (p.kind==='embedded'?
    '<div class="lesson-practice-body" id="lesson-practice-host" aria-label="Simulador real integrado"></div>'+
-   (['numeric-bench','wave-inquiry'].includes(p.page)?'<p class="muted small">Banco calculado y sintético integrado en esta lección; no es una medición real ni acredita competencias físicas.</p>':
+   (['numeric-bench','wave-inquiry','volt-drop'].includes(p.page)?'<p class="muted small">Banco calculado y sintético integrado en esta lección; no es una medición real ni acredita competencias físicas.</p>':
     '<p class="muted small">El mismo laboratorio sigue disponible desde el menú. Guardar evidencia práctica no equivale a marcar la lectura.</p>'+
     button('Abrir banco como pantalla completa','nav','data-id="'+attr(p.page)+'"','alt')):
    '<p>Este ejercicio funciona en su banco especializado: el enlace abre el laboratorio real, donde se evalúan predicciones y evidencia.</p>'+
