@@ -40,7 +40,7 @@ test('lesson 2: DTC learner freezes an uncertain diagnosis, runs four tests, rev
  await lab.locator('[data-dtc="counter"]').click();
  await expect(lab.locator('#dtc-counter-result')).toContainText('Después: +3 % y +4 %');
  await expect(lab.locator('#dtc-counter-result')).toContainText('no acredita');
- await expect(page.locator('#lesson-theory-practice-status')).toContainText('Práctica aprobada');
+ await expect(page.locator('#lesson-theory-practice-status')).toContainText('Banco guiado completado · caso independiente sin resolver');
  await page.locator('nav.nav button[data-id="data"]').click();
  const download=page.waitForEvent('download');
  await page.locator('[data-action="export"]').click();

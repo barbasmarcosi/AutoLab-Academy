@@ -53,7 +53,7 @@ test('lesson 2: independent DTC holdout freezes prior forecast, rejects shortcut
  await expect(h.locator('#dtc-h-result')).toContainText('100/100');
  await expect(h.locator('#dtc-h-result')).toContainText('pendiente de revisión humana');
  await expect(h.locator('#dtc-h-result')).toContainText('revisada: sí');
- await expect(page.locator('#lesson-theory-practice-status')).toContainText('caso independiente completados');
+ await expect(page.locator('#lesson-theory-practice-status')).toContainText('Práctica todavía no registrada'); // transfer evidence must not count as the guided bank
  await page.locator('nav.nav button[data-id="data"]').click();
  const download=page.waitForEvent('download');
  await page.locator('[data-action="export"]').click();
