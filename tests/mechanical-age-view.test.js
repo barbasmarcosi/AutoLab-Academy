@@ -61,3 +61,16 @@ test('MA00 cannot be tricked into scoring edited measurements through a forged s
  assert.match(root.innerHTML,/No calculable/);
  assert.match(root.innerHTML,/SIN puntuación/);
 });
+
+
+test('MA00 makes adversarial negative controls visible without representing them as physical wear',()=>{
+ const {root,click}=fakeRoot();
+ mountMechanicalAgeLab(root);
+ assert.match(root.innerHTML,/Intentar refutar el índice/);
+ click('falsify');
+ assert.match(root.innerHTML,/Controles negativos de falsación/);
+ assert.match(root.innerHTML,/Se detectaron limitaciones del indicador/);
+ assert.match(root.innerHTML,/STFT y LTFT se compensan/);
+ assert.match(root.innerHTML,/no es identificable/);
+ assert.match(root.innerHTML,/100 % sintéticos/);
+});
