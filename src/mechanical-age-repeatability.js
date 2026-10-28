@@ -26,8 +26,9 @@ export function evaluateReplicatedMeasurements(sessions){
   if(!item||typeof item.sessionId!=='string'||item.sessionId.trim().length<3||item.sessionId.length>100)throw RangeError('Identificador de sesión inválido');
   if(seenIds.has(item.sessionId))throw RangeError('Sesión duplicada');
   seenIds.add(item.sessionId);
-  const key=JSON.stringify(item.snapshot?.samples);
-  if(seenSamples.has(key))throw RangeError('Dos sesiones repiten idénticos registros; no son replicaciones independientes');
+  // A shifted timestamp does not make the same measured signal sequence an independent capture.
+  const key=JSON.stringify(item.snapshot?.samples?.map(({timeMs,...channels})=>channels));
+  if(seenSamples.has(key))throw RangeError('Dos sesiones repiten idénticas señales (incluso con otros timestamps); no son replicaciones independientes');
   seenSamples.add(key);
   results.push({...evaluateMechanicalSnapshot(item.snapshot),sessionId:item.sessionId});
  }
