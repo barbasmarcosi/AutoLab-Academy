@@ -53,6 +53,7 @@ import{mountLessonReasoning}from'./lesson-reasoning-view.js';
 import{mountInquiryNotebook,inquiryProgress}from'./lesson-inquiry.js';
 import{mountNumericBench}from'./numeric-inquiry.js';
 import{mountWaveInquiry}from'./waveform-inquiry.js';
+import{voltDropTheoryIllustration,mountVoltDropPractice}from'./volt-drop-lesson.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
 const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...powertrainLessons,...engineeringBridgeLessons,...inventorLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...powertrainQuestions,...engineeringBridgeQuestions,...inventorQuestions,...rotaryGeometryQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions,...ecuOptimizationQuestions,...ecuRobustQuestions,...rotaryApertureQuestions,...rotaryInverseQuestions];
@@ -719,7 +720,7 @@ function learn(){
 }
 function lessonPracticeStatusText(id){
  const status=practiceProgress(data,id);
- const p=lessonPractice(id),virtual=['numeric-bench','wave-inquiry'].includes(p?.page);
+ const p=lessonPractice(id),virtual=['numeric-bench','wave-inquiry','volt-drop'].includes(p?.page);
  return status.status==='passed'?(virtual?'Práctica aprobada: modelo virtual, NO competencia física':'Práctica aprobada: hay evidencia guardada'):status.status==='attempted'?(virtual?'Práctica realizada en modelo virtual, todavía sin aprobar':'Práctica realizada, todavía sin aprobar'):
   status.status==='related-passed'?'El banco relacionado fue aprobado; esta lección no tiene rúbrica propia':
   status.status==='related-attempted'?'El banco relacionado tiene intentos; no se acredita esta lección':
@@ -749,7 +750,7 @@ function lessonPracticePanel(l){
   '<div class="eyebrow">DEL CONCEPTO A LA HIPÓTESIS</div><h2>'+esc(p.title)+'</h2>'+
   '<p><strong>Antes de observar:</strong> '+esc(p.prompt)+'</p>'+
   '<p id="lesson-practice-status" class="muted" role="status">'+esc(lessonPracticeStatusText(l.id))+'</p>'+
-  reasoning+
+  (l.id==='volt-drop'?'':reasoning)+
   (p.kind==='embedded'?
    '<div class="lesson-practice-body" id="lesson-practice-host" aria-label="Simulador real integrado"></div>'+
    (['numeric-bench','wave-inquiry'].includes(p.page)?'<p class="muted small">Banco calculado y sintético integrado en esta lección; no es una medición real ni acredita competencias físicas.</p>':
@@ -757,7 +758,7 @@ function lessonPracticePanel(l){
     button('Abrir banco como pantalla completa','nav','data-id="'+attr(p.page)+'"','alt')):
    '<p>Este ejercicio funciona en su banco especializado: el enlace abre el laboratorio real, donde se evalúan predicciones y evidencia.</p>'+
    button('Ir a la práctica correspondiente','nav','data-id="'+attr(p.page)+'"'))+
-  inquiry+'</section>';
+  (l.id==='volt-drop'?reasoning:'')+inquiry+'</section>';
 }
 function lessonView(){
  const l=lessons.find(x=>x.id===selectedLesson);if(!l)return learn();
@@ -768,7 +769,7 @@ function lessonView(){
  '<article class="panel lesson-body"><p class="muted">Teoría: '+(data.notes['lesson-'+l.id]?'lectura registrada':'lectura pendiente')+
  '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>'+
  '. Razonamiento: <span id="lesson-theory-reasoning-status">'+esc(lessonReasoningStatusText(l.id))+'</span>. Ninguno acredita competencia física.</p>'+
- sections(allSections)+'</article>'+lessonPracticePanel(l)+
+ sections(allSections)+(l.id==='volt-drop'?voltDropTheoryIllustration():'')+'</article>'+lessonPracticePanel(l)+
  '<article class="panel lesson-body">'+
  '<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+
  link(l.url,'Abrir fuente y lecturas relacionadas')+
@@ -1556,7 +1557,8 @@ if(page==='learn'&&selectedLesson){
   const lessonAtMount=selectedLesson;
   const mounts={powertrain:mountPowertrainLab,inventor:mountInventorLab,rotary:mountRotaryLab,'ecu-robust':mountRobustResearch,
    'numeric-bench':(node,opts)=>mountNumericBench(node,{...opts,lessonId:lessonAtMount}),
-   'wave-inquiry':(node,opts)=>mountWaveInquiry(node,{...opts,lessonId:lessonAtMount})};
+   'wave-inquiry':(node,opts)=>mountWaveInquiry(node,{...opts,lessonId:lessonAtMount}),
+   'volt-drop':mountVoltDropPractice};
   const node=document.getElementById('lesson-practice-host'),mount=mounts[practice.page];
   if(node&&mount){
    mount(node,{record:async entry=>{
