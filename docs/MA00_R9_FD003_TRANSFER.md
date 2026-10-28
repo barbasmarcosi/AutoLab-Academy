@@ -37,3 +37,7 @@ Con ZIP NASA original ya validado:
     python3 tools/benchmark_cmapss_fd003_transfer_r9.py archivo-NASA-original.zip > ma00-r9-fd003-aggregate.json
 
 La descarga en Actions es **opt-in con marcador de commit [MA00 NASA FD003 once]** y publica exclusivamente el resultado agregado. No hay merge ni deploy de producción.
+
+## Ejecución oficial única (solicitud)
+
+Las pruebas de aislamiento de cohortes, el lector ZIP, la invocación CLI y los controles de transferencia ya pasaron en CI antes de abrir etiquetas reales FD003. Los parámetros, referencias, intervalos y bandas de RUL quedaron fijados. Este commit activa una única evaluación del ZIP de NASA, publicando las métricas aunque demuestren falta de generalización. FD001 TEST y FD003 TRAIN permanecen sin utilizar.
