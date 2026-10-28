@@ -81,6 +81,7 @@ export function auditRawObdSession(session){
    channel:g.channel,unit:g.unit,attempts:g.attempts,success:g.success,
    failures:g.failures,failFraction,median,medianAbsoluteDeviation,
    distinctValues:new Set(g.values).size,maxIdenticalRun,possibleStaleOrStable,
+   observedSpan:g.values.length?Math.max(...g.values)-Math.min(...g.values):null,
    medianReceiptGapMs:sortedMedian(receiptGaps),maxReceiptGapMs:receiptGaps.length?Math.max(...receiptGaps):null,
    medianHostRoundTripMs:sortedMedian(g.roundTripMs),unmeasuredRoundTripCount:g.undocumentedLatency
   };
@@ -119,6 +120,10 @@ function gateAA(audits,sessions){
    if(!c||c.success<10||c.failFraction>0.2)blockers.push('Cobertura por PID insuficiente en sesión '+(i+1)+': '+pid);
    if(c&&(c.medianReceiptGapMs===null||c.medianReceiptGapMs<100||c.medianReceiptGapMs>5000||c.maxReceiptGapMs>10000))blockers.push('Cadencia PID con huecos o fuera del protocolo de sesión '+(i+1)+': '+pid);
   }
+  const rpm=a.channels['010C'],ect=a.channels['0105'],load=a.channels['0104'];
+  if(rpm?.median!==null&&rpm?.median!==undefined&&(rpm.median<550||rpm.median>1150))blockers.push('RPM fuera de rango educativo de ralentí en sesión '+(i+1));
+  if(ect?.median!==null&&ect?.median!==undefined&&(ect.median<75||ect.median>110||ect.observedSpan>5))blockers.push('ECT fuera de régimen térmico estable en sesión '+(i+1));
+  if(load?.median!==null&&load?.median!==undefined&&(load.median>35||load.observedSpan>10))blockers.push('Carga fuera de condición estable de ralentí en sesión '+(i+1));
   if(a.requestTimeMissingCount)blockers.push('Intervalos petición-respuesta ausentes: sesión '+(i+1));
  }
  const wireSignatures=sessions.map(x=>JSON.stringify(x.events.map(({pid,status,value,unit})=>({pid,status,value,unit}))));
