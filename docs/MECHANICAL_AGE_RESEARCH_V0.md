@@ -141,3 +141,12 @@ Se incorporó un formato de recibos de **cada PID individual**, distinto de las 
 - tests/mechanical-age-raw-obd.test.js, tests/mechanical-age-bridge.test.js, tests/mechanical-age-aa-view.test.js y pruebas E2E dedicadas, incluidas en la CI.
 
 **Limitación cardinal:** ni un host clock ni datos de buena cobertura proporcionan la «verdad terreno» de desgaste. En un estudio con solo 2 sesiones no hay cuantificación fiable de repetibilidad a largo plazo ni de la incertidumbre poblacional. La futura conexión al hardware requiere una librería/driver compatible y medir tiempos de petición/respuesta en la interfaz real, antes de interpretar transitorios de RPM o lambda. El pipeline no despliega producción ni conecta actuadores.
+
+
+## MA00 R3 — Conector serial físico opt-in (implementado, sin prueba en vehículo)
+
+Se incorporó tools/ma00_elm327_serial.py, que utiliza pyserial==3.5 **solo mediante invocación manual** y permite interrogar seis PIDs estándar de Servicio 01, sin comandos arbitrarios ni servicios de escritura. Los bytes de respuesta se preservan y cada evento recibe marcas de tiempo monotónicas de host antes de la escritura y tras recibir el prompt de ELM; estos tiempos NO prueban adquisición simultánea ni latencia intrínseca de ECU.
+
+**Validación alcanzada:** pruebas con FakeSerial de decodificación, errores, respuestas truncadas, PIDs no autorizados y captura sin sobreescritura, más construcción de AutoLab. **No alcanzada:** prueba con adaptador físico, calibración de sensores, compatibilidad con diferentes fabricantes, baseline por motores, ni verdad-terreno de desgaste.
+
+Documentación y comando de ejecución: [MA00 ELM327 serial V1](MECHANICAL_AGE_ELM327_SERIAL_V1.md). El puntaje de envejecimiento continúa bloqueado explícitamente; el A–A real requiere datos de varias sesiones documentadas.
