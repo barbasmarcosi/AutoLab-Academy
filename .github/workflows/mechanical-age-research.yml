@@ -23,6 +23,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Mechanical age unit and PWA offline tests
         run: node --test tests/mechanical-age-research.test.js tests/service-worker.test.js
+      - name: Validate raw PID capture bridge and AA no-intervention research
+        run: node --test tests/mechanical-age-raw-obd.test.js tests/mechanical-age-bridge.test.js tests/mechanical-age-aa-view.test.js
       - name: Verify source dataset audit with Python standard library
         run: python3 -m unittest discover -s tests/science -p 'test_mechanical_age_dataset.py'
       - name: Full unit tests and static checks
