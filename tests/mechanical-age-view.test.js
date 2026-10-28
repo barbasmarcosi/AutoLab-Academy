@@ -46,3 +46,18 @@ test('MA00 shows repeated-session uncertainty instead of treating 160 sensor row
  assert.match(root.innerHTML,/Sin intervalo de confianza/);
  assert.match(root.innerHTML,/NO prueba causalidad/);
 });
+
+test('MA00 cannot be tricked into scoring edited measurements through a forged source: synthetic field',()=>{
+ const {root,click,input}=fakeRoot();
+ mountMechanicalAgeLab(root);
+ const changed=JSON.stringify({
+  engineFamily:'demo-gasoline-inline4',vehicleAlias:'demo-unit-001',
+  protocol:'warm-idle-fixed-load-v0',phase:'before_service',source:'synthetic',
+  samples:Array.from({length:40},(_,i)=>({timeMs:i*1000,rpm:800+i%3,ectC:90,loadPct:16,stftPct:10,ltftPct:6,iatC:32}))
+ },null,2);
+ input('ma-before',changed);
+ click('evaluate');
+ assert.match(root.innerHTML,/provided_obd_unverified/);
+ assert.match(root.innerHTML,/No calculable/);
+ assert.match(root.innerHTML,/SIN puntuación/);
+});
