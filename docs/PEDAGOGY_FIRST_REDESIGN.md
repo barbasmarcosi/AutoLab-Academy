@@ -34,18 +34,22 @@ Lesson 1: **NOT ACCEPTED, provisional 8.5/10** (reviewed 2026-10-28; not a measu
 - Diagram with labelled terminals and moving voltage-probe marks; explicitly predict and measure two tramos.
 - Simulated low-voltage experiment with parameter manipulation, reset-on-change and objective prediction tolerance (±0.15 V).
 - Immediate correct/incorrect feedback with choice, expected answer and causal explanation.
-- Two novel reserved cases with no disclosed numeric answers before hand-in, a falsifier question, and independent evidence.
+- Three reserved synthetic scenarios (similar losses, positive-dominant, return-dominant) with no answer shown by the interface before submission.
+- Pre-measurement initial hypothesis, declared confidence, compatible predicted pattern and first discriminating probe frozen before any reading. The uncertainty option is valid when data are insufficient.
+- Measurements and final diagnosis can support, revise or contradict the initial position; changing a wrong prior is not penalized.
+- Immutable objective decision snapshot plus ordered virtual readings, timestamps, final explanation, falsifier and human-review pending status persist in exported evidence. This timing is client-reported, not tamper-proof proctoring.
+- A 1.25× ratio is the **didactic** threshold for a dominant drop, not an OEM acceptability or repair threshold.
 - Reading, guided practice, independent holdout and conceptual transfer counted separately.
 - Tests: pure scientific model, held-out scenarios, evidence semantics, offline cache, and Chromium/WebKit E2E.
 
 **Critical findings and gate blockers**:
-1. Browser E2E and offline/a11y smoke must pass at the exact final SHA; draft PR remains in progress.
+1. GitHub Actions run 40640521960 passed unit/build, Chromium/WebKit/mobile focused smoke and complete E2E on the prior SHA 6bdb646. A **new run is mandatory on the latest freeze-hypothesis implementation**; do not carry forward the earlier green status.
 2. Novice comprehension/user-testing has NOT been performed; no claim of 9/10 without it.
-3. The established conceptual transfer engine still requires lengthy free-text fields which receive no semantic scoring. This is transparently described, but remains a pedagogy gap.
+3. The structured hypothesis/transfer case now records the student's evidence-based justification, but **does not** semantically grade its correctness. The broader conceptual transfer engine still relies on text-length thresholds. Genuine evidence-based explanation requires human review or an independently validated rubric.
 4. Guided practice allows formative retries; its 100/100 is not independent mastery and must never be sold as such.
 5. In the reserved case, a successful retry is evidence of a successful attempt, not first-try competence. The earliest **retained** attempt can be inspected; the capped 500-entry progress log cannot certify a lifetime first-attempt rate.
 
-**Next critical review**: watch a novice complete the lesson without assistance; inspect first-try correctness and ability to explain the mechanism on another unseen numerical case; check keyboard, 375px mobile viewport, screen reader announcements, offline study, and backup round-trip. Certify only after all gates and scores ≥9/10.
+**Next critical review**: run all automated checks on the exact final SHA; watch a novice complete the lesson without assistance; compare confidence, prior and final inference without penalizing revision; inspect independent reasoning on unseen numbers; check keyboard, 375px mobile viewport, screen reader announcements, offline study, and backup round-trip. The current offline PWA keeps scenarios and answers in downloadable JS: "blind" means hidden by the exercise UI, not cryptographically secret or suitable for proctored certification. Certify only after all gates and scores ≥9/10.
 
 Lessons 2–94: NOT AUDITED under new rubric. Existing implementation does not imply completion.
 Do not merge or deploy production before independent review.
