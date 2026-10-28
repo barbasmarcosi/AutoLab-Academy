@@ -55,3 +55,7 @@ Pruebas sin fuentes externas:
     python3 -m unittest discover -s tests/science -p 'test_ma00_cmapss_fd001.py'
 
 No activar score de edad, porcentaje de salud ni RUL de autos reales. El próximo benchmark de NASA deberá comparar futuros modelos de sensores contra los dos baselines sobre el mismo split de motores y medir generalización. Para LEVIN se deberá conseguir y auditar el archivo auténtico, permisos, huso horario, frecuencia y condiciones de operación. Finalmente, se requieren referencias mecánicas independientes por motor antes de validar desgaste real.
+
+## Solicitud controlada de auditoría externa
+
+La implementación y los tests sintéticos se fijaron antes de la ejecución. Esta revisión solicita **una única lectura del archivo oficial NASA** para comparar las dos baselines preregistradas, sin entrenamiento sobre las etiquetas test ni publicación de las trayectorias originales. La evidencia empírica deberá provenir del artefacto agregado de CI y conservar su digest SHA-256.
