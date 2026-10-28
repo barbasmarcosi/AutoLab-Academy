@@ -98,6 +98,14 @@ def select_features(x, mode):
         return x[1:]
     if mode == "cycle_sensors":
         return x
+    if mode == "cycle_operating":
+        return x[:4]
+    if mode == "cycle_measurements":
+        return x[:1]+x[4:]
+    if mode == "operating":
+        return x[1:4]
+    if mode == "measurements":
+        return x[4:]
     raise ValueError("Unknown ablation")
 
 
