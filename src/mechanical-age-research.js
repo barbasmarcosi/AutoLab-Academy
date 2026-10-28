@@ -3,6 +3,7 @@
  * NO mechanical age, structural wear, remaining life or diagnostic certification.
  * All limits below are educational assay rules, not OEM tolerances.
  */
+import {auditMeasurementEvidence,compareMeasurementEvidence} from './mechanical-age-evidence.js';
 export const MECHANICAL_AGE_VERSION='ma-obd-controlled-idle-v0';
 export const PROTOCOL='warm-idle-fixed-load-v0';
 const bound=(x,min,max)=>Math.max(min,Math.min(max,x));
@@ -61,6 +62,7 @@ export function evaluateMechanicalSnapshot(record){
   model:MECHANICAL_AGE_VERSION,protocol,phase,source,engineFamily:engineFamily.trim(),
   sampleCount:samples.length,elapsedSec,medianIntervalMs,maxIntervalMs,
   status:eligible?'eligible':'inconclusive',exclusion,vehicleAlias:vehicleAlias.trim(),
+  measurementEvidence:auditMeasurementEvidence(record),
   features:{medianRpm:rpm,rpmRobustSigma,medianEctC:ect,medianLoadPct:load,medianIatC:iat,medianCombinedTrimPct:trim,temperatureRange,loadRange},
   deviationIndex,scoringStatus:source==='synthetic'?'demonstration_only':'not_calibrated_external_data',
   structuralWear:null,mechanicalAgeEquivalentKm:null,remainingUsefulLife:null,
@@ -83,9 +85,11 @@ export function compareMechanicalSnapshots(before,after){
  if(Math.abs(a.features.medianLoadPct-b.features.medianLoadPct)>5)blockers.push('Carga no comparable');
  if(a.features.medianIatC!==null&&b.features.medianIatC!==null&&Math.abs(a.features.medianIatC-b.features.medianIatC)>7)blockers.push('Temperatura de admisión no comparable');
  if((a.features.medianIatC===null)!==(b.features.medianIatC===null))blockers.push('IAT presente en un solo ensayo');
+ const evidence=compareMeasurementEvidence(before,after);
+ if(!evidence.documented)blockers.push(...evidence.blockers);
  const comparable=blockers.length===0;
  return {
-  model:MECHANICAL_AGE_VERSION,comparable,blockers,before:a,after:b,
+  model:MECHANICAL_AGE_VERSION,comparable,blockers,before:a,after:b,measurementEvidence:evidence,
   deltaDeviationIndex:comparable&&a.deviationIndex!==null&&b.deviationIndex!==null?b.deviationIndex-a.deviationIndex:null,
   interpretation:comparable?(a.deviationIndex===null?'Variables observadas comparables, pero SIN puntuación de datos externos no calibrados':'Cambio observado en índice sintético; causalidad y desgaste NO identificados'):'No comparar índices bajo condiciones dispares',
   mechanicalAgeChangeKm:null,structuralRejuvenationClaim:false
