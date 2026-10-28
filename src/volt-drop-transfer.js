@@ -1,7 +1,7 @@
 /**
  * Reserved low-voltage transfer cases, separate from the guided examples.
  * Correct answers and assumed hidden resistances are disclosed only after
- * committing a full response. Retakes use a different fault localization.
+ * committing a full response. Retakes cycle through different physical scenarios and causal localizations.
  */
 import{voltageDropModel}from"./volt-drop-lesson.js";
 export const VOLT_DROP_HOLDOUT_ID="lab-volt-drop-holdout-v2";
@@ -11,7 +11,13 @@ export const VOLT_DROP_HOLDOUT_CASES=Object.freeze([
  Object.freeze({id:"positive",story:"Un consumidor de 12 V funciona débilmente en un banco aislado. La tensión de fuente virtual se mantiene en 12,00 V. Se desconoce en qué tramo aparece la pérdida dominante.",
   positiveOhm:0.62,returnOhm:0.06,loadOhm:2.5}),
  Object.freeze({id:"return",story:"En otro equipo didáctico de 12 V la carga recibe menos tensión de lo esperado. La fuente ideal sigue estable. No disponés de las resistencias ocultas ni de una pieza identificada como culpable.",
-  positiveOhm:0.07,returnOhm:0.52,loadOhm:2.8})
+  positiveOhm:0.07,returnOhm:0.52,loadOhm:2.8}),
+ Object.freeze({id:"balanced-2",story:"En un módulo sintético de 12 V la carga pierde tensión al activarse. Investigá si las caídas de entrada y retorno son parecidas o si una domina.",positiveOhm:0.24,returnOhm:0.27,loadOhm:3.6}),
+ Object.freeze({id:"positive-2",story:"En un banco LV una luz resistiva enciende con baja intensidad. La fuente ideal conserva 12 V; investigá qué conductor concentra la pérdida.",positiveOhm:0.85,returnOhm:0.12,loadOhm:3.2}),
+ Object.freeze({id:"return-2",story:"Una carga de prueba recibe menos tensión que la fuente. No se conoce la resistencia de ningún cable y el nombre del cable no adelanta su comportamiento.",positiveOhm:0.05,returnOhm:0.70,loadOhm:4.3}),
+ Object.freeze({id:"balanced-3",story:"En un prototipo de 12 V ambos enlaces muestran una pérdida al circular corriente. Compará sus lecturas antes de localizar una falla.",positiveOhm:0.33,returnOhm:0.29,loadOhm:1.9}),
+ Object.freeze({id:"positive-3",story:"Una carga ficticia se debilita aunque la fuente virtual siga estable. Solo las lecturas bajo una misma carga permiten localizar una pérdida predominante.",positiveOhm:0.48,returnOhm:0.18,loadOhm:5.2}),
+ Object.freeze({id:"return-3",story:"Cuando activás una carga resistiva de 12 V, la tensión disponible disminuye. No conocés las resistencias ocultas: contrastá primero una hipótesis y después compará ambos tramos.",positiveOhm:0.09,returnOhm:0.91,loadOhm:2.1})
 ]);
 // A falsifier is tied to the student's selected diagnosis, not the hidden
 // actual fault: otherwise a wrong conclusion could earn points for refuting
@@ -43,6 +49,10 @@ const labels={positive:"tramo positivo",return:"tramo de retorno",balanced:"sin 
 const probeLabels={positive:"positivo A–B",return:"retorno D–E",load:"consumidor B–D"};
 const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>n.toFixed(2).replace(".",",");
+export function holdoutDiagnosis(caseId){
+ const m=modelFor(caseId);
+ return m.positiveV>m.returnV*1.25?"positive":m.returnV>m.positiveV*1.25?"return":"balanced";
+}
 const modelFor=id=>{
  const x=VOLT_DROP_HOLDOUT_CASES.find(x=>x.id===id);
  if(!x)throw RangeError("Caso reservado no identificado");
@@ -84,10 +94,11 @@ export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diag
  const frozen=freezeVoltageDropHypothesis({...prior,caseId:prior?.caseId});
  if(frozen.caseId!==caseId)throw RangeError("La hipótesis inicial pertenece a otro caso");
  if(!Array.isArray(measurements)||measurements.length!==2||measurements[0]!==frozen.firstProbe||new Set(measurements).size!==2||!measurements.includes("positive")||!measurements.includes("return"))throw RangeError("Falta respetar el primer ensayo congelado o las dos mediciones independientes");
+ if(typeof loadPrediction!=="number"&&(!String(loadPrediction??"").trim()||!/^\\d+(?:[.,]\\d+)?$/.test(String(loadPrediction).trim())))throw RangeError("Predicción numérica obligatoria");
  const parsed=typeof loadPrediction==="number"?loadPrediction:Number(String(loadPrediction).trim().replace(",","."));
  if(!Number.isFinite(parsed)||parsed<0||parsed>24)throw RangeError("Predicción de tensión inválida");
  if(!Object.hasOwn(labels,diagnosis)||!Number.isInteger(falsifier)||falsifier<0||falsifier>=VOLT_DROP_FALSIFIERS[diagnosis]?.options.length)throw RangeError("Decisiones inválidas");
- const expected=m.positiveV>m.returnV*1.25?"positive":m.returnV>m.positiveV*1.25?"return":"balanced";
+ const expected=holdoutDiagnosis(caseId);
  const numeric=Math.abs(parsed-m.loadV)<=0.12;
  const causal=diagnosis===expected;
  const falsified=falsifier===VOLT_DROP_FALSIFIERS[diagnosis].answer;
@@ -218,7 +229,11 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{},history=[]}={})
    if(!measurements.size&&$("holdout-probe").value!==prior.firstProbe){
     $("holdout-measured").textContent="Primero medí el tramo que congelaste en el plan, y después compará con el otro.";return;
    }
-   const probe=$("holdout-probe").value,value=heldOutVoltageReading(VOLT_DROP_HOLDOUT_CASES[index].id,probe);
+   const probe=$("holdout-probe").value;
+   if(measurements.has(probe)){
+    $("holdout-measured").textContent="Ya mediste este tramo; para comparar hipótesis, medí el otro sin repetir el primero.";return;
+   }
+   const value=heldOutVoltageReading(VOLT_DROP_HOLDOUT_CASES[index].id,probe);
    measurements.add(probe);
    readingTrail.push({probe,volts:value,recordedAt:new Date().toISOString()});
    feedback="Medición entre los extremos de "+(probe==="positive"?"positivo":probe==="return"?"retorno":"consumidor")+": "+fmt(value)+" V (bajo carga).";

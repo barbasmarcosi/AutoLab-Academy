@@ -28,3 +28,6 @@ Do not invent achieved scores, test participants, or competence claims. A softwa
 - Push the intended HEAD with `<!-- [FULL_E2E_MILESTONE] -->` temporarily present in PR description.
 - GitHub Actions verifies unit, build, focused Chromium and complete Chromium/WebKit/mobile WebKit; PR cannot deploy Pages.
 - Remove the marker once the run has started; keep later PR updates fast. Use GitHub Pages via Actions only for deployment, with separate full-suite approval.
+
+## Nine-case independent transfer (2026-10-28)
+Three scenarios are no longer sufficient to discourage memorization. The independent holdout now contains nine distinct DC resistor configurations, cycling balanced/positive/return classifications and preserving original case identifiers for existing offline evidence. Each classifier is computed from physical readings, not case names. Empty numeric predictions and duplicate instrument clicks are rejected. Nine-case properties are tested, but actual novice transfer remains unobserved.

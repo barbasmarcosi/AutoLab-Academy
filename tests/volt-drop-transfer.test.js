@@ -1,13 +1,13 @@
 import test from"node:test";
 import assert from"node:assert/strict";
-import{VOLT_DROP_HOLDOUT_CASES,VOLT_DROP_HOLDOUT_ID,heldOutVoltageReading,gradeVoltageDropHoldout,freezeVoltageDropHypothesis,compareVoltageDropHypotheses,VOLT_DROP_FALSIFIERS,nextVoltageDropHoldoutIndex}from"../src/volt-drop-transfer.js";
+import{VOLT_DROP_HOLDOUT_CASES,VOLT_DROP_HOLDOUT_ID,heldOutVoltageReading,gradeVoltageDropHoldout,freezeVoltageDropHypothesis,compareVoltageDropHypotheses,VOLT_DROP_FALSIFIERS,nextVoltageDropHoldoutIndex,holdoutDiagnosis}from"../src/volt-drop-transfer.js";
 import{lessonEvidence,learningEvidenceOverview}from"../src/learning-evidence.js";
 import{learningStages}from"../src/learning-path.js";
 
 test("independent cases have disjoint causal localizations and consistent Kirchhoff balance",()=>{
- assert.equal(VOLT_DROP_HOLDOUT_CASES.length,3);
+ assert.equal(VOLT_DROP_HOLDOUT_CASES.length,9);
  assert.ok(VOLT_DROP_HOLDOUT_ID.startsWith("lab-volt-drop-holdout-"));
- assert.equal(new Set(VOLT_DROP_HOLDOUT_CASES.map(x=>x.id)).size,3);
+ assert.equal(new Set(VOLT_DROP_HOLDOUT_CASES.map(x=>x.id)).size,9);
  for(const c of VOLT_DROP_HOLDOUT_CASES){
   const p=heldOutVoltageReading(c.id,"positive"),r=heldOutVoltageReading(c.id,"return"),l=heldOutVoltageReading(c.id,"load");
   assert.ok(Math.abs(p+r+l-12)<1e-9);
@@ -21,19 +21,20 @@ test("full measurement, causal choice and falsifier are necessary; numeric uncer
  for(const c of VOLT_DROP_HOLDOUT_CASES){
   const measures=["positive","return"],loadPrediction=heldOutVoltageReading(c.id,"load").toFixed(2);
   // A wrong pre-data hypothesis does not penalize a justified revision.
-  const initial=c.id==="positive"?"return":"positive";
+  const diagnosis=holdoutDiagnosis(c.id);
+  const initial=diagnosis==="positive"?"return":"positive";
   const prior=freezeVoltageDropHypothesis({caseId:c.id,hypothesis:initial,prediction:initial,firstProbe:"positive",confidence:"low"});
-  const good=gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior});
+  const good=gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction,diagnosis,falsifier:VOLT_DROP_FALSIFIERS[diagnosis].answer,prior});
   assert.equal(good.score,100);assert.equal(good.passed,true);
   assert.equal(good.prior.hypothesis,initial);
   assert.equal(good.evolution.changed,true);
-  const wrongDiagnosis=c.id==="positive"?"return":"positive";
+  const wrongDiagnosis=diagnosis==="positive"?"return":"positive";
   const bad=gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction:Number(loadPrediction)+0.5,diagnosis:wrongDiagnosis,falsifier:(VOLT_DROP_FALSIFIERS[wrongDiagnosis].answer+1)%3,prior});
   assert.equal(bad.passed,false);assert.equal(bad.score,0);
-  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["positive"],loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior}),RangeError);
-   assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["positive","return","load"],loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior}),RangeError,'A direct load probe would disclose the numeric answer');
-  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["return","positive"],loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior}),RangeError);
-  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer}),RangeError);
+  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["positive"],loadPrediction,diagnosis,falsifier:VOLT_DROP_FALSIFIERS[diagnosis].answer,prior}),RangeError);
+   assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["positive","return","load"],loadPrediction,diagnosis,falsifier:VOLT_DROP_FALSIFIERS[diagnosis].answer,prior}),RangeError,'A direct load probe would disclose the numeric answer');
+  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["return","positive"],loadPrediction,diagnosis,falsifier:VOLT_DROP_FALSIFIERS[diagnosis].answer,prior}),RangeError);
+  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction,diagnosis,falsifier:VOLT_DROP_FALSIFIERS[diagnosis].answer}),RangeError);
  }
  assert.throws(()=>heldOutVoltageReading("missing","load"),RangeError);
  assert.throws(()=>heldOutVoltageReading("positive","nonsense"),RangeError);
@@ -138,9 +139,23 @@ test("offline reopening rotates to the next retained unseen scenario without tru
  assert.equal(nextVoltageDropHoldoutIndex(),0);
  assert.equal(nextVoltageDropHoldoutIndex([record("balanced")]),1);
  assert.equal(nextVoltageDropHoldoutIndex([record("balanced"),record("positive")]),2);
- assert.equal(nextVoltageDropHoldoutIndex([record("return")]),0);
- assert.equal(nextVoltageDropHoldoutIndex([record("return"),{id:VOLT_DROP_HOLDOUT_ID,report:"{broken"}]),0);
- assert.equal(nextVoltageDropHoldoutIndex([record("return"),record("positive","lab-volt-drop-holdout-v1")]),0);
+ assert.equal(nextVoltageDropHoldoutIndex([record("return")]),3);
+ assert.equal(nextVoltageDropHoldoutIndex([record("return"),{id:VOLT_DROP_HOLDOUT_ID,report:"{broken"}]),3);
+ assert.equal(nextVoltageDropHoldoutIndex([record("return"),record("positive","lab-volt-drop-holdout-v1")]),3);
  assert.equal(nextVoltageDropHoldoutIndex([{id:VOLT_DROP_HOLDOUT_ID,report:JSON.stringify({caseId:"invalid"})}]),0);
  assert.equal(nextVoltageDropHoldoutIndex({notAnArray:true}),0);
+});
+
+test("nine reserved cases vary the physics; grades depend on readings rather than case identifiers",()=>{
+ assert.deepEqual(VOLT_DROP_HOLDOUT_CASES.map(c=>holdoutDiagnosis(c.id)),["balanced","positive","return","balanced","positive","return","balanced","positive","return"]);
+ const cases=VOLT_DROP_HOLDOUT_CASES;
+ for(let i=0;i<cases.length;i++){
+  const c=cases[i],initial=freezeVoltageDropHypothesis({caseId:c.id,hypothesis:"undetermined",prediction:"need-evidence",firstProbe:"positive"});
+  const diagnosis=holdoutDiagnosis(c.id),base={caseId:c.id,measurements:["positive","return"],loadPrediction:heldOutVoltageReading(c.id,"load"),diagnosis,falsifier:VOLT_DROP_FALSIFIERS[diagnosis].answer,prior:initial};
+  assert.equal(gradeVoltageDropHoldout(base).score,100);
+  for(const bad of [""," ","abc","3x","1e5","-1",null,undefined])
+   assert.throws(()=>gradeVoltageDropHoldout({...base,loadPrediction:bad}),RangeError);
+  assert.throws(()=>gradeVoltageDropHoldout({...base,measurements:["positive","positive"]}),RangeError);
+  assert.equal(nextVoltageDropHoldoutIndex([{id:VOLT_DROP_HOLDOUT_ID,report:JSON.stringify({caseId:c.id})}]),(i+1)%cases.length);
+ }
 });
