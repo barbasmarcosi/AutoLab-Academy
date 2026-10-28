@@ -50,6 +50,6 @@ test('MA00 user can falsify the scoring assumptions using deterministic negative
  await page.getByRole('button',{name:'Intentar refutar el índice'}).click();
  await expect(page.getByRole('heading',{name:/Controles negativos de falsación/})).toBeVisible();
  await expect(page.getByText(/Se detectaron limitaciones del indicador/)).toBeVisible();
- await expect(page.getByText(/STFT y LTFT se compensan/)).toBeVisible();
+ await expect(page.locator('li').filter({hasText:'STFT y LTFT se compensan'})).toBeVisible();
  await expect(page.getByText(/El score no identifica desgaste ni causa/)).toHaveCount(0);
 });
