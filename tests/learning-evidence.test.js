@@ -12,7 +12,7 @@ test('94 lessons have honest, complete, independently auditable evidence coverag
  assert.equal(summary.totals.lessons,94);
  assert.equal(summary.totals.reasoningAvailable,39);
  assert.equal(lessonEvidence(progress(),'volt-drop').reasoning.available,false,'The first lesson uses its dedicated holdout');
- assert.equal(summary.totals.embeddedAvailable,22);
+ assert.equal(summary.totals.embeddedAvailable,23);
  assert.equal(summary.totals.holdoutAvailable,1);
  assert.equal(summary.totals.holdoutPassed,0);
  assert.equal(summary.totals.linkedOnly,12);

@@ -1,0 +1,46 @@
+import{test,expect}from'@playwright/test';
+import{readFile}from'node:fs/promises';
+test('lesson 2: DTC learner freezes an uncertain diagnosis, runs four tests, revises and stores an auditable case',async({page})=>{
+ await page.goto('./');
+ await page.getByRole('button',{name:'Academia',exact:true}).click();
+ await page.locator('.lesson-card').filter({hasText:'DTC y parámetros: síntomas, no sentencias'}).getByRole('button',{name:'Estudiar'}).click();
+ const lesson=page.locator('#main-content'),lab=page.locator('#lesson-practice-host');
+ await expect(lesson.getByText('Dos problemas, un mismo DTC: ejemplo resuelto')).toBeVisible();
+ await expect(lab.locator('#dtc-prior')).toBeVisible();
+ await lab.locator('[data-dtc="freeze"]').click();
+ await expect(lab.locator('#dtc-status')).toContainText('Elegí hipótesis y primera prueba');
+ await lab.locator('#dtc-prior').selectOption('fuel');
+ await lab.locator('#dtc-first').selectOption('pressure');
+ await lab.locator('[data-dtc="freeze"]').click();
+ await expect(lab.locator('#dtc-locked')).toContainText('suministro insuficiente');
+ await lab.locator('#dtc-probe').selectOption('trims');
+ await lab.locator('[data-dtc="measure"]').click();
+ await expect(lab.locator('#dtc-status')).toContainText('Medí primero lo que habías planificado');
+ await expect(lab.locator('#dtc-measured')).toContainText('0/4');
+ for(const [i,key] of ['pressure','trims','leak','sensor'].entries()){
+  await lab.locator('#dtc-probe').selectOption(key);
+  await lab.locator('[data-dtc="measure"]').click();
+  await expect(lab.locator('#dtc-measured')).toContainText((i+1)+'/4');
+ }
+ await expect(lab.locator('#dtc-measured')).toContainText('NO OEM');
+ await expect(lab.locator('[data-dtc="measure"]')).toBeDisabled();
+ await lab.locator('#dtc-diagnosis').selectOption('air');
+ await lab.locator('input[name="dtc-falsifier"][value="0"]').check();
+ await lab.locator('[data-dtc="grade"]').click();
+ await expect(lab.locator('#dtc-status')).toContainText('Completá refutación y justificación');
+ await lab.locator('#dtc-why').fill('La presión coincide con la referencia del banco y hay indicio independiente de fuga. Una prueba repetible sin fuga con presión anómala debilitaría esta hipótesis.');
+ await lab.locator('[data-dtc="grade"]').click();
+ await expect(lab.locator('#dtc-result')).toContainText('100/100');
+ await expect(lab.locator('#dtc-result')).toContainText('pendiente de revisión cualitativa');
+ await expect(page.locator('#lesson-theory-practice-status')).toContainText('Práctica aprobada');
+ await page.locator('nav.nav button[data-id="data"]').click();
+ const download=page.waitForEvent('download');
+ await page.locator('[data-action="export"]').click();
+ const file=JSON.parse(await readFile(await(await download).path(),'utf8'));
+ const result=file.payload.cases.findLast(x=>x.id==='lab-dtc-guided-v1');
+ expect(result).toMatchObject({passed:true,score:100});
+ const ev=JSON.parse(result.report);
+ expect(ev).toMatchObject({caseId:'air',initial:'fuel',first:'pressure',qualitativeReview:'pending'});
+ expect(ev.measurementsInOrder).toEqual(['pressure','trims','leak','sensor']);
+ expect(ev.observations).toHaveLength(4);
+});

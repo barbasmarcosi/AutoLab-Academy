@@ -65,3 +65,10 @@ test('related lab evidence does not certify a separate linked lesson',()=>{
  assert.equal(attempt.status,'related-attempted');
  assert.equal(attempt.passed,false);
 });
+
+test('motor-data guided DTC bench has its own separate evidence ID, never a generic exam score',()=>{
+ const entry=lessonPractice('motor-data');assert.equal(entry?.kind,'embedded');assert.equal(entry?.page,'dtc-guided');
+ assert.equal(entry?.caseId,'lab-dtc-guided-v1');
+ assert.equal(practiceProgress({cases:[{id:'lab-reasoning-motor-data-v3',passed:true}]},'motor-data').passed,false);
+ assert.equal(practiceProgress({cases:[{id:entry.caseId,passed:true}]},'motor-data').passed,true);
+});

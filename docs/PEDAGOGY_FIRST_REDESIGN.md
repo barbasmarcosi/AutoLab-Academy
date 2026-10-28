@@ -97,3 +97,7 @@ Do not merge or deploy production before independent review.
 ## Lesson 02 — synthetic DTC guided practice in progress
 - Three fictional P0171 symptom cases. Every practice starts with a frozen hypothesis and first test, then observes four targeted independent synthetic results. The final diagnosis and a hypothesis-relative falsifier are objectively scored; free-text remains ungraded for human review. No OEM thresholds or physical procedures are implied.
 - Integrated guided practice is distinct from the already-existing conceptual challenge and independent transfer. Lesson 02 is NOT yet certified >=9/10.
+
+## Lesson 02 automatic quality gates
+- Corrected 94-lesson evidence-coverage test to 23 embedded labs after mapping `motor-data` (35 total mapped), with the new practice ID explicitly isolated from generic reasoning/exam IDs.
+- Focused Chromium CI now runs the second lesson's E2E for freezing the prior, enforcing the first test, collecting four observations and persisting a qualified synthetic result.
