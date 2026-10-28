@@ -17,9 +17,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-VERSION = "ma00-elm327-serial-v2"
+VERSION = "ma00-elm327-serial-v3"
 # SAE J1979 Mode 01. PID, channel name, unit and response length.
 PIDS = {
+    "0103": ("fuelSystem1Status", "enum", 2),
     "010C": ("rpm", "rpm", 2),
     "0105": ("ectC", "C", 1),
     "0104": ("loadPct", "%", 1),
@@ -27,7 +28,7 @@ PIDS = {
     "0107": ("ltftPct", "%", 1),
     "010F": ("iatC", "C", 1),
 }
-ORDER = ("010C", "0105", "0104", "0106", "0107", "010F")
+ORDER = ("0103", "010C", "0105", "0104", "0106", "0107", "010F")
 SUPPORTED_QUERY = "0100"  # Mode 01 supported PIDs 01-20; read-only
 # Adapter presentation/protocol negotiation. Never writes to ECU via service 02+.
 SETUP = ("ATE0", "ATL0", "ATS0", "ATH0", "ATSP0")
@@ -67,7 +68,14 @@ def decode_mode01(pid: str, response: bytes) -> float:
     if data[:2] != expected or len(data) != 2 + PIDS[pid][2]:
         raise ProtocolError("Incorrect PID, response service or payload length")
     a = data[2]
-    if pid == "010C":
+    if pid == "0103":
+        # Byte A = fuel system 1, Byte B = fuel system 2.
+        # 0 means not reported. Other values are mutually exclusive flags.
+        valid = (0, 1, 2, 4, 8, 16)
+        if a not in valid or data[3] not in valid:
+            raise ProtocolError("Invalid fuel control state")
+        value = a
+    elif pid == "010C":
         value = (a * 256 + data[3]) / 4
     elif pid in ("0105", "010F"):
         value = a - 40
@@ -170,7 +178,7 @@ def capture_mode01(
     if preflight_state != "received":
         raise ProtocolError("Could not retrieve mandatory Mode01 PID support bitmap")
     supported = decode_supported_pids(supported_raw)
-    mandatory = set(ORDER) - {"010F"}  # IAT may be unavailable
+    mandatory = set(ORDER) - {"010F"}  # Fuel status 0103 is required  # IAT may be unavailable
     if not mandatory.issubset(supported):
         raise ProtocolError("Required Mode01 PIDs unsupported: " + ",".join(sorted(mandatory - supported)))
     active_pids = tuple(pid for pid in ORDER if pid in supported)
@@ -196,6 +204,10 @@ def capture_mode01(
             else:
                 try:
                     event["value"] = decode_mode01(pid, raw)
+                    if pid == "0103":
+                        # Record bank 2 / fuel system 2, not only the first byte.
+                        cleaned = re.sub(rb"\s+", b"", raw[:-1].upper())
+                        event["fuelSystem2Status"] = bytes.fromhex(cleaned.decode("ascii"))[3]
                     event["status"] = "ok"
                 except ProtocolError as exc:
                     event["status"] = "error"
