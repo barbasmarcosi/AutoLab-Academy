@@ -52,7 +52,7 @@ test('MC06 recommendation requires genuine v2 transfer then its own embedded lab
    const practice=lessonPractice(id);
    if(practice?.kind==='embedded')p.cases.push({id:practice.caseId,at:'2026-10-26T16:00:02Z',score:100,passed:true});
   }
-  p.cases.push({id:'lab-volt-drop-holdout-v1',at:'2026-10-26T16:00:03Z',score:100,passed:true});
+  p.cases.push({id:'lab-volt-drop-holdout-v2',at:'2026-10-26T16:00:03Z',score:100,passed:true});
   p.notes['lesson-mc06-dual-fault-instrumentation']='2026-10-26T16:00:00Z';
   await saveProgress(p);
  });
