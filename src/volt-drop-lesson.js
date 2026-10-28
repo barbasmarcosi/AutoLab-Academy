@@ -137,7 +137,7 @@ export function mountVoltDropPractice(root,{record,onSaved=()=>{}}={}){
   positive:{red:[208,60],black:[550,60],label:"A–B: cable positivo"},
   return:{red:[550,145],black:[208,145],label:"D–E: retorno"},
   load:{red:[660,60],black:[660,145],label:"B–D: consumidor"},
-  source:{red:[105,60],black:[105,145],label:"A–E: fuente ideal"}
+  source:{red:[208,60],black:[208,145],label:"A–E: fuente ideal"}
  };
  const updateProbes=()=>{
   const k=$("volt-points").value,p=probes[k];
