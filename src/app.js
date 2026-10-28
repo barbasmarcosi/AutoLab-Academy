@@ -733,6 +733,7 @@ function lessonPracticeStatusText(id){
   status.status==='not-started'?'Práctica todavía no registrada':'No hay práctica vinculada todavía';
 }
 function lessonReasoningStatusText(id){
+ if(id==='volt-drop')return transferProgress(data,id).passed?'Transferencia conceptual opcional realizada; el caso independiente es la prueba principal':'Transferencia conceptual opcional; no es requisito para completar esta lección';
  const r=transferProgress(data,id);
  return r.status==='passed'?'Decisiones objetivas correctas; texto pendiente de revisión':r.status==='attempted'?'Transferencia todavía no aprobada':r.status==='legacy-passed'?'Ejercicio anterior registrado; transferencia v3 pendiente':r.status==='unmapped'?'Sin ejercicio de razonamiento asociado':'Razonamiento y transferencia pendientes';
 }

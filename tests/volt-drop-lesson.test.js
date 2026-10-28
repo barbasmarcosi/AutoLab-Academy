@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {VOLT_DROP_CASE_ID,VOLT_DROP_CHECKS,voltageDropModel,checkVoltageDropAnswer,diagnoseVoltageDrop,voltDropTheoryIllustration} from "../src/volt-drop-lesson.js";
+import {VOLT_DROP_CASE_ID,VOLT_DROP_CHECKS,voltageDropModel,checkVoltageDropAnswer,diagnoseVoltageDrop,voltDropTheoryIllustration,voltageDropNodes} from "../src/volt-drop-lesson.js";
 import {lessonPractice,practiceProgress} from "../src/lesson-practice.js";
 
 test("lesson-1 worked example obeys Ohm and Kirchhoff equations",()=>{
@@ -53,4 +53,16 @@ test("first lesson records instrument-model evidence without granting physical c
  const theory=voltDropTheoryIllustration();
  assert.match(theory,/4,80 A/);
  assert.match(theory,/no acredita|no modela|no representa/i);
+});
+
+test("signed potential model obeys voltage reference and Kirchhoff laws for varied resistances",()=>{
+ for(let p=0.02;p<=1;p+=0.07)for(let r=0.02;r<=1;r+=0.11){
+  const m=voltageDropModel({positiveOhm:p,returnOhm:r,loadOhm:3});
+  const n=voltageDropNodes(m);const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-9,`${a} != ${b}`);
+  near(n.A-n.B,m.positiveV);near(n.B-n.D,m.loadV);near(n.D-n.E,m.returnV);
+  near(n.A-n.E,m.sourceV);near(n.B-n.A,-m.positiveV);near(m.balanceV,m.sourceV);
+ }
+ assert.throws(()=>voltageDropNodes(voltageDropModel({energized:false})),RangeError);
+ assert.match(voltDropTheoryIllustration(),/11,52 V/);
+ assert.match(voltDropTheoryIllustration(),/−0,48 V/);
 });

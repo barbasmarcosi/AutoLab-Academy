@@ -29,6 +29,11 @@ export function voltageDropModel({sourceV=12,positiveOhm=0.10,returnOhm=0.40,loa
  return {sourceV,currentA,positiveV,returnV,loadV,positiveOhm,returnOhm,loadOhm,
   balanceV:positiveV+returnV+loadV,energized:Boolean(energized)};
 }
+/** Potentials of a CLOSED DC loop, with return/source negative E = 0 V. */
+export function voltageDropNodes(model){
+ if(!model?.energized||![model.sourceV,model.positiveV,model.returnV,model.loadV].every(Number.isFinite))throw RangeError("Solo el circuito cerrado tiene los potenciales definidos por este modelo");
+ return Object.freeze({A:model.sourceV,B:model.sourceV-model.positiveV,D:model.returnV,E:0});
+}
 export function checkVoltageDropAnswer(id,choice){
  const q=VOLT_DROP_CHECKS.find(x=>x.id===id);
  if(!q||!Number.isInteger(choice)||choice<0||choice>=q.options.length)throw RangeError("Respuesta inválida");
@@ -55,6 +60,10 @@ export function voltDropTheoryIllustration(){
   "<li><strong>Caída en retorno:</strong> 4,80 × 0,40 = <strong>1,92 V</strong>.</li>",
   "<li><strong>Tensión en consumidor:</strong> 4,80 × 2,00 = <strong>9,60 V</strong>.</li></ol>",
   "<p><strong>Comprobación:</strong> 0,48 + 1,92 + 9,60 = 12,00 V. La fuente no desapareció: parte de su tensión se pierde en conexiones y menos llega a la carga.</p>",
+   "<h3>Potenciales, referencias y polaridad: una misma caída, dos signos</h3>"+
+   "<p>Tomando el borne negativo E como referencia de 0 V en este circuito <strong>cerrado y bajo carga</strong>: A = 12,00 V, B = 11,52 V, D = 1,92 V y E = 0,00 V. Ninguno de esos potenciales es absoluto; todos se refieren a E.</p>"+
+   "<p>Con punta roja en A y negra en B: V(A) − V(B) = +0,48 V. Invirtiendo las puntas: −0,48 V. La <strong>magnitud</strong> de la caída sigue siendo 0,48 V. Este simulador muestra magnitudes, aunque un voltímetro real indica el signo según la polaridad.</p>"+
+   "<p>Medir «12 V en un cable» sin identificar el punto de referencia no localiza dónde se pierde tensión. Para el tramo A–B compará específicamente sus extremos bajo carga, sin inferir umbrales OEM ni conectar sondas a circuitos desconocidos.</p>",
   "<p><strong>Ahora pensá:</strong> si desconectás la carga e I = 0 A, las caídas en los cables de este modelo son 0 V, aunque la resistencia del retorno siga siendo 0,40 Ω. Medir solo en vacío ocultaría el problema.</p>",
   "<p class='muted small'>Supuestos: corriente continua estable, resistencias constantes, fuente de tensión ideal y voltímetro ideal. No modela temperatura, inductancia, química de batería ni comportamiento de un motor de arranque real.</p></section>",
   "<section class='panel stack' aria-label='Segundo ejemplo progresivo'><h2>Segundo ejemplo: cambiá de hipótesis</h2>"+

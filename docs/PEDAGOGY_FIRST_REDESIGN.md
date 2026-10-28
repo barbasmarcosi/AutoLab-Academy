@@ -79,3 +79,8 @@ Do not merge or deploy production before independent review.
 ## CI coverage guard
 - The focused Chromium gate includes not only the lesson-1 holdout/offline flows but representative MC06/MC14/MOSFET conceptual transfers and progression/legacy evidence tests, guarding the v3 scoring migration at browser level.
 - Publishing to the existing GitHub Pages environment on manual feature-branch dispatch requires explicit `full_suite=true`. The default quick manual validation does not silently overwrite production.
+
+## 2026-10-28: reference and signed-voltage literacy
+- Added explicit closed-loop A/B/D/E potentials relative to E, positive/negative voltmeter polarity and the distinction from unsigned magnitude in the guided simulation. Clarified that the open-circuit node model is underdetermined.
+- Added deterministic metamorphic tests over multiple positive/return resistances checking all node drops, sign reversal and Kirchhoff closure.
+- Clarified that the generic conceptual transfer in lesson 1 is optional; its dedicated independent holdout is the actual progression gate.
