@@ -85,3 +85,11 @@ Los escenarios son sintéticos y las mediciones no representan especificaciones 
 - Falta generar y conservar un lockfile npm para reproducibilidad estricta del build. La versión científica directa está fijada; las dependencias transitivas quedan registradas por ejecución y aún requieren lockfile/constraints reproducibles.
 
 Documentación: [transferencia diagnóstica](docs/DIAGNOSTIC_TRANSFER_V1_9.md), [problemas de transferencia](docs/TRANSFER_V1_8.md), [evaluación por pregunta](docs/ANSWER_EVIDENCE_V1_7.md), [orientador de estudio basado en evidencias](docs/STUDY_COACH_V1_6.md), [taller integrador](docs/INTEGRATIVE_V1_5.md), [combustión y balance de cilindros](docs/MISFIRE_V1_4.md), [inyección y trims](docs/FUEL_V1_3.md), [fallas intermitentes y buffer](docs/TEMPORAL_V1_2.md), [diagnóstico diferencial](docs/DIFFERENTIAL_V1_1.md), [componentes y drivers](docs/COMPONENTS_V1.md), [banco ECU e itinerarios](docs/ECU_PATHS.md), [multifallas y portafolio](docs/MULTIFAULT_PORTFOLIO.md), [contenido y osciloscopio](docs/CURRICULUM_WAVEFORMS.md), [retos cuantitativos](docs/MEASUREMENT_CHALLENGES.md), [retención FSRS y migración](docs/FSRS_E1.md), [plan general](docs/ROADMAP.md), [modelo de casos](docs/CASE_MODEL.md), [laboratorios CAN y circuitos](docs/LABS_E3.md), [laboratorio BMS](docs/LABS_E4.md).
+
+## Previsualización de hitos pedagógicos en GitHub Pages
+
+**URL única:** [Abrir AutoLab Academy en Pages](https://barbasmarcosi.github.io/AutoLab-Academy/).
+
+La rama `feature/pedagogy-first-redesign` conserva el trabajo en PR #56. Un commit directo en esa rama con `[pages-milestone]` en el **mensaje de commit** autoriza y dispara una publicación a la URL anterior **solo si** pasan `npm run build`, la generación exacta del sitio, E2E focalizados y la suite completa Chromium / WebKit / WebKit móvil. Un commit sin esa marca continúa usando solo la CI rápida del PR. Se despliega exclusivamente mediante GitHub Actions (`actions/deploy-pages`), nunca Vercel. La publicación del hito en la URL única **reemplaza** la versión anterior de Pages; no es un hosting paralelo ni un examen proctorizado.
+
+Los hitos y su alcance real se registran en [historial de Pages](docs/PAGES_MILESTONES.md). La publicación no requiere merge al `main`; las métricas internas no constituyen certificación de aprendizaje físico.

@@ -1,7 +1,7 @@
 name: Test and deploy AutoLab Academy
 on:
   push:
-    branches: [main]
+    branches: [main, feature/pedagogy-first-redesign]
   workflow_dispatch:
     inputs:
       full_suite:
@@ -13,13 +13,16 @@ on:
     branches: [main]
 permissions:
   contents: read
-# Only superseded PR validations are canceled. Main deployments are never canceled
+# Only superseded PR validations are canceled. Push milestones and main deploys are never canceled
 # by a later PR or commit; use run_id for unique non-PR groups.
 concurrency:
   group: autolab-${{ github.workflow }}-${{ github.event_name == 'pull_request' && contains(github.event.pull_request.body, '[FULL_E2E_MILESTONE]') && github.sha || github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.body, '[FULL_E2E_MILESTONE]') }}
 jobs:
   verify:
+    # Feature-branch pushes are silent except for explicit, versioned Pages milestones.
+    # Other commits keep receiving fast pull_request CI without duplicate push jobs.
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feature/pedagogy-first-redesign' && contains(github.event.head_commit.message, '[pages-milestone]'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -41,10 +44,10 @@ jobs:
       - name: Focused pedagogy and offline E2E (Chromium on every PR/dispatch)
         run: npx playwright test tests/e2e/volt-drop-pedagogy.spec.js tests/e2e/dtc-pedagogy.spec.js tests/e2e/lesson-reasoning.spec.js tests/e2e/learning-evidence.spec.js tests/e2e/academy.spec.js tests/e2e/sw-upgrade.spec.js --project=chromium --grep 'lesson 1|lesson 2|first lesson|PWA instalada|actualización v38|MC06 lesson|MC06 recommendation|path makes reading|MC14:|MOSFET causal'
       - name: Install WebKit for release-milestone E2E
-        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'pull_request' && contains(github.event.pull_request.body, '[FULL_E2E_MILESTONE]'))
+        if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feature/pedagogy-first-redesign' && contains(github.event.head_commit.message, '[pages-milestone]')))) || (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'pull_request' && contains(github.event.pull_request.body, '[FULL_E2E_MILESTONE]'))
         run: npx playwright install --with-deps webkit
       - name: Browser E2E complete (Chromium, WebKit, mobile WebKit; release milestones only)
-        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'pull_request' && contains(github.event.pull_request.body, '[FULL_E2E_MILESTONE]'))
+        if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feature/pedagogy-first-redesign' && contains(github.event.head_commit.message, '[pages-milestone]')))) || (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'pull_request' && contains(github.event.pull_request.body, '[FULL_E2E_MILESTONE]'))
         run: npm run test:e2e
       - name: Upload Playwright artifacts on failure
         if: failure()
@@ -57,12 +60,12 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Upload Pages artifact
-        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.full_suite)
+        if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feature/pedagogy-first-redesign' && contains(github.event.head_commit.message, '[pages-milestone]')))) || (github.event_name == 'workflow_dispatch' && inputs.full_suite)
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
           path: ./site/AutoLab-Academy
   deploy:
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.full_suite)
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feature/pedagogy-first-redesign' && contains(github.event.head_commit.message, '[pages-milestone]')))) || (github.event_name == 'workflow_dispatch' && inputs.full_suite)
     needs: verify
     runs-on: ubuntu-latest
     environment:
