@@ -90,7 +90,7 @@ class TestCmapss(unittest.TestCase):
                 run_archive(p)
             with zipfile.ZipFile(p, "a") as z:
                 z.writestr("train_FD001.txt", rows([2]))
-            with self.assertRaisesRegex(ValueError, "Duplicated NASA"):
+            with self.assertRaisesRegex(ValueError, "duplicate NASA"):
                 unpack_fd001(p)
 
 
