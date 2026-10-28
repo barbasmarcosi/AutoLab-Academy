@@ -3,6 +3,11 @@ on:
   push:
     branches:
       - research/mechanical-age-obd-v0
+  workflow_dispatch:
+# Superseded push validations cancel; manual audits use an independent group.
+concurrency:
+  group: ma00-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 permissions:
   contents: read
 jobs:
@@ -41,6 +46,7 @@ jobs:
 
   empirical-enginefault:
     name: Audit pinned real laboratory sensor dataset (no model training)
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -67,6 +73,7 @@ jobs:
 
   empirical-dieselobd:
     name: Inventory pinned real DieselOBD train/test workbooks
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
