@@ -130,11 +130,11 @@ export function gradeReasoningTransfer({lessonId,answers,transferAnswer,reasonin
  const original=gradeReasoning({lessonId,answers,reasoning,limitations});
  if(!Number.isInteger(transferAnswer)||transferAnswer<0||transferAnswer>=transfer.options.length)throw RangeError('Transferencia ausente o inválida');
  const transferCorrect=transferAnswer===transfer.answer;
- const score=original.correct*20+(transferCorrect?30:0)+(original.reasoningDocumented&&original.limitsDocumented?10:0);
+ const score=original.correct*20+(transferCorrect?40:0);
  return {model:TRANSFER_MODEL,lessonId,score,passed:original.correct===3&&transferCorrect&&original.reasoningDocumented&&original.limitsDocumented,
   decisionsCorrect:original.correct,transferCorrect,reasoningDocumented:original.reasoningDocumented,limitsDocumented:original.limitsDocumented,
   original,transfer:{selected:transferAnswer,expected:transfer.answer,correct:transferCorrect,feedback:transfer.feedback},
-  warning:'Rúbrica automática: 3 decisiones conceptuales y una transferencia contrafactual con respuestas objetivas. La extensión del texto no valida su significado; se requiere revisión humana antes de acreditar razonamiento profesional.'};
+  qualitativeReview:'pending',warning:'Puntaje exclusivamente objetivo: tres decisiones (60) y una transferencia (40). Las respuestas escritas se exigen como registro, pero no reciben puntos por longitud ni son evaluadas semánticamente. Revisión humana pendiente; no acredita competencia profesional.'};
 }
 export function reasoningTransferReport({lessonId,answers,transferAnswer,reasoning,limitations},result){
  const original=reasoningChallenge(lessonId),transfer=transferCase(lessonId);

@@ -47,7 +47,7 @@ Lesson 1: **NOT ACCEPTED, provisional 8.5/10** (reviewed 2026-10-28; not a measu
 **Critical findings and gate blockers**:
 1. GitHub Actions run 40640521960 passed unit/build, Chromium/WebKit/mobile focused smoke and complete E2E on the prior SHA 6bdb646. A **new run is mandatory on the latest freeze-hypothesis implementation**; do not carry forward the earlier green status.
 2. Novice comprehension/user-testing has NOT been performed; no claim of 9/10 without it.
-3. The structured hypothesis/transfer case now records the student's evidence-based justification, but **does not** semantically grade its correctness. The broader conceptual transfer engine still relies on text-length thresholds. Genuine evidence-based explanation requires human review or an independently validated rubric.
+3. The structured hypothesis/transfer case now records the student's evidence-based justification, but **does not** semantically grade its correctness. The broader conceptual transfer engine now grades only four objective decisions; 60 + 40 points, with no score for text length. Explanation and caveats are required as documented, ungraded evidence; human review remains pending. Genuine evidence-based explanation requires human review or an independently validated rubric.
 4. Guided practice allows formative retries; its 100/100 is not independent mastery and must never be sold as such.
 5. In the reserved case, a successful retry is evidence of a successful attempt, not first-try competence. The earliest **retained** attempt can be inspected; the capped 500-entry progress log cannot certify a lifetime first-attempt rate.
 
@@ -55,3 +55,11 @@ Lesson 1: **NOT ACCEPTED, provisional 8.5/10** (reviewed 2026-10-28; not a measu
 
 Lessons 2–94: NOT AUDITED under new rubric. Existing implementation does not imply completion.
 Do not merge or deploy production before independent review.
+
+
+## Execution update — 2026-10-28
+- At initial commit `9f161591`, the GitHub Actions `verify` job completed successfully with full E2E; the `deploy` job was correctly skipped on a PR. Vercel's separate build-rate-limit status does not indicate a GitHub Actions test failure.
+- To reduce PR turnaround, every PR runs static/unit, site build, and a focused Chromium E2E. Full Chromium, WebKit, mobile WebKit E2E runs on a main push or explicitly on `workflow_dispatch` with `full_suite=true`. Dispatch on this feature branch can deploy via GitHub Pages without Vercel.
+- A green focused check is NOT equivalent to a green full cross-browser release milestone.
+- Automated 100/100 scores in the general reasoning engine now represent only objective decisions; explanations and caveats remain under human review. Historical v2 results may reflect earlier scoring; do not reinterpret or mix cohorts without versioning.
+- Lesson 1 is still **8.5/10 provisional / NOT ACCEPTED** pending novice comprehension, real keyboard/mobile/offline acceptance and a milestone check on the current commit. Lessons 2–94 are unapproved. Never invent learner-validated scores.

@@ -378,14 +378,15 @@ export function gradeReasoning({lessonId,answers,reasoning,limitations}){
  if(!answers||typeof answers!=='object'||Array.isArray(answers)||answerKeys.some(k=>!Number.isInteger(answers[k])||answers[k]<0||answers[k]>=3))throw RangeError('Faltan decisiones congeladas');
  if(typeof reasoning!=='string'||reasoning.length>3000||typeof limitations!=='string'||limitations.length>3000)throw RangeError('Justificación o límites inválidos');
  const correct=answerKeys.filter((k,i)=>answers[k]===scenario.steps[i].answer).length;
- const reasoningDocumented=reasoning.trim().length>=100;
- const limitsDocumented=limitations.trim().length>=60;
- const score=correct*30+(reasoningDocumented&&limitsDocumented?10:0);
+ // The prose is recorded but receives no score for character count.
+  const reasoningDocumented=reasoning.trim().length>0;
+ const limitsDocumented=limitations.trim().length>0;
+ const score=Math.round(correct/3*100);
  return {model:REASONING_MODEL,lessonId,score,passed:correct===3&&reasoningDocumented&&limitsDocumented,
   correct,reasoningDocumented,limitsDocumented,
   stepResults:scenario.steps.map((step,i)=>({id:step.id,selected:answers[step.id],correct:answers[step.id]===step.answer,
     expected:step.answer,feedback:step.feedback})),
-  warning:'Solo se califican tres decisiones objetivas y la presencia/longitud del argumento y límites; NO se evalúa semánticamente el texto ni se certifica dominio profesional.'};
+  qualitativeReview:'pending',warning:'Los puntos proceden solo de tres decisiones objetivas. El texto y sus límites deben estar registrados, pero no reciben puntos por longitud y esperan revisión humana. Aprobación = decisiones correctas con evidencia escrita presente, NO dominio profesional.'};
 }
 export function reasoningReport({lessonId,answers,reasoning,limitations},result){
  const scenario=reasoningChallenge(lessonId);

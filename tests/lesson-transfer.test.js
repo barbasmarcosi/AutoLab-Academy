@@ -21,12 +21,16 @@ test('40 counterfactuals test transfer rather than repeating the original answer
   const full=gradeReasoningTransfer(base);
   assert.equal(full.model,TRANSFER_MODEL);assert.equal(full.score,100);assert.equal(full.passed,true);
   assert.equal(full.transferCorrect,true);
+   assert.equal(full.qualitativeReview,'pending');
+   assert.equal(gradeReasoningTransfer({...base,reasoning:'x',limitations:'y'}).score,100);
+   assert.equal(gradeReasoningTransfer({...base,reasoning:'',limitations:''}).score,100,'Missing prose never reduces the objective score');
+   assert.equal(gradeReasoningTransfer({...base,reasoning:'',limitations:''}).passed,false,'No written evidence means incomplete training');
   assert.match(reasoningTransferReport(base,full),/Escenario reservado/);
   assert.match(reasoningTransferReport(base,full),/sin evaluación semántica/);
   assert.match(reasoningTransferReport(base,full),/Resultado de revisión humana: PENDIENTE/);
   const mistaken=(transfer.answer+1)%3;
   const fail=gradeReasoningTransfer({...base,transferAnswer:mistaken});
-  assert.equal(fail.score,70);assert.equal(fail.passed,false);
+  assert.equal(fail.score,60);assert.equal(fail.passed,false);
   const failFirst=gradeReasoningTransfer({...base,answers:{...answers,hypothesis:(answers.hypothesis+1)%3}});
   assert.equal(failFirst.score,80);assert.equal(failFirst.passed,false);
   assert.throws(()=>gradeReasoningTransfer({...base,transferAnswer:null}),RangeError);

@@ -49,16 +49,16 @@ export function mountLessonReasoning(root,{lessonId,record,onSaved=()=>{}}){
      '<button type="button" class="button" data-reasoning="lock-transfer">Congelar hipótesis de transferencia</button></div>';
   }else if(!result){
    html+='<p class="reasoning-frozen"><strong>Escenario reservado: </strong>'+esc(transfer.options[transferAnswer])+' <span class="tag dim">Congelado</span>'+(transferConfidence===null?' · confianza no declarada':' · confianza subjetiva '+Math.round(transferConfidence*100)+' %')+'</p>';
-   html+='<label for="reasoning-justification">Explicá qué observación discrimina y qué te haría cambiar de hipótesis (100 caracteres mínimo)</label>'+
+   html+='<label for="reasoning-justification">Explicá qué observación discrimina y qué te haría cambiar de hipótesis (sin longitud mínima; revisión escrita por separado)</label>'+
     '<textarea class="field" id="reasoning-justification" rows="4" maxlength="3000">'+esc(reasoning)+'</textarea>'+
-    '<label for="reasoning-limitations">Explicá límites de la simulación y evidencia física faltante (60 caracteres mínimo)</label>'+
+    '<label for="reasoning-limitations">Explicá límites de la simulación y evidencia física faltante (sin longitud mínima; revisión escrita por separado)</label>'+
     '<textarea class="field" id="reasoning-limitations" rows="3" maxlength="3000">'+esc(limitations)+'</textarea>'+
     '<button type="button" class="button" data-reasoning="grade">Revelar devoluciones y evaluar</button>';
   }else{
    html+='<h3>Devolución por criterio</h3>'+
     result.original.stepResults.map((item,i)=>'<div class="panel"><p><strong>'+esc(scenario.steps[i].title)+': '+(item.correct?'Correcto':'Incorrecto')+'</strong></p><p>Tu respuesta: '+esc(scenario.steps[i].options[item.selected])+'</p><p>Respuesta esperada: '+esc(scenario.steps[i].options[item.expected])+'</p><p>'+esc(item.feedback)+'</p></div>').join('')+
     '<div class="panel"><p><strong>Transferencia: '+(result.transferCorrect?'Correcto':'Incorrecto')+'</strong></p><p>Tu respuesta: '+esc(transfer.options[result.transfer.selected])+'</p><p>Respuesta esperada: '+esc(transfer.options[result.transfer.expected])+'</p><p>'+esc(transfer.feedback)+'</p></div>'+
-    '<p><strong>Resultado estructurado con transferencia: '+result.score+'/100</strong> · '+(result.passed?'Criterios cumplidos':'Volvé a plantear el caso')+'</p>'+
+    '<p><strong>Resultado estructurado con transferencia: '+result.score+'/100</strong> · '+(result.passed?'Decisiones objetivas correctas; revisión escrita pendiente':'Revisá las decisiones objetivas')+'</p>'+
     '<p><strong>Autoconfianza (no es parte de la nota):</strong> '+currentAudit().declared+'/4 decisiones declaradas.'+
  (currentAudit().complete?' Error cuadrático medio descriptivo: '+currentAudit().meanSquaredError.toFixed(4)+'.':' No se calcula índice con declaraciones incompletas.')+
  ' Errores cometidos con confianza 95 %: '+currentAudit().overconfidentErrors+'.</p>'+

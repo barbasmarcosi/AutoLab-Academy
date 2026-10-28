@@ -15,9 +15,12 @@ test('thirteen guided reasoning exercises: ambiguous cases, unique choices, feed
   assert.match(reasoningReport(valid,grade),/sin revisión semántica/);
   const bad={...answers,hypothesis:(answers.hypothesis+1)%3};
   assert.equal(gradeReasoning({...valid,answers:bad}).passed,false);
-  assert.equal(gradeReasoning({...valid,answers:bad}).score,70);
-  assert.equal(gradeReasoning({...valid,reasoning:'corto'}).passed,false);
-  assert.equal(gradeReasoning({...valid,limitations:'corto'}).passed,false);
+  assert.equal(gradeReasoning({...valid,answers:bad}).score,67);
+  assert.equal(gradeReasoning({...valid,reasoning:''}).passed,false);
+  assert.equal(gradeReasoning({...valid,limitations:''}).passed,false);
+   assert.equal(gradeReasoning({...valid,reasoning:'x',limitations:'y'}).score,100);
+   assert.equal(gradeReasoning({...valid,reasoning:'x',limitations:'y'}).qualitativeReview,'pending');
+   assert.equal(gradeReasoning({...valid,reasoning:''}).score,100,'Prose does not contribute points');
   assert.throws(()=>gradeReasoning({...valid,answers:{...answers,falsifier:-1}}),RangeError);
   assert.throws(()=>gradeReasoning({...valid,answers:{...answers,falsifier:3}}),RangeError);
   assert.throws(()=>gradeReasoning({...valid,answers:{...answers,falsifier:'2'}}),RangeError);

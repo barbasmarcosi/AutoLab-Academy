@@ -3,6 +3,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      full_suite:
+        description: 'Hito: ejecutar E2E completo en Chromium y WebKit antes de desplegar'
+        type: boolean
+        required: true
+        default: false
   pull_request:
     branches: [main]
 permissions:
@@ -30,11 +36,15 @@ jobs:
         run: npm run build
       - name: Prepare EXACT Pages bundle on PR and main
         run: npm run build:site
-      - name: Install Chromium and WebKit dependencies
-        run: npx playwright install --with-deps chromium webkit
-      - name: Focused pedagogy and offline E2E (Chromium, WebKit, mobile WebKit)
-        run: npx playwright test tests/e2e/volt-drop-pedagogy.spec.js tests/e2e/academy.spec.js tests/e2e/sw-upgrade.spec.js --grep 'lesson 1|first lesson|PWA instalada|actualización v38'
-      - name: Browser E2E (Chromium/WebKit, diagnostics, backup, offline, a11y)
+      - name: Install Chromium for focused E2E
+        run: npx playwright install --with-deps chromium
+      - name: Focused pedagogy and offline E2E (Chromium on every PR/dispatch)
+        run: npx playwright test tests/e2e/volt-drop-pedagogy.spec.js tests/e2e/academy.spec.js tests/e2e/sw-upgrade.spec.js --project=chromium --grep 'lesson 1|first lesson|PWA instalada|actualización v38'
+      - name: Install WebKit for release-milestone E2E
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.full_suite)
+        run: npx playwright install --with-deps webkit
+      - name: Browser E2E complete (Chromium, WebKit, mobile WebKit; release milestones only)
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.full_suite)
         run: npm run test:e2e
       - name: Upload Playwright artifacts on failure
         if: failure()
