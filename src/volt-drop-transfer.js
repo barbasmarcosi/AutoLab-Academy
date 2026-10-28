@@ -13,8 +13,9 @@ export const VOLT_DROP_HOLDOUT_CASES=Object.freeze([
  Object.freeze({id:"return",story:"En otro equipo didáctico de 12 V la carga recibe menos tensión de lo esperado. La fuente ideal sigue estable. No disponés de las resistencias ocultas ni de una pieza identificada como culpable.",
   positiveOhm:0.07,returnOhm:0.52,loadOhm:2.8})
 ]);
-// Contrasting evidence must be case-specific; a fixed "first answer is right"
-// would reward recognition of the UI rather than scientific falsification.
+// A falsifier is tied to the student's selected diagnosis, not the hidden
+// actual fault: otherwise a wrong conclusion could earn points for refuting
+// the model's answer instead of the claim the student committed to.
 export const VOLT_DROP_FALSIFIERS=Object.freeze({
  balanced:Object.freeze({
   options:Object.freeze([
@@ -85,14 +86,14 @@ export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diag
  if(!Array.isArray(measurements)||measurements[0]!==frozen.firstProbe||!measurements.includes("positive")||!measurements.includes("return"))throw RangeError("Falta respetar el primer ensayo congelado o las dos mediciones independientes");
  const parsed=typeof loadPrediction==="number"?loadPrediction:Number(String(loadPrediction).trim().replace(",","."));
  if(!Number.isFinite(parsed)||parsed<0||parsed>24)throw RangeError("Predicción de tensión inválida");
- if(!Object.hasOwn(labels,diagnosis)||!Number.isInteger(falsifier)||falsifier<0||falsifier>=VOLT_DROP_FALSIFIERS[caseId].options.length)throw RangeError("Decisiones inválidas");
+ if(!Object.hasOwn(labels,diagnosis)||!Number.isInteger(falsifier)||falsifier<0||falsifier>=VOLT_DROP_FALSIFIERS[diagnosis]?.options.length)throw RangeError("Decisiones inválidas");
  const expected=m.positiveV>m.returnV*1.25?"positive":m.returnV>m.positiveV*1.25?"return":"balanced";
  const numeric=Math.abs(parsed-m.loadV)<=0.12;
  const causal=diagnosis===expected;
- const falsified=falsifier===VOLT_DROP_FALSIFIERS[caseId].answer;
+ const falsified=falsifier===VOLT_DROP_FALSIFIERS[diagnosis].answer;
  const score=(numeric?40:0)+(causal?30:0)+(falsified?30:0);
  return {caseId,score,passed:score===100,prior:frozen,evolution:compareVoltageDropHypotheses(frozen,diagnosis,{supported:causal}),selected:{loadPrediction:parsed,diagnosis,falsifier},
-  expected:{loadV:m.loadV,diagnosis:expected,falsifier:VOLT_DROP_FALSIFIERS[caseId].answer,positiveV:m.positiveV,returnV:m.returnV},
+  expected:{loadV:m.loadV,diagnosis:expected,falsifier:VOLT_DROP_FALSIFIERS[diagnosis].answer,positiveV:m.positiveV,returnV:m.returnV},
   numeric,causal,falsified,reason:"La tensión de la carga es la fuente menos ambas caídas bajo la misma condición. La falsación debe buscar una observación incompatible con la hipótesis. Caídas similares NO demuestran que ambos tramos cumplan límites OEM: solo que no hay un dominante relativo en este modelo."};
 }
 export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
@@ -148,8 +149,10 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    "<label for='holdout-cause'>Localización final a partir de tus mediciones</label>"+
    "<select id='holdout-cause' class='field' "+(result?"disabled":"")+">"+
    "<option value=''>Elegí según los datos</option><option value='positive'>Positivo</option><option value='return'>Retorno</option><option value='balanced'>Ambas caídas similares</option></select>"+
-   "<fieldset class='panel'><legend>¿Qué observación refutaría la localización final?</legend>"+
-   VOLT_DROP_FALSIFIERS[scenario.id].options.map((o,i)=>"<label class='option'><input type='radio' name='holdout-falsifier' value='"+i+"' "+(result?"disabled":"")+">"+esc(o)+"</label>").join("")+"</fieldset>"+
+   "<fieldset class='panel' id='holdout-falsifier-field'><legend>¿Qué observación refutaría la localización final que elegiste?</legend>"+
+   (result?VOLT_DROP_FALSIFIERS[result.selected.diagnosis].options.map((o,i)=>"<label class='option'><input type='radio' disabled name='holdout-falsifier' value='"+i+"'>"+esc(o)+"</label>").join(""):
+    "<p class='muted' id='holdout-falsifier-hint'>Elegí tu diagnóstico final para ver qué observaciones lo apoyarían o refutarían.</p>")+
+   "</fieldset>"+
    (result?"":
     "<label for='holdout-reasoning'>Explicá qué evidencia hizo sostener o revisar la hipótesis inicial y qué la refutaría</label>"+
     "<textarea class='field' id='holdout-reasoning' rows='4' maxlength='1200' aria-describedby='holdout-reasoning-help' placeholder='Comparo ambas caídas, justifico mi localización y describo qué lectura la contradice.'></textarea>"+
@@ -159,7 +162,7 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
     "<strong>Resultado objetivo del intento "+attempts+" de esta sesión: "+result.score+"/100 · "+(result.passed?"criterios cumplidos":"revisar evidencia")+"</strong>"+
     "<p>Cálculo: "+(result.numeric?"correcto":"incorrecto")+". Tu lectura calculada: "+fmt(result.selected.loadPrediction)+" V; valor del modelo: "+fmt(result.expected.loadV)+" V.</p>"+
     "<p>Localización: "+(result.causal?"correcta":"incorrecta")+". Elegiste "+esc(labels[result.selected.diagnosis])+"; según el modelo: "+esc(labels[result.expected.diagnosis])+".</p>"+
-    "<p>Refutación: "+(result.falsified?"correcta":"incorrecta")+". Tu elección: "+esc(VOLT_DROP_FALSIFIERS[scenario.id].options[result.selected.falsifier])+". Observación que realmente contradice la hipótesis: "+esc(VOLT_DROP_FALSIFIERS[scenario.id].options[result.expected.falsifier])+"</p>"+
+    "<p>Refutación: "+(result.falsified?"correcta":"incorrecta")+". Tu elección: "+esc(VOLT_DROP_FALSIFIERS[result.selected.diagnosis].options[result.selected.falsifier])+". Observación que realmente contradice la hipótesis: "+esc(VOLT_DROP_FALSIFIERS[result.selected.diagnosis].options[result.expected.falsifier])+"</p>"+
     "<p><strong>Comparación con tu hipótesis congelada:</strong> "+esc(result.evolution.interpretation)+
     " Antes: "+esc(prior.hypothesis==="undetermined"?"indeterminado":labels[prior.hypothesis])+
     "; después: "+esc(labels[result.selected.diagnosis])+".</p>"+
@@ -171,6 +174,17 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    (result?"<button class='button alt' type='button' data-holdout='retry'>Practicar un caso diferente</button>":"")+
    "</section>";
  };
+ root.addEventListener("change",ev=>{
+  if(ev.target.id!=="holdout-cause"||result||!prior)return;
+  const choice=ev.target.value,fieldset=$("holdout-falsifier-field");
+  if(!fieldset)return;
+  const choices=VOLT_DROP_FALSIFIERS[choice];
+  fieldset.innerHTML="<legend>¿Qué observación refutaría la localización final que elegiste?</legend>"+
+   (choices?choices.options.map((option,i)=>
+    "<label class='option'><input type='radio' name='holdout-falsifier' value='"+i+"'>"+esc(option)+"</label>").join(""):
+    "<p class='muted' id='holdout-falsifier-hint'>Elegí tu diagnóstico final para ver las opciones.</p>");
+  $("holdout-status").textContent="La prueba de refutación se define respecto de tu hipótesis final, no respecto de una respuesta oculta.";
+ });
  root.addEventListener("click",async ev=>{
   const b=ev.target.closest("[data-holdout]");if(!b||saving)return;
   if(b.dataset.holdout==="freeze"&&!prior&&!result){
