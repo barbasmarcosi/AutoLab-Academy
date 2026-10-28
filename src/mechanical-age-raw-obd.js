@@ -87,7 +87,8 @@ export function auditRawObdSession(session){
  }
  return {
   version:RAW_OBD_VERSION,sessionId,vehicleAlias,engineFamily,adapterModel,softwareVersion,
-  source,capturedAt,clock,eventCount:events.length,channels,warnings,requestTimeMissingCount:requestUnknown,
+  source,capturedAt,clock,eventCount:events.length,elapsedHostReceiptMs:events.at(-1).receivedAtMs-events[0].receivedAtMs,
+  channels,warnings,requestTimeMissingCount:requestUnknown,
   hostReceiptTimePresent:true,sensorAcquisitionTimeKnown:false,simultaneityVerified:false,
   estimatedAgeKm:null,structuralWear:null,remainingUsefulLife:null,
   caveat:'Las marcas host son de RECEPCIÓN, no de muestreo en ECU. Latencia host/ECU no está validada.'
@@ -111,9 +112,11 @@ function gateAA(audits,sessions){
  }
  const required=['010C','0105','0104','0106','0107'];
  for(const [i,a] of audits.entries()){
+  if(a.elapsedHostReceiptMs<19000)blockers.push('Duración host de A–A inferior a 19 s en sesión '+(i+1));
   for(const pid of required){
    const c=a.channels[pid];
    if(!c||c.success<10||c.failFraction>0.2)blockers.push('Cobertura por PID insuficiente en sesión '+(i+1)+': '+pid);
+   if(c&&(c.medianReceiptGapMs===null||c.medianReceiptGapMs<100||c.medianReceiptGapMs>5000||c.maxReceiptGapMs>10000))blockers.push('Cadencia PID con huecos o fuera del protocolo de sesión '+(i+1)+': '+pid);
   }
   if(a.requestTimeMissingCount)blockers.push('Intervalos petición-respuesta ausentes: sesión '+(i+1));
  }
