@@ -52,3 +52,16 @@ Pruebas deterministas con un FakeSerial que simula respuestas, errores, tramas a
 Primero: verificar varios adaptadores concretos en modo solo lectura, tiempos host, pérdida de datos y compatibilidad PID. Segundo: repetir A–A en motores reales **sin intervención** entre sesiones y con contexto documentado; contar sesiones independientes, no filas. Tercero: comparar contra instrumentos y wear ground truth físico. **No hay todavía base científica para edad equivalente en kilómetros, porcentaje de salud ni vida remanente.**
 
 Documentos relacionados: MECHANICAL_AGE_RAW_CAPTURE_AA_V1.md y MECHANICAL_AGE_ACQUISITION_PROTOCOL_V1.md. CI de la rama de investigación sin merge y sin deploy de producción.
+
+
+## R3.1 — Revisión adversarial del enlace (28/10/2026)
+
+**Riesgo identificado:** un timeout parcial puede dejar bytes atrasados; continuar consultando otro PID sería inseguro para la integridad de la evidencia. El programa **aborta** al primer timeout o trama inválida, conserva la respuesta incompleta y el motivo de interrupción; no inventa lecturas ni ejecuta reintentos automáticos.
+
+**Preflight obligatorio:** antes de capturar consulta el PID de capacidad 0100 (Servicio 01) y valida la máscara de sensores. Si no están anunciados los cinco PIDs requeridos (010C RPM, 0105 ECT, 0104 carga, 0106 STFT, 0107 LTFT), rechaza la sesión. El 010F IAT se consulta únicamente si figura en la máscara. El anuncio de soporte no demuestra por sí mismo que una señal esté calibrada, sea confiable o esté disponible en cualquier régimen del motor.
+
+**Evidencia en el expediente:** se añaden los campos captureAborted, abortReason, supportedPidMaskRawHex y supportedPids. El comparador A–A excluye toda captura interrumpida, incluso cuando tenga numerosas muestras. La lista serviceCommandsSent enumera los comandos permitidos por la configuración de esa sesión, no una traza exhaustiva de cada trama enviada.
+
+**Pruebas:** rechazo de máscara ambigua o incompatible, falta de PIDs indispensables, canal IAT opcional, timeout incompleto y prohibición de consultar otro PID después de una trama no confiable.
+
+Todo esto se verificó con un adaptador falso en software: el funcionamiento físico, la latencia real, el estado de lazo cerrado y la exactitud del sensor **siguen sin validarse**. Un fallo real debe dar lugar a una nueva captura identificada por un nuevo sessionId.
