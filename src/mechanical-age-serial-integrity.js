@@ -53,7 +53,6 @@ export function auditSerialTrace(session){
    session?.supportedPids!==undefined||
    session?.plannedCycles!==undefined||
    session?.expectedEventCount!==undefined||
-   session?.captureAborted!==undefined||
    (Array.isArray(session?.events)&&session.events.some(e=>e&&typeof e==='object'&&
     (has(e,'rawResponseHex')||has(e,'rawFrameSizeBytes'))))
   );
