@@ -70,4 +70,27 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await transfer.locator("[data-holdout='grade']").click();
  await expect(transfer.getByText("Resultado objetivo del intento 1")).toBeVisible();
  await expect(transfer.getByText("criterios cumplidos",{exact:false})).toBeVisible();
+ await expect(page.locator("#lesson-theory-practice-status")).toContainText("caso independiente completados");
+ await page.reload();
+ await page.locator('nav.nav button[data-id="learn"]').click();
+ await page.locator('article.lesson-card').filter({hasText:"La caída de tensión cuenta la historia"}).getByRole("button",{name:"Revisar contenido"}).click().catch(async()=>{
+   await page.locator('article.lesson-card').filter({hasText:"La caída de tensión cuenta la historia"}).getByRole("button",{name:"Estudiar"}).click();
+ });
+ await expect(page.locator("#lesson-theory-practice-status")).toContainText("caso independiente completados");
+});
+
+test("first lesson remains navigable at mobile width and exposes labelled instruments",async({page})=>{
+ await page.setViewportSize({width:375,height:812});
+ await page.goto("./");
+ await page.locator('nav.nav button[data-id="learn"]').click();
+ await page.locator('article.lesson-card').filter({hasText:"La caída de tensión cuenta la historia"}).getByRole("button",{name:"Estudiar"}).click();
+ const lab=page.locator("#lesson-practice-host");
+ await expect(lab.locator("#volt-prediction")).toBeVisible();
+ await expect(lab.locator("#volt-measure")).toBeVisible();
+ await lab.locator("#volt-points").selectOption("return");
+ await expect(lab.locator("#volt-probe-location")).toContainText("D–E");
+ await lab.locator("#volt-prediction").fill("1,92");
+ await lab.locator("#volt-measure").click();
+ await expect(lab.locator("#volt-reading")).toContainText("Predicción compatible");
+ await expect(lab.locator("#volt-measurements")).toContainText("D–E");
 });
