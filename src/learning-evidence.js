@@ -6,6 +6,7 @@
 import{lessonPractice,practiceProgress}from'./lesson-practice.js';
 import{transferCase,transferProgress}from'./lesson-transfer.js';
 import{inquiryProgress}from'./lesson-inquiry.js';
+import{VOLT_DROP_HOLDOUT_ID}from'./volt-drop-transfer.js';
 export const EVIDENCE_MODEL='lesson-evidence-structured-v1';
 export function lessonEvidence(progress,lessonId){
  const read=Boolean(progress?.notes?.['lesson-'+lessonId]);
@@ -20,13 +21,14 @@ export function lessonEvidence(progress,lessonId){
    passed:false,attempts:0};
  const linkedLab=practice?.kind==='linked'?{
   id:practice.caseId,status:p.status,attempts:p.attempts}:null;
- const assessed=reasoning.available||lab.available;
- const checks=[read,...(reasoning.available?[reasoning.passed]:[]),...(lab.available?[lab.passed]:[])];
+ const holdout=lessonId==='volt-drop'?(()=>{const attempts=(Array.isArray(progress?.cases)?progress.cases:[]).filter(x=>x?.id===VOLT_DROP_HOLDOUT_ID);return {available:true,attempts:attempts.length,passed:attempts.some(x=>x.passed===true),firstAttemptPassed:attempts[0]?.passed===true};})():null;
+ const assessed=reasoning.available||lab.available||Boolean(holdout);
+ const checks=[read,...(reasoning.available?[reasoning.passed]:[]),...(lab.available?[lab.passed]:[]),...(holdout?[holdout.passed]:[])];
  const documented=assessed&&checks.every(Boolean);
  const gaps=[...(!read?['reading']:[]),
   ...(reasoning.available&&!reasoning.passed?['reasoning-transfer']:[]),
-  ...(lab.available&&!lab.passed?['embedded-lab']:[])];
- return {model:EVIDENCE_MODEL,lessonId,read,reasoning,lab,linkedLab,inquiry:inquiryProgress(progress,lessonId),
+  ...(lab.available&&!lab.passed?['embedded-lab']:[]),...(holdout&&!holdout.passed?['independent-holdout']:[])];
+ return {model:EVIDENCE_MODEL,lessonId,read,reasoning,lab,holdout,linkedLab,inquiry:inquiryProgress(progress,lessonId),
   assessed,documented,phase:documented?'documented-training':assessed?'in-progress':'unassessed',
   gaps,disclaimer:'Evidencia de entrenamiento digital, no dominio técnico real ni certificación.'};
 }
@@ -43,6 +45,7 @@ export function learningEvidenceOverview(progress,lessons,stages){
   reasoningPassed:all.filter(x=>x.reasoning.passed).length,
   embeddedAvailable:all.filter(x=>x.lab.available).length,
   embeddedPassed:all.filter(x=>x.lab.passed).length,
+  holdoutAvailable:all.filter(x=>x.holdout?.available).length,holdoutPassed:all.filter(x=>x.holdout?.passed).length,
   linkedOnly:all.filter(x=>x.linkedLab!==null).length,
   inquiryAvailable:all.length,inquiryRecorded:all.filter(x=>x.inquiry.attempts>0).length,
   notAssessed:all.filter(x=>!x.assessed).length,
@@ -54,6 +57,10 @@ export function learningEvidenceOverview(progress,lessons,stages){
   if(found)return found;
   const e=byLesson.get(id);
   if(!e.read)return {lessonId:id,kind:'reading',label:'Estudiar la teoría y sus límites'};
+  if(id==='volt-drop'){
+   if(!e.lab.passed)return {lessonId:id,kind:'embedded-lab',label:e.lab.attempts?'Repetir banco guiado':'Experimentar con voltímetro virtual'};
+   if(!e.holdout.passed)return {lessonId:id,kind:'independent-holdout',label:e.holdout.attempts?'Revisar el caso independiente':'Resolver caso reservado sin ayudas'};
+  }
   if(e.reasoning.available&&!e.reasoning.passed)return {lessonId:id,kind:'reasoning-transfer',
    label:e.reasoning.attempts?'Revisar hipótesis y transferencia':'Resolver hipótesis y transferencia'};
   if(e.lab.available&&!e.lab.passed)return {lessonId:id,kind:'embedded-lab',
