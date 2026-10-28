@@ -12,8 +12,12 @@ import json
 import math
 import random
 import statistics
+import sys
+from pathlib import Path
 from collections import defaultdict
 
+# Direct invocation sets sys.path[0] to tools/; resolve repository imports.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.benchmark_cmapss_fd001 import unpack_fd001
 from tools.benchmark_cmapss_sensors import (
     SOURCE_SHA256, read_sensor_trajectories, samples, features,
