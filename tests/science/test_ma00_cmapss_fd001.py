@@ -59,6 +59,22 @@ class TestCmapss(unittest.TestCase):
         with self.assertRaises(ValueError):
             evaluate_fd001(rows([20]), rows([10]), "0", strict_nasa_counts=True)
 
+    def test_official_style_nested_archive_is_not_extracted_to_disk(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            original = io.BytesIO()
+            with zipfile.ZipFile(original, "w") as nested:
+                nested.writestr("CMAPSSData/train_FD001.txt", rows([20, 40]))
+                nested.writestr("CMAPSSData/test_FD001.txt", rows([10, 20]))
+                nested.writestr("CMAPSSData/RUL_FD001.txt", "3\n7\n")
+            top = Path(tmp) / "NASA-original-container.zip"
+            with zipfile.ZipFile(top, "w") as outer:
+                outer.writestr("CMAPSSData.zip", original.getvalue())
+                outer.writestr("README.txt", "Simulated NASA fixture only")
+            digest, data = unpack_fd001(top)
+            self.assertEqual(len(digest), 64)
+            self.assertEqual(len(data), 3)
+            self.assertFalse((Path(tmp) / "CMAPSSData").exists())
+
     def test_zip_bounded_no_extract_and_missing_source_detection(self):
         with tempfile.TemporaryDirectory() as temp:
             p = Path(temp) / "fake-nasa.zip"
