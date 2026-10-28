@@ -13,7 +13,7 @@ test('94 lessons have honest, complete, independently auditable evidence coverag
  assert.equal(summary.totals.reasoningAvailable,39);
  assert.equal(lessonEvidence(progress(),'volt-drop').reasoning.available,false,'The first lesson uses its dedicated holdout');
  assert.equal(summary.totals.embeddedAvailable,23);
- assert.equal(summary.totals.holdoutAvailable,1);
+ assert.equal(summary.totals.holdoutAvailable,2);
  assert.equal(summary.totals.holdoutPassed,0);
  assert.equal(summary.totals.linkedOnly,12);
  assert.equal(summary.totals.documentedTraining,0);
@@ -65,6 +65,7 @@ test('path recommendation: theory then guided lab, reserved transfer and objecti
   p.cases.push({id:caseId(id),passed:true});
   const lab=lessonPractice(id);
   if(lab?.kind==='embedded')p.cases.push({id:lab.caseId,passed:true});
+  if(id==='motor-data')p.cases.push({id:'lab-dtc-holdout-v1',passed:true});
  }
  p.notes['lesson-mc06-dual-fault-instrumentation']='2026-10-26';
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
@@ -83,4 +84,24 @@ test('unknown and broken stage IDs fail closed; no accidental success without as
  assert.throws(()=>learningEvidenceOverview({},[{id:'a'},{id:'a'}],[{id:'stage',lessons:['a','a']}]),Error);
  const x=lessonEvidence({notes:{'lesson-hv':'2026'},cases:[{id:'other',passed:true}]},'hv');
  assert.equal(x.read,true);assert.equal(x.documented,false);assert.equal(x.phase,'in-progress');
+});
+
+test('lesson 2 only documents independent digital transfer after actual holdout evidence',()=>{
+ const p=progress();p.notes['lesson-motor-data']='2026-10-28';
+ p.cases.push({id:'lab-dtc-guided-v1',passed:true});
+ p.cases.push({id:caseId('motor-data'),passed:true});
+ let x=lessonEvidence(p,'motor-data');
+ assert.equal(x.holdout.available,true);
+ assert.equal(x.holdout.passed,false);
+ assert.equal(x.documented,false);
+ assert.ok(x.gaps.includes('independent-holdout'));
+ p.cases.push({id:'lab-volt-drop-holdout-v2',passed:true});
+ x=lessonEvidence(p,'motor-data');assert.equal(x.documented,false,'Another lesson holdout cannot be recycled');
+ p.cases.push({id:'lab-dtc-holdout-v1',passed:false});
+ x=lessonEvidence(p,'motor-data');assert.equal(x.holdout.attempts,1);
+ p.cases.push({id:'lab-dtc-holdout-v1',passed:true});
+ x=lessonEvidence(p,'motor-data');
+ assert.equal(x.documented,true);
+ assert.equal(x.holdout.attempts,2);
+ assert.equal(x.holdout.firstRecordedAttemptPassed,false);
 });
