@@ -31,6 +31,7 @@ test("full measurement, causal choice and falsifier are necessary; numeric uncer
   const bad=gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction:Number(loadPrediction)+0.5,diagnosis:wrongDiagnosis,falsifier:(VOLT_DROP_FALSIFIERS[wrongDiagnosis].answer+1)%3,prior});
   assert.equal(bad.passed,false);assert.equal(bad.score,0);
   assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["positive"],loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior}),RangeError);
+   assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["positive","return","load"],loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior}),RangeError,'A direct load probe would disclose the numeric answer');
   assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["return","positive"],loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior}),RangeError);
   assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer}),RangeError);
  }

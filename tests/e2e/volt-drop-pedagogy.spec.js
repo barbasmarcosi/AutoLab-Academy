@@ -74,6 +74,7 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await transfer.locator("[data-holdout='freeze']").click();
  await expect(transfer.locator("#holdout-locked")).toContainText("retorno");
  await expect(transfer.locator("#holdout-probe")).toBeVisible();
+  await expect(transfer.locator("#holdout-probe option[value='load']")).toHaveCount(0);
  await transfer.locator("#holdout-probe").selectOption("positive");
  await transfer.locator("[data-holdout='probe']").click();
  await expect(transfer.locator("#holdout-measured")).toContainText("Primero medí el tramo");

@@ -83,7 +83,7 @@ export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diag
  const m=modelFor(caseId);
  const frozen=freezeVoltageDropHypothesis({...prior,caseId:prior?.caseId});
  if(frozen.caseId!==caseId)throw RangeError("La hipótesis inicial pertenece a otro caso");
- if(!Array.isArray(measurements)||measurements[0]!==frozen.firstProbe||!measurements.includes("positive")||!measurements.includes("return"))throw RangeError("Falta respetar el primer ensayo congelado o las dos mediciones independientes");
+ if(!Array.isArray(measurements)||measurements.length!==2||measurements[0]!==frozen.firstProbe||new Set(measurements).size!==2||!measurements.includes("positive")||!measurements.includes("return"))throw RangeError("Falta respetar el primer ensayo congelado o las dos mediciones independientes");
  const parsed=typeof loadPrediction==="number"?loadPrediction:Number(String(loadPrediction).trim().replace(",","."));
  if(!Number.isFinite(parsed)||parsed<0||parsed>24)throw RangeError("Predicción de tensión inválida");
  if(!Object.hasOwn(labels,diagnosis)||!Number.isInteger(falsifier)||falsifier<0||falsifier>=VOLT_DROP_FALSIFIERS[diagnosis]?.options.length)throw RangeError("Decisiones inválidas");
@@ -156,12 +156,12 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{},history=[]}={})
    "<p><strong>Momento 2: medí.</strong> Solo ahora se habilita el voltímetro. Registrá ambos cables bajo la misma carga; usá los números para revisar, sostener o descartar tu hipótesis inicial.</p>"+
    "<label for='holdout-probe'>Puntas de tu voltímetro</label>"+
    "<select id='holdout-probe' class='field' "+(result?"disabled":"")+">"+
-   "<option value='positive'>A–B: cable positivo</option><option value='return'>D–E: retorno</option><option value='load'>B–D: consumidor</option></select>"+
+   "<option value='positive'>A–B: cable positivo</option><option value='return'>D–E: retorno</option></select>"+
    "<button type='button' class='button alt' data-holdout='probe' "+(result?"disabled":"")+">Medir este tramo</button>"+
    "<p role='status' aria-live='polite' id='holdout-measured'>"+esc(feedback||"Todavía no mediste ningún tramo.")+"</p>"+
    "<p class='muted small' id='holdout-history'>"+(readingTrail.length?
     "Lecturas tomadas bajo la misma carga: "+readingTrail.map(x=>esc(probeLabels[x.probe])+": "+fmt(x.volts)+" V").join("; ")+".":"Todavía no hay lecturas.")+"</p>"+
-   "<p><strong>Momento 3: decisión revisada.</strong> No se penaliza modificar la hipótesis; importa que la conclusión final sea compatible con la evidencia.</p>"+
+   "<p><strong>Momento 3: decisión revisada.</strong> No se penaliza modificar la hipótesis; importa que la conclusión final sea compatible con la evidencia. La tensión del consumidor NO se puede medir directamente en este desafío: calculala a partir de los 12 V de la fuente y las dos caídas registradas. Se revelará después de entregar.</p>"+
    "<label for='holdout-load'>Calculá la tensión del consumidor usando fuente y ambas caídas (V)</label>"+
    "<input class='field' type='text' inputmode='decimal' id='holdout-load' placeholder='Por ejemplo: 9,45' "+(result?"disabled":"")+">"+
    "<label for='holdout-cause'>Localización final a partir de tus mediciones</label>"+

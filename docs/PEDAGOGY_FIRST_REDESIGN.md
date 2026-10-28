@@ -69,3 +69,8 @@ Do not merge or deploy production before independent review.
 - General transfer model/id advanced to `autolab-reasoning-transfer-v3` / `lab-reasoning-{lessonId}-v3`. Old v1/v2 attempts remain visible, but cannot complete the new rubric. Portfolio explicitly distinguishes prior v2 and current v3.
 - `volt-drop` requires reading, embedded guided bank, and its dedicated independent `lab-volt-drop-holdout-v2` only. It must NOT additionally require generic reasoning transfer that its lesson UI does not mount.
 - v3 transfer is a record of **objective choices**, not a certification that free-text causal reasoning is correct.
+
+
+## Independent-case numeric leakage closed
+- The lesson-1 independent holdout no longer exposes a load-voltage probe before submitting the numerical load prediction. Only two conductor measurements, under the same load, may be submitted to its grading function. A third direct probe or a duplicated probe fails closed.
+- The load-voltage model value is revealed after submission for corrective feedback. The learner must compute it as source minus the two observed conductor drops; tests explicitly reject direct answer disclosure in the assessment UI and grader.
