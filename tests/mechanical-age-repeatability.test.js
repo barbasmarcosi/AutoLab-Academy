@@ -20,7 +20,10 @@ test('MA00: four distinct synthetic sessions report variability instead of false
 test('MA00: repeated observations from the same session cannot masquerade as independent replication',()=>{
  const s=syntheticReplicatedServiceCase();
  const same=copy(s);same[1].snapshot.samples=copy(same[0].snapshot.samples);
- assert.throws(()=>evaluateReplicatedMeasurements(same),/idénticos registros/);
+ assert.throws(()=>evaluateReplicatedMeasurements(same),/idénticas señales/);
+ const replay=copy(s);
+ replay[1].snapshot.samples=replay[0].snapshot.samples.map(x=>({...x,timeMs:x.timeMs+120000}));
+ assert.throws(()=>evaluateReplicatedMeasurements(replay),/idénticas señales/);
  const sameId=copy(s);sameId[1].sessionId=same[0].sessionId;
  assert.throws(()=>evaluateReplicatedMeasurements(sameId),/Sesión duplicada/);
  assert.throws(()=>evaluateReplicatedMeasurements(s.slice(0,3)),RangeError);
