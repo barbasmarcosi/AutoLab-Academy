@@ -19,6 +19,7 @@ const FALSIFIERS=Object.freeze([
  "Reemplazar piezas a partir del síntoma sin comprobar otra hipótesis."
 ]);
 const labels={positive:"tramo positivo",return:"tramo de retorno",balanced:"sin tramo dominante"};
+const probeLabels={positive:"positivo A–B",return:"retorno D–E",load:"consumidor B–D"};
 const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>n.toFixed(2).replace(".",",");
 const modelFor=id=>{
@@ -119,7 +120,8 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    "<option value='positive'>A–B: cable positivo</option><option value='return'>D–E: retorno</option><option value='load'>B–D: consumidor</option></select>"+
    "<button type='button' class='button alt' data-holdout='probe' "+(result?"disabled":"")+">Medir este tramo</button>"+
    "<p role='status' aria-live='polite' id='holdout-measured'>"+esc(feedback||"Todavía no mediste ningún tramo.")+"</p>"+
-   "<p class='muted small' id='holdout-history'>Mediciones registradas: "+[...measurements].map(k=>esc(k)).join(", ")+".</p>"+
+   "<p class='muted small' id='holdout-history'>"+(readingTrail.length?
+    "Lecturas tomadas bajo la misma carga: "+readingTrail.map(x=>esc(probeLabels[x.probe])+": "+fmt(x.volts)+" V").join("; ")+".":"Todavía no hay lecturas.")+"</p>"+
    "<p><strong>Momento 3: decisión revisada.</strong> No se penaliza modificar la hipótesis; importa que la conclusión final sea compatible con la evidencia.</p>"+
    "<label for='holdout-load'>Calculá la tensión del consumidor usando fuente y ambas caídas (V)</label>"+
    "<input class='field' type='text' inputmode='decimal' id='holdout-load' placeholder='Por ejemplo: 9,45' "+(result?"disabled":"")+">"+
@@ -169,7 +171,8 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    readingTrail.push({probe,volts:value,recordedAt:new Date().toISOString()});
    feedback="Medición entre los extremos de "+(probe==="positive"?"positivo":probe==="return"?"retorno":"consumidor")+": "+fmt(value)+" V (bajo carga).";
    $("holdout-measured").textContent=feedback;
-   $("holdout-history").textContent="Mediciones registradas: "+[...measurements].join(", ")+".";
+   $("holdout-history").textContent="Lecturas tomadas bajo la misma carga: "+
+    readingTrail.map(x=>probeLabels[x.probe]+": "+fmt(x.volts)+" V").join("; ")+".";
    return;
   }
   if(b.dataset.holdout==="grade"&&!result){
