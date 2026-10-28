@@ -9,7 +9,7 @@ FIELDS = ["deviceID", "tripID", "timestamp", "rpm", "speed", "cTemp", "eLoad"]
 
 
 def row(unit, trip, second, rpm=800, speed=0, ect=90, load=18):
-    return dict(deviceID=unit, tripID=trip, timestamp=f"2026-01-{trip:02d} 13:00:{second // 60:02d}:{second % 60:02d}",
+    return dict(deviceID=unit, tripID=trip, timestamp=f"2026-01-{trip:02d} 13:{second // 60:02d}:{second % 60:02d}",
                 rpm=str(rpm), speed=str(speed), cTemp=str(ect), eLoad=str(load))
 
 
