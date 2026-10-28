@@ -115,7 +115,6 @@ def evaluate_transfer(fd001_train,fd003_test,fd003_rul,*,strict=False):
         raise ValueError("FD001 training inventory not the pinned original")
     if strict and len(test)!=EXPECTED_FD003_TEST_ENGINES:
         raise ValueError("FD003 test must contain 100 independent simulated engines")
-    actual=parse_test_rul(fd003_rul,len(test))
     training_records=samples(train)
     models={
         mode:fit_ridge(training_records,mode,ALPHA)
@@ -125,9 +124,7 @@ def evaluate_transfer(fd001_train,fd003_test,fd003_rul,*,strict=False):
         raise AssertionError("Frozen models not trained on all FD001 train engines")
     train_cycle_lengths=[len(seq) for seq in train.values()]
     median_life=statistics.median(train_cycle_lengths)
-    median_train_rul=statistics.median([record[2] for record in training_records
-        for _ in ()]) if False else None
-    # R5 constant reference uses all TRAIN rows, not checkpoint-weighted samples.
+     # R5 constant reference uses all TRAIN rows, not checkpoint-weighted samples.
     train_row_ruls=[
         len(sequence)-cycle
         for sequence in train.values()
@@ -142,6 +139,9 @@ def evaluate_transfer(fd001_train,fd003_test,fd003_rul,*,strict=False):
     }
     for mode,model in models.items():
         forecasts["frozen_fd001_ridge_"+mode]=[predict(model,x) for _,x,_ in records]
+    # Frozen FD001 models and all FD003 predictions are ready. ONLY now parse
+    # the withheld simulated FD003 TEST RUL labels for scoring.
+    actual=parse_test_rul(fd003_rul,len(test))
     summaries={}
     for name,values in forecasts.items():
         errors=[guess-truth for guess,truth in zip(values,actual)]
@@ -180,7 +180,7 @@ def evaluate_transfer(fd001_train,fd003_test,fd003_rul,*,strict=False):
         "fd001TestOpened":False,"fd001RulTestRead":False,
         "fd003TrainOpened":False,"fd003TestLabelsUsedOnlyOnceForScoring":True,
         "alphaFixedFromPriorR6Train":ALPHA,
-        "allModelsFrozenBeforeNewTestRead":True,
+        "allModelsFrozenBeforeFD003RULScoring":True,
         "fd001MedianLifetime":median_life,"fd001MedianRowRUL":median_train_rul,
         "testMetricUnit":"one final available prefix per independent FD003 simulated engine",
         "metrics":summaries,
