@@ -34,9 +34,11 @@ jobs:
           python3 -m unittest discover -s tests/science -p 'test_ma00_cmapss_sensors.py'
           python3 -m unittest discover -s tests/science -p 'test_ma00_r7_robustness.py'
           python3 -m unittest discover -s tests/science -p 'test_ma00_r8_stress_mechanism.py'
+          python3 -m unittest discover -s tests/science -p 'test_ma00_r9_fd003_transfer.py'
           python3 tools/benchmark_cmapss_sensors.py --help >/dev/null
           python3 tools/audit_cmapss_robustness_r7.py --help >/dev/null
           python3 tools/audit_cmapss_stress_mechanism_r8.py --help >/dev/null
+          python3 tools/benchmark_cmapss_fd003_transfer_r9.py --help >/dev/null
       - name: Regime overlap negative controls (no real source download)
         run: node --test tests/mechanical-age-regime-overlap.test.js
       - name: Full unit tests and static checks
@@ -129,7 +131,7 @@ jobs:
   empirical-cmapss:
     name: NASA FD001 aggregate-only simulated-engine baseline
     # Never fetch the dataset on routine push. Single research marker or dispatch.
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[MA00 NASA once]') || contains(github.event.head_commit.message, '[MA00 NASA sensors once]') || contains(github.event.head_commit.message, '[MA00 NASA robustness once]') || contains(github.event.head_commit.message, '[MA00 NASA mechanism once]') || contains(github.event.head_commit.message, '[MA00 NASA alpha-control once]')
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[MA00 NASA once]') || contains(github.event.head_commit.message, '[MA00 NASA sensors once]') || contains(github.event.head_commit.message, '[MA00 NASA robustness once]') || contains(github.event.head_commit.message, '[MA00 NASA mechanism once]') || contains(github.event.head_commit.message, '[MA00 NASA alpha-control once]') || contains(github.event.head_commit.message, '[MA00 NASA FD003 once]')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -141,7 +143,7 @@ jobs:
             "https://phm-datasets.s3.amazonaws.com/NASA/6.+Turbofan+Engine+Degradation+Simulation+Data+Set.zip" \
             -o /tmp/ma00/cmapss-source.zip
       - name: Check archive, independent engine split and benchmark train-only priors
-        if: "!contains(github.event.head_commit.message, '[MA00 NASA robustness once]') && !contains(github.event.head_commit.message, '[MA00 NASA mechanism once]') && !contains(github.event.head_commit.message, '[MA00 NASA alpha-control once]')"
+        if: "!contains(github.event.head_commit.message, '[MA00 NASA robustness once]') && !contains(github.event.head_commit.message, '[MA00 NASA mechanism once]') && !contains(github.event.head_commit.message, '[MA00 NASA alpha-control once]') && !contains(github.event.head_commit.message, '[MA00 NASA FD003 once]')"
         run: |
           python3 tools/benchmark_cmapss_fd001.py /tmp/ma00/cmapss-source.zip > /tmp/ma00/cmapss-aggregate.json
           python3 -c 'import json; d=json.load(open("/tmp/ma00/cmapss-aggregate.json")); print(json.dumps({k:d[k] for k in ("schema","sourceArchiveSha256","trainEngines","testEngines","trainRows","testRows","baselineMetrics","automotiveWearValidation")},indent=2))'
@@ -166,6 +168,11 @@ jobs:
           python3 tools/audit_cmapss_stress_mechanism_r8.py /tmp/ma00/cmapss-source.zip --alpha 1 > /tmp/ma00/cmapss-r8-alpha1.json
           python3 tools/audit_cmapss_stress_mechanism_r8.py /tmp/ma00/cmapss-source.zip --alpha 20 > /tmp/ma00/cmapss-r8-alpha20.json
           python3 -c 'import json; a=json.load(open("/tmp/ma00/cmapss-r8-alpha1.json")); b=json.load(open("/tmp/ma00/cmapss-r8-alpha20.json")); print(json.dumps({"sha256":a["officialZipSha256"],"testLabelsRead":a["testRulLabelsRead"] or b["testRulLabelsRead"],"results":{x["alphaFixed"]:{k:{"MAE":v["engineBalancedMAEcycles"],"independentEngines":v["independentEngineCount"]} for k,v in x["policies"].items()} for x in (a,b)}},indent=2))'
+      - name: R9 one-shot FD001 TRAIN to untouched FD003 TEST, no FD001 TEST reanalysis
+        if: contains(github.event.head_commit.message, '[MA00 NASA FD003 once]')
+        run: |
+          python3 tools/benchmark_cmapss_fd003_transfer_r9.py /tmp/ma00/cmapss-source.zip > /tmp/ma00/cmapss-r9-fd003-aggregate.json
+          python3 -c 'import json; x=json.load(open("/tmp/ma00/cmapss-r9-fd003-aggregate.json")); print(json.dumps({"schema":x["schema"],"sha":x["sourceArchiveSha256"],"trainEngines":x["fd001TrainEngines"],"fd003TestEngines":x["fd003TestEngines"],"models":{n:{"MAE":v["MAEcycles"],"RMSE":v["RMSEcycles"]} for n,v in x["metrics"].items()},"primaryPairedUncertainty":x["primaryPairedUncertainty"],"externalSupport":x["fd003OutOfSourceTrainRanges"],"realAutomotiveValidated":x["automotiveWearValidated"]},indent=2))'
       - name: Publish NASA aggregate metrics only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -177,4 +184,5 @@ jobs:
             /tmp/ma00/cmapss-r8-train-only.json
             /tmp/ma00/cmapss-r8-alpha1.json
             /tmp/ma00/cmapss-r8-alpha20.json
+            /tmp/ma00/cmapss-r9-fd003-aggregate.json
           retention-days: 14
