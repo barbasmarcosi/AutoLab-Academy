@@ -43,3 +43,33 @@ La ejecución original se activa SOLO con el marcador de commit [MA00 NASA robus
 ## Ejecución empírica única — protocolo congelado
 
 La CI ya validó los controles de formato e independencia por motor y la invocación CLI. Este commit habilita una sola auditoría sobre el ZIP NASA previamente fijado por SHA-256. **No se cambiarán grillas, semillas ni resultados según los errores obtenidos**; los resultados se publicarán aunque no respalden ninguna mejora. La ejecución se limita a TRAIN y genera agregados sin datos individuales.
+
+
+## Resultado real R7 — TRAIN only (28/10/2026)
+
+Auditoría con fuente NASA fijada, completada correctamente en la rama:
+
+- Run: https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40746113659
+- JSON agregado: https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40746113659/artifacts/12842066810
+- SHA-256 de origen coincidente con R5/R6: c9c5dec12a945a82e8bb4446589d7fb3cc057b5e5d81fa1a12e25ee9912ad3b2.
+- **Solo TRAIN**: 100 motores, sin procesar sus pares de evaluación FD001 ni etiquetas RUL TEST. Todos los MAE que siguen son CV interna y **no son comparables directamente** con el MAE TEST 21,951 de R6.
+- Seis canales de los 21 sensores presentaron amplitud/desviación casi constante: S1, S5, S10, S16, S18 y S19. Ningún par de sensores variables superó |r|≥0,995 en este conjunto de checkpoints; **no demuestra ausencia de colinealidad por debajo del umbral**.
+
+| Ablación | α | MAE sin ruido, ciclos | MAE con 10% de sigma TRAIN por canal medido | L1 media coef. normalizados |
+| --- | ---: | ---: | ---: | ---: |
+| Solo ciclos | 20 | 36,983 | 36,983 | 37,284 |
+| Solo ciclos | 200 | 43,449 | 43,449 | 13,316 |
+| Solo ciclos | 2000 | 47,986 | 47,986 | 1,793 |
+| Ciclos + operaciones | 20 | 37,071 | 37,071 | 38,811 |
+| Ciclos + operaciones | 200 | 43,456 | 43,456 | 13,741 |
+| Ciclos + operaciones | 2000 | 47,986 | 47,986 | 1,846 |
+| Ciclos + mediciones | 20 | 31,568 | 31,621 | 58,456 |
+| Ciclos + mediciones | 200 | 33,536 | 33,576 | 48,222 |
+| Ciclos + mediciones | 2000 | 41,466 | 41,467 | 18,265 |
+| Ciclos + operaciones + mediciones | 20 | 31,623 | 31,680 | 59,575 |
+| Ciclos + operaciones + mediciones | 200 | 33,561 | 33,605 | 48,617 |
+| Ciclos + operaciones + mediciones | 2000 | 41,468 | 41,469 | 18,310 |
+
+**Interpretación científicamente limitada:** con los checkpoints 50/100/150 en CV de TRAIN, agregar mediciones reduce MAE para α=20 de 36,983 a 31,568 ciclos. Agregar solo variables operacionales NO muestra mejoría. Aumentar la penalización reduce L1 pero puede aumentar mucho el error (subajuste). Bajo el protocolo nuevo, el estrés artificial de 10% en canales medidos variables apenas cambia MAE. **No equivale a invalidar el resultado R6: el estrés R6 perturbaba más columnas, incluidos canales de operación/casi constantes y evaluaba motores TEST en un solo ciclo final; R7 difiere tanto en perturbación como población y checkpoints.** No comparar ambas métricas como si fueran una misma prueba.
+
+Hipótesis pendiente: analizar ablation del mecanismo de R6 sin reexaminar TEST, sobre un fold interno, para identificar cuál de los cambios de protocolo reduce la sensibilidad. La magnitud 10% de sigma TRAIN no corresponde necesariamente a un error físico del escáner o sensor. No hay todavía validación en un automóvil ni indicadores de edad/desgaste real.
