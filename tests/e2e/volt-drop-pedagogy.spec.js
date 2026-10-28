@@ -64,11 +64,13 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await transfer.locator("[data-holdout='probe']").click();
  await transfer.locator("#holdout-probe").selectOption("return");
  await transfer.locator("[data-holdout='probe']").click();
- await transfer.locator("#holdout-load").fill("9,43");
- await transfer.locator("#holdout-cause").selectOption("positive");
+ // This first blind case is deliberately unlike both worked examples:
+ // neither conductor has a clearly dominant loss.
+ await transfer.locator("#holdout-load").fill("10,76");
+ await transfer.locator("#holdout-cause").selectOption("balanced");
  await transfer.locator("input[name='holdout-falsifier'][value='0']").check();
  await transfer.locator("[data-holdout='grade']").click();
- await expect(transfer.getByText("Resultado objetivo del intento 1")).toBeVisible();
+ await expect(transfer.locator("#holdout-result")).toContainText("Resultado objetivo del intento 1");
  await expect(transfer.getByText("criterios cumplidos",{exact:false})).toBeVisible();
  await expect(page.locator("#lesson-theory-practice-status")).toContainText("caso independiente completados");
  await page.reload();
