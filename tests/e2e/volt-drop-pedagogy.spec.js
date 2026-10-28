@@ -110,7 +110,11 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  const evidence=JSON.parse(saved.report);
  expect(evidence.initial).toMatchObject({caseId:"balanced",hypothesis:"return",prediction:"return",firstProbe:"return",confidence:"high"});
  expect(evidence.measuredInOrder).toEqual(["return","positive"]);
- expect(evidence.revision).toMatchObject({initial:"return",final:"balanced",changed:true});
+ expect(evidence.initial.frozenAt).toMatch(/^20\d{2}-\d{2}-\d{2}T/);
+ expect(evidence.measurementTrail).toHaveLength(2);
+ expect(evidence.measurementTrail.map(x=>x.probe)).toEqual(["return","positive"]);
+ expect(evidence.measurementTrail.every(x=>typeof x.volts==="number"&&x.recordedAt>=evidence.initial.frozenAt)).toBe(true);
+ expect(evidence.revision).toMatchObject({initial:"return",final:"balanced",changed:true,evidenceSupported:true});
  expect(evidence.qualitativeReview).toBe("pending");
  expect(saved.reasoning).toContain("Las caídas medidas");
  await page.reload();
