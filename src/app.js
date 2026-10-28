@@ -45,7 +45,7 @@ import{FUEL_CASES,createFuelSession,fuelFrame,fuelProbe,gradeFuelSession,fuelRep
 import{TRACE_CASES,TRACE_CHANNELS,TRACE_WINDOWS,TRACE_DURATION_MS,createTraceSession,generateTrace,traceSummary,gradeTraceSession,traceReport}from'./temporal-trace-lab.js';
 import{differentialCases,createDifferentialSession,getDifferentialProbe,gradeDifferential,differentialTrace,differentialReport}from'./fault-discrimination.js';
 import{learningStages,evaluateLearningPath}from'./learning-path.js';
-import{learningEvidenceOverview}from'./learning-evidence.js';
+import{learningEvidenceOverview,lessonEvidence}from'./learning-evidence.js';
 import{lessonPractice,practiceProgress,practiceCoverage}from'./lesson-practice.js';
 import{REASONING_CHALLENGES,reasoningChallenge}from'./lesson-reasoning.js';
 import{transferProgress}from'./lesson-transfer.js';
@@ -722,7 +722,11 @@ function learn(){
 function lessonPracticeStatusText(id){
  const status=practiceProgress(data,id);
  const p=lessonPractice(id),virtual=['numeric-bench','wave-inquiry','volt-drop'].includes(p?.page);
- if(id==='volt-drop'&&status.status==='passed')return 'Banco guiado completado: transferencia independiente todavía debe verificarse';
+ if(id==='volt-drop'&&status.status==='passed'){
+  const h=lessonEvidence(data,id).holdout;
+  return h?.passed?'Banco guiado y caso independiente completados · evidencia digital, no competencia física':
+   'Banco guiado completado · caso independiente '+(h?.attempts?'pendiente de aprobación':'sin resolver');
+ }
  return status.status==='passed'?(virtual?'Práctica aprobada: modelo virtual, NO competencia física':'Práctica aprobada: hay evidencia guardada'):status.status==='attempted'?(virtual?'Práctica realizada en modelo virtual, todavía sin aprobar':'Práctica realizada, todavía sin aprobar'):
   status.status==='related-passed'?'El banco relacionado fue aprobado; esta lección no tiene rúbrica propia':
   status.status==='related-attempted'?'El banco relacionado tiene intentos; no se acredita esta lección':
@@ -1540,7 +1544,12 @@ function render(){let body=page==='home'?home():page==='learn'?(selectedLesson?l
 if(page==='learn'&&selectedLesson){
  const lessonAtMount=selectedLesson;
  const holdout=document.getElementById('volt-holdout-host');
- if(holdout)mountVoltDropHoldout(holdout,{record:saveLabEntry,onSaved:()=>{}});
+ if(holdout)mountVoltDropHoldout(holdout,{record:saveLabEntry,onSaved:()=>{
+  if(page!=='learn'||selectedLesson!==lessonAtMount)return;
+  const status=document.getElementById('lesson-practice-status'),summary=document.getElementById('lesson-theory-practice-status');
+  if(status)status.textContent=lessonPracticeStatusText(lessonAtMount);
+  if(summary)summary.textContent=lessonPracticeStatusText(lessonAtMount);
+ }});
  const reasonNode=document.getElementById('lesson-reasoning-host');
  if(reasonNode)mountLessonReasoning(reasonNode,{lessonId:lessonAtMount,record:saveLabEntry,onSaved:()=>{
   if(page==='learn'&&selectedLesson===lessonAtMount){
