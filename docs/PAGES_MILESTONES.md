@@ -27,3 +27,8 @@ The resolution does not require admin-level environment edits or merging PR #56:
 - No external hosting, no production merge, no new credentials. The branch restriction failure is solved by using the proper workflow context.
 - `main` infrastructure commit `a2bce265` is labeled `[pages-router]` to avoid publishing an old `main` snapshot while installing the router.
 - Publication is NOT complete until the `Publish validated AutoLab Academy milestones to Pages` run reports `deploy: success`.
+
+## Segundo candidato (lección 02, 2026-10-28)
+- Lección 02: diagnóstico de conceptos previos, nueve casos reservados y transferencia con predicción congelada, evidencia discriminante, falsación e historial independiente.
+- **Fuente de verdad:** `docs/LESSON_02_ACCEPTANCE.md`. La nota de calidad requiere CI completa verde y no equivale a competencia física.
+- La publicación se dispara solo desde un commit `[pages-milestone]` de la rama del PR y el publicador en `main` toma el mismo SHA verificado.
