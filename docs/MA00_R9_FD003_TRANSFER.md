@@ -41,3 +41,27 @@ La descarga en Actions es **opt-in con marcador de commit [MA00 NASA FD003 once]
 ## Ejecución oficial única (solicitud)
 
 Las pruebas de aislamiento de cohortes, el lector ZIP, la invocación CLI y los controles de transferencia ya pasaron en CI antes de abrir etiquetas reales FD003. Los parámetros, referencias, intervalos y bandas de RUL quedaron fijados. Este commit activa una única evaluación del ZIP de NASA, publicando las métricas aunque demuestren falta de generalización. FD001 TEST y FD003 TRAIN permanecen sin utilizar.
+
+
+## Resultado observado — evaluación única FD003 TEST (28/10/2026)
+
+- Evidencia: https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40789923931
+- Artefacto agregado: https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40789923931/artifacts/12861735037
+- ZIP NASA original: SHA-256 c9c5dec12a945a82e8bb4446589d7fb3cc057b5e5d81fa1a12e25ee9912ad3b2.
+- 100 motores simulados FD001 TRAIN (20.631 filas) -> 100 motores simulados FD003 TEST; NO se abrió FD001 TEST/RUL ni FD003 TRAIN, ni se usó FD003 RUL antes de congelar las predicciones.
+
+| Método congelado previamente | MAE FD003 TEST, ciclos | RMSE FD003 TEST, ciclos |
+| --- | ---: | ---: |
+| Mediana constante RUL FD001 TRAIN | 41,220 | 49,797 |
+| Mediana vida FD001 TRAIN - ciclos FD003 vistos | 35,690 | 47,796 |
+| Ridge ciclos α=1 | **32,136** | **42,819** |
+| Ridge sensores+operaciones α=1 | **119,598** | 184,281 |
+| Ridge ciclo+sensores+operaciones α=1 (primario) | **67,413** | 97,253 |
+
+**Resultado negativo preregistrado:** la diferencia MAE (prior mediana vida - Ridge combinado) = **−31,723 ciclos**, es decir que el modelo combinado empeora 31,723 ciclos respecto del baseline. Intervalo descriptivo bootstrap pareado de motores FD003, 1.000 remuestreos seed 20261028: **[−49,156; −16,191]**. No refleja incertidumbre sobre transporte a autos reales.
+
+**Cambio de dominio:** motores FD003 con al menos un valor fuera del rango observado en FD001 TRAIN: ciclo=4/100, operaciones=0/100, sensores=46/100. No equivale a confirmar qué sensores provocaron los errores ni identifica su causalidad. FD003 cambia los MODOS simulados de falla (HPC + fan), pero no hay etiqueta individual por tipo que autorice análisis de MAE por falla.
+
+**Decisión irrevocable de R9:** no seleccionar "solo ciclos" retrospectivamente como nuevo campeón basándose en FD003 TEST; su mejor MAE solo es observación secundaria. El modelo combinado falla la transferencia especificada, y el FD003 TEST queda también **consumido** para nuevos ajustes. Antes de aplicaciones reales se requieren detección de cambio de dominio y una nueva cohorte independiente, junto con evidencia mecánica física. No inferir edad equivalente en km, salud mecánica porcentual ni vida automotriz.
+
+La auditoría oficial de datos terminó SUCCESS. El estado de CI general debe verificarse por separado en el run final de la rama; E2E no modifica la conclusión científica.
