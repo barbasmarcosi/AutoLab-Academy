@@ -93,3 +93,7 @@ Do not merge or deploy production before independent review.
 - Normal PR CI: unit/static/build plus focused Chromium. A milestone explicitly sets `<!-- [FULL_E2E_MILESTONE] -->` in the PR body before pushing; this runs the full Chromium/WebKit/mobile WebKit suite ONCE. Remove the marker once started.
 - PR events NEVER upload or deploy Pages, including the full-suite milestone. Publishing needs a separate GitHub Pages Actions run with `full_suite=true`.
 - Automated testing cannot substitute for actual beginner comprehension and human evaluation of written reasoning.
+
+## Lesson 02 — synthetic DTC guided practice in progress
+- Three fictional P0171 symptom cases. Every practice starts with a frozen hypothesis and first test, then observes four targeted independent synthetic results. The final diagnosis and a hypothesis-relative falsifier are objectively scored; free-text remains ungraded for human review. No OEM thresholds or physical procedures are implied.
+- Integrated guided practice is distinct from the already-existing conceptual challenge and independent transfer. Lesson 02 is NOT yet certified >=9/10.

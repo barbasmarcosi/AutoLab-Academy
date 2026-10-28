@@ -55,6 +55,7 @@ import{mountNumericBench}from'./numeric-inquiry.js';
 import{mountWaveInquiry}from'./waveform-inquiry.js';
 import{voltDropTheoryIllustration,mountVoltDropPractice,mountVoltDropBaseline}from'./volt-drop-lesson.js';
 import{mountVoltDropHoldout}from'./volt-drop-transfer.js';
+import{dtcTheoryIllustration,mountDtcGuided}from'./dtc-lesson.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
 const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...powertrainLessons,...engineeringBridgeLessons,...inventorLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...powertrainQuestions,...engineeringBridgeQuestions,...inventorQuestions,...rotaryGeometryQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions,...ecuOptimizationQuestions,...ecuRobustQuestions,...rotaryApertureQuestions,...rotaryInverseQuestions];
@@ -721,7 +722,7 @@ function learn(){
 }
 function lessonPracticeStatusText(id){
  const status=practiceProgress(data,id);
- const p=lessonPractice(id),virtual=['numeric-bench','wave-inquiry','volt-drop'].includes(p?.page);
+ const p=lessonPractice(id),virtual=['numeric-bench','wave-inquiry','volt-drop','dtc-guided'].includes(p?.page);
  if(id==='volt-drop'&&status.status==='passed'){
   const h=lessonEvidence(data,id).holdout;
   return h?.passed?'Banco guiado y caso independiente completados · evidencia digital, no competencia física':
@@ -760,7 +761,7 @@ function lessonPracticePanel(l){
   (l.id==='volt-drop'?'':reasoning)+
   (p.kind==='embedded'?
    '<div class="lesson-practice-body" id="lesson-practice-host" aria-label="Simulador real integrado"></div>'+
-   (['numeric-bench','wave-inquiry','volt-drop'].includes(p.page)?'<p class="muted small">Banco calculado y sintético integrado en esta lección; no es una medición real ni acredita competencias físicas.</p>':
+   (['numeric-bench','wave-inquiry','volt-drop','dtc-guided'].includes(p.page)?'<p class="muted small">Banco calculado y sintético integrado en esta lección; no es una medición real ni acredita competencias físicas.</p>':
     '<p class="muted small">El mismo laboratorio sigue disponible desde el menú. Guardar evidencia práctica no equivale a marcar la lectura.</p>'+
     button('Abrir banco como pantalla completa','nav','data-id="'+attr(p.page)+'"','alt')):
    '<p>Este ejercicio funciona en su banco especializado: el enlace abre el laboratorio real, donde se evalúan predicciones y evidencia.</p>'+
@@ -777,7 +778,7 @@ function lessonView(){
  '<article class="panel lesson-body"><p class="muted">Teoría: '+(data.notes['lesson-'+l.id]?'lectura registrada':'lectura pendiente')+
  '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>'+
  '. Razonamiento: <span id="lesson-theory-reasoning-status">'+esc(lessonReasoningStatusText(l.id))+'</span>. Ninguno acredita competencia física.</p>'+
- (l.id==='volt-drop'?'<div id="volt-baseline-host"></div>':'')+sections(allSections)+(l.id==='volt-drop'?voltDropTheoryIllustration():'')+'</article>'+lessonPracticePanel(l)+
+ (l.id==='volt-drop'?'<div id="volt-baseline-host"></div>':'')+sections(allSections)+(l.id==='volt-drop'?voltDropTheoryIllustration():l.id==='motor-data'?dtcTheoryIllustration():'')+'</article>'+lessonPracticePanel(l)+
  '<article class="panel lesson-body">'+
  '<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+
  link(l.url,'Abrir fuente y lecturas relacionadas')+
@@ -1575,7 +1576,7 @@ if(page==='learn'&&selectedLesson){
   const mounts={powertrain:mountPowertrainLab,inventor:mountInventorLab,rotary:mountRotaryLab,'ecu-robust':mountRobustResearch,
    'numeric-bench':(node,opts)=>mountNumericBench(node,{...opts,lessonId:lessonAtMount}),
    'wave-inquiry':(node,opts)=>mountWaveInquiry(node,{...opts,lessonId:lessonAtMount}),
-   'volt-drop':mountVoltDropPractice};
+   'volt-drop':mountVoltDropPractice,'dtc-guided':mountDtcGuided};
   const node=document.getElementById('lesson-practice-host'),mount=mounts[practice.page];
   if(node&&mount){
    mount(node,{record:async entry=>{
