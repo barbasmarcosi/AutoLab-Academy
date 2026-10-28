@@ -155,6 +155,8 @@ def capture_mode01(
                 "pid": pid, "unit": UNITS[pid],
                 "requestAtMs": round((before - start) * 1000, 4),
                 "receivedAtMs": round((after - start) * 1000, 4),
+                "rawResponseHex": raw.hex().upper(),
+                "rawFrameSizeBytes": len(raw),
             }
             if state != "received":
                 event["status"] = "timeout"
@@ -162,8 +164,9 @@ def capture_mode01(
                 try:
                     event["value"] = decode_mode01(pid, raw)
                     event["status"] = "ok"
-                except ProtocolError:
+                except ProtocolError as exc:
                     event["status"] = "error"
+                    event["parseError"] = str(exc)
             events.append(event)
     return {
         "schema": "ma00-local-serial-receipts-v1", "sessionId": session_id,
