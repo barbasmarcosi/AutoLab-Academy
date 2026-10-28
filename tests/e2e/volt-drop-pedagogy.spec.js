@@ -37,6 +37,15 @@ test("lesson 1: learn, predict, place probes, correct mistakes, save guided and 
  await expect(lab.locator("#volt-positive-value")).toContainText("1,00");
  await expect(lab.locator("#volt-measurements")).toContainText("Todavía no realizaste");
  await lab.locator("#volt-points").selectOption("positive");
+ await lab.locator("#volt-prediction").fill("0,00");
+ await lab.locator("#volt-measure").click();
+ await lab.locator("#volt-points").selectOption("return");
+ await lab.locator("#volt-prediction").fill("1,41");
+ await lab.locator("#volt-measure").click();
+ await lab.locator("#volt-diagnosis").selectOption("positive");
+ await lab.locator("#volt-diagnose").click();
+ await expect(lab.locator("#volt-save")).toBeDisabled();
+ await lab.locator("#volt-points").selectOption("positive");
  await lab.locator("#volt-prediction").fill("3,53");
  await lab.locator("#volt-measure").click();
  await lab.locator("#volt-points").selectOption("return");
