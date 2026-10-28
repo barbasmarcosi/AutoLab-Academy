@@ -9,9 +9,21 @@ export const EVIDENCE_VERSION='ma00-operator-metadata-v1';
 const named=x=>typeof x==='string'&&x.trim().length>=3&&x.length<=96;
 const id=x=>named(x)&&/^[a-zA-Z0-9][\w.-]{2,95}$/.test(x);
 const enumOf=(v,choices)=>choices.includes(v);
-const timestamp=v=>typeof v==='string'&&
- /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(v)&&
- Number.isFinite(Date.parse(v));
+const timestamp=v=>{
+ if(typeof v!=='string')return false;
+ const match=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|[+-]\d{2}:\d{2})$/.exec(v);
+ if(!match)return false;
+ const [,y,mo,d,h,mi,s,zone]=match;
+ const year=Number(y),month=Number(mo),day=Number(d);
+ const leap=year%4===0&&(year%100!==0||year%400===0);
+ const days=[31,leap?29:28,31,30,31,30,31,31,30,31,30,31];
+ if(month<1||month>12||day<1||day>days[month-1]||Number(h)>23||Number(mi)>59||Number(s)>59)return false;
+ if(zone!=='Z'){
+  const zh=Number(zone.slice(1,3)),zm=Number(zone.slice(4,6));
+  if(zh>14||zm>59||(zh===14&&zm!==0))return false;
+ }
+ return Number.isFinite(Date.parse(v));
+};
 const finiteAmbient=v=>typeof v==='number'&&Number.isFinite(v)&&v>=-40&&v<=60;
 
 export function auditMeasurementEvidence(snapshot){
