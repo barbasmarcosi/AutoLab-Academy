@@ -3,6 +3,7 @@
  * Timestamps mark HOST RECEIPT, NOT sensor acquisition or PID simultaneity.
  * Descriptive A-A is the only supported comparison: no service, wear or age.
  */
+import {auditSerialTrace} from './mechanical-age-serial-integrity.js';
 export const RAW_OBD_VERSION='ma00-raw-pid-receipts-v1';
 const PID=Object.freeze({
  '010C':{channel:'rpm',unit:'rpm',min:0,max:16383.75},
@@ -41,6 +42,8 @@ export function auditRawObdSession(session){
  if(!['synthetic','provided_obd_unverified'].includes(source)||clock!=='host_monotonic_receive')throw RangeError('Procedencia o reloj no reconocidos');
  if(!time(capturedAt))throw RangeError('Hora de inicio con zona horaria requerida');
  if(!Array.isArray(events)||events.length===0||events.length>20000)throw RangeError('Eventos OBD: 1 a 20000');
+ const traceIntegrity=auditSerialTrace(session);
+ if(traceIntegrity.applies&&!traceIntegrity.internallyConsistent)throw RangeError('Traza serial inconsistente: '+traceIntegrity.errors.join('; '));
  const grouped=Object.fromEntries(Object.entries(PID).map(([pid,def])=>[pid,{...def,attempts:0,success:0,failures:0,values:[],receiptTimes:[],roundTripMs:[],undocumentedLatency:0}]));
  let last=-Infinity,requestUnknown=0;
  for(const [i,e] of events.entries()){
@@ -89,7 +92,7 @@ export function auditRawObdSession(session){
  return {
   version:RAW_OBD_VERSION,sessionId,vehicleAlias,engineFamily,adapterModel,softwareVersion,
   source,capturedAt,clock,eventCount:events.length,elapsedHostReceiptMs:events.at(-1).receivedAtMs-events[0].receivedAtMs,
-  channels,warnings,requestTimeMissingCount:requestUnknown,
+  channels,warnings,requestTimeMissingCount:requestUnknown,traceIntegrity,
   hostReceiptTimePresent:true,sensorAcquisitionTimeKnown:false,simultaneityVerified:false,
   estimatedAgeKm:null,structuralWear:null,remainingUsefulLife:null,
   caveat:'Las marcas host son de RECEPCIÓN, no de muestreo en ECU. Latencia host/ECU no está validada.'
