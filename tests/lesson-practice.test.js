@@ -9,13 +9,13 @@ test('all practice bridges are unique, target genuine stages and use known labs'
  const coverage=practiceCoverage(catalog);
  assert.equal(catalog.length,94);
  assert.equal(coverage.total,94);
- assert.equal(coverage.mapped,33);
- assert.equal(coverage.embedded,21);
+ assert.equal(coverage.mapped,34);
+ assert.equal(coverage.embedded,22);
  assert.equal(coverage.linked,12);
- assert.equal(coverage.unmapped,61);
+ assert.equal(coverage.unmapped,60);
  assert.deepEqual(coverage.invalid,[]);
- assert.equal(new Set(LESSON_PRACTICES.map(p=>p.lessonId)).size,33);
- const supported=new Set(['rotary','rotary-thermal','rotary-heat','rotary-ports','rotary-aperture','rotary-inverse','ecu-robust','metrology','inventor','brakes','powertrain','numeric-bench','wave-inquiry']);
+ assert.equal(new Set(LESSON_PRACTICES.map(p=>p.lessonId)).size,34);
+ const supported=new Set(['rotary','rotary-thermal','rotary-heat','rotary-ports','rotary-aperture','rotary-inverse','ecu-robust','metrology','inventor','brakes','powertrain','numeric-bench','wave-inquiry','volt-drop']);
  assert.ok(LESSON_PRACTICES.every(p=>supported.has(p.page)&&['embedded','linked'].includes(p.kind)&&p.title.length>12&&p.prompt.length>35));
  assert.equal(lessonPractice('not-a-lesson'),null);
 });
@@ -53,7 +53,7 @@ test('reading progress never masquerades as a passed practice or vice versa',()=
  assert.deepEqual(passed,{status:'passed',attempts:2,passed:true});
  assert.equal(practiceProgress({cases:[{id:'lab-inventor-blackbox-v1',passed:true}]},id).status,'not-started');
  assert.equal(practiceProgress({cases:[{id:p.caseId,passed:'true'}]},id).passed,false);
- assert.deepEqual(practiceProgress({cases:[{id:p.caseId,passed:true}]},'volt-drop'),{status:'unmapped',attempts:0,passed:false});
+ assert.deepEqual(practiceProgress({cases:[{id:p.caseId,passed:true}]},'volt-drop'),{status:'not-started',attempts:0,passed:false});
 });
 
 test('related lab evidence does not certify a separate linked lesson',()=>{
