@@ -124,7 +124,10 @@ class TestMode01(unittest.TestCase):
         self.assertNotIn("value", data["events"][0])
         self.assertIn("parseError", data["events"][0])
         self.assertEqual(data["events"][0]["rawResponseHex"], b"NO DATA\r>".hex().upper())
-        self.assertTrue(all(e["status"] == "ok" for e in data["events"][1:]))
+        self.assertTrue(data["captureAborted"])
+        self.assertIn("untrusted", data["abortReason"])
+        self.assertEqual(len(data["events"]), 1)
+        self.assertEqual(port.sent, list(SETUP) + ["0100", "010C"])
 
     def test_rejects_fake_setup_ack(self):
         responses = [b"ELM327 v1.5\r>"] + [b"\rOK\r>" for _ in SETUP[1:]]
