@@ -4,6 +4,7 @@
  * All limits below are educational assay rules, not OEM tolerances.
  */
 import {auditMeasurementEvidence,compareMeasurementEvidence} from './mechanical-age-evidence.js';
+import {auditObdSignalObservability} from './mechanical-age-signal-quality.js';
 export const MECHANICAL_AGE_VERSION='ma-obd-controlled-idle-v0';
 export const PROTOCOL='warm-idle-fixed-load-v0';
 const bound=(x,min,max)=>Math.max(min,Math.min(max,x));
@@ -63,6 +64,7 @@ export function evaluateMechanicalSnapshot(record){
   sampleCount:samples.length,elapsedSec,medianIntervalMs,maxIntervalMs,
   status:eligible?'eligible':'inconclusive',exclusion,vehicleAlias:vehicleAlias.trim(),
   measurementEvidence:auditMeasurementEvidence(record),
+  signalObservability:auditObdSignalObservability(samples),
   features:{medianRpm:rpm,rpmRobustSigma,medianEctC:ect,medianLoadPct:load,medianIatC:iat,medianCombinedTrimPct:trim,temperatureRange,loadRange},
   deviationIndex,scoringStatus:source==='synthetic'?'demonstration_only':'not_calibrated_external_data',
   structuralWear:null,mechanicalAgeEquivalentKm:null,remainingUsefulLife:null,
