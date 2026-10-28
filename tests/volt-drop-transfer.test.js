@@ -27,7 +27,8 @@ test("full measurement, causal choice and falsifier are necessary; numeric uncer
   assert.equal(good.score,100);assert.equal(good.passed,true);
   assert.equal(good.prior.hypothesis,initial);
   assert.equal(good.evolution.changed,true);
-  const bad=gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction:Number(loadPrediction)+0.5,diagnosis:c.id==="positive"?"return":"positive",falsifier:(VOLT_DROP_FALSIFIERS[c.id].answer+1)%3,prior});
+  const wrongDiagnosis=c.id==="positive"?"return":"positive";
+  const bad=gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction:Number(loadPrediction)+0.5,diagnosis:wrongDiagnosis,falsifier:(VOLT_DROP_FALSIFIERS[wrongDiagnosis].answer+1)%3,prior});
   assert.equal(bad.passed,false);assert.equal(bad.score,0);
   assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["positive"],loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior}),RangeError);
   assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["return","positive"],loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior}),RangeError);
@@ -115,4 +116,17 @@ test("falsifier options vary by case and only contradictory evidence earns falsi
    assert.equal(incorrect.passed,false);
   }
  }
+});
+
+test("a falsifier is objectively relative to the selected conclusion, even if that conclusion is wrong",()=>{
+ const prior=freezeVoltageDropHypothesis({caseId:"balanced",hypothesis:"undetermined",prediction:"need-evidence",firstProbe:"positive"});
+ const base={caseId:"balanced",measurements:["positive","return"],loadPrediction:heldOutVoltageReading("balanced","load"),diagnosis:"positive",prior};
+ const proper=gradeVoltageDropHoldout({...base,falsifier:VOLT_DROP_FALSIFIERS.positive.answer});
+ assert.equal(proper.causal,false);
+ assert.equal(proper.falsified,true);
+ assert.equal(proper.score,70);
+ assert.equal(proper.expected.falsifier,VOLT_DROP_FALSIFIERS.positive.answer);
+ const wrong=gradeVoltageDropHoldout({...base,falsifier:VOLT_DROP_FALSIFIERS.balanced.answer});
+ assert.equal(wrong.falsified,false);
+ assert.equal(wrong.score,40);
 });
