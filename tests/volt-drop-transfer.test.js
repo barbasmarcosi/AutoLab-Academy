@@ -82,3 +82,16 @@ test("no reward for guessing the frozen hypothesis, and no penalty for revising 
  assert.match(stable.evolution.interpretation,/compatible/);
  assert.equal(stable.score,100);
 });
+
+test("feedback never calls an incorrect final diagnosis evidence-supported",()=>{
+ const prior=freezeVoltageDropHypothesis({caseId:"balanced",hypothesis:"positive",prediction:"positive",firstProbe:"positive"});
+ const outcome=gradeVoltageDropHoldout({caseId:"balanced",measurements:["positive","return"],
+  loadPrediction:heldOutVoltageReading("balanced","load"),diagnosis:"positive",falsifier:0,prior});
+ assert.equal(outcome.causal,false);
+ assert.equal(outcome.evolution.evidenceSupported,false);
+ assert.match(outcome.evolution.interpretation,/no coincide con las mediciones/);
+ assert.doesNotMatch(outcome.evolution.interpretation,/fue compatible/);
+ const revisedWrong=compareVoltageDropHypotheses(prior,"return",{supported:false});
+ assert.equal(revisedWrong.changed,true);
+ assert.match(revisedWrong.interpretation,/todavía insuficiente/);
+});
