@@ -33,9 +33,31 @@ export function heldOutVoltageReading(id,probe){
  if(probe==="load")return m.loadV;
  throw RangeError("Puntos del instrumento desconocidos");
 }
-export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diagnosis,falsifier}){
+
+export function freezeVoltageDropHypothesis({caseId,hypothesis,prediction,firstProbe,confidence="low"}={}){
+ modelFor(caseId);
+ const hypotheses=["positive","return","balanced","undetermined"];
+ if(!hypotheses.includes(hypothesis)||!["positive","return"].includes(firstProbe)||!["low","medium","high"].includes(confidence))
+  throw RangeError("Hipótesis inicial, confianza o primer ensayo inválidos");
+ const expectedPrediction=hypothesis==="undetermined"?"need-evidence":hypothesis;
+ if(prediction!==expectedPrediction)throw RangeError("La predicción debe ser compatible con la hipótesis declarada");
+ return Object.freeze({caseId,hypothesis,prediction,firstProbe,confidence});
+}
+export function compareVoltageDropHypotheses(prior,final){
+ if(!prior||!Object.hasOwn(labels,final)||!["positive","return","balanced","undetermined"].includes(prior.hypothesis))
+  throw RangeError("Revisión de hipótesis incompleta");
+ return Object.freeze({
+  initial:prior.hypothesis,final,changed:prior.hypothesis!==final,
+  interpretation:prior.hypothesis==="undetermined"?"La evidencia permitió pasar de incertidumbre explícita a una conclusión provisional.":
+   prior.hypothesis===final?"La evidencia fue compatible con la hipótesis congelada.":
+   "La evidencia contradijo la hipótesis inicial: revisarla es parte del método científico, no un error por sí mismo."
+ });
+}
+export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diagnosis,falsifier,prior}){
  const m=modelFor(caseId);
- if(!Array.isArray(measurements)||!measurements.includes("positive")||!measurements.includes("return"))throw RangeError("Faltan las dos mediciones independientes");
+ const frozen=freezeVoltageDropHypothesis({...prior,caseId:prior?.caseId});
+ if(frozen.caseId!==caseId)throw RangeError("La hipótesis inicial pertenece a otro caso");
+ if(!Array.isArray(measurements)||measurements[0]!==frozen.firstProbe||!measurements.includes("positive")||!measurements.includes("return"))throw RangeError("Falta respetar el primer ensayo congelado o las dos mediciones independientes");
  const parsed=typeof loadPrediction==="number"?loadPrediction:Number(String(loadPrediction).trim().replace(",","."));
  if(!Number.isFinite(parsed)||parsed<0||parsed>24)throw RangeError("Predicción de tensión inválida");
  if(!Object.hasOwn(labels,diagnosis)||!Number.isInteger(falsifier)||falsifier<0||falsifier>=FALSIFIERS.length)throw RangeError("Decisiones inválidas");
@@ -44,37 +66,79 @@ export function gradeVoltageDropHoldout({caseId,measurements,loadPrediction,diag
  const causal=diagnosis===expected;
  const falsified=falsifier===0;
  const score=(numeric?40:0)+(causal?30:0)+(falsified?30:0);
- return {caseId,score,passed:score===100,selected:{loadPrediction:parsed,diagnosis,falsifier},
+ return {caseId,score,passed:score===100,prior:frozen,evolution:compareVoltageDropHypotheses(frozen,diagnosis),selected:{loadPrediction:parsed,diagnosis,falsifier},
   expected:{loadV:m.loadV,diagnosis:expected,falsifier:0,positiveV:m.positiveV,returnV:m.returnV},
   numeric,causal,falsified,reason:"La tensión de la carga es la fuente menos ambas caídas bajo la misma condición. La falsación debe buscar una observación incompatible con la hipótesis. Caídas similares NO demuestran que ambos tramos cumplan límites OEM: solo que no hay un dominante relativo en este modelo."};
 }
 export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
  if(!root||typeof record!=="function")throw Error("Falta el guardador de evidencia");
- let index=0,measurements=new Set(),result=null,saving=false,attempts=0,feedback="",learnerReasoning="";
+ let index=0,measurements=new Set(),prior=null,result=null,saving=false,attempts=0,feedback="",learnerReasoning="";
  const $=id=>root.querySelector("#"+id);
  const render=()=>{
-  const c=VOLT_DROP_HOLDOUT_CASES[index];
-  root.innerHTML="<section class='panel stack' aria-label='Caso de transferencia de caída de tensión'>"+
-   "<div class='eyebrow'>CASO NUEVO · SIN SOLUCIÓN ADELANTADA</div><h3>5. ¿Podés aplicarlo sin el ejemplo?</h3>"+
-   "<p>"+esc(c.story)+"</p><p class='muted'>No se muestran resistencias ni la clave. Para decidir, elegí los extremos y registrá al menos una medición de cada cable mientras la carga funciona. Podés consultar la tensión en el consumidor para contrastar tu predicción.</p>"+
-   "<label for='holdout-probe'>Puntas de tu voltímetro</label><select id='holdout-probe' class='field' "+(result?"disabled":"")+"><option value='positive'>A–B: cable positivo</option><option value='return'>D–E: retorno</option><option value='load'>B–D: consumidor</option></select>"+
+  const scenario=VOLT_DROP_HOLDOUT_CASES[index];
+  const header="<section class='panel stack' aria-label='Caso independiente de caída de tensión'>"+
+   "<div class='eyebrow'>TRANSFERENCIA · ESCENARIO SIN RESPUESTA ADELANTADA</div>"+
+   "<h3>5. De la hipótesis a la evidencia</h3><p>"+esc(scenario.story)+"</p>";
+  if(!prior){
+   root.innerHTML=header+
+    "<p><strong>Momento 1: antes de medir.</strong> Con solo el síntoma, las cuatro opciones son hipótesis provisionales. Si no hay información suficiente, declaralo expresamente. Elegí qué comparación esperás observar y qué tramo vas a medir primero. La respuesta no recibe puntos por acertar antes de investigar.</p>"+
+    "<label for='holdout-initial'>Hipótesis inicial (sin mediciones)</label>"+
+    "<select class='field' id='holdout-initial'><option value=''>Elegí una posición provisional</option>"+
+    "<option value='positive'>El positivo concentra la pérdida</option>"+
+    "<option value='return'>El retorno concentra la pérdida</option>"+
+    "<option value='balanced'>Los tramos muestran caídas similares</option>"+
+    "<option value='undetermined'>Aún no hay datos para localizar una causa</option></select>"+
+    "<label for='holdout-expected'>Predicción que se contrastará</label>"+
+    "<select class='field' id='holdout-expected'><option value=''>Elegí qué esperarías observar</option>"+
+    "<option value='positive'>Caída positiva claramente superior</option>"+
+    "<option value='return'>Caída del retorno claramente superior</option>"+
+    "<option value='balanced'>Caídas de ambos tramos similares</option>"+
+    "<option value='need-evidence'>No predigo cuál domina: mediré ambos para decidir</option></select>"+
+    "<label for='holdout-first'>Primer tramo que medirías, manteniendo la misma carga</label>"+
+    "<select class='field' id='holdout-first'><option value='positive'>A–B: positivo</option><option value='return'>D–E: retorno</option></select>"+
+    "<label for='holdout-confidence'>Confianza subjetiva antes de ver evidencia (no suma ni resta nota)</label>"+
+    "<select class='field' id='holdout-confidence'><option value='low'>Baja</option><option value='medium'>Media</option><option value='high'>Alta</option></select>"+
+    "<button type='button' class='button' data-holdout='freeze'>Congelar hipótesis y plan de medición</button>"+
+    "<p class='muted small'>Después de congelar podrás medir. No se puede alterar la hipótesis anterior sin iniciar un caso nuevo.</p>"+
+    "<p id='holdout-status' role='status' aria-live='polite'></p></section>";
+   return;
+  }
+  root.innerHTML=header+
+   "<div class='panel' id='holdout-locked' role='status'><strong>Hipótesis inicial congelada:</strong> "+esc(prior.hypothesis==="undetermined"?"Información insuficiente":labels[prior.hypothesis])+
+   " · predicción: "+esc(prior.prediction==="need-evidence"?"comparar los dos cables":labels[prior.prediction])+
+   " · primer tramo planificado: "+esc(prior.firstProbe==="positive"?"positivo":"retorno")+
+   " · confianza inicial: "+esc({low:"baja",medium:"media",high:"alta"}[prior.confidence])+".</div>"+
+   "<p><strong>Momento 2: medí.</strong> Solo ahora se habilita el voltímetro. Registrá ambos cables bajo la misma carga; usá los números para revisar, sostener o descartar tu hipótesis inicial.</p>"+
+   "<label for='holdout-probe'>Puntas de tu voltímetro</label>"+
+   "<select id='holdout-probe' class='field' "+(result?"disabled":"")+">"+
+   "<option value='positive'>A–B: cable positivo</option><option value='return'>D–E: retorno</option><option value='load'>B–D: consumidor</option></select>"+
    "<button type='button' class='button alt' data-holdout='probe' "+(result?"disabled":"")+">Medir este tramo</button>"+
    "<p role='status' aria-live='polite' id='holdout-measured'>"+esc(feedback||"Todavía no mediste ningún tramo.")+"</p>"+
    "<p class='muted small' id='holdout-history'>Mediciones registradas: "+[...measurements].map(k=>esc(k)).join(", ")+".</p>"+
-   "<label for='holdout-load'>Calculá la tensión del consumidor usando la fuente y ambas caídas (V)</label><input class='field' type='text' inputmode='decimal' id='holdout-load' placeholder='Por ejemplo: 9,45' "+(result?"disabled":"")+">"+
-   "<label for='holdout-cause'>¿En qué tramo se concentra la mayor caída?</label><select id='holdout-cause' class='field' "+(result?"disabled":"")+"><option value=''>Elegí a partir de las medidas</option><option value='positive'>Positivo</option><option value='return'>Retorno</option><option value='balanced'>Ambas caídas similares</option></select>"+
-   "<fieldset class='panel'><legend>¿Qué observación refutaría la localización que elegiste?</legend>"+
+   "<p><strong>Momento 3: decisión revisada.</strong> No se penaliza modificar la hipótesis; importa que la conclusión final sea compatible con la evidencia.</p>"+
+   "<label for='holdout-load'>Calculá la tensión del consumidor usando fuente y ambas caídas (V)</label>"+
+   "<input class='field' type='text' inputmode='decimal' id='holdout-load' placeholder='Por ejemplo: 9,45' "+(result?"disabled":"")+">"+
+   "<label for='holdout-cause'>Localización final a partir de tus mediciones</label>"+
+   "<select id='holdout-cause' class='field' "+(result?"disabled":"")+">"+
+   "<option value=''>Elegí según los datos</option><option value='positive'>Positivo</option><option value='return'>Retorno</option><option value='balanced'>Ambas caídas similares</option></select>"+
+   "<fieldset class='panel'><legend>¿Qué observación refutaría la localización final?</legend>"+
    FALSIFIERS.map((o,i)=>"<label class='option'><input type='radio' name='holdout-falsifier' value='"+i+"' "+(result?"disabled":"")+">"+esc(o)+"</label>").join("")+"</fieldset>"+
-   (result?"":"<label for='holdout-reasoning'>Justificación científica: ¿qué datos apoyan tu diagnóstico y qué datos lo refutarían?</label>"+
-    "<textarea class='field' id='holdout-reasoning' rows='4' maxlength='1200' aria-describedby='holdout-reasoning-help' placeholder='Cito mis dos mediciones, explico por qué elijo esa hipótesis y qué otra lectura me haría cambiar de opinión.'></textarea>"+
-    "<p class='muted small' id='holdout-reasoning-help'>Guardaremos tu argumento para una revisión humana. El sistema no evalúa semánticamente el texto ni suma puntos por su longitud.</p>")+
-   (result?"<div class='result' id='holdout-result' role='status' aria-live='polite' tabindex='-1'><strong>Resultado objetivo del intento "+attempts+" de esta sesión: "+result.score+"/100 · "+(result.passed?"criterios cumplidos":"revisar evidencia")+"</strong>"+
-    "<p>Cálculo de carga: "+(result.numeric?"correcto":"incorrecto")+". Tu valor: "+fmt(result.selected.loadPrediction)+" V · esperado: "+fmt(result.expected.loadV)+" V.</p>"+
-    "<p>Localización: "+(result.causal?"correcta":"incorrecta")+". Elegiste "+esc(labels[result.selected.diagnosis])+"; según las medidas, "+esc(labels[result.expected.diagnosis])+".</p>"+
+   (result?"":
+    "<label for='holdout-reasoning'>Explicá qué evidencia hizo sostener o revisar la hipótesis inicial y qué la refutaría</label>"+
+    "<textarea class='field' id='holdout-reasoning' rows='4' maxlength='1200' aria-describedby='holdout-reasoning-help' placeholder='Comparo ambas caídas, justifico mi localización y describo qué lectura la contradice.'></textarea>"+
+    "<p class='muted small' id='holdout-reasoning-help'>El texto queda para revisión humana. No se califica semánticamente ni por cantidad de caracteres.</p>")+
+   (result?
+    "<div class='result' id='holdout-result' role='status' aria-live='polite' tabindex='-1'>"+
+    "<strong>Resultado objetivo del intento "+attempts+" de esta sesión: "+result.score+"/100 · "+(result.passed?"criterios cumplidos":"revisar evidencia")+"</strong>"+
+    "<p>Cálculo: "+(result.numeric?"correcto":"incorrecto")+". Tu lectura calculada: "+fmt(result.selected.loadPrediction)+" V; valor del modelo: "+fmt(result.expected.loadV)+" V.</p>"+
+    "<p>Localización: "+(result.causal?"correcta":"incorrecta")+". Elegiste "+esc(labels[result.selected.diagnosis])+"; según el modelo: "+esc(labels[result.expected.diagnosis])+".</p>"+
     "<p>Refutación: "+(result.falsified?"correcta":"incorrecta")+". "+esc(FALSIFIERS[0])+"</p>"+
-    "<p>Mediciones de referencia: positivo "+fmt(result.expected.positiveV)+" V; retorno "+fmt(result.expected.returnV)+" V. "+esc(result.reason)+"</p>"+
-    "<details><summary>Revisar mi argumento escrito</summary><p>"+esc(learnerReasoning)+"</p></details>"+
-    "<p class='muted'>El texto fue guardado pero sigue pendiente de revisión cualitativa humana. La nota corrige solo decisiones objetivas y números de un modelo, nunca certifica habilidad física ni dominio profesional.</p></div>":
+    "<p><strong>Comparación con tu hipótesis congelada:</strong> "+esc(result.evolution.interpretation)+
+    " Antes: "+esc(prior.hypothesis==="undetermined"?"indeterminado":labels[prior.hypothesis])+
+    "; después: "+esc(labels[result.selected.diagnosis])+".</p>"+
+    "<p>Mediciones del modelo: positivo "+fmt(result.expected.positiveV)+" V; retorno "+fmt(result.expected.returnV)+" V. "+esc(result.reason)+"</p>"+
+    "<details><summary>Revisar mi explicación escrita</summary><p>"+esc(learnerReasoning)+"</p></details>"+
+    "<p class='muted'>El argumento está guardado y pendiente de revisión cualitativa humana. La puntuación automática solo considera cálculos y elecciones objetivas del modelo. No acredita competencias físicas.</p></div>":
     "<button class='button' type='button' data-holdout='grade'>Entregar diagnóstico y revelar devolución</button>")+
    "<p id='holdout-status' role='status' aria-live='polite'></p>"+
    (result?"<button class='button alt' type='button' data-holdout='retry'>Practicar un caso diferente</button>":"")+
@@ -82,7 +146,19 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
  };
  root.addEventListener("click",async ev=>{
   const b=ev.target.closest("[data-holdout]");if(!b||saving)return;
-  if(b.dataset.holdout==="probe"&&!result){
+  if(b.dataset.holdout==="freeze"&&!prior&&!result){
+   try{
+    prior=freezeVoltageDropHypothesis({caseId:VOLT_DROP_HOLDOUT_CASES[index].id,
+     hypothesis:$("holdout-initial").value,prediction:$("holdout-expected").value,
+     firstProbe:$("holdout-first").value,confidence:$("holdout-confidence").value});
+    feedback="";render();$("holdout-probe")?.focus({preventScroll:true});
+   }catch(e){$("holdout-status").textContent="Revisá el compromiso inicial: "+String(e.message);}
+   return;
+  }
+  if(b.dataset.holdout==="probe"&&prior&&!result){
+   if(!measurements.size&&$("holdout-probe").value!==prior.firstProbe){
+    $("holdout-measured").textContent="Primero medí el tramo que congelaste en el plan, y después compará con el otro.";return;
+   }
    const probe=$("holdout-probe").value,value=heldOutVoltageReading(VOLT_DROP_HOLDOUT_CASES[index].id,probe);
    measurements.add(probe);
    feedback="Medición entre los extremos de "+(probe==="positive"?"positivo":probe==="return"?"retorno":"consumidor")+": "+fmt(value)+" V (bajo carga).";
@@ -94,21 +170,23 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    let g,reasoningText="";
    try{
     const raw=$("holdout-load").value.trim();
+    if(!prior)throw Error("Primero congelá una hipótesis y un plan de medida.");
     if(!raw)throw Error("Primero completá la predicción de la carga.");
     reasoningText=$("holdout-reasoning").value.trim();
     if(!reasoningText)throw Error("Escribí una justificación para documentar la hipótesis; no se califica por su longitud.");
     const selected=root.querySelector("[name='holdout-falsifier']:checked");
     if(!selected)throw Error("Elegí también una observación falsadora.");
     g=gradeVoltageDropHoldout({caseId:VOLT_DROP_HOLDOUT_CASES[index].id,measurements:[...measurements],
-     loadPrediction:raw,diagnosis:$("holdout-cause").value,falsifier:Number(selected.value)});
+     loadPrediction:raw,diagnosis:$("holdout-cause").value,falsifier:Number(selected.value),prior});
    }catch(e){$("holdout-status").textContent="Falta evidencia: "+String(e.message);return;}
    saving=true;attempts++;
    try{
     await record({id:VOLT_DROP_HOLDOUT_ID,passed:g.passed,score:g.score,at:new Date().toISOString(),attemptInSession:attempts,
      hypothesis:"Causa localizada: "+g.selected.diagnosis,conclusion:"Evaluación objetiva "+g.score+"/100",
-     used:["dos-mediciones-bajo-carga","prediccion-numerica","falsacion","argumento-documentado-sin-nota"],
+     used:["hipotesis-y-plan-congelados","dos-mediciones-bajo-carga","prediccion-numerica","revision-o-sostenimiento","falsacion","argumento-documentado-sin-nota"],
      reasoning:reasoningText,
-     report:JSON.stringify({caseId:g.caseId,selected:g.selected,expected:g.expected,
+     report:JSON.stringify({caseId:g.caseId,initial:g.prior,revision:g.evolution,
+      measuredInOrder:[...measurements],selected:g.selected,expected:g.expected,
       firstInThisSession:attempts===1,qualitativeReview:"pending",reasoning:reasoningText})});
     learnerReasoning=reasoningText;result=g;feedback="";render();$("holdout-result")?.focus({preventScroll:true});onSaved(g);
    }catch(e){attempts--;$("holdout-status").textContent="No se confirmó el guardado: "+String(e.message||e);}
@@ -116,7 +194,7 @@ export function mountVoltDropHoldout(root,{record,onSaved=()=>{}}={}){
    return;
   }
   if(b.dataset.holdout==="retry"&&result){
-   index=(index+1)%VOLT_DROP_HOLDOUT_CASES.length;measurements=new Set();result=null;feedback="";learnerReasoning="";render();
+   index=(index+1)%VOLT_DROP_HOLDOUT_CASES.length;measurements=new Set();prior=null;result=null;feedback="";learnerReasoning="";render();
   }
  });
  render();
