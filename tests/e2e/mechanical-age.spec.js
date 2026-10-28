@@ -1,0 +1,45 @@
+import {test,expect} from '@playwright/test';
+
+test('MA00 distinguishes synthetic functional changes, session replication and no mechanical age',async({page})=>{
+ await page.goto('./');
+ await page.locator('nav.nav button[data-id="mechanical-age"]').click();
+ await expect(page.getByRole('heading',{name:/Edad mecánica · laboratorio experimental/})).toBeVisible();
+ await page.getByRole('button',{name:'Evaluar ambas mediciones'}).click();
+ await expect(page.getByText('Condiciones comparables')).toBeVisible();
+ await expect(page.getByText(/Diferencia de índice funcional sintético/)).toBeVisible();
+ await expect(page.getByText(/Edad equivalente:.*no determinada/).first()).toBeVisible();
+ await page.getByRole('button',{name:/Ensayar repetibilidad 2 \+ 2/}).click();
+ await expect(page.getByRole('heading',{name:/Ensayo de repetibilidad · 4 sesiones sintéticas/})).toBeVisible();
+ await expect(page.getByText(/Unidades experimentales: 4 sesiones/)).toBeVisible();
+ await expect(page.getByText(/Sin intervalo de confianza, prueba causal ni edad mecánica/)).toBeVisible();
+});
+
+test('MA00 edited JSON cannot spoof synthetic data and get an uncalibrated score',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="mechanical-age"]').click();
+ const raw=await page.locator('#ma-before').inputValue();
+ const altered=JSON.parse(raw);
+ altered.samples[1].rpm+=3;
+ altered.source='synthetic';
+ await page.locator('#ma-before').fill(JSON.stringify(altered,null,2));
+ await page.getByRole('button',{name:'Evaluar ambas mediciones'}).click();
+ await expect(page.getByText(/Datos externos: NO calculamos ningún índice no calibrado/)).toBeVisible();
+ await expect(page.getByText(/SIN puntuación de datos externos/)).toBeVisible();
+ await expect(page.getByText(/Procedencia: provided_obd_unverified/)).toHaveCount(2);
+});
+
+test('MA00 reloads offline with research modules, and rejects malformed data safely',async({page,context})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="mechanical-age"]').click();
+ await page.locator('#ma-before').fill('{malformed JSON');
+ await page.getByRole('button',{name:'Evaluar ambas mediciones'}).click();
+ await expect(page.getByText(/No se pudo evaluar/)).toBeVisible();
+ await page.getByRole('button',{name:'Restaurar ejemplo sintético'}).click();
+ await expect(page.getByText(/No se pudo evaluar/)).toHaveCount(0);
+ await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
+ await context.setOffline(true);
+ try{
+  await page.reload();
+  await page.locator('nav.nav button[data-id="mechanical-age"]').click();
+  await page.getByRole('button',{name:'Evaluar ambas mediciones'}).click();
+  await expect(page.getByText(/Diferencia de índice funcional sintético/)).toBeVisible();
+ }finally{await context.setOffline(false);}
+});
