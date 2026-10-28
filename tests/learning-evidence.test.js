@@ -12,6 +12,8 @@ test('94 lessons have honest, complete, independently auditable evidence coverag
  assert.equal(summary.totals.lessons,94);
  assert.equal(summary.totals.reasoningAvailable,40);
  assert.equal(summary.totals.embeddedAvailable,22);
+ assert.equal(summary.totals.holdoutAvailable,1);
+ assert.equal(summary.totals.holdoutPassed,0);
  assert.equal(summary.totals.linkedOnly,12);
  assert.equal(summary.totals.documentedTraining,0);
  assert.equal(summary.byStage.length,16);
@@ -35,19 +37,27 @@ test('a generic exam, a lecture, v1 reasoning and a related lab cannot inflate p
  assert.equal(lessonEvidence(p,'mc06-dual-fault-instrumentation').documented,true);
  assert.equal(lessonEvidence(p,'mc06-gears-powertrain').documented,false);
 });
-test('path recommendation advances through reading, transfer and an actual embedded lab without conflation',()=>{
+test('path recommendation: theory then guided lab, reserved transfer and objective reasoning',()=>{
  const p=progress();
- p.notes['lesson-volt-drop']='2026-10-26';
  let snapshot=learningEvidenceOverview(p,lessons,learningStages);
- assert.deepEqual({id:snapshot.nextTask.lessonId,kind:snapshot.nextTask.kind},{id:'volt-drop',kind:'reasoning-transfer'});
- p.cases.push({id:caseId('volt-drop'),passed:false});
+ assert.deepEqual({id:snapshot.nextTask.lessonId,kind:snapshot.nextTask.kind},{id:'volt-drop',kind:'reading'});
+ p.notes['lesson-volt-drop']='2026-10-26';
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
- assert.equal(snapshot.nextTask.label,'Revisar hipótesis y transferencia');
+ assert.equal(snapshot.nextTask.kind,'embedded-lab');
  p.cases.push({id:caseId('volt-drop'),passed:true});
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
- assert.deepEqual({id:snapshot.nextTask.lessonId,kind:snapshot.nextTask.kind},{id:'volt-drop',kind:'embedded-lab'});
+ assert.equal(snapshot.nextTask.kind,'embedded-lab');
  p.cases.push({id:'lab-volt-drop-guided-v1',passed:true});
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
+ assert.equal(snapshot.nextTask.kind,'independent-holdout');
+ assert.equal(snapshot.byLesson.get('volt-drop').documented,false);
+ p.cases.push({id:'lab-volt-drop-holdout-v1',passed:false});
+ snapshot=learningEvidenceOverview(p,lessons,learningStages);
+ assert.equal(snapshot.nextTask.kind,'independent-holdout');
+ p.cases.push({id:'lab-volt-drop-holdout-v1',passed:true,attempt:2});
+ snapshot=learningEvidenceOverview(p,lessons,learningStages);
+ assert.equal(snapshot.byLesson.get('volt-drop').documented,true);
+ assert.equal(snapshot.byLesson.get('volt-drop').holdout.firstAttemptPassed,false);
  assert.equal(snapshot.nextTask.lessonId,'motor-data');
  for(const id of lessonIds.slice(0,lessonIds.indexOf('mc06-dual-fault-instrumentation'))){
   p.notes['lesson-'+id]='2026-10-26';
