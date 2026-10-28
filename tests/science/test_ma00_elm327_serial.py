@@ -39,6 +39,7 @@ def good_serial():
     return FakeSerial([
         b"\rOK\r>" for _ in SETUP
     ] + [b"41 00 FF FF FF FF\r>"] + [
+        b"41 03 02 00\r>",
         b"41 0C 1A F8\r>",
         b"41 05 7D\r>",
         b"41 04 80\r>",
@@ -65,7 +66,11 @@ class TestMode01(unittest.TestCase):
         self.assertEqual(decode_mode01("0106", b"410690\r>"), 12.5)
         self.assertEqual(decode_mode01("0107", b"410780\r>"), 0)
         self.assertEqual(decode_mode01("010F", b"410F46\r>"), 30)
-        self.assertEqual(tuple(ORDER), ("010C", "0105", "0104", "0106", "0107", "010F"))
+        self.assertEqual(tuple(ORDER), ("0103", "010C", "0105", "0104", "0106", "0107", "010F"))
+        self.assertEqual(decode_mode01("0103", b"41030200\r>"), 2)
+        self.assertEqual(decode_mode01("0103", b"41030100\r>"), 1)
+        with self.assertRaises(ProtocolError):
+            decode_mode01("0103", b"41030300\r>")
 
     def test_ambiguous_and_untrustworthy_frames_fail_closed(self):
         cases = (
@@ -103,11 +108,13 @@ class TestMode01(unittest.TestCase):
         self.assertIsNone(data["abortReason"])
         self.assertIn("010C", data["supportedPids"])
         self.assertEqual(data["supportedPidMaskRawHex"], b"41 00 FF FF FF FF\r>".hex().upper())
-        self.assertEqual(len(data["events"]), 6)
+        self.assertEqual(len(data["events"]), 7)
         self.assertTrue(all(e["status"] == "ok" for e in data["events"]))
         self.assertTrue(all(e["receivedAtMs"] >= e["requestAtMs"] for e in data["events"]))
-        self.assertEqual(data["events"][0]["value"], 1726)
-        self.assertEqual(data["events"][0]["rawResponseHex"], b"41 0C 1A F8\r>".hex().upper())
+        self.assertEqual(data["events"][0]["value"], 2)
+        self.assertEqual(data["events"][0]["fuelSystem2Status"], 0)
+        self.assertEqual(data["events"][1]["value"], 1726)
+        self.assertEqual(data["events"][0]["rawResponseHex"], b"41 03 02 00\r>".hex().upper())
         self.assertGreater(data["events"][0]["rawFrameSizeBytes"], 0)
         self.assertFalse("mechanicalAgeKm" in data)
         self.assertFalse("healthScore" in data)
@@ -115,7 +122,7 @@ class TestMode01(unittest.TestCase):
     def test_partial_reply_is_not_a_valid_measurement(self):
         responses = [b"\rOK\r>" for _ in SETUP] + [b"41 00 FF FF FF FF\r>"] + [
             b"NO DATA\r>",  # real returned nonvalue
-            b"41057D\r>", b"410480\r>", b"410690\r>",
+            b"410C1AF8\r>", b"41057D\r>", b"410480\r>", b"410690\r>",
             b"410780\r>", b"410F46\r>"
         ]
         port = FakeSerial(responses)
@@ -127,7 +134,7 @@ class TestMode01(unittest.TestCase):
         self.assertTrue(data["captureAborted"])
         self.assertIn("untrusted", data["abortReason"])
         self.assertEqual(len(data["events"]), 1)
-        self.assertEqual(port.sent, list(SETUP) + ["0100", "010C"])
+        self.assertEqual(port.sent, list(SETUP) + ["0100", "0103"])
 
     def test_rejects_fake_setup_ack(self):
         responses = [b"ELM327 v1.5\r>"] + [b"\rOK\r>" for _ in SETUP[1:]]
@@ -164,12 +171,12 @@ class TestMode01(unittest.TestCase):
         mask = 0xFFFFFFFF & ~(1 << (32 - 15))
         no_iat = FakeSerial([b"\rOK\r>" for _ in SETUP] +
                             [("4100%08X\r>" % mask).encode("ascii")] +
-                            [b"410C1AF8\r>", b"41057D\r>", b"410480\r>",
+                            [b"41030200\r>", b"410C1AF8\r>", b"41057D\r>", b"410480\r>",
                              b"410690\r>", b"410780\r>"])
         data = capture(no_iat)
         self.assertFalse(data["captureAborted"])
         self.assertNotIn("010F", no_iat.sent)
-        self.assertEqual(len(data["events"]), 5)
+        self.assertEqual(len(data["events"]), 6)
 
     def test_partial_response_aborts_before_another_pid_can_be_misattributed(self):
         port = FakeSerial([b"\rOK\r>" for _ in SETUP] +
@@ -179,7 +186,7 @@ class TestMode01(unittest.TestCase):
         self.assertEqual(data["events"][0]["status"], "timeout")
         self.assertEqual(data["events"][0]["rawResponseHex"], b"410C1A".hex().upper())
         self.assertEqual(len(data["events"]), 1)
-        self.assertEqual(port.sent, list(SETUP) + ["0100", "010C"])
+        self.assertEqual(port.sent, list(SETUP) + ["0100", "0103"])
         self.assertNotIn("0105", port.sent)
 
     def test_cannot_mutate_pid_allowlist_or_induce_actuator_commands(self):
