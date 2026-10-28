@@ -82,3 +82,42 @@ Estos números proceden de los **archivos originales** recuperados por las Actio
 ## Balance crítico de MA00
 
 **Resultado obtenido:** pipeline y evidencias reproducibles, calidad estructural de dos bases públicas, captura y normalización básica, abstención ante falta de inferencia, laboratorio sintético con replicación. **No obtenido:** predicción de desgaste real, modelo calibrado por familia, capacidad de comparar motores reales, pronóstico de vida/edad mecánica. **Riesgo decisivo:** incluso un clasificador de fallas muy preciso puede ser incapaz de estimar la degradación. El trabajo prioritario siguiente es conseguir cohortes longitudinales con identidad por vehículo y medidas físicas, no subir la complejidad del modelo.
+
+
+## MA00 — Falsación adversarial (tanda 2026-10-28)
+
+La rutina \`src/mechanical-age-falsification.js\` genera cinco controles **100 % sintéticos** y los expone en la PWA con «Intentar refutar el índice». El propósito es documentar la **no identificabilidad** de desgaste a partir de una combinación de RPM y correcciones de combustible, incluso en condiciones de medición que el validador considera comparables.
+
+| Control experimental | Alteración programada (motor físico no simulado) | Resultado esperado |
+| --- | --- | --- |
+| Nulo | Los canales operativos son idénticos, solo se desplaza el reloj | Delta de índice cero |
+| Sesgo de STFT | Añadir +11 puntos porcentuales a STFT, sin alterar mecanismo alguno | El índice puede cambiar sin existir desgaste real |
+| Trims opuestos | Añadir +14 puntos a STFT y -14 puntos a LTFT | La suma queda idéntica y el índice no ve la alteración |
+| Térmico | Subir ECT 8 °C | Bloqueo por falta de comparabilidad |
+| Carga | Subir carga OBD 7 puntos | Bloqueo por falta de comparabilidad |
+
+**Lectura crítica:** cumplir las pruebas automáticas de este harness valida que los ejemplos adversariales exhiben exactamente los puntos débiles predefinidos; **no valida el método**, ni demuestra cuánto desgaste físico detectaría. Los valores +11/+14/-14 son perturbaciones artificiales ilustrativas, no errores típicos inferidos de un taller. Distinguir sensor degradado de motor degradado requiere sensores redundantes, instrumentos calibrados, pruebas físicas y modelado causal. La estructura actual no controla estado cerrado de mezcla, banco de inyección, refrigeración por ventilador, software/adaptaciones ECU o posición de accesorios, por lo que **no se autoriza puntuar vehículos reales**, aunque un operador declare condiciones equivalentes.
+
+### Criterios de falsación pre-registrados para la futura fase con datos reales
+
+1. **A–A sin intervención:** repetir el protocolo en días y operadores diferentes. Si el modelo detecta sistemáticamente «mejora» en ausencia de intervención, rechazar el índice.
+2. **A–B intervenido:** medir al menos dos sesiones antes/después, registrar fecha, trabajo efectivamente realizado, aceite, combustible, carga eléctrica, temperatura ambiente y calibración del lector. Comparar contra el A–A y controlar regresión a la media.
+3. **Prueba instrumental ciega:** introducir errores conocidos de un sensor o comparar con referencia independiente, sin revelar al algoritmo la condición hasta cerrar su predicción.
+4. **Prueba mecánica ciega:** contraste contra compresión/leak-down, blow-by, lubricación y verificaciones de componentes; no utilizar la propia telemetría OBD como etiqueta de desgaste.
+5. **Validación externa:** separación por ID de motor, taller, marca/familia, entorno, y cohorte temporal; reportar abstenciones, falsos positivos, incertidumbre por motor (no por fila) y calibración bajo cambio de dominio.
+6. **Regla de parada:** sin verdad-terreno de desgaste no entrenar ni publicar equivalencia kilométrica, edad, porcentaje de salud o RUL.
+
+## Nuevos candidatos para el catálogo de evidencias
+
+Estas fuentes se localizaron en sus fichas públicas; **no se han descargado ni inspeccionado sus registros**. No son sustitutos de una cohorte con OBD, identificación por motor y desgaste medido.
+
+| Fuente | Qué podría aportar | Advertencia |
+| --- | --- | --- |
+| [Aceites de pick-ups diésel 2,5 L, Palacio 2021](https://data.mendeley.com/datasets/49v4wjwp5n/1) | Composición elemental por XRF en lubricantes usados; posible biomarcador físico complementario | El metal en el aceite depende también de kilómetros desde el cambio, filtro, aporte externo, rellenados, laboratorio y materiales; sin trazabilidad unidad/servicio no significa edad física |
+| [DLR Turbofan Sensor FDI benchmark v1.1](https://doi.org/10.5281/zenodo.20053482) | Señales sintéticas con desgaste de turbina, fallas de sensor, deriva y variabilidad operativa; sirve para refutar la confusión sensor/activo | No es un motor automotriz ni datos reales; no validar edad de automóvil |
+| [Lenze-GD geared motor run-to-failure](https://zenodo.org/records/11162448) | Tres repeticiones hasta fallo con condiciones de carga documentadas | Motorreductor industrial no equiparable a motor de combustión en uso |
+| [Marine Engine Fault 2026](https://zenodo.org/records/19857425) | Datos reales de banco de un motor marino con cinco fallas inducidas y referencia nominal | Falla inducida y carga controlada, no envejecimiento longitudinal de automóviles |
+
+### Consecuencia para diseño de base de datos
+
+El registro de estudio futuro deberá guardar, además de lecturas: \`anonymizedEngineId\`, \`independentSessionId\`, \`captureTime\`, \`prePostServicePhase\`, \`serviceEventId\`, \`engineFamily\`, \`sensorSource\`, \`closedLoopEvidence\`, \`ambientAndAccessoryContext\`, \`instrumentCalibration\` y \`independentMechanicalReference\`. No introducir VIN, patente, propietario ni otros identificadores personales en artefactos de CI. La ausencia de estos metadatos bloqueará inferencias sobre edad, incluso si existen cientos de miles de filas.
