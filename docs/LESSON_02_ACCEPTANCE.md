@@ -1,6 +1,6 @@
 # Lección 02 — DTC y parámetros: revisión crítica
 
-**Estado:** CANDIDATA, pendiente de CI exacta del commit del hito. El umbral exigido es **≥9/10 en diseño interno** y cero fallos críticos; la aceptación NO implica retención demostrada en novatos ni destreza física.
+**Estado:** ACEPTADA en la puerta de **diseño interno 9,2/10**, cero fallos críticos detectados por CI. Validación exacta del hito `c19669fab4e785b65fb367277c44b7ffc0590ed0`: [Actions #40789604462](https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40789604462), `verify: success` (unidad, build, E2E focalizado y suite completa Chromium/WebKit/WebKit móvil). La aceptación NO equivale a aprendizaje demostrado en novatos, destreza física ni calidad de las respuestas abiertas.
 
 ## Alcance verificable
 
@@ -30,7 +30,7 @@
 | Trazabilidad, persistencia y accesibilidad verificadas | 2,0 | 1,6 |
 | **Total condicionado a CI completa** | **10** | **9,2** |
 
-**9,2 es una proyección de la rúbrica de diseño, no una calificación observada**. Solo se convertirá en aceptación cuando la CI completa del SHA publicado pase y no haya defectos críticos; se actualiza este documento con la ejecución reproducible. Si falla, corregir antes de comenzar lección 03.
+**9,2/10 es una evaluación crítica interna de diseño y verificabilidad**, convertida en puerta de aceptación tras obtener CI exacta completa verde en `c19669fa`. **No es una puntuación de conocimiento humano ni revisión observacional**; los estudios de novatos, retención a 24–72 h y práctica instrumentada siguen pendientes. El hito se publica únicamente cuando también finalice el publicador de Pages.
 
 ## Siguiente lección
 La lección 03 corresponde a `scope`: lectura de señales de osciloscopio. Debe tener chequeo de escala/tiempo/trigger/referencia, experimento de señales, comparación de hipótesis, errores comunes, transferencia independiente y evidencia versionada antes de superar la puerta ≥9/10.
