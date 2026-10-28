@@ -80,3 +80,28 @@ test('MA v0: local measurement features are not global wear measurements',()=>{
  assert.equal(a.structuralWear,null);
  assert.equal(a.remainingUsefulLife,null);
 });
+
+test('MA v0: real-world uploaded/unverified readings never receive an arbitrary age or functional score',()=>{
+ const {before,after}=syntheticServicePair();
+ before.source='provided_obd_unverified';after.source='provided_obd_unverified';
+ const p=compareMechanicalSnapshots(before,after);
+ assert.equal(p.comparable,true);
+ assert.equal(p.deltaDeviationIndex,null);
+ assert.equal(p.before.deviationIndex,null);
+ assert.equal(p.after.deviationIndex,null);
+ assert.equal(p.before.scoringStatus,'not_calibrated_external_data');
+ assert.match(p.interpretation,/SIN puntuación/);
+ assert.equal(p.before.mechanicalAgeEquivalentKm,null);
+});
+test('MA v0: huge logging gaps and implausible sample frequencies reject the measurement protocol',()=>{
+ const {before}=syntheticServicePair();
+ const delayed=copy(before);
+ delayed.samples.forEach((s,i)=>{if(i>=20)s.timeMs+=12000;});
+ const a=evaluateMechanicalSnapshot(delayed);
+ assert.equal(a.status,'inconclusive');
+ assert.equal(a.deviationIndex,null);
+ assert.match(a.exclusion.join(' '),/Muestreo irregular/);
+ const tooFast=copy(before);tooFast.samples.forEach((s,i)=>s.timeMs=i*30);
+ const b=evaluateMechanicalSnapshot(tooFast);
+ assert.match(b.exclusion.join(' '),/Muestreo irregular/);
+});
