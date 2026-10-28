@@ -1,3 +1,4 @@
+import{readFileSync}from'node:fs';
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 
@@ -92,7 +93,9 @@ test('PWA instalada en scope Pages: funciona sin red y sin datos OEM',async({pag
  await page.goto('./');
  await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
  await page.waitForFunction(()=>Boolean(navigator.serviceWorker?.controller),null,{timeout:30_000});
- expect((await page.evaluate(()=>caches.keys())).includes('autolab-academy-v92')).toBe(true);
+ const expectedCache=/const CACHE="(autolab-academy-v\d+)"/.exec(readFileSync('sw.js','utf8'))?.[1];
+ expect(expectedCache).toBeTruthy();
+ await expect.poll(()=>page.evaluate(()=>caches.keys())).toContain(expectedCache);
  await context.setOffline(true);
  await page.reload();
  await expect(page.getByRole('heading',{name:/Aprendé a encontrar la causa/i})).toBeVisible();
