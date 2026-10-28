@@ -1,6 +1,6 @@
 import test from"node:test";
 import assert from"node:assert/strict";
-import{VOLT_DROP_HOLDOUT_CASES,VOLT_DROP_HOLDOUT_ID,heldOutVoltageReading,gradeVoltageDropHoldout,freezeVoltageDropHypothesis,compareVoltageDropHypotheses}from"../src/volt-drop-transfer.js";
+import{VOLT_DROP_HOLDOUT_CASES,VOLT_DROP_HOLDOUT_ID,heldOutVoltageReading,gradeVoltageDropHoldout,freezeVoltageDropHypothesis,compareVoltageDropHypotheses,VOLT_DROP_FALSIFIERS}from"../src/volt-drop-transfer.js";
 import{lessonEvidence,learningEvidenceOverview}from"../src/learning-evidence.js";
 import{learningStages}from"../src/learning-path.js";
 
@@ -23,15 +23,15 @@ test("full measurement, causal choice and falsifier are necessary; numeric uncer
   // A wrong pre-data hypothesis does not penalize a justified revision.
   const initial=c.id==="positive"?"return":"positive";
   const prior=freezeVoltageDropHypothesis({caseId:c.id,hypothesis:initial,prediction:initial,firstProbe:"positive",confidence:"low"});
-  const good=gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction,diagnosis:c.id,falsifier:0,prior});
+  const good=gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior});
   assert.equal(good.score,100);assert.equal(good.passed,true);
   assert.equal(good.prior.hypothesis,initial);
   assert.equal(good.evolution.changed,true);
-  const bad=gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction:Number(loadPrediction)+0.5,diagnosis:c.id==="positive"?"return":"positive",falsifier:1,prior});
+  const bad=gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction:Number(loadPrediction)+0.5,diagnosis:c.id==="positive"?"return":"positive",falsifier:(VOLT_DROP_FALSIFIERS[c.id].answer+1)%3,prior});
   assert.equal(bad.passed,false);assert.equal(bad.score,0);
-  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["positive"],loadPrediction,diagnosis:c.id,falsifier:0,prior}),RangeError);
-  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["return","positive"],loadPrediction,diagnosis:c.id,falsifier:0,prior}),RangeError);
-  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction,diagnosis:c.id,falsifier:0}),RangeError);
+  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["positive"],loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior}),RangeError);
+  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:["return","positive"],loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer,prior}),RangeError);
+  assert.throws(()=>gradeVoltageDropHoldout({caseId:c.id,measurements:measures,loadPrediction,diagnosis:c.id,falsifier:VOLT_DROP_FALSIFIERS[c.id].answer}),RangeError);
  }
  assert.throws(()=>heldOutVoltageReading("missing","load"),RangeError);
  assert.throws(()=>heldOutVoltageReading("positive","nonsense"),RangeError);
@@ -70,7 +70,7 @@ test("hypothesis lock rejects invented cases, inconsistent predictions, and unsu
  assert.match(evolution.interpretation,/incertidumbre/);
  assert.equal(Object.isFrozen(evolution),true);
  const fromFrozen=gradeVoltageDropHoldout({caseId:"balanced",measurements:["return","positive"],
-  loadPrediction:heldOutVoltageReading("balanced","load"),diagnosis:"balanced",falsifier:0,prior:frozen});
+  loadPrediction:heldOutVoltageReading("balanced","load"),diagnosis:"balanced",falsifier:VOLT_DROP_FALSIFIERS.balanced.answer,prior:frozen});
  assert.equal(fromFrozen.score,100);
  assert.equal(fromFrozen.evolution.initial,"undetermined");
  assert.equal(fromFrozen.evolution.final,"balanced");
@@ -80,7 +80,7 @@ test("hypothesis lock rejects invented cases, inconsistent predictions, and unsu
 test("no reward for guessing the frozen hypothesis, and no penalty for revising it",()=>{
  const prior=freezeVoltageDropHypothesis({caseId:"positive",hypothesis:"positive",prediction:"positive",firstProbe:"return",confidence:"high"});
  const stable=gradeVoltageDropHoldout({caseId:"positive",measurements:["return","positive"],
-  loadPrediction:heldOutVoltageReading("positive","load"),diagnosis:"positive",falsifier:0,prior});
+  loadPrediction:heldOutVoltageReading("positive","load"),diagnosis:"positive",falsifier:VOLT_DROP_FALSIFIERS.positive.answer,prior});
  assert.equal(stable.evolution.changed,false);
  assert.match(stable.evolution.interpretation,/compatible/);
  assert.equal(stable.score,100);
@@ -89,7 +89,7 @@ test("no reward for guessing the frozen hypothesis, and no penalty for revising 
 test("feedback never calls an incorrect final diagnosis evidence-supported",()=>{
  const prior=freezeVoltageDropHypothesis({caseId:"balanced",hypothesis:"positive",prediction:"positive",firstProbe:"positive"});
  const outcome=gradeVoltageDropHoldout({caseId:"balanced",measurements:["positive","return"],
-  loadPrediction:heldOutVoltageReading("balanced","load"),diagnosis:"positive",falsifier:0,prior});
+  loadPrediction:heldOutVoltageReading("balanced","load"),diagnosis:"positive",falsifier:VOLT_DROP_FALSIFIERS.balanced.answer,prior});
  assert.equal(outcome.causal,false);
  assert.equal(outcome.evolution.evidenceSupported,false);
  assert.match(outcome.evolution.interpretation,/no coincide con las mediciones/);
@@ -97,4 +97,22 @@ test("feedback never calls an incorrect final diagnosis evidence-supported",()=>
  const revisedWrong=compareVoltageDropHypotheses(prior,"return",{supported:false});
  assert.equal(revisedWrong.changed,true);
  assert.match(revisedWrong.interpretation,/todavía insuficiente/);
+});
+
+test("falsifier options vary by case and only contradictory evidence earns falsification credit",()=>{
+ const cases=["balanced","positive","return"];
+ assert.deepEqual(cases.map(id=>VOLT_DROP_FALSIFIERS[id].answer),[2,0,1]);
+ for(const id of cases){
+  const p=freezeVoltageDropHypothesis({caseId:id,hypothesis:"undetermined",prediction:"need-evidence",firstProbe:"positive"});
+  const d={caseId:id,measurements:["positive","return"],loadPrediction:heldOutVoltageReading(id,"load"),diagnosis:id,prior:p};
+  const good=gradeVoltageDropHoldout({...d,falsifier:VOLT_DROP_FALSIFIERS[id].answer});
+  assert.equal(good.falsified,true);
+  assert.equal(good.expected.falsifier,VOLT_DROP_FALSIFIERS[id].answer);
+  for(let option=0;option<3;option++)if(option!==VOLT_DROP_FALSIFIERS[id].answer){
+   const incorrect=gradeVoltageDropHoldout({...d,falsifier:option});
+   assert.equal(incorrect.falsified,false);
+   assert.equal(incorrect.score,70);
+   assert.equal(incorrect.passed,false);
+  }
+ }
 });
