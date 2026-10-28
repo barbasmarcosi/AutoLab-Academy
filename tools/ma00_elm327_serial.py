@@ -215,6 +215,7 @@ def capture_mode01(
         "adapterModel": adapter_model, "softwareVersion": VERSION,
         "capturedAt": wall, "source": "provided_obd_unverified",
         "clock": "host_monotonic_receive", "conditions": None, "events": events,
+        "plannedCycles": cycles, "expectedEventCount": cycles * len(active_pids),
         "captureAborted": capture_aborted, "abortReason": abort_reason,
         "supportedPidMaskRawHex": supported_raw.hex().upper(),
         "supportedPids": sorted(supported),
