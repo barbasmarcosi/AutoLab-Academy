@@ -65,3 +65,14 @@ Documentos relacionados: MECHANICAL_AGE_RAW_CAPTURE_AA_V1.md y MECHANICAL_AGE_AC
 **Pruebas:** rechazo de máscara ambigua o incompatible, falta de PIDs indispensables, canal IAT opcional, timeout incompleto y prohibición de consultar otro PID después de una trama no confiable.
 
 Todo esto se verificó con un adaptador falso en software: el funcionamiento físico, la latencia real, el estado de lazo cerrado y la exactitud del sensor **siguen sin validarse**. Un fallo real debe dar lugar a una nueva captura identificada por un nuevo sessionId.
+
+
+## R3.3 — Contrato de evidencia entre Python y AutoLab
+
+**Hallazgo adversarial:** escribir el texto hexadecimal original y, separadamente, el número decodificado no obliga a que ambos representen el mismo valor. Un archivo transformado podría mostrar 800 RPM mientras sus bytes describen otra velocidad. También podría declararse una captura completa aunque falten respuestas.
+
+**Corrección implementada:** src/mechanical-age-serial-integrity.js decodifica de nuevo los bytes originales del Servicio 01 dentro de la PWA, sin consultar el algoritmo Python. Si el valor y los bytes no coinciden, los eventos exceden el plan, la máscara de compatibilidad no corresponde, se fabrican PIDs, se altera el estado de aborto o hay muestras después de una trama fallida, **se rechaza todo el expediente**. El capturador añade plannedCycles y expectedEventCount para impedir que una serie truncada se presente como completa. El auditor JS ya ejecuta este contrato al importar registros con schema ma00-local-serial-receipts-v1.
+
+**Prueba cruzada reproducible:** tests/science/ma00_fake_serial_fixture.py ejecuta el *mismo capturador serial Python* sobre bytes ELM simulados, generando 32 ciclos. tests/mechanical-age-python-serial.test.js procesa esa captura directamente con el auditor JS y ensaya manipulaciones maliciosas/accidentales de valores, HEX, cantidad de muestras, máscara, timestamps y estado de interrupción. La interfaz también se prueba con esos datos. Un marcador testOnlyFakeTransport prohíbe tomar el dispositivo falso como evidencia física A–A. La CI corre Python y Node, y el módulo JS se incluye en la caché offline.
+
+**Límite explícito:** consistencia interna no equivale a autenticidad, integridad criptográfica, calibración instrumental, simultaneidad de PIDs o verdad-terreno del desgaste. Si un tercero manipula coherentemente todos los campos, la validación interna no puede detectarlo; para autenticidad se necesitarían protocolos externos y evidencia independiente. No hay ningún indicador de edad mecánica disponible para capturas reales.
