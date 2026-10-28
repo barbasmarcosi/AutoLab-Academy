@@ -32,6 +32,8 @@ jobs:
         run: npm run build:site
       - name: Install Chromium and WebKit dependencies
         run: npx playwright install --with-deps chromium webkit
+      - name: Focused pedagogy and offline E2E (Chromium, WebKit, mobile WebKit)
+        run: npx playwright test tests/e2e/volt-drop-pedagogy.spec.js tests/e2e/academy.spec.js tests/e2e/sw-upgrade.spec.js --grep 'lesson 1|first lesson|PWA instalada|actualización v38'
       - name: Browser E2E (Chromium/WebKit, diagnostics, backup, offline, a11y)
         run: npm run test:e2e
       - name: Upload Playwright artifacts on failure
