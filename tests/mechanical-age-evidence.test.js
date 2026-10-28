@@ -61,6 +61,9 @@ test('MA00 deliberate metadata contradictions and confounders cause abstention',
   (a,b)=>b.measurementContext.fuelControl='open_loop_observed',
   (a,b)=>b.measurementContext.clock='unknown',
   (a,b)=>b.measurementContext.capturedAt='2026-10-02',
+  (a,b)=>b.measurementContext.capturedAt='2026-02-30T11:00:00Z',
+  (a,b)=>b.measurementContext.capturedAt='2026-10-02T11:00:00+15:00',
+  (a,b)=>b.measurementContext.capturedAt='2026-10-02T25:00:00Z',
   (a,b)=>b.measurementContext.serviceEventId='invalid space',
  ];
  for(const change of mutators){
