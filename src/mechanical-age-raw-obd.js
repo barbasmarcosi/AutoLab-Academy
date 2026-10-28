@@ -104,6 +104,7 @@ function gateAA(audits,sessions){
  if(new Set(audits.map(a=>a.sessionId)).size!==audits.length)blockers.push('ID de sesión reutilizado');
  const times=audits.map(a=>Date.parse(a.capturedAt));
  for(let i=1;i<times.length;i++)if(times[i]<=times[i-1])blockers.push('Fechas de captura no ordenadas/distintas');
+ if(sessions.some(x=>x.captureAborted===true))blockers.push('Captura interrumpida o desincronizada: no valida para A–A');
  const contexts=sessions.map(x=>x.conditions);
  if(contexts.some(c=>!c||typeof c!=='object'||c.intervention!=='none'||c.fuelControl!=='closed_loop_observed'||c.ac!=='off_observed'||c.coolingFan!=='stable_observed'||c.electricalLoads!=='stable_observed'||!finite(c.ambientC)||c.ambientC< -40||c.ambientC>60)){
   blockers.push('Sin evidencia documental de A–A sin intervención y condiciones estables');
