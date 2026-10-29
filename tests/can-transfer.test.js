@@ -32,7 +32,7 @@ test('case frozen plan and four evidence entries are necessary, prior may be wro
   const result=gradeCanHoldout(answer);
   assert.equal(result.score,100);assert.equal(result.passed,true);
   assert.equal(result.changed,true);assert.equal(result.qualitativeReview,'pending');
-  assert.equal(gradeCanHoldout({...answer,finalEnds:3}).score,75);
+  assert.equal(gradeCanHoldout({...answer,finalEnds:((120/c.resistanceOhm)%3)+1}).score,75);
   assert.equal(gradeCanHoldout({...answer,decisiveTest:'differential'}).score,85);
   assert.equal(gradeCanHoldout({...answer,falsifier:(answer.falsifier+1)%3}).score,90);
   assert.throws(()=>gradeCanHoldout({...answer,measurements:measurements.slice(1)}),RangeError);
