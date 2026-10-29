@@ -92,6 +92,17 @@ export function auditRawObdSession(session){
    medianHostRoundTripMs:sortedMedian(g.roundTripMs),unmeasuredRoundTripCount:g.undocumentedLatency
   };
  }
+ // Source references are offsets into the ORIGINAL input session's event
+ // array, not proofs that the bytes came from a particular ECU or vehicle.
+ const sourceTrace={
+  version:'ma00-r13-ordinal-source-references-v1',
+  sessionReference:'session:'+sessionId,
+  eventCount:events.length,
+  pidEventIndexes:Object.fromEntries(Object.keys(channels).map(pid=>[
+   pid,events.flatMap((e,index)=>e.pid===pid?[index]:[])
+  ])),
+  independentlyAuthenticated:false,eventIndexIsNotAcquisitionTimestamp:true
+ };
  const observability=assessMA00Observability({
   powertrain:session.powertrain??'unknown',fuel:session.fuel??'unknown',
   control:session.conditions?.fuelControl??'unknown',
@@ -100,7 +111,7 @@ export function auditRawObdSession(session){
  return assertMA00Report({
   version:RAW_OBD_VERSION,sessionId,vehicleAlias,engineFamily,adapterModel,softwareVersion,
   source,capturedAt,clock,eventCount:events.length,elapsedHostReceiptMs:events.at(-1).receivedAtMs-events[0].receivedAtMs,
-  channels,warnings,requestTimeMissingCount:requestUnknown,traceIntegrity,observability,
+  channels,warnings,requestTimeMissingCount:requestUnknown,traceIntegrity,observability,sourceTrace,
   hostReceiptTimePresent:true,sensorAcquisitionTimeKnown:false,simultaneityVerified:false,
   estimatedAgeKm:null,structuralWear:null,remainingUsefulLife:null,
   caveat:'Las marcas host son de RECEPCIÓN, no de muestreo en ECU. Latencia host/ECU no está validada.'
