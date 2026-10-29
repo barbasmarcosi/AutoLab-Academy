@@ -27,7 +27,7 @@ export const REPORT_FIELDS=Object.freeze({
  }),
  raw_session:Object.freeze({
   metadata:'version sessionId vehicleAlias engineFamily adapterModel softwareVersion source capturedAt clock eventCount elapsedHostReceiptMs requestTimeMissingCount caveat',
-  container:'channels warnings traceIntegrity',
+  container:'channels warnings traceIntegrity observability',
   observation:'hostReceiptTimePresent',
   unknown:'sensorAcquisitionTimeKnown simultaneityVerified',
   blocked:'estimatedAgeKm structuralWear remainingUsefulLife',
@@ -46,6 +46,7 @@ export const REPORT_FIELDS=Object.freeze({
  })
 });
 export const REPORT_SUBFIELDS=Object.freeze({
+ raw_session:Object.freeze({observability:'version powertrain fuel control status mode requiredPids missingPids supportedPids unobservableMechanisms blockers allowableInterpretation independentlyVerified'}),
  snapshot:Object.freeze({features:'medianRpm rpmRobustSigma medianEctC medianLoadPct medianIatC medianCombinedTrimPct temperatureRange loadRange',
   observability:'version powertrain fuel control status mode requiredPids missingPids supportedPids unobservableMechanisms blockers allowableInterpretation independentlyVerified'}),
  aa:Object.freeze({observedChanges:'*pid-map-session-deltas-only*'}),
