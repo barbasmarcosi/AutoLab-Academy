@@ -35,7 +35,7 @@ test('lesson 4: reserved CAN case freezes plan, tests alternatives, saves and ex
  await expect(h.getByText('CASO RESERVADO: ¿defecto o arbitraje normal?')).toBeVisible();
  await expect(h).toContainText('Banco N01');
  await h.locator('[data-can-h="freeze"]').click();
- await expect(h.locator('#can-h-status')).toContainText('Congelá hipótesis');
+ await expect(h.locator('#can-h-status')).toContainText('Elegí una predicción explícita');
  await h.locator('#can-h-prior').selectOption('supply');
  await h.locator('#can-h-first').selectOption('supply');
  await h.locator('#can-h-prediction').selectOption('2');
