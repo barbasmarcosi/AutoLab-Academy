@@ -23,7 +23,8 @@ test('lesson 6: guided safety cannot pass unsafe choices, reserved transfer free
  await guided.locator('#hv-g-decision').selectOption('unsafe');
  await guided.locator('#hv-g-risk').selectOption('thermal');
  await guided.locator('[data-hv-g="check"]').click();
- await expect(guided.locator('#hv-g-feedback')).toContainText('No es una decisión segura');
+ await expect(guided.locator('#hv-g-feedback')).toContainText('No avanzamos.');
+ await expect(guided.locator('#hv-g-feedback')).toContainText('contactá servicios locales de emergencia');
  for(const [d,r]of [['emergency','thermal'],['refer','authority'],['inform','none']]){
   await guided.locator('#hv-g-decision').selectOption(d);
   await guided.locator('#hv-g-risk').selectOption(r);
