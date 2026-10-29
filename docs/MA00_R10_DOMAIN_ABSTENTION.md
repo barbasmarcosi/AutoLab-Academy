@@ -47,3 +47,7 @@ GitHub Actions ejecuta tests locales en cada push. El archivo original **solo** 
 ## Implicancia para MA00 automotriz
 
 El método es un **ensayo de detección de regímenes fuera de soporte**, no un detector real OBD-II. FD002 usa ajustes de un turbofán simulado, no PID de autos, y un motor de combustión podría entrar en soporte de señales sin compartir mecanismos de desgaste. La edad mecánica, porcentaje de salud y RUL de automotores permanecen bloqueados hasta tener ground truth físico y validación entre motores.
+
+## Activación única de FD002 TEST
+
+La implementación, umbral y criterios se fijaron antes de ejecutar los datos oficiales. La CI de pruebas Python, JavaScript y compilación ha pasado; los E2E del commit de preparación siguen aparte. Se autoriza una única lectura de FD002 TEST y su RUL, con el detector calibrado únicamente en FD001 TRAIN. **No ajustar nada con los resultados FD002**, incluso si la cobertura es cero o el error es peor. La corrida deberá subir exclusivamente métricas agregadas.
