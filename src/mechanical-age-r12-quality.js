@@ -111,6 +111,7 @@ export function assessObdMultiSessionRepeatability(sessions){
    descriptiveBandHalfWidth:round(descriptiveBand),
    subsequentSessionMedians:subsequent.map(round),
    subsequentMinusReference:deltas.map(round),
+   sourceSessionRefs:aa.sessionAudits.map(a=>a.sourceTrace.sessionReference),
    sessionsOutsideObservedReferenceBand:outside.filter(Boolean).length,
    anyOutsideObservedReferenceBand:outside.some(Boolean),
    thresholdMeaning:'observed_four_session_spread_or_two_nominal_readout_steps_NOT_a_fault_threshold'
