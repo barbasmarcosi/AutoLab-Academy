@@ -37,6 +37,13 @@ const time=x=>{
  return Number.isFinite(Date.parse(x));
 };
 const medianDifference=(a,b)=>Number((b-a).toFixed(4));
+const EVENT_FIELDS=new Set(['pid','status','unit','value','requestAtMs','receivedAtMs',
+ 'rawResponseHex','rawFrameSizeBytes','parseError','fuelSystem2Status']);
+const CONTEXT_FIELDS=new Set(['intervention','fuelControl','ac','coolingFan','electricalLoads','ambientC']);
+const INSTRUMENT_FIELDS=new Set(['hostRequestTimestamp','hostReceiptTimestamp','ecuAcquisitionTimestampKnown',
+ 'transportLatencyCalibrated','protocol','serviceCommandsSent','commandListMeans','testOnlyFakeTransport']);
+const unexpected=(obj,allowed)=>Object.keys(obj).filter(key=>!allowed.has(key));
+
 
 export function auditRawObdSession(session){
  if(!session||typeof session!=='object'||Array.isArray(session))throw TypeError('Sesión OBD inválida');
@@ -45,12 +52,23 @@ export function auditRawObdSession(session){
  if(!['synthetic','provided_obd_unverified'].includes(source)||clock!=='host_monotonic_receive')throw RangeError('Procedencia o reloj no reconocidos');
  if(!time(capturedAt))throw RangeError('Hora de inicio con zona horaria requerida');
  if(!Array.isArray(events)||events.length===0||events.length>20000)throw RangeError('Eventos OBD: 1 a 20000');
+ if(session.conditions!==undefined&&session.conditions!==null){
+  if(typeof session.conditions!=='object'||Array.isArray(session.conditions)||
+     unexpected(session.conditions,CONTEXT_FIELDS).length)
+   throw RangeError('Contexto OBD con campos ajenos al contrato');
+ }
+ if(session.instrumentClaims!==undefined){
+  if(!session.instrumentClaims||typeof session.instrumentClaims!=='object'||
+     Array.isArray(session.instrumentClaims)||unexpected(session.instrumentClaims,INSTRUMENT_FIELDS).length)
+   throw RangeError('Declaraciones instrumentales no registradas');
+ }
  const traceIntegrity=auditSerialTrace(session);
  if(traceIntegrity.applies&&!traceIntegrity.internallyConsistent)throw RangeError('Traza serial inconsistente: '+traceIntegrity.errors.join('; '));
  const grouped=Object.fromEntries(Object.entries(PID).map(([pid,def])=>[pid,{...def,attempts:0,success:0,failures:0,values:[],receiptTimes:[],roundTripMs:[],undocumentedLatency:0}]));
  let last=-Infinity,requestUnknown=0;
  for(const [i,e] of events.entries()){
   if(!e||typeof e!=='object'||Array.isArray(e)||!Object.hasOwn(PID,e.pid))throw RangeError('PID no autorizado en evento '+i);
+  if(unexpected(e,EVENT_FIELDS).length)throw RangeError('Evento OBD con campos sin contrato en evento '+i);
   const g=grouped[e.pid];
   if(!finite(e.receivedAtMs)||e.receivedAtMs<0||e.receivedAtMs<last||e.receivedAtMs>86400000)throw RangeError('Reloj host fuera de orden/rango en evento '+i);
   last=e.receivedAtMs;
@@ -124,6 +142,8 @@ function gateAA(audits,sessions){
  if(new Set(audits.map(a=>a.engineFamily)).size!==1)blockers.push('Familias de motor distintas');
  if(new Set(audits.map(a=>a.adapterModel)).size!==1||new Set(audits.map(a=>a.softwareVersion)).size!==1)blockers.push('Capturador distinto/no equivalente');
  if(new Set(audits.map(a=>a.source)).size!==1)blockers.push('Proveniencia no uniforme');
+ if(audits.some(a=>a.observability.status!=='descriptive_only'))
+  blockers.push('Tecnología, combustible, lazo cerrado o PIDs sin observabilidad para comparar trims; solo señales individuales');
  if(new Set(audits.map(a=>a.sessionId)).size!==audits.length)blockers.push('ID de sesión reutilizado');
  const times=audits.map(a=>Date.parse(a.capturedAt));
  for(let i=1;i<times.length;i++)if(times[i]<=times[i-1])blockers.push('Fechas de captura no ordenadas/distintas');
@@ -211,6 +231,7 @@ export function syntheticAAReceiptPair(){
   sessions.push({
    sessionId:'aa-session-'+(k+1),vehicleAlias:'demo-unit-001',
    engineFamily:'demo-gasoline-inline4',adapterModel:'SIMULATED HOST BRIDGE',
+   powertrain:'gasoline_ice',fuel:'gasoline',
    softwareVersion:'MA00 synthetic v1',source:'synthetic',
    clock:'host_monotonic_receive',capturedAt:'2026-10-'+String(27+k).padStart(2,'0')+'T13:00:00Z',
    conditions:{intervention:'none',fuelControl:'closed_loop_observed',ac:'off_observed',
