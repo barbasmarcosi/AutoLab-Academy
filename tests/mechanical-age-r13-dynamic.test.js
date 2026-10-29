@@ -86,3 +86,35 @@ test('R13.1: repeated-sessions and falsification subsidiary claims cannot gain p
  const h=copy(f);h.controls[0].secretVerifiedDiagnosis='sensor failed';
  assert.throws(()=>assertMA00Report(h,'falsification',{source:'synthetic'}),/R13 afirmación no sustentada/);
 });
+
+
+test('R13.1: input schemas reject unrecognized OBD claims even before building a report',()=>{
+ const edits=[
+  x=>{x.events[3].healthScore=95;},
+  x=>{x.events[1].rawWear=true;},
+  x=>{x.conditions.structuralWear=0;},
+  x=>{x.instrumentClaims={ecuAcquisitionTimestampKnown:false,transportLatencyCalibrated:false,confirmedDiagnosis:'mechanical_fatigue'};},
+ ];
+ for(const edit of edits){
+  const x=syntheticAAReceiptPair()[0];edit(x);
+  assert.throws(()=>auditRawObdSession(x),{name:'RangeError'});
+ }
+});
+test('R13.1: unknown or mismatched powertrains cannot silently compare gasoline trims',()=>{
+ const variants=[
+  ['diesel_ice','diesel'],['gasoline_ice','gnc'],
+  ['hybrid','mixed'],['battery_electric','electric'],['unknown','unknown']
+ ];
+ for(const [powertrain,fuel] of variants){
+  const data=syntheticAAReceiptPair();
+  for(const s of data){s.powertrain=powertrain;s.fuel=fuel;}
+  const r=evaluateAAWithoutService(data);
+  assert.equal(r.comparable,false,powertrain);
+  assert.equal(r.observedChanges,null,powertrain);
+  assert.match(r.blockers.join(' '),/Tecnología|combustible|observabilidad/);
+  assert.equal(r.mechanicalAgeKm,null);
+ }
+ const missing=syntheticAAReceiptPair();
+ delete missing[1].powertrain;
+ assert.equal(evaluateAAWithoutService(missing).comparable,false);
+});
