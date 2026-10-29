@@ -51,3 +51,8 @@ Esta es una rúbrica crítica **de diseño**, no un experimento de aprendizaje, 
 - El modelo no cubre reflectometría, integridad de señal temporal, bit stuffing, ACK, carga real, incertidumbre instrumental ni condiciones peligrosas.
 
 **Siguiente lección tras la aceptación de la cuarta:** `bms`, SOC vs SOH y estimación con incertidumbre.
+
+## Resultados iniciales (2026-10-28/29)
+- [CI focalizada #40793511720](https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40793511720): **success** para el núcleo CAN (unitarias, build del sitio, navegación focalizada y casos reservados).
+- La batería de navegador obligó a actualizar una expectativa de guardia de formulario: ahora es **imposible** dejar vacía la predicción antes de congelarla o de entregar el equivalente de terminadores. También hubo tests de valores erróneos que se adaptaron a un caso nuevo de tres terminadores, sin cambiar el criterio científico.
+- **No existe aceptación de 9,0/10 ni publicación confirmada** de esta lección hasta que la suite completa del hito conjunto y el job de Pages culminen verde.

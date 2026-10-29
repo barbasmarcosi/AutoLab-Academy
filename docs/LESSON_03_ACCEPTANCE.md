@@ -35,3 +35,8 @@
 
 ## Próximo paso
 La lección 04 es `can`. Reutilizar modelos y redes CAN existentes, empezando por diagnóstico de conocimientos previos, contraste entre diferencial y común, terminación, arbitraje, pruebas seguras, caso reservado y rúbrica independiente; no confundir captura simulada con autorización de manipular una red real.
+
+## Revisión de CI completa (primer hito 03, 2026-10-28/29)
+- [Run #40792154579](https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40792154579): **438 E2E aprobados, 3 fallos del mismo test histórico** (`tests/e2e/waveform-inquiry.spec.js` en Chromium, WebKit y móvil). El test antiguo atribuía «Práctica aprobada» a la lección `scope` solo por completar el banco guiado, ignorando el requisito nuevo del caso reservado.
+- Corrección **sin relajar la puerta**: el test ahora comprueba «Banco guiado completado · caso independiente sin resolver» para `scope` y conserva el resto de las comprobaciones. No se modificó el simulador para satisfacer un test viejo.
+- La lección sigue **no aceptada como hito publicado** hasta que una nueva matriz completa certifique la versión corregida. El hito conjunto con lección 04 incluirá la evidencia exacta.

@@ -37,3 +37,8 @@ The resolution does not require admin-level environment edits or merging PR #56:
 - Desarrollo: `src/scope-lesson.js`, `src/scope-transfer.js`, prácticas vinculadas y tests `scope-lesson` / `scope-transfer`.
 - Fuente de verdad: `docs/LESSON_03_ACCEPTANCE.md`. El puntaje de diseño 9,1 es provisional hasta la CI completa exacta.
 - Hito identificado por `[pages-milestone]`; el publicador en `main` recompila e instala **exactamente el SHA validado**. Una versión anterior permanece activa si la ejecución falla.
+
+## Candidato conjunto de lecciones 03+04 — 2026-10-28/29
+- Se corrige el run completo fallido de lección 03 (438 correctos, tres expectativas desactualizadas de un único test) y se incorpora CAN con banco de terminación/arbitraje, nueve investigaciones y su CI focalizada.
+- Publicar **ambas lecciones juntas en una sola versión** del sitio para evitar sobrescribir un hito nuevo con el posterior cierre de un workflow anterior.
+- La puerta es el commit exacto marcado `[pages-milestone]`, `verify: success` y `Publish validated AutoLab Academy milestones to Pages: deploy success`. Hasta entonces la web conserva el hito 02.
