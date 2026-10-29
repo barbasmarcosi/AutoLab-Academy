@@ -331,8 +331,8 @@
       "descriptiveBandHalfWidth",
       "subsequentSessionMedians",
       "subsequentMinusReference",
-      "sessionsOutsideObservedReferenceBand",
       "sourceSessionRefs",
+      "sessionsOutsideObservedReferenceBand",
       "anyOutsideObservedReferenceBand",
       "thresholdMeaning"
     ],
