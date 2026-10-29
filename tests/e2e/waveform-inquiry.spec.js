@@ -35,8 +35,12 @@ for(const c of cases){
   await expect(root.locator('p').filter({hasText:'Resultado del modelo:'})).toContainText('100/100');
   await expect(root.getByText(/Hipótesis compatible:/)).toBeVisible();
   await root.getByRole('button',{name:'Guardar evidencia del oscilograma'}).click();
-  await expect(page.locator('#lesson-practice-status')).toContainText('Práctica aprobada');
-  await expect(page.locator('#lesson-practice-status')).toContainText('NO competencia física');
+  const independent=c.id==='lab-scope-waveform-v1';
+  await expect(page.locator('#lesson-practice-status')).toContainText(
+   independent?'Banco guiado completado · caso independiente sin resolver':'Práctica aprobada');
+  if(!independent)await expect(page.locator('#lesson-practice-status')).toContainText('NO competencia física');
+  // The new scope holdout is required separately; a guided pass alone must not imply transfer.
+  if(independent)await expect(page.locator('#scope-holdout-host')).toBeVisible();
   await expect(page.getByText(/Teoría: lectura pendiente/)).toBeVisible();
   await page.locator('nav.nav button[data-id="data"]').click();
   const dl=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
