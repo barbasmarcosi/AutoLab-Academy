@@ -172,3 +172,14 @@ test('lesson 6 is not certified by theory or another lesson; guided and held-out
  assert.equal(x.holdout.firstRecordedAttemptPassed,false);
  assert.equal(x.disclaimer.includes('certificación'),true);
 });
+
+test('lesson 7 guided and independent LV contact evidence cannot be replaced by another lesson',()=>{
+ const p=progress();p.notes['lesson-ground-test']='2026-10-29';
+ p.cases.push({id:'lab-ground-test-guided-v1',passed:true});
+ p.cases.push({id:caseId('ground-test'),passed:true});
+ let x=lessonEvidence(p,'ground-test');assert.equal(x.documented,false);assert.equal(x.holdout.available,true);
+ p.cases.push({id:'lab-volt-drop-holdout-v2',passed:true});
+ assert.equal(lessonEvidence(p,'ground-test').documented,false);
+ p.cases.push({id:'lab-ground-test-holdout-v1',passed:true});
+ x=lessonEvidence(p,'ground-test');assert.equal(x.documented,true);assert.equal(x.holdout.attempts,1);
+});
