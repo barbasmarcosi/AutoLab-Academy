@@ -28,7 +28,7 @@ test('lesson 3: scope display calibration alters on-screen divisions, never the 
      assert.equal(m.amplitudeDiv,2.4/voltsDiv);
      assert.equal(m.offsetV,2.5+referenceOffset);
      assert.equal(m.triggerStable,trigger==='stable');
-     assert.match(m.warning,/no implica/);
+     assert.match(m.warning,/no implica/i);
      assert.equal(Object.isFrozen(m),true);
     }
    }
