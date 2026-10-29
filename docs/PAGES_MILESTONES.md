@@ -48,3 +48,8 @@ The resolution does not require admin-level environment edits or merging PR #56:
 - Se sustituyeron por **síntomas observables sin revelar el mecanismo**, y se añadieron tests de regresión en `tests/scope-transfer.test.js` y `tests/can-transfer.test.js`.
 - [CI focalizada #40794071876](https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40794071876): PASS de unidad, compilación y navegador.
 - **Candidato final revisado**: commit con marcador `[pages-milestone]` posterior a `30bc0ab0`. Conserva la puerta completa y publicación desde workflow del `main`. No calificar como aceptado hasta obtener validación del SHA revisado y deploy éxito.
+
+## Lección 06 — Seguridad HV (candidato de hito)
+- `src/hv-lesson.js` contiene reconocimiento de peligros, práctica guiada de 3 casos y transferencia independiente de 9 expedientes: sin contactos HV, sin guías de reparación.
+- El sistema anula puntaje por autorización ficticia o por no activar respuesta de emergencia ante signos activos, y exige evidencia digital separada.
+- Revisión y criterios en `docs/LESSON_06_ACCEPTANCE.md`, **9,2/10 provisional de diseño**, no certificación. Disponible en Pages solo después de CI completa y deploy exitoso de un SHA etiquetado `[pages-milestone]`.
