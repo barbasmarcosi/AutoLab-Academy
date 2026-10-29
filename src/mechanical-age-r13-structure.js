@@ -75,6 +75,7 @@ function rawSourceRefs(x,path,errors,report){
   x.sessionReference!==('session:'+report.sessionId))
   errors.push(path+': session reference mismatch');
  let referencedCount=0;
+ const uniqueEventOffsets=new Set();
  const observedPids=new Set();
  map(x.pidEventIndexes,path+'.pidEventIndexes',errors,(indexes,p,pid)=>{
   observedPids.add(pid);
@@ -87,10 +88,13 @@ function rawSourceRefs(x,path,errors,report){
    if(!Number.isInteger(idx)||idx<0||idx>=report.eventCount||idx<=previous){
     errors.push(p+': invalid event index or ordering');break;
    }
+   if(uniqueEventOffsets.has(idx))errors.push(p+': same event ordinal assigned to multiple PID results');
+   uniqueEventOffsets.add(idx);
    previous=idx;
   }
  });
- if(referencedCount!==report.eventCount)errors.push(path+': source event references incomplete');
+ if(referencedCount!==report.eventCount||uniqueEventOffsets.size!==report.eventCount)
+  errors.push(path+': source event references incomplete or duplicated');
  if(Object.keys(report.channels??{}).some(pid=>!observedPids.has(pid)))
   errors.push(path+': source PID map missing observed channel');
 }
@@ -105,7 +109,7 @@ function rawChecks(report,errors,prefix='raw_session'){
     errors.push(path+': unsupported unit');
   }
  });
- if(boundedArray(report.warnings,prefix+'.warnings',errors,7)&&report.warnings.some(x=>typeof x!=='string'||x.length>300))
+ if(boundedArray(report.warnings,prefix+'.warnings',errors,14)&&report.warnings.some(x=>typeof x!=='string'||x.length>300))
   errors.push(prefix+'.warnings: invalid text');
  traceValid(report.traceIntegrity,prefix+'.traceIntegrity',errors);
  if(report.sourceTrace!==undefined)rawSourceRefs(report.sourceTrace,prefix+'.sourceTrace',errors,report);
