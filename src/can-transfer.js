@@ -142,6 +142,7 @@ export function mountCanHoldout(root,{record,history=[],onSaved=()=>{}}={}){
   const button=e.target.closest("[data-can-h]");if(!button||busy)return;
   const action=button.dataset.canH,c=CAN_HOLDOUT_CASES[index];
   if(action==="freeze"&&!prior){
+   if($("can-h-prediction").value===""){$("can-h-status").textContent="Elegí una predicción explícita antes de congelar.";return;}
    try{prior=freezeCanHoldout({caseId:c.id,hypothesis:$("can-h-prior").value,firstTest:$("can-h-first").value,
      predictedEnds:Number($("can-h-prediction").value)});render();}
    catch(error){$("can-h-status").textContent=error.message;}return;
@@ -153,6 +154,7 @@ export function mountCanHoldout(root,{record,history=[],onSaved=()=>{}}={}){
    tests.push(probe);render();return;
   }
   if(action==="grade"&&prior&&!result){
+   if($("can-h-count").value===""){$("can-h-status").textContent="Calculá y elegí la cantidad equivalente de terminadores.";return;}
    const selected=root.querySelector("input[name='can-h-falsifier']:checked");
    if(!selected){$("can-h-status").textContent="Elegí la prueba que refutaría tu hipótesis.";return;}
    why=$("can-h-why").value.trim();alt=$("can-h-alt").value.trim();

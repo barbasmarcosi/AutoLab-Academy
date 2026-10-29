@@ -36,7 +36,7 @@ test('standard 11-bit CAN arbitration: lower ID wins first differing bit, never 
   assert.ok(arb.decisiveBit>=1&&arb.decisiveBit<=11);
   assert.equal(arb.aBits.length,11);assert.equal(arb.bBits.length,11);
   assert.notEqual(arb.aBits[arb.decisiveBit-1],arb.bBits[arb.decisiveBit-1]);
-  assert.match(arb.reason,/no tratarlo como error/);
+  assert.match(arb.reason,/sin tratarlo como error/);
  }
  for(const [a,b] of [[0x080,0x080],[-1,10],[0x800,100],[1,0x800],[NaN,1]]){
   assert.throws(()=>canArbitrationModel(a,b),RangeError);
