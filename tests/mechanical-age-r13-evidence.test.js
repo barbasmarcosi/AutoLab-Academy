@@ -114,7 +114,9 @@ test('R13: imported raw sessions still never authenticate physical signal proven
  const s=syntheticAAReceiptPair()[0];
  s.source='provided_obd_unverified';
  const a=auditRawObdSession(s);
- assert.equal(a.observability.status,'abstain');
+ assert.equal(a.observability.status,'descriptive_only');
+ assert.equal(a.observability.independentlyVerified,false);
+ assert.match(a.observability.allowableInterpretation,/no diagnosticar/);
  assert.equal(a.evidenceContract.evidenceLevel,'unverified');
  assert.equal(a.traceIntegrity.independentlyAuthenticated,false);
  assert.equal(a.sensorAcquisitionTimeKnown,false);
