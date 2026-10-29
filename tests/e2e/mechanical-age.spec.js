@@ -73,3 +73,21 @@ test('MA00 A-A rejects forged contradictory or incomplete data without showing a
  await expect(page.getByText(/No se pudo evaluar A–A/)).toBeVisible();
  await expect(page.locator('script').filter({hasText:'alert(1)'})).toHaveCount(0);
 });
+
+
+test('MA00 R12 six-session OBD quality demo is offline and abstains on unverified replay',async({page,context})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="mechanical-age"]').click();
+ await page.getByRole('button',{name:'Demo R12 (6 sesiones)'}).click();
+ await expect(page.getByRole('heading',{name:/R12 — Repetibilidad entre sesiones/})).toBeVisible();
+ await expect(page.getByText('Comparación descriptiva habilitada')).toBeVisible();
+ await expect(page.getByText(/4 sesiones de referencia \+ 2 posteriores/)).toBeVisible();
+ await expect(page.getByText(/Secuencias 100 % sintéticas/)).toBeVisible();
+ await expect(page.getByText(/Desgaste, edad mecánica, vida útil y salud porcentual/)).toBeVisible();
+ await context.setOffline(true);
+ try{
+  await page.reload();
+  await page.locator('nav.nav button[data-id="mechanical-age"]').click();
+  await page.getByRole('button',{name:'Demo R12 (6 sesiones)'}).click();
+  await expect(page.getByText('Comparación descriptiva habilitada')).toBeVisible();
+ }finally{await context.setOffline(false);}
+});
