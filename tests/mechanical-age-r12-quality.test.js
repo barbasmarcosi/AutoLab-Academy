@@ -67,7 +67,7 @@ test('MA00 R12: replay, reused IDs, and short separation fail closed',()=>{
  const a=assessObdMultiSessionRepeatability(reused);
  assert.equal(a.status,'abstain');
  assert.match(a.blockers.join(' '),/ID de sesión/);
- const short=clone(s);short[2].capturedAt='2026-10-24T12:01:00Z';
+ const short=clone(s);short[2].capturedAt='2026-10-23T12:01:00Z';
  const b=assessObdMultiSessionRepeatability(short);
  assert.equal(b.status,'abstain');
  assert.match(b.blockers.join(' '),/Separación temporal/);
