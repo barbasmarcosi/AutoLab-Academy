@@ -58,3 +58,8 @@ The resolution does not require admin-level environment edits or merging PR #56:
 - [CI focalizada #40800309412](https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40800309412): **SUCCESS** con pruebas unitarias, offline, accesibilidad y navegador.
 - Contenido: `lab-hv-safety-guided-v1`, `lab-hv-safety-holdout-v1` (9 expedientes), prueba previa de conceptos, ensayo explicativo de roles y fuentes HSE/NHTSA; código `src/hv-lesson.js`, caché `v104`.
 - Publicación exclusivamente tras E2E completa; la puntuación 9,2/10 es de diseño interno, nunca habilitación física.
+
+## Candidato lección 07 — caída bajo carga (solo CI focalizada)
+- `src/ground-lesson.js` reutiliza el solver LV de lección 01, con `src/ground-lesson-ui.js` para práctica guiada distinta de nueve casos reservados. No se marca como publicada sin full CI y deploy.
+- [CI focalizada #40801330807](https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40801330807): **SUCCESS**. Diseño interno provisional 9,1/10 en `docs/LESSON_07_ACCEPTANCE.md`. Cache offline `v105`.
+- El hito #06 de seguridad HV se está validando con un SHA anterior e inmutable. No permitir que un despliegue del séptimo hito sea sobrescrito por uno anterior; secuenciar releases.
