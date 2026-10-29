@@ -43,3 +43,7 @@ Comandos:
     python3 tools/benchmark_cmapss_coverage_r11.py --help
 
 Solo el commit experimental marcado [MA00 NASA FD004 once] descarga el ZIP original ya fijado con SHA-256 y genera un artefacto de métricas agregadas.
+
+## Ejecución oficial preregistrada
+
+Las pruebas de las tres particiones disjuntas, abstención ante régimen desconocido, auditoría de etiquetas, rangos y CLI aprobaron en CI. El protocolo ya estaba documentado antes de solicitar la lectura de FD004 TEST. Este commit habilita una sola auditoría sobre la fuente oficial: se publicarán todos los resultados, incluidos posibles cero pronósticos o fallas de calibración, sin modificar α, umbrales, proporción pseudo-censurada ni límite de 100 ciclos según TEST.
