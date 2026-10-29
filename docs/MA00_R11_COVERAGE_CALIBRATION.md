@@ -47,3 +47,28 @@ Solo el commit experimental marcado [MA00 NASA FD004 once] descarga el ZIP origi
 ## Ejecución oficial preregistrada
 
 Las pruebas de las tres particiones disjuntas, abstención ante régimen desconocido, auditoría de etiquetas, rangos y CLI aprobaron en CI. El protocolo ya estaba documentado antes de solicitar la lectura de FD004 TEST. Este commit habilita una sola auditoría sobre la fuente oficial: se publicarán todos los resultados, incluidos posibles cero pronósticos o fallas de calibración, sin modificar α, umbrales, proporción pseudo-censurada ni límite de 100 ciclos según TEST.
+
+
+## Resultado único observado — NASA FD004 TEST, 29/10/2026 UTC
+
+Evidencia empírica de la fuente original NASA, ZIP SHA-256 c9c5dec12a945a82e8bb4446589d7fb3cc057b5e5d81fa1a12e25ee9912ad3b2:
+- https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40794004368
+- https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40794004368/artifacts/12862444049
+
+FD004 TRAIN: **249 motores / 61.249 filas**. FD004 TEST nunca antes examinado por MA00: **248 motores / 41.214 filas**. Ningún FD001/FD002/FD003 TEST ni RUL fue abierto en R11. Los modelos, calibraciones y decisiones quedaron congelados antes de leer FD004 RUL.
+
+Calibración: 199 motores para FIT, 25 independientes para umbral OOD, 25 independientes para residuo/intervalo (25 aceptados). Ridge α20, corte pseudo-censurado al 65% de vida de TRAIN. Score MAD-z sobre 21 sensores variables: umbral **2,4597**. Semiancho de intervalo por residuo de TRAIN: **79,69 ciclos simulados**, menor que el presupuesto 100, por lo que no se rechazó ninguno por ancho. No es intervalo certificado de error en hardware ni garantía de conformal coverage.
+
+| Estado | Motores FD004 TEST | MAE Ridge (ciclos) | MAE baseline (ciclos) |
+| --- | ---: | ---: | ---: |
+| Todos, para auditoría | 248 | 35,895 | 50,484 |
+| Publicados | **239** | **35,484** | **49,473** |
+| Abstenciones, auditoría únicamente | **9** | 46,800 | 77,333 |
+
+Cobertura de publicación **239/248 = 96,371%**. Nueve motores fuera de soporte por señales de sensores, cero por variables operativas, cero por intervalo demasiado ancho. En los 239 publicados, el intervalo incluyó el RUL verdadero en **227/239 = 94,979%** (redondeado 0,94979), comparado con la calibración nominal del 90%. **Es cobertura observada en esta cohorte SIMULADA, NO garantía de cobertura futura ni de pronóstico sobre vehículos.**
+
+**Corrección de presentación de métricas (sin volver a puntuar FD004):** el JSON histórico de la corrida original también contenía "intervalCoverageFraction=0.94979" en la fila de auditoría de TODOS LOS 248 motores, aunque los 9 abstenidos no tenían ningún intervalo. Esa cifra se calculaba únicamente entre los 239 que sí recibieron intervalo y estaba mal etiquetada para "wholeCohort". El código ahora exige intervalos definidos para todos los integrantes de la cohorte antes de publicar ese porcentaje global; por tanto el campo correcto de la cohorte completa es **null**. El porcentaje 94,979% **sigue siendo válido exclusivamente en los 239 publicados**. El artefacto empírico inicial permanece intacto y no se vuelve a leer el TEST consumido para ajustar nada.
+
+**Interpretación con cautela:** a diferencia de R9 y R10, aquí se ENTRENÓ y CALIBRÓ sobre FD004 TRAIN, cuyos regímenes y mecanismos son semejantes a FD004 TEST. No es prueba de transferencia desde FD001 ni una flota física independiente. El filtro retuvo una mayoría y el error medio del modelo fue mejor que el prior, pero el intervalo de incertidumbre es amplio (casi 160 ciclos de ancho, salvo truncado a 0) y el filtro elimina solo nueve de 248 motores. No inferir control causal, edad en km, porcentaje de salud, seguridad de diagnóstico, ni RUL automotriz.
+
+**Decisión:** FD004 TEST está consumido. No cambiar umbrales, α, ratio de pseudocensura ni presupuestos mirando ese TEST. Próxima prioridad científica: usar mediciones físicas con identidades de motor, cobertura de regímenes, incertidumbre instrumental calibrada y ground truth mecánico independiente, o una nueva fuente no relacionada con C-MAPSS.
