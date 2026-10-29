@@ -83,9 +83,27 @@ export function auditMA00Report(report,kind,{source=null}={}){
  const keys=Object.keys(report).filter(k=>k!=='evidenceContract');
  const unclassified=keys.filter(k=>!Object.hasOwn(registry,k));
  const missing=Object.keys(registry).filter(k=>!Object.hasOwn(report,k));
+ const unclassifiedNested=[],missingNested=[];
+ for(const [container,contract] of Object.entries(REPORT_SUBFIELDS[kind]??{})){
+  const data=report[container];
+  if(data===null||data===undefined)continue;
+  if(typeof data!=='object'||Array.isArray(data)) {
+   unclassifiedNested.push(container+' (estructura inválida)');continue;
+  }
+  if(contract.startsWith('*'))continue; // Dynamic PID→delta maps have a separate allowlist.
+  const expected=contract.split(/\s+/);
+  for(const field of Object.keys(data)){
+   if(!expected.includes(field))unclassifiedNested.push(container+'.'+field);
+  }
+  for(const field of expected){
+   if(!Object.hasOwn(data,field))missingNested.push(container+'.'+field);
+  }
+ }
  const violations=[];
  if(unclassified.length)violations.push('Campos sin clasificación: '+unclassified.join(', '));
  if(missing.length)violations.push('Campos declarados pero ausentes: '+missing.join(', '));
+ if(unclassifiedNested.length)violations.push('Subcampos sin clasificación: '+unclassifiedNested.join(', '));
+ if(missingNested.length)violations.push('Subcampos ausentes: '+missingNested.join(', '));
  for(const key of BLOCKED_PHYSICAL_CLAIMS)if(Object.hasOwn(report,key)&&
    report[key]!==null&&report[key]!==false)
   violations.push('Estimación física no respaldada: '+key);
@@ -100,8 +118,8 @@ export function auditMA00Report(report,kind,{source=null}={}){
  const nullOnly=['confidenceInterval','causalEffect'];
  for(const key of nullOnly)if(Object.hasOwn(report,key)&&report[key]!==null)
   violations.push('Intervalo o efecto causal no validado: '+key);
- return {version:CLAIMS_VERSION,kind,complete:unclassified.length===0&&missing.length===0,
-  violations,unclassified,missing,classifiedCount:keys.length-unclassified.length,
+ return {version:CLAIMS_VERSION,kind,complete:unclassified.length===0&&missing.length===0&&unclassifiedNested.length===0&&missingNested.length===0,
+  violations,unclassified:[...unclassified,...unclassifiedNested],missing:[...missing,...missingNested],classifiedCount:keys.length-unclassified.length,
   evidenceLevel:relevantSource==='synthetic'?'E0':'unverified',
   independentlyVerified:false,
   physicalWearAuthorized:false};
