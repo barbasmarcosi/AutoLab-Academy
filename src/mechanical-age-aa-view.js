@@ -50,7 +50,7 @@ export function mountRawAA(root){
    +'<label for="ma-aa-json">Sesiones A–A en formato raw PID JSON (sin VIN, patentes ni datos personales)</label>'
    +'<textarea class="field" id="ma-aa-json" rows="5" spellcheck="false" maxlength="1300000" placeholder="Pegá aquí un array de sesiones A–A">'+esc(state.raw)+'</textarea>'
    +'<div class="row"><button class="button" type="button" data-aa="demo">Ensayo A–A sintético</button>'
-   +'<button class="button alt" type="button" data-aa="evaluate">Evaluar A–A (2+)</button>'
+   +'<button class="button alt" type="button" data-aa="evaluate">Evaluar sesiones aportadas</button>'
    +'<button class="button" type="button" data-aa="demo-r12">Demo R12 (6 sesiones)</button>'
    +'<button class="button alt" type="button" data-aa="evaluate-r12">Evaluar repetibilidad R12</button>'
    +'<button class="button alt" type="button" data-aa="clear">Limpiar</button></div>'
