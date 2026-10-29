@@ -32,3 +32,8 @@ The resolution does not require admin-level environment edits or merging PR #56:
 - Lección 02: diagnóstico de conceptos previos, nueve casos reservados y transferencia con predicción congelada, evidencia discriminante, falsación e historial independiente.
 - **Fuente de verdad:** `docs/LESSON_02_ACCEPTANCE.md`. La nota de calidad requiere CI completa verde y no equivale a competencia física.
 - La publicación se dispara solo desde un commit `[pages-milestone]` de la rama del PR y el publicador en `main` toma el mismo SHA verificado.
+
+## Tercer candidato: osciloscopía básica (lección 03, 2026-10-28/29)
+- Desarrollo: `src/scope-lesson.js`, `src/scope-transfer.js`, prácticas vinculadas y tests `scope-lesson` / `scope-transfer`.
+- Fuente de verdad: `docs/LESSON_03_ACCEPTANCE.md`. El puntaje de diseño 9,1 es provisional hasta la CI completa exacta.
+- Hito identificado por `[pages-milestone]`; el publicador en `main` recompila e instala **exactamente el SHA validado**. Una versión anterior permanece activa si la ejecución falla.
