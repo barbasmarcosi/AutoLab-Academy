@@ -22,7 +22,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
       - name: Mechanical age unit and PWA offline tests
-        run: node --test tests/mechanical-age-research.test.js tests/mechanical-age-r13-evidence.test.js tests/service-worker.test.js
+        run: node --test tests/mechanical-age-research.test.js tests/mechanical-age-r13-evidence.test.js tests/mechanical-age-r13-dynamic.test.js tests/service-worker.test.js
       - name: Validate raw PID capture bridge and AA no-intervention research
         run: node --test tests/mechanical-age-raw-obd.test.js tests/mechanical-age-bridge.test.js tests/mechanical-age-aa-view.test.js tests/mechanical-age-python-serial.test.js tests/mechanical-age-r12-quality.test.js tests/mechanical-age-r12-view.test.js
       - name: Verify source dataset audit and mock ELM327 serial (no connected hardware)
