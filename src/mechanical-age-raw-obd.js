@@ -4,6 +4,8 @@
  * Descriptive A-A is the only supported comparison: no service, wear or age.
  */
 import {auditSerialTrace} from './mechanical-age-serial-integrity.js';
+import {assertMA00Report} from './mechanical-age-r13-claims.js';
+import {assessMA00Observability} from './mechanical-age-r13-observability.js';
 export const RAW_OBD_VERSION='ma00-raw-pid-receipts-v1';
 const PID=Object.freeze({
  '0103':{channel:'fuelSystem1Status',unit:'enum',min:0,max:16},
@@ -90,14 +92,19 @@ export function auditRawObdSession(session){
    medianHostRoundTripMs:sortedMedian(g.roundTripMs),unmeasuredRoundTripCount:g.undocumentedLatency
   };
  }
- return {
+ const observability=assessMA00Observability({
+  powertrain:session.powertrain??'unknown',fuel:session.fuel??'unknown',
+  control:session.conditions?.fuelControl??'unknown',
+  availablePids:Object.entries(channels).filter(([,stats])=>stats.success>0).map(([pid])=>pid)
+ });
+ return assertMA00Report({
   version:RAW_OBD_VERSION,sessionId,vehicleAlias,engineFamily,adapterModel,softwareVersion,
   source,capturedAt,clock,eventCount:events.length,elapsedHostReceiptMs:events.at(-1).receivedAtMs-events[0].receivedAtMs,
-  channels,warnings,requestTimeMissingCount:requestUnknown,traceIntegrity,
+  channels,warnings,requestTimeMissingCount:requestUnknown,traceIntegrity,observability,
   hostReceiptTimePresent:true,sensorAcquisitionTimeKnown:false,simultaneityVerified:false,
   estimatedAgeKm:null,structuralWear:null,remainingUsefulLife:null,
   caveat:'Las marcas host son de RECEPCIÓN, no de muestreo en ECU. Latencia host/ECU no está validada.'
- };
+ },'raw_session',{source});
 }
 
 function gateAA(audits,sessions){
@@ -163,13 +170,13 @@ export function evaluateAAWithoutService(sessions){
     maxMinusMin:medianDifference(Math.min(...audits.map(a=>a.channels[pid].median)),Math.max(...audits.map(a=>a.channels[pid].median)))}
   ])
  ):null;
- return {
+ return assertMA00Report({
   version:RAW_OBD_VERSION,design:'AA_without_intervention_descriptive',sessionCount:sessions.length,
   dataUnit:'session_not_obd_row',comparable,blockers,sessionAudits:audits,
   observedChanges:changes,confidenceInterval:null,noiseThresholdCalibrated:false,
   verifiedIndependence:false,causalEffect:null,healthScore:null,mechanicalAgeKm:null,wear:null,
   caveat:'Solo evidencia descriptiva A–A declarada. Dos sesiones no determinan repetibilidad poblacional, sincronía ECU ni incertidumbre causal.'
- };
+ },'aa',{source:audits.every(a=>a.source==='synthetic')?'synthetic':'provided_obd_unverified'});
 }
 export function syntheticAAReceiptPair(){
  const pids=['010C','0105','0104','0106','0107','010F'];
