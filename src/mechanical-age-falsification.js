@@ -4,6 +4,7 @@
  * validated causal effects, or proofs of a service's effectiveness.
  */
 import {compareMechanicalSnapshots,syntheticServicePair} from './mechanical-age-research.js';
+import {assertMA00Report} from './mechanical-age-r13-claims.js';
 export const FALSIFICATION_VERSION='ma00-adversarial-negative-controls-v1';
 const clone=x=>structuredClone(x);
 const makePair=(mutation)=>{
@@ -41,8 +42,8 @@ export function runMechanicalAgeFalsification(){
    caveat:'El cambio simulado se asignó al sensor/operación. El score no identifica desgaste ni causa.'
   };
  });
- return {version:FALSIFICATION_VERSION,source:'synthetic_negative_controls',
+ return assertMA00Report({version:FALSIFICATION_VERSION,source:'synthetic_negative_controls',
   passedBehaviorChecks:results.every(x=>x.behaviorObserved),
   controls:results,mechanicalAgeInferenceAllowed:false,
-  conclusion:'Un índice funcional puede variar sin desgaste, o permanecer igual cuando STFT y LTFT se compensan; la condición de un motor no es identificable sólo a partir de estas lecturas.'};
+  conclusion:'Un índice funcional puede variar sin desgaste, o permanecer igual cuando STFT y LTFT se compensan; la condición de un motor no es identificable sólo a partir de estas lecturas.'},'falsification',{source:'synthetic'});
 }
