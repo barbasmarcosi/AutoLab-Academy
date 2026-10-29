@@ -44,3 +44,20 @@
 5. Scorecard de gates y E2E en SHA exacto; solo declarar R13 completo si realmente alcanza 100% de salidas afectadas.
 
 **La excelencia científica de software antes de autos reales no crea una validación física: esa frontera es innegociable.**
+
+
+## R13.1 — Segunda tanda: estructuras dinámicas y rastreo de origen (29/10/2026)
+
+**Implementado en código:** src/mechanical-age-r13-structure.js, actualizaciones de src/mechanical-age-r13-claims.js, src/mechanical-age-raw-obd.js y src/mechanical-age-r12-quality.js, tests/mechanical-age-r13-dynamic.test.js y CI.
+
+1. **Contratos dinámicos (fail-closed).** El validador inspecciona canales PID 0103/0104/0105/0106/0107/010C/010F, diferencias A–A, reportes R12 por PID, QA multisesión, trazas seriales, escenarios de falsación y fases de repetibilidad. Rechaza campos sin registrar, valores físicos inventados, PIDs desconocidos, arrays excesivos y estructuras incompletas. La especificación dinámica está sincronizada en docs/ma00/claims.json con pruebas automáticas.
+2. **Rastreo al expediente:** cada auditoría RAW contiene un registro sourceTrace con ID de sesión, cantidad de eventos e **índices originales de eventos por PID**. Se exige que los índices sean válidos, crecientes, globalmente únicos, completos y consistentes con los recuentos de cada PID. Las diferencias A–A y R12 contienen referencias ordenadas a las sesiones que sustentan cada canal observado.
+3. **Sin autenticación.** Los IDs ordinales permiten encontrar eventos dentro del mismo archivo de entrada; **no** demuestran que ese archivo sea inmutable. Un operador puede reescribir tanto eventos como índices. No hay hashes firmados, identificación de ECU física, tiempo de adquisición ECU, calibración instrumental independiente ni evidencia E4/E5. Un futuro repositorio de evidencias tendrá que verificar integridad mediante fuentes externas.
+4. **Validación de entrada:** las tramas Mode 01 y sus contextos no admiten campos ajenos al contrato, por ejemplo atributos inventados de salud mecánica. Las declaraciones instrumentales también están limitadas a una lista conocida. Esto no verifica físicamente los valores del sensor, pero evita colar conclusiones inventadas a través de campos desconocidos.
+5. **Tecnologías y combustible:** las comparaciones A–A de correcciones requieren gasolina ICE, combustible gasolina, lazo cerrado declarado y PIDs completos. No se aplican reglas de gasolina a GNC, diésel, híbridos, EV o tecnologías desconocidas.
+6. **Batería adversarial:** tests para health/wear falsos, recuentos y referencias inconsistentes, offsets duplicados entre dos PIDs, falsa autenticación serial, hipótesis de falsación manipuladas, contextos no registrados y tecnología incorrecta.
+7. **Compatibilidad:** se preservan las demos sintéticas y los flujos Python/Node/JS existentes. No hubo pruebas en autos reales ni relecturas de los TEST NASA ya consumidos.
+
+**Revisión crítica:** falta todavía la auditoría integral del resto de exportaciones, registros de terceros, privacidad de identidad y trazabilidad fuerte entre archivos/canales. Por lo tanto **R13 no cumple aún el 100 % de su gate**, aunque esta tanda cierra múltiples riesgos de integridad en los siete reportes principales.
+
+**CI final:** registrar SHA y run verificables al concluir la validación. Hasta entonces este documento no declara aprobado el cierre R13.1. Sin merge ni deploy.
