@@ -46,9 +46,13 @@ for(const entry of entries){
   await expect(root.getByText(/100\/100/)).toBeVisible();
   await expect(root.locator('#nb-predicted')).toHaveCount(0);
   await root.getByRole('button',{name:'Guardar evidencia del banco numérico'}).click();
-  await expect(page.locator('#lesson-practice-status')).toContainText('Práctica aprobada');
-  await expect(page.locator('#lesson-practice-status')).toContainText('NO competencia física');
-  await expect(page.locator('#lesson-theory-practice-status')).toContainText('Práctica aprobada');
+  const needsHoldout=entry.id==='lab-numeric-can-termination-v1';
+  await expect(page.locator('#lesson-practice-status')).toContainText(needsHoldout?
+   'Banco guiado completado · caso independiente sin resolver':'Práctica aprobada');
+  if(!needsHoldout)await expect(page.locator('#lesson-practice-status')).toContainText('NO competencia física');
+  await expect(page.locator('#lesson-theory-practice-status')).toContainText(needsHoldout?
+   'Banco guiado completado · caso independiente sin resolver':'Práctica aprobada');
+  if(needsHoldout)await expect(page.locator('#can-holdout-host')).toBeVisible();
   await expect(page.getByText(/Teoría: lectura pendiente/)).toBeVisible();
   await page.locator('nav.nav button[data-id="data"]').click();
   const download=page.waitForEvent('download');await page.locator('[data-action="export"]').click();
