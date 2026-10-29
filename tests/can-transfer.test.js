@@ -44,7 +44,7 @@ test('a normal arbitration case must not award diagnosis credit for guessing a t
  const r=gradeCanHoldout({caseId:'N03',prior,measurements:['termination','supply','traffic','differential'],finalEnds:2,
   diagnosis:'termination',decisiveTest:'termination',falsifier:CAN_HOLDOUT_FALSIFIERS.termination.answer,
   reasoning:'Alternativa elegida',alternative:'No asumir salud de transceptor'});
- assert.equal(r.score,50);assert.equal(r.passed,false);
+ assert.equal(r.score,35);assert.equal(r.causal,false);assert.equal(r.discriminated,false);assert.equal(r.passed,false);
  assert.throws(()=>freezeCanHoldout({caseId:'N03',hypothesis:'termination',firstTest:'unknown',predictedEnds:2}),RangeError);
 });
 test('reserved-case index rotates only valid v1 entries, ignores corrupt history',()=>{
