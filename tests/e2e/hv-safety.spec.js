@@ -73,3 +73,29 @@ test('lesson 6: mobile WCAG AA and no scroll overflow for safety decision lab',a
  expect(violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))).toEqual([]);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1)).toBe(false);
 });
+
+test('lesson 6: critical unsafe HV action scores zero in UI and cannot unlock digital holdout gate',async({page})=>{
+ await openHv(page);
+ const h=page.locator('#hv-holdout-host');
+ await h.locator('#hv-h-initial').selectOption('inform');
+ await h.locator('#hv-h-first').selectOption('incident');
+ await h.locator('[data-hv-h="freeze"]').click();
+ for(const probe of ['incident','authority','documentation','limits']){
+  await h.locator('#hv-h-probe').selectOption(probe);
+  await h.locator('[data-hv-h="observe"]').click();
+ }
+ await h.locator('#hv-h-decision').selectOption('unsafe');
+ await h.locator('#hv-h-risk').selectOption('thermal');
+ await h.locator('#hv-h-authority').selectOption('no_authority');
+ await h.locator('#hv-h-reason').fill('Se elige una intervención peligrosa para comprobar que el motor la bloquee, en una simulación ficticia.');
+ await h.locator('#hv-h-alt').fill('La alternativa segura sería alejarse y avisar a emergencias.');
+ await h.locator('[data-hv-h="grade"]').click();
+ await expect(h.locator('#hv-h-result')).toContainText('0/100');
+ await expect(h.locator('#hv-h-result')).toContainText('acción insegura: NO APROBADO');
+ await h.locator('[data-hv-h="again"]').click();
+ await expect(h).toContainText('Expediente H02');
+ await page.reload();
+ await page.getByRole('button',{name:'Academia',exact:true}).click();
+ await page.locator('.lesson-card').filter({hasText:'Seguridad de alta tensión: reconocer el límite'}).getByRole('button',{name:'Estudiar'}).click();
+ await expect(page.locator('#hv-holdout-host')).toContainText('Expediente H02');
+});
