@@ -1,0 +1,42 @@
+import{test,expect}from'@playwright/test';
+import AxeBuilder from'@axe-core/playwright';
+test('lesson 3: oscilloscope pre-reading, calibrated display manipulation and physical invariants',async({page})=>{
+ await page.goto('./');
+ await page.getByRole('button',{name:'Academia',exact:true}).click();
+ await page.locator('.lesson-card').filter({hasText:'Lectura inicial de señales con osciloscopio'}).getByRole('button',{name:'Estudiar'}).click();
+ const baseline=page.locator('#scope-baseline-host'),controls=page.locator('#scope-controls-host');
+ await expect(baseline.getByText('Antes de leer: tiempo, tensión y referencia')).toBeVisible();
+ await baseline.locator('#scope-baseline-check').click();
+ await expect(baseline.locator('#scope-baseline-feedback')).toContainText('Respondé las cuatro ideas previas');
+ for(const [id,value] of Object.entries({period:0,vertical:2,trigger:0,reference:1}))
+  await baseline.locator("input[name='scope-pre-"+id+"'][value='"+value+"']").check();
+ await baseline.locator('#scope-baseline-check').click();
+ await expect(baseline.locator('#scope-baseline-feedback')).toContainText('Idea por revisar');
+ await expect(page.getByText('Ejemplo resuelto: primero la referencia, después la interpretación')).toBeVisible();
+ await expect(controls.getByText('Mismo sensor, distintos ajustes de pantalla')).toBeVisible();
+ await expect(controls.locator('#scope-control-readings')).toContainText('200 Hz');
+ await expect(controls.locator('#scope-control-readings')).toContainText('5,00 div/ciclo');
+ await controls.locator('#scope-timeDiv').selectOption('2');
+ await expect(controls.locator('#scope-control-readings')).toContainText('2,50 div/ciclo');
+ await controls.locator('#scope-voltsDiv').selectOption('2');
+ await expect(controls.locator('#scope-control-readings')).toContainText('1,20 div pico a pico');
+ await controls.locator('#scope-referenceOffset').selectOption('1');
+ await expect(controls.locator('#scope-control-readings')).toContainText('3,5 V');
+ await controls.locator('#scope-trigger').selectOption('free');
+ await expect(controls.getByText('disparo estable',{exact:false})).toHaveCount(0);
+ await expect(controls.locator('#scope-control-readings')).toContainText('200 Hz');
+ await expect(controls.locator('#scope-control-readings')).toContainText('5 ms');
+});
+test('lesson 3: mobile scope chart has labels, no horizontal overflow and WCAG AA',async({page})=>{
+ await page.setViewportSize({width:375,height:812});
+ await page.goto('./');
+ await page.getByRole('button',{name:'Academia',exact:true}).click();
+ await page.locator('.lesson-card').filter({hasText:'Lectura inicial de señales con osciloscopio'}).getByRole('button',{name:'Estudiar'}).click();
+ const chart=page.locator('#scope-controls-host svg[role=img]');
+ await expect(chart).toBeVisible();
+ await expect(chart).toHaveAttribute('aria-label',/milisegundos por división/);
+ const violations=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze()).violations;
+ expect(violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)}))).toEqual([]);
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1);
+ expect(overflow).toBe(false);
+});

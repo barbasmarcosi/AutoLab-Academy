@@ -20,9 +20,8 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.body, '[FULL_E2E_MILESTONE]') }}
 jobs:
   verify:
-    # Feature-branch pushes are silent except for explicit, versioned Pages milestones.
-    # Other commits keep receiving fast pull_request CI without duplicate push jobs.
-    if: github.event_name != 'push' || github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feature/pedagogy-first-redesign' && contains(github.event.head_commit.message, '[pages-milestone]'))
+    # Ordinary feature pushes run focused CI only. Full E2E, artifact and Pages
+    # publishing remain exclusive to tagged milestones and main releases.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
