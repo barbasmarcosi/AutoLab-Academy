@@ -43,6 +43,17 @@ export const REPORT_FIELDS=Object.freeze({
   container:'qa pidReports summary',
   unknown:'physicalAccuracyValidated verifiedSessionIndependence calibratedWearThreshold',
   blocked:'predictedFailure structuralWear mechanicalAgeKm',
+ }),
+ replicates:Object.freeze({
+  metadata:'version comparable blockers sessionUnitCount evidenceLevel verdict',
+  container:'phases baseline after observedDifferences',
+  unknown:'confidenceInterval causalMaintenanceEffect',
+  blocked:'structuralWear mechanicalAgeEquivalentKm',
+ }),
+ falsification:Object.freeze({
+  metadata:'version source passedBehaviorChecks conclusion',
+  container:'controls',
+  blocked:'mechanicalAgeInferenceAllowed',
  })
 });
 export const REPORT_SUBFIELDS=Object.freeze({
@@ -51,6 +62,7 @@ export const REPORT_SUBFIELDS=Object.freeze({
   observability:'version powertrain fuel control status mode requiredPids missingPids supportedPids unobservableMechanisms blockers allowableInterpretation independentlyVerified'}),
  aa:Object.freeze({observedChanges:'*pid-map-session-deltas-only*'}),
  r12:Object.freeze({summary:'channelsWithObservedShift shiftedChannelCount comparableWarmIdleByOperatorDocumentation evidenceFromIndependentPhysicalReference functionalDiagnosisSupported sampleUnit'}),
+ replicates:Object.freeze({phases:'before after',observedDifferences:'medianRpm rpmRobustSigma medianCombinedFuelTrim syntheticDeviationIndex'}),
 });
 
 export const BLOCKED_PHYSICAL_CLAIMS=Object.freeze([
