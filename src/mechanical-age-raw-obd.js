@@ -178,7 +178,8 @@ export function evaluateAAWithoutService(sessions){
    pid,{unit:first.channels[pid].unit,firstMedian:first.channels[pid].median,
     lastMedian:last.channels[pid].median,
     lastMinusFirst:medianDifference(first.channels[pid].median,last.channels[pid].median),
-    maxMinusMin:medianDifference(Math.min(...audits.map(a=>a.channels[pid].median)),Math.max(...audits.map(a=>a.channels[pid].median)))}
+    maxMinusMin:medianDifference(Math.min(...audits.map(a=>a.channels[pid].median)),Math.max(...audits.map(a=>a.channels[pid].median))),
+    sourceSessionRefs:audits.map(a=>a.sourceTrace.sessionReference)}
   ])
  ):null;
  return assertMA00Report({
