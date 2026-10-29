@@ -42,6 +42,7 @@ test('R13.1: tampered per-PID counts, injected physical fields and truncated lin
   x=>x.channels['0107'].failFraction=3,
   x=>x.sourceTrace.pidEventIndexes['0104'].pop(),
   x=>x.sourceTrace.pidEventIndexes['0105'][0]=999999,
+  x=>{x.sourceTrace.pidEventIndexes['0105'][0]=x.sourceTrace.pidEventIndexes['010C'][0];},
   x=>x.sourceTrace.independentlyAuthenticated=true,
   x=>x.traceIntegrity.independentlyAuthenticated=true,
   x=>x.traceIntegrity.fakeECU='verified',
