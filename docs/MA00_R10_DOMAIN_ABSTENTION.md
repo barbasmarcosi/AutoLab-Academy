@@ -51,3 +51,25 @@ El método es un **ensayo de detección de regímenes fuera de soporte**, no un 
 ## Activación única de FD002 TEST
 
 La implementación, umbral y criterios se fijaron antes de ejecutar los datos oficiales. La CI de pruebas Python, JavaScript y compilación ha pasado; los E2E del commit de preparación siguen aparte. Se autoriza una única lectura de FD002 TEST y su RUL, con el detector calibrado únicamente en FD001 TRAIN. **No ajustar nada con los resultados FD002**, incluso si la cobertura es cero o el error es peor. La corrida deberá subir exclusivamente métricas agregadas.
+
+
+## Resultados oficiales R10: única evaluación FD002 TEST (29/10/2026 UTC)
+
+Auditoría sobre ZIP original NASA PCoE previamente fijado por SHA-256 c9c5dec12a945a82e8bb4446589d7fb3cc057b5e5d81fa1a12e25ee9912ad3b2. Solo se leyeron FD001 TRAIN, FD002 TEST y FD002 RUL. FD001 TEST/RUL, FD003 TEST/RUL y FD002 TRAIN siguieron cerrados. Los parámetros y todas las decisiones quedaron congelados antes de usar FD002 RUL.
+
+- Run: https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40791656486
+- JSON agregado (sin filas originales): https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40791656486/artifacts/12862071475
+- 100 motores FD001 TRAIN; detector calibrado con 80 motores de ajuste de soporte y otros 20 para umbral; 259 motores FD002 TEST.
+- Puntaje de novedad máximo MAD-z: umbral derivado solo de FD001 TRAIN = **3,42641**; **14 sensores variables** participan en el score, 7 se consideran casi constantes y se excluyen. El cambio de sensores casi constantes NO fue probado como inocuo.
+- Calibración independiente de fuente (20 motores): **18/20 aceptados**. Ese 90 % NO equivale a cobertura ni precisión del modelo en futuras flotas.
+- FD002 TEST: **0 aceptados, 259 abstenciones, cobertura 0,00000**. Cambios operativos detectados en 259/259, de sensores en 259/259, ambos simultáneamente 259/259.
+- MAE sobre la **cohorte completa** calculada exclusivamente como auditoría de lo que sucedería sin protección:
+  - Ridge congelado FD001 ciclo+sensores: **2575,849 ciclos** (SIMULADOS).
+  - Referencia mediana vida FD001 menos ciclos observados: **33,486 ciclos**.
+  - Deterioro del modelo combinado = **2542,363 ciclos** de MAE adicional.
+- MAE condicional de los casos aceptados = **null**, porque no hubo ninguno. No calcular ni reportar una precisión selectiva ficticia.
+- FD002 TEST RUL queda **consumido**; no se pueden ajustar retrospectivamente umbral, modelo o condiciones para recuperar cobertura.
+
+**Interpretación científica:** el detector de cambio de dominio se comportó de forma fail-closed: impidió emitir estimaciones no respaldadas cuando los regímenes y sensores estaban fuera de los observados en la fuente. El contraste adverso muestra una seria falla de extrapolación del predictor original. Pero una regla con 0 % de cobertura no demuestra capacidad de pronóstico, garantía de error, sensibilidad frente a fallas, ni utilidad clínica/automotriz. El estudio de R10 valida un mecanismo **operativo de abstención** en SIMULACIÓN; no mide desgaste de motor automotriz.
+
+**Decisión:** no usar FD002 TEST para cambiar thresholds. Investigar calibración de cobertura/precisión exclusivamente con datos de entrenamiento y nuevas cohortes no consumidas; priorizar conceptos de soporte operativo, protocolos de captura repetibles, indicadores de calidad instrumental y ground truth mecánica independiente. Sin merge ni deploy.
