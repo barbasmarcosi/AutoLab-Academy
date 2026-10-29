@@ -6,7 +6,8 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const fmt=v=>v===null?'no disponible':Number(v).toFixed(2);
 export function mechanicalAgeShell(){
  return '<section class="stack"><div class="eyebrow">AUTOMOTIVE R&D · MA00</div><h1>Edad mecánica · laboratorio experimental</h1>'
-  +'<p>Analizá una foto OBD con un protocolo reproducible y contrastá antes/después de mantenimiento. <strong>No mide edad real, desgaste estructural, vida restante ni diagnostica averías.</strong></p><div id="mechanical-age-explorer"></div>'+rawAAShell()+'</section>';
+  +'<p>Analizá una foto OBD con un protocolo reproducible y contrastá antes/después de mantenimiento. <strong>No mide edad real, desgaste estructural, vida restante ni diagnostica averías.</strong></p>'
+  +'<p class="muted">R13: observación ≠ hipótesis ≠ diagnóstico confirmado. Gasolina, GNC, diésel, HEV y BEV requieren perfiles y evidencias distintos; sin documentación el sistema debe abstenerse.</p><div id="mechanical-age-explorer"></div>'+rawAAShell()+'</section>';
 }
 export function mountMechanicalAgeLab(root){
  if(!root)throw Error('Falta contenedor de investigación MA00');
@@ -18,6 +19,8 @@ export function mountMechanicalAgeLab(root){
    +(r.exclusion.length?'<p role="note">Exclusiones: '+esc(r.exclusion.join('; '))+'</p>':'')
    +'<p class="muted">Evidencia de adquisición: '+esc(r.measurementEvidence.completeness)+'; verificación instrumental independiente: ninguna.</p>'
    +'<p class="muted">Sincronización entre PIDs: no verificada. Alertas de observabilidad: '+r.signalObservability.warnings.length+'.</p>'
+   +'<p class="muted">R13 · Contrato de afirmaciones: '+esc(r.evidenceContract.complete?'clasificado':'incompleto')+'; nivel '+esc(r.evidenceContract.evidenceLevel)+'; tecnología declarada '+esc(r.observability.powertrain)+' / '+esc(r.observability.fuel)+'; uso de trims: '+esc(r.observability.status==='descriptive_only'?'solo descriptivo':'no habilitado')+'. Verificación física independiente: NO.</p>'
+   +(r.observability.blockers.length?'<p role="note">Límites por tecnología: '+esc(r.observability.blockers.join('; '))+'</p>':'')
    +(r.signalObservability.warnings.length?'<ul>'+r.signalObservability.warnings.map(w=>'<li>'+esc(w)+'</li>').join('')+'</ul>':'')
    +'<p class="muted">Procedencia: '+esc(r.provenance)+'; muestras: '+r.sampleCount+'. Edad equivalente: <strong>no determinada</strong>. Desgaste estructural: <strong>no determinado</strong>.</p></div>';
  }
