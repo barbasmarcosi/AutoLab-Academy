@@ -12,8 +12,8 @@ test('94 lessons have honest, complete, independently auditable evidence coverag
  assert.equal(summary.totals.lessons,94);
  assert.equal(summary.totals.reasoningAvailable,39);
  assert.equal(lessonEvidence(progress(),'volt-drop').reasoning.available,false,'The first lesson uses its dedicated holdout');
- assert.equal(summary.totals.embeddedAvailable,24);
- assert.equal(summary.totals.holdoutAvailable,5);
+ assert.equal(summary.totals.embeddedAvailable,25);
+ assert.equal(summary.totals.holdoutAvailable,6);
  assert.equal(summary.totals.holdoutPassed,0);
  assert.equal(summary.totals.linkedOnly,12);
  assert.equal(summary.totals.documentedTraining,0);
@@ -69,6 +69,7 @@ test('path recommendation: theory then guided lab, reserved transfer and objecti
   if(id==='scope')p.cases.push({id:'lab-scope-holdout-v1',passed:true});
   if(id==='can')p.cases.push({id:'lab-can-holdout-v1',passed:true});
   if(id==='bms')p.cases.push({id:'lab-bms-holdout-v1',passed:true});
+  if(id==='hv')p.cases.push({id:'lab-hv-safety-holdout-v1',passed:true});
  }
  p.notes['lesson-mc06-dual-fault-instrumentation']='2026-10-26';
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
