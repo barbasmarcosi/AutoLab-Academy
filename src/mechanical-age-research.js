@@ -5,6 +5,8 @@
  */
 import {auditMeasurementEvidence,compareMeasurementEvidence} from './mechanical-age-evidence.js';
 import {auditObdSignalObservability} from './mechanical-age-signal-quality.js';
+import {assessMA00Observability} from './mechanical-age-r13-observability.js';
+import {assertMA00Report} from './mechanical-age-r13-claims.js';
 export const MECHANICAL_AGE_VERSION='ma-obd-controlled-idle-v0';
 export const PROTOCOL='warm-idle-fixed-load-v0';
 const bound=(x,min,max)=>Math.max(min,Math.min(max,x));
@@ -54,17 +56,22 @@ export function evaluateMechanicalSnapshot(record){
  if(rpm<550||rpm>1150)exclusion.push('Régimen fuera de rango educativo de ralentí');
  if(load>35||loadRange>10)exclusion.push('Carga no comparable/estable');
  if(!trims)exclusion.push('Faltan STFT y LTFT: v0 no puntúa diésel ni señales parciales');
+ const availablePids=[['rpm','010C'],['ectC','0105'],['loadPct','0104'],['stftPct','0106'],['ltftPct','0107'],['iatC','010F']]
+  .filter(([key])=>samples.every(s=>typeof s[key]==='number'&&Number.isFinite(s[key])))
+  .map(([,pid])=>pid);
+ const observability=assessMA00Observability({powertrain:record.powertrain??'unknown',fuel:record.fuel??'unknown',control:record.control??'unknown',availablePids});
  const eligible=exclusion.length===0;
  const speedDeviation=bound((rpmRobustSigma-4)/55,0,1);
  const trimDeviation=trim===null?null:bound((Math.abs(trim)-5)/20,0,1);
  // An arbitrary weighted score must never be applied to externally supplied OBD as if it were calibrated.
- const deviationIndex=eligible&&source==='synthetic'?Math.round(100*(.4*speedDeviation+.6*trimDeviation)):null;
- return {
+ const deviationIndex=eligible&&source==='synthetic'&&observability.status==='descriptive_only'
+  ?Math.round(100*(.4*speedDeviation+.6*trimDeviation)):null;
+ return assertMA00Report({
   model:MECHANICAL_AGE_VERSION,protocol,phase,source,engineFamily:engineFamily.trim(),
   sampleCount:samples.length,elapsedSec,medianIntervalMs,maxIntervalMs,
   status:eligible?'eligible':'inconclusive',exclusion,vehicleAlias:vehicleAlias.trim(),
   measurementEvidence:auditMeasurementEvidence(record),
-  signalObservability:auditObdSignalObservability(samples),
+  signalObservability:auditObdSignalObservability(samples),observability,
   features:{medianRpm:rpm,rpmRobustSigma,medianEctC:ect,medianLoadPct:load,medianIatC:iat,medianCombinedTrimPct:trim,temperatureRange,loadRange},
   deviationIndex,scoringStatus:source==='synthetic'?'demonstration_only':'not_calibrated_external_data',
   structuralWear:null,mechanicalAgeEquivalentKm:null,remainingUsefulLife:null,
@@ -72,7 +79,7 @@ export function evaluateMechanicalSnapshot(record){
   thresholdsMeaning:'Umbrales educativos arbitrarios, sin calibración OEM ni validación clínica/mecánica',
   provenance:source,
   caveat:'Sin banco, compresión, leak-down ni evaluación longitudinal no puede inferirse desgaste permanente.'
- };
+ },'snapshot',{source});
 }
 export function compareMechanicalSnapshots(before,after){
  const a=evaluateMechanicalSnapshot(before),b=evaluateMechanicalSnapshot(after);
@@ -90,12 +97,12 @@ export function compareMechanicalSnapshots(before,after){
  const evidence=compareMeasurementEvidence(before,after);
  if(!evidence.documented)blockers.push(...evidence.blockers);
  const comparable=blockers.length===0;
- return {
+ return assertMA00Report({
   model:MECHANICAL_AGE_VERSION,comparable,blockers,before:a,after:b,measurementEvidence:evidence,
   deltaDeviationIndex:comparable&&a.deviationIndex!==null&&b.deviationIndex!==null?b.deviationIndex-a.deviationIndex:null,
   interpretation:comparable?(a.deviationIndex===null?'Variables observadas comparables, pero SIN puntuación de datos externos no calibrados':'Cambio observado en índice sintético; causalidad y desgaste NO identificados'):(a.source==='provided_obd_unverified'?'Comparación documental no acreditada; SIN puntuación de datos externos no calibrados':'No comparar índices bajo condiciones dispares'),
   mechanicalAgeChangeKm:null,structuralRejuvenationClaim:false
- };
+ },'comparison',{source:a.source});
 }
 /** Dataset sintético sin observaciones de vehículos reales, para demostrar el contrato. */
 export function syntheticServicePair(){
@@ -103,6 +110,7 @@ export function syntheticServicePair(){
   const before=phase==='before_service';
   return {
    engineFamily:'demo-gasoline-inline4',vehicleAlias:'demo-unit-001',protocol:PROTOCOL,phase,source:'synthetic',
+   powertrain:'gasoline_ice',fuel:'gasoline',control:'closed_loop_observed',
    samples:Array.from({length:40},(_,i)=>({
     timeMs:i*1000,rpm:800+(before?24:5)*Math.sin(i*1.37),
     ectC:89+Math.sin(i*.2),loadPct:18+Math.sin(i*.15),
