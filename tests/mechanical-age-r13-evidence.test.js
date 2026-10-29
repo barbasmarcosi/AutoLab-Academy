@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {
  CLAIMS_VERSION,REPORT_FIELDS,REPORT_SUBFIELDS,auditMA00Report,
  assertMA00Report,checkObservabilityClaim
@@ -114,4 +115,31 @@ test('R13: imported raw sessions still never authenticate physical signal proven
  assert.equal(a.traceIntegrity.independentlyAuthenticated,false);
  assert.equal(a.sensorAcquisitionTimeKnown,false);
  assert.equal(a.estimatedAgeKm,null);
+});
+
+
+test('R13: machine-readable claims.json stays in sync with runtime allowlist',()=>{
+ const doc=JSON.parse(readFileSync(new URL('../docs/ma00/claims.json',import.meta.url),'utf8'));
+ const keys=Object.keys(REPORT_FIELDS).sort();
+ assert.deepEqual(Object.keys(doc.reportContracts).sort(),keys);
+ let classified=0;
+ for(const kind of keys){
+  const declared=REPORT_FIELDS[kind];
+  const published=doc.reportContracts[kind];
+  assert.deepEqual(Object.keys(published).sort(),Object.keys(declared).sort());
+  for(const [cls,names] of Object.entries(declared)){
+   assert.deepEqual(published[cls],names.trim().split(/\s+/),kind+'.'+cls);
+   classified+=published[cls].length;
+  }
+ }
+ assert.ok(classified>=90);
+ for(const [kind,inner] of Object.entries(REPORT_SUBFIELDS)){
+  for(const [container,fields] of Object.entries(inner)){
+   if(fields.startsWith('*'))continue;
+   assert.deepEqual(doc.nestedContracts[kind+'.'+container],fields.trim().split(/\s+/));
+  }
+ }
+ assert.ok(doc.preRealPhysicalClaimVeto.includes('healthScore'));
+ assert.ok(doc.evidenceLevels.E4.includes('NOT AVAILABLE'));
+ assert.ok(doc.evidenceLevels.E5.includes('NOT AVAILABLE'));
 });
