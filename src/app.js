@@ -57,6 +57,7 @@ import{voltDropTheoryIllustration,mountVoltDropPractice,mountVoltDropBaseline}fr
 import{mountVoltDropHoldout}from'./volt-drop-transfer.js';
 import{dtcTheoryIllustration,mountDtcGuided,mountDtcBaseline}from'./dtc-lesson.js';
 import{mountDtcHoldout}from'./dtc-transfer.js';
+import{scopeTheoryIllustration,mountScopeBaseline,mountScopeControls}from'./scope-lesson.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
 const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...powertrainLessons,...engineeringBridgeLessons,...inventorLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...powertrainQuestions,...engineeringBridgeQuestions,...inventorQuestions,...rotaryGeometryQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions,...ecuOptimizationQuestions,...ecuRobustQuestions,...rotaryApertureQuestions,...rotaryInverseQuestions];
@@ -779,7 +780,7 @@ function lessonView(){
  '<article class="panel lesson-body"><p class="muted">Teoría: '+(data.notes['lesson-'+l.id]?'lectura registrada':'lectura pendiente')+
  '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>'+
  '. Razonamiento: <span id="lesson-theory-reasoning-status">'+esc(lessonReasoningStatusText(l.id))+'</span>. Ninguno acredita competencia física.</p>'+
- (l.id==='volt-drop'?'<div id="volt-baseline-host"></div>':l.id==='motor-data'?'<div id="dtc-baseline-host"></div>':'')+sections(allSections)+(l.id==='volt-drop'?voltDropTheoryIllustration():l.id==='motor-data'?dtcTheoryIllustration():'')+'</article>'+lessonPracticePanel(l)+
+ (l.id==='volt-drop'?'<div id="volt-baseline-host"></div>':l.id==='motor-data'?'<div id="dtc-baseline-host"></div>':l.id==='scope'?'<div id="scope-baseline-host"></div>':'')+sections(allSections)+(l.id==='volt-drop'?voltDropTheoryIllustration():l.id==='motor-data'?dtcTheoryIllustration():l.id==='scope'?scopeTheoryIllustration()+'<div id="scope-controls-host"></div>':'')+'</article>'+lessonPracticePanel(l)+
  '<article class="panel lesson-body">'+
  '<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+
  link(l.url,'Abrir fuente y lecturas relacionadas')+
@@ -1550,6 +1551,10 @@ if(page==='learn'&&selectedLesson){
  if(baseline)mountVoltDropBaseline(baseline);
  const dtcBaseline=document.getElementById('dtc-baseline-host');
  if(dtcBaseline)mountDtcBaseline(dtcBaseline);
+ const scopeBaseline=document.getElementById('scope-baseline-host');
+ if(scopeBaseline)mountScopeBaseline(scopeBaseline);
+ const scopeControls=document.getElementById('scope-controls-host');
+ if(scopeControls)mountScopeControls(scopeControls);
  const dtcHoldout=document.getElementById('dtc-holdout-host');
  if(dtcHoldout)mountDtcHoldout(dtcHoldout,{record:saveLabEntry,history:data.cases,onSaved:()=>{
   if(page!=='learn'||selectedLesson!==lessonAtMount)return;

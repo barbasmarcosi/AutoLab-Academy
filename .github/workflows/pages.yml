@@ -42,7 +42,7 @@ jobs:
       - name: Install Chromium for focused E2E
         run: npx playwright install --with-deps chromium
       - name: Focused pedagogy and offline E2E (Chromium on every PR/dispatch)
-        run: npx playwright test tests/e2e/volt-drop-pedagogy.spec.js tests/e2e/dtc-pedagogy.spec.js tests/e2e/dtc-transfer.spec.js tests/e2e/lesson-reasoning.spec.js tests/e2e/learning-evidence.spec.js tests/e2e/academy.spec.js tests/e2e/sw-upgrade.spec.js --project=chromium --grep 'lesson 1|lesson 2|first lesson|PWA instalada|actualización v38|MC06 lesson|MC06 recommendation|path makes reading|MC14:|MOSFET causal'
+        run: npx playwright test tests/e2e/volt-drop-pedagogy.spec.js tests/e2e/dtc-pedagogy.spec.js tests/e2e/dtc-transfer.spec.js tests/e2e/lesson-reasoning.spec.js tests/e2e/learning-evidence.spec.js tests/e2e/academy.spec.js tests/e2e/sw-upgrade.spec.js --project=chromium --grep 'lesson 1|lesson 2|lesson 3|first lesson|PWA instalada|actualización v38|MC06 lesson|MC06 recommendation|path makes reading|MC14:|MOSFET causal'
       - name: Install WebKit for release-milestone E2E
         if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feature/pedagogy-first-redesign' && contains(github.event.head_commit.message, '[pages-milestone]')))) || (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'pull_request' && contains(github.event.pull_request.body, '[FULL_E2E_MILESTONE]'))
         run: npx playwright install --with-deps webkit
