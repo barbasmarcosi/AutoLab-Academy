@@ -4,6 +4,7 @@
  */
 import {evaluateMechanicalSnapshot,syntheticServicePair} from './mechanical-age-research.js';
 import {compareMeasurementEvidence} from './mechanical-age-evidence.js';
+import {assertMA00Report} from './mechanical-age-r13-claims.js';
 export const REPLICATES_VERSION='ma00-replicated-observations-v1';
 const median=x=>{const a=[...x].sort((p,q)=>p-q),n=a.length;return n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2;};
 const range=x=>Math.max(...x)-Math.min(...x);
@@ -56,7 +57,7 @@ export function evaluateReplicatedMeasurements(sessions){
  const comparable=blockers.length===0;
  const baseline=comparable?phaseSummary(before):null,post=comparable?phaseSummary(after):null;
  const difference=(field)=>baseline&&post&&baseline[field]&&post[field]?post[field].median-baseline[field].median:null;
- return {
+ return assertMA00Report({
   version:REPLICATES_VERSION,
   comparable,blockers,sessionUnitCount:results.length,phases:{before:before.length,after:after.length},
   baseline,after:post,
@@ -69,7 +70,7 @@ export function evaluateReplicatedMeasurements(sessions){
   confidenceInterval:null,causalMaintenanceEffect:null,structuralWear:null,mechanicalAgeEquivalentKm:null,
   evidenceLevel:results.every(x=>x.source==='synthetic')?'synthetic_demonstration':'operator_assertions_only',
   verdict:comparable?'Descriptivo: la diferencia entre medianas NO prueba causalidad ni supera por sí sola un umbral inferencial':'Inconcluso: los ensayos no son comparables'
- };
+ },'replicates',{source:results.every(x=>x.source==='synthetic')?'synthetic':'provided_obd_unverified'});
 }
 /** Distinct but still synthetic sessions: illustrative of a repeated assay, not biological replicates. */
 export function syntheticReplicatedServiceCase(){
