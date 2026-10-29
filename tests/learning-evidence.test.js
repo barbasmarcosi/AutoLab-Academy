@@ -13,7 +13,7 @@ test('94 lessons have honest, complete, independently auditable evidence coverag
  assert.equal(summary.totals.reasoningAvailable,39);
  assert.equal(lessonEvidence(progress(),'volt-drop').reasoning.available,false,'The first lesson uses its dedicated holdout');
  assert.equal(summary.totals.embeddedAvailable,23);
- assert.equal(summary.totals.holdoutAvailable,2);
+ assert.equal(summary.totals.holdoutAvailable,3);
  assert.equal(summary.totals.holdoutPassed,0);
  assert.equal(summary.totals.linkedOnly,12);
  assert.equal(summary.totals.documentedTraining,0);
@@ -66,6 +66,7 @@ test('path recommendation: theory then guided lab, reserved transfer and objecti
   const lab=lessonPractice(id);
   if(lab?.kind==='embedded')p.cases.push({id:lab.caseId,passed:true});
   if(id==='motor-data')p.cases.push({id:'lab-dtc-holdout-v1',passed:true});
+  if(id==='scope')p.cases.push({id:'lab-scope-holdout-v1',passed:true});
  }
  p.notes['lesson-mc06-dual-fault-instrumentation']='2026-10-26';
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
@@ -104,4 +105,18 @@ test('lesson 2 only documents independent digital transfer after actual holdout 
  assert.equal(x.documented,true);
  assert.equal(x.holdout.attempts,2);
  assert.equal(x.holdout.firstRecordedAttemptPassed,false);
+});
+
+test('lesson 3 holdout cannot be replaced by guided waveform or DTC records',()=>{
+ const p=progress();p.notes['lesson-scope']='2026-10-28';
+ p.cases.push({id:'lab-scope-waveform-v1',passed:true});
+ p.cases.push({id:caseId('scope'),passed:true});
+ let x=lessonEvidence(p,'scope');
+ assert.equal(x.holdout.available,true);assert.equal(x.documented,false);
+ assert.equal(x.holdout.attempts,0);
+ p.cases.push({id:'lab-dtc-holdout-v1',passed:true});
+ assert.equal(lessonEvidence(p,'scope').documented,false);
+ p.cases.push({id:'lab-scope-holdout-v1',passed:true});
+ x=lessonEvidence(p,'scope');
+ assert.equal(x.documented,true);assert.equal(x.holdout.attempts,1);
 });
