@@ -9,11 +9,14 @@ test('nine reserved CAN cases separate termination, node supply and legitimate a
  }
  for(const c of CAN_HOLDOUT_CASES){
   for(const t of CAN_HOLDOUT_TESTS)assert.ok(canHoldoutReading(c.id,t.id).length>50);
-  assert.equal(c.resistanceOhm,c.cause==='termination'?120:60);
+  assert.equal(c.resistanceOhm,c.cause==='termination'?(c.id==='N04'?40:120):60);
   assert.equal(c.nodeSupplyV,c.cause==='supply'?0:12);
   assert.equal(Object.isFrozen(c),true);
  }
  assert.match(canHoldoutReading('N03','traffic'),/reintenta con éxito/);
+ assert.match(canHoldoutReading('N06','traffic'),/gana el nodo B/);
+ assert.match(canHoldoutReading('N09','traffic'),/gana el nodo A/);
+ assert.match(canHoldoutReading('N04','termination'),/40 Ω/);
  assert.match(canHoldoutReading('N02','traffic'),/no prueba un transceptor roto/);
  assert.throws(()=>canHoldoutReading('bad','termination'),RangeError);
  assert.throws(()=>canHoldoutReading('N01','bad'),RangeError);

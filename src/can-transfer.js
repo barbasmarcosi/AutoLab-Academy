@@ -2,12 +2,13 @@
  * Lesson 04 reserved CAN diagnosis on fully synthetic, isolated bench data.
  * There is no interface for transmitting frames, wiring, energizing or probing.
  */
+import{canArbitrationModel}from'./can-lesson.js';
 export const CAN_HOLDOUT_ID="lab-can-holdout-v1";
 const rows=[
  ["N01","termination",120,12,1.7,"Observaciones con retrasos y pérdidas de tramas ficticias"],
  ["N02","supply",60,0,2.0,"Un nodo no responde; otros intercambian tramas"],
  ["N03","arbitration",60,12,2.0,"Retraso de un emisor bajo tráfico simultáneo"],
- ["N04","termination",120,12,1.6,"Recepciones intermitentes en el banco"],
+ ["N04","termination",40,12,1.6,"Recepciones intermitentes y posible terminador adicional"],
  ["N05","supply",60,0,2.1,"Nodo silencioso; red restante estable"],
  ["N06","arbitration",60,12,1.9,"Tramas diferidas durante arbitraje simultáneo"],
  ["N07","termination",120,12,1.8,"Tasa variable de recepción de una trama sintética"],
@@ -39,8 +40,9 @@ export const CAN_HOLDOUT_FALSIFIERS=Object.freeze({
   "La captura independiente demuestra errores físicos repetibles o pérdida de alimentación"
  ]),answer:2})
 });
-const names=Object.freeze({termination:"Terminación faltante (modelo)",supply:"Alimentación ausente en el nodo",arbitration:"Arbitraje normal, no defecto",unknown:"Aún no hay conclusión"});
+const names=Object.freeze({termination:"Terminación diferente de referencia (modelo)",supply:"Alimentación ausente en el nodo",arbitration:"Arbitraje normal, no defecto",unknown:"Aún no hay conclusión"});
 const discriminators=Object.freeze({termination:"termination",supply:"supply",arbitration:"traffic"});
+const arbitrationPairs=Object.freeze({N03:[0x080,0x120],N06:[0x140,0x080],N09:[0x180,0x300]});
 const get=id=>{const c=CAN_HOLDOUT_CASES.find(c=>c.id===id);if(!c)throw RangeError("Caso reservado CAN inexistente");return c;};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 export function canHoldoutReading(id,test){
@@ -49,7 +51,10 @@ export function canHoldoutReading(id,test){
  if(test==="supply")return "Referencia independiente virtual: alimentación del nodo observado "+c.nodeSupplyV+" V (referencia de banco 12 V). No describe una medición real.";
  if(test==="differential")return "Estados del emulador: recesivo CAN-H = CAN-L = 2,5 V; dominante diferencial "+c.differentialV.toFixed(1).replace(".",",")+" V. No decide por sí solo la causa.";
  if(test==="traffic")return c.cause==="arbitration"?
-  "Registro sintético: dos ID estándar, 0x080 y 0x120, solicitan el bus a la vez; 0x080 vence y 0x120 reintenta con éxito, sin error de protocolo.":
+  "Registro sintético: dos ID estándar, 0x"+arbitrationPairs[c.id][0].toString(16).toUpperCase().padStart(3,"0")+" y 0x"+
+  arbitrationPairs[c.id][1].toString(16).toUpperCase().padStart(3,"0")+
+  " solicitan el bus a la vez; gana el nodo "+canArbitrationModel(...arbitrationPairs[c.id]).winner+
+  " por prioridad y el otro reintenta con éxito, sin error de protocolo.":
   c.cause==="supply"?
   "Registro sintético: tramas de otros nodos válidas, sin mensajes del nodo observado; el log por sí solo no prueba un transceptor roto.":
   "Registro sintético: huecos variables en mensajes y reintentos ficticios; por sí solos no identifican la causa eléctrica.";
