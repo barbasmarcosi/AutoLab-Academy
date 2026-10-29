@@ -7,6 +7,11 @@ on:
     branches: [main]
 permissions:
   contents: read
+# Only superseded PR validations are canceled. Main deployments are never canceled
+# by a later PR or commit; use run_id for unique non-PR groups.
+concurrency:
+  group: autolab-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   verify:
     # Adding the release router is an infrastructure change, not a request

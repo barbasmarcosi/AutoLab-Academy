@@ -154,3 +154,130 @@ test('v1.9: diagnóstico por evidencia conserva hipótesis, descartes e informe 
  assert.match(portfolioMarkdown(restored,lessons),/Semilla reproducible: 291/);
  assert.match(portfolioMarkdown(restored,lessons),/Puntuación: 100\/100/);
 });
+
+
+test('RW1: evidencia geométrica y procedencia se conservan en backup y Portafolio',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-geometry-v1',at:'2026-10-26T03:00:00Z',score:100,passed:true,hypothesis:'aumenta',conclusion:'aumenta',used:['geometry-a'],reasoning:'Predicción registrada con modelo cinemático; no es metrología ni un resultado real.',report:'# RW1\nModelo: rw1-epitrochoid-straight-flanks v1\nProcedencia: derived_from_geometry'});
+ const recovered=parseBackup(serializeBackup(p)),snap=portfolioSnapshot(recovered,lessons),report=portfolioMarkdown(recovered,lessons);
+ assert.equal(snap.events[0].title,'RW1 — Rotary Geometry Explorer');
+ assert.equal(snap.events[0].hypothesis,'aumenta');
+ assert.equal(snap.events[0].report,p.cases[0].report);
+ assert.match(report,/derived_from_geometry/);
+});
+
+
+test('RW4: portafolio y respaldo conservan hipótesis, dos pruebas y procedencia del modelo',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-sealing-v1',score:100,passed:true,at:'2026-10-26T04:00:00.000Z',hypothesis:'ignition',conclusion:'sealing',used:['retention','primary'],reasoning:'Dos índices sintéticos distinguen las hipótesis sin mediciones físicas.',report:'# RW4\nProcedencia: synthetic_model\nSemilla: 42'});
+ const restored=parseBackup(serializeBackup(p)),snap=portfolioSnapshot(restored,lessons),md=portfolioMarkdown(restored,lessons);
+ assert.equal(snap.events[0].title,'RW4 — Diagnóstico diferencial rotativo');
+ assert.deepEqual(snap.events[0].evidence,['retention','primary']);
+ assert.match(md,/synthetic_model/);assert.match(md,/Semilla: 42/);
+});
+
+test('MC01: experiment preserves metrology evidence through backup and portfolio',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-metrology-uncertainty-v1',at:'2026-10-26T04:00:00Z',score:100,passed:true,hypothesis:'resolvable',conclusion:'resolvable',used:['micro','repeatability','resolution'],reasoning:'Comparé la diferencia con dos incertidumbres estándar combinadas.',report:'# MC01\nModelo: mc01-uncertainty-rd-v1\nProcedencia: synthetic_measurement\nSemilla: 42'});
+ const restored=parseBackup(serializeBackup(p)),s=portfolioSnapshot(restored,lessons);
+ assert.equal(s.events[0].title,'MC01 — Metrología e incertidumbre');
+ assert.deepEqual(s.events[0].evidence,['micro','repeatability','resolution']);
+ assert.match(portfolioMarkdown(restored,lessons),/synthetic_measurement/);
+});
+
+test('RW4+: a biased instrument investigation survives JSON export and recovery',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-instrument-v1',at:'2026-10-26T05:00:00Z',score:100,passed:true,hypothesis:'sealing',conclusion:'instrument',used:['zero','independent'],reasoning:'La referencia del instrumento está desviada, se descarta la hipótesis de estanqueidad al verificar una fuente independiente.',report:'# RW4+\nSemilla: 111\nModelo: rw4-instrument-adversarial-synthetic-v1'});
+ const recovered=parseBackup(serializeBackup(p)),snapshot=portfolioSnapshot(recovered,lessons),md=portfolioMarkdown(recovered,lessons);
+ assert.equal(snapshot.events[0].title,'RW4+ — Verificación instrumental adversarial');
+ assert.deepEqual(snapshot.events[0].evidence,['zero','independent']);
+ assert.match(md,/rw4-instrument-adversarial-synthetic-v1/);
+});
+
+test('MC08 ideal brakes: portfolio evidence survives backup round-trip',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-brake-energy-v1',at:'2026-10-26T05:00:00Z',score:100,passed:true,hypothesis:'quadruple',conclusion:'ideal friction model',used:['energy','mu','reaction-distance'],reasoning:'La energía es proporcional a v cuadrado.',report:'# MC08\nModelo mc08-energy-friction-ideal-v1\nProcedencia: derived_from_ideal_physics'});
+ const recovered=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(recovered,lessons);
+ assert.equal(snap.events[0].title,'MC08 — Investigación de energía de frenado');
+ assert.match(portfolioMarkdown(recovered,lessons),/derived_from_ideal_physics/);
+});
+
+test('RW2/RW3: thermodynamics report round-trip through backup and portfolio',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-thermal-v1',at:'2026-10-26T05:00:00Z',score:100,passed:true,hypothesis:'aumenta',conclusion:'ideal not real',used:['otto-ideal','energy-ledger'],reasoning:'Diferencio el ciclo termodinámico ideal de la arquitectura rotativa.',report:'# RW2/RW3\nModelo: rw2-rw3-ideal-cycle-synthetic-balance-v1\nProcedencia: synthetic_energy_allocation'});
+ const recovered=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(recovered,lessons);
+ assert.equal(snap.events[0].title,'RW2/RW3 — Termodinámica y balance energético');
+ assert.match(portfolioMarkdown(recovered,lessons),/synthetic_energy_allocation/);
+});
+
+test('RW5: convection evidence survives JSON export and portfolio recovery',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-convection-v1',at:'2026-10-26T06:00:00Z',score:100,passed:true,hypothesis:'aumenta',conclusion:'aumenta',used:['assumed-area','assumed-convective-coefficient'],reasoning:'Área menor pero coeficiente convectivo mayor.',report:'# RW5\nModelo: rw5-lumped-convection-sensitivity-v1\nProcedencia: derived_from_lumped_heat_transfer'});
+ const recovered=parseBackup(serializeBackup(p)),s=portfolioSnapshot(recovered,lessons);
+ assert.equal(s.events[0].title,'RW5 — Sensibilidad de transferencia térmica');
+ assert.match(portfolioMarkdown(recovered,lessons),/derived_from_lumped_heat_transfer/);
+});
+
+test('RW6/RW7: reports survive JSON backup round-trip and portfolio metadata',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-port-burn-v1',at:'2026-10-26T07:00:00Z',score:100,passed:true,hypothesis:'aumenta / disminuye',conclusion:'Ventanas ficticias y Wiebe',used:['cyclic-port-window','normalized-wiebe-shape'],reasoning:'Grados de apertura no determinan rendimiento ni emisiones.',report:'# RW6/RW7\nModelo: rw6-rw7-disconnected-conceptual-v1\nProcedencia: synthetic_ports_and_assumed_heat_release'});
+ const restored=parseBackup(serializeBackup(p));const snapshot=portfolioSnapshot(restored,lessons);
+ assert.equal(snapshot.events[0].title,'RW6/RW7 — Puertos y combustión conceptual');
+ assert.match(portfolioMarkdown(restored,lessons),/synthetic_ports_and_assumed_heat_release/);
+});
+
+test('RW8: constrained profile research survives backup and portfolio export',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-ecu-optimization-v1',at:'2026-10-26T07:00:00Z',score:100,passed:true,hypothesis:'DAILY',conclusion:'DAILY',used:['thermal-constraint','emissions-constraint','knock-constraint'],reasoning:'No ignoro riesgos aunque la respuesta parezca alta.',report:'# RW8\nModelo: rw8-constrained-synthetic-profiles-v1\nProveniencia: synthetic_discrete_constraint_catalog'});
+ const x=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(x,lessons);
+ assert.equal(snap.events[0].title,'RW8 — Optimización ECU restringida');
+ assert.match(portfolioMarkdown(x,lessons),/synthetic_discrete_constraint_catalog/);
+});
+
+test('RW8+: worst-case Pareto research persists through schema 1 backup',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-ecu-robust-v1',at:'2026-10-26T08:00:00Z',score:100,passed:true,hypothesis:'1 / 0 / 0',conclusion:'Sin solución robustamente viable',used:['worst-case-interval','multiobjective-pareto','thermal-sensitivity'],reasoning:'Una opción puede aprobar nominalmente y fracasar con incertidumbre acotada.',report:'# RW8+\nModelo: rw8-robust-pareto-fictitious-indices-v1\nOrigen: synthetic_bounded_indices_not_probabilities'});
+ const restored=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(restored,lessons);
+ assert.equal(snap.events[0].title,'RW8+ — Robustez y Pareto ECU');
+ assert.match(portfolioMarkdown(restored,lessons),/synthetic_bounded_indices_not_probabilities/);
+});
+
+test('RW6+: 2D aperture report survives schema-1 JSON backup and portfolio title',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-aperture-v1',at:'2026-10-26T09:00:00Z',score:100,passed:true,hypothesis:'rectangular',conclusion:'2D only',used:['circular-segment-integral','midpoint-convergence'],reasoning:'La apertura parcial difiere con igual área máxima.',report:'# RW6+\nModelo: rw6-planar-port-aperture-ideal-v1\nProcedencia: analytical_2d_occlusion_geometry'});
+ const recovered=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(recovered,lessons);
+ assert.equal(snap.events[0].title,'RW6+ — Geometría y apertura de puertos');
+ assert.match(portfolioMarkdown(recovered,lessons),/analytical_2d_occlusion_geometry/);
+});
+
+test('RW6++ inverse metrology evidence round-trip preserves provenance and full report',()=>{
+ const p=emptyProgress();p.cases.push({id:'lab-rotary-aperture-inverse-v1',at:'2026-10-26T15:00:00Z',score:100,passed:true,hypothesis:'no',conclusion:'Intervalo excluye verdad sintética',used:['bounded-inverse-bisection','synthetic-gauge-bias'],reasoning:'El sesgo supera a la tolerancia determinista.',report:'# RW6++\nModelo: rw6-inverse-2d-aperture-bounded-v1\nProveniencia: synthetic_deterministic_inverse_interval'});
+ const restored=parseBackup(serializeBackup(p));const snap=portfolioSnapshot(restored,lessons);
+ assert.equal(snap.events[0].title,'RW6++ — Metrología geométrica inversa');
+ assert.match(portfolioMarkdown(restored,lessons),/synthetic_deterministic_inverse_interval/);
+});
+
+test('el razonamiento guiado tiene su contador y no infla las prácticas de laboratorio',()=>{
+ const p=emptyProgress();
+ p.cases.push({id:'lab-reasoning-volt-drop-v1',score:100,passed:true,at:'2026-10-26T16:00:00Z',
+  hypothesis:'no identificable',conclusion:'señal alternativa',used:['hypothesis-frozen'],
+  reasoning:'Hipótesis falsable',report:'Predicción congelada y devolución'});
+ p.cases.push({id:'lab-powertrain-mc06-v1',score:100,passed:true,at:'2026-10-26T16:01:00Z'});
+ const snap=portfolioSnapshot(p,lessons);
+ assert.equal(snap.totals.practices,1);assert.equal(snap.totals.reasoning,1);
+ assert.match(snap.events.find(x=>x.kind==='reasoning').title,/Razonamiento guiado/);
+ const recovered=parseBackup(serializeBackup(p));
+ assert.deepEqual(portfolioSnapshot(recovered,lessons),snap);
+ const report=portfolioMarkdown(recovered,lessons);
+ assert.match(report,/Razonamientos guiados: 1/);
+ assert.match(report,/Predicción congelada y devolución/);
+});
+
+test('legacy guided reasoning survives v2 backup without granting transfer mastery',async()=>{
+ const {transferProgress,transferCaseId}=await import('../src/lesson-transfer.js');
+ const p=emptyProgress();
+ p.cases.push({id:'lab-reasoning-mc06-dual-fault-instrumentation-v1',at:'2026-10-26T17:00:00.000Z',
+   score:100,passed:true,reasoning:'Registro conceptual legado',report:'Modelo original v1'});
+ const original=transferProgress(p,'mc06-dual-fault-instrumentation');
+ assert.equal(original.status,'legacy-passed');assert.equal(original.passed,false);
+ p.cases.push({id:transferCaseId('mc06-dual-fault-instrumentation'),at:'2026-10-26T18:00:00.000Z',
+   score:100,passed:true,reasoning:'Transferencia congelada',report:'Modelo nuevo v2\nEscenario reservado'});
+ const restored=parseBackup(serializeBackup(p));
+ assert.deepEqual(restored.cases.map(x=>({id:x.id,passed:x.passed,score:x.score,report:x.report})),p.cases.map(x=>({id:x.id,passed:x.passed,score:x.score,report:x.report})));
+ assert.ok(restored.cases.every(x=>Array.isArray(x.used)&&typeof x.hypothesis==='string'&&typeof x.conclusion==='string'));
+ const snap=portfolioSnapshot(restored,lessons);
+ assert.equal(snap.totals.reasoning,2);assert.equal(snap.totals.practices,0);
+ assert.equal(transferProgress(restored,'mc06-dual-fault-instrumentation').passed,true);
+ assert.equal(snap.events.filter(e=>e.kind==='reasoning').length,2);
+ assert.match(portfolioMarkdown(restored,lessons),/Modelo original v1/);
+ assert.match(portfolioMarkdown(restored,lessons),/Modelo nuevo v2/);
+});

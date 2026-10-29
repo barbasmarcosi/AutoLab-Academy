@@ -1,5 +1,5 @@
 /**
- * Nine-stage learning itinerary. Reading and objective exams are shown separately:
+ * Sixteen-stage learning itinerary. Reading and objective exams are shown separately:
  * neither demonstrates competence on a real vehicle.
  */
 export const learningStages=[
@@ -29,7 +29,28 @@ export const learningStages=[
   goal:'Separar monitor P030x, patrón por cilindro y evidencia instrumental confirmatoria, sin adjudicar culpables por un solo dato.'},
  {id:'integrative',order:9,name:'Taller Integrador',subtitle:'Cruzar OBD, oscilogramas, circuitos y condiciones de funcionamiento',
   lessons:['chain-of-evidence','obd-context-provenance','multichannel-crosschecks','mixture-closed-loop-inference','professional-diagnostic-report'],
-  goal:'Documentar procedencia, confirmación, descarte e incertidumbres con un expediente reproducible; jamás equiparar la nota con una certificación de taller.'}
+  goal:'Documentar procedencia, confirmación, descarte e incertidumbres con un expediente reproducible; jamás equiparar la nota con una certificación de taller.'},
+ {id:'mechanics',order:10,name:'Mecánica integral — fundamentos',subtitle:'MC00–MC01 · Seguridad de taller, física y metrología',
+  lessons:['mc00-risk-assessment','mc01-measurement-uncertainty','mc01-torque-preload'],
+  goal:'Identificar riesgos, evaluar límites de competencia y justificar mediciones e incertidumbre antes de diagnosticar.'},
+ {id:'engine-core',order:11,name:'Arquitectura y motores',subtitle:'MC02–MC05 · Tren motriz, motores, diésel, lubricación y térmica',
+  lessons:['mc02-energy-path','mc03-cycle-vs-architecture','mc03-piston-cinematics','mc04-diesel-commonrail','mc05-cooling-lubrication'],
+  goal:'Distinguir arquitecturas mecánicas, ciclos, relación de compresión y síntomas mecánicos de lecturas indirectas.'},
+ {id:'chassis-core',order:12,name:'Chasis, transmisión y seguridad',subtitle:'MC06–MC09 · Caja, dirección, ruedas, frenos y climatización',
+  lessons:['mc06-gears-powertrain','mc06-dual-fault-instrumentation','mc07-chassis-geometry','mc08-brakes-abs','mc09-hvac-loop'],
+  goal:'Interpretar tren motriz, adherencia, controles de estabilidad y climatización sin atribuirle al modelo capacidades físicas que no tiene.'},
+ {id:'control-core',order:13,name:'Control e híbridos',subtitle:'MC10–MC12 · Señales, ECUs y seguridad eléctrica',
+  lessons:['mc10-electronic-architecture','mc11-engine-control','mc12-hybrid-energy'],
+  goal:'Relacionar mediciones y control con la mecánica, conservar límites HV y contrastar arquitecturas energéticas.'},
+ {id:'research-core',order:14,name:'Diagnóstico e investigación',subtitle:'MC13–MC14 · Hipótesis, diseño experimental e invención',
+  lessons:['mc13-diagnostic-method','mc14-research-doe','mc14-blackbox-identification'],
+  goal:'Formular hipótesis alternativas, diseñar pruebas discriminantes, estimar incertidumbre y entregar evidencia reproducible.'},
+ {id:'rotary-science',order:15,name:'Ingeniería rotativa: termodinámica',subtitle:'RW1–RW7 · Geometría, energía, puertos, metrología y combustión conceptual',
+  lessons:['rw1-analytic-geometry-validation','rw2-ideal-versus-architecture','rw3-energy-losses','rw5-convection-limits','rw6-port-phase-tradeoffs','rw6-aperture-area-study','rw6-inverse-area-metrology','rw6-radius-identifiability','rw7-burn-shape-literacy'],
+  goal:'Distinguir ciclo termodinámico de arquitectura mecánica y exigir ensayos antes de inferir rendimiento Wankel.'},
+ {id:'rotary-control',order:16,name:'Ingeniería rotativa: control y optimización',subtitle:'RW8/RW8+ · Restricciones, incertidumbre y Pareto',
+  lessons:['rw8-controller-boundaries','rw8-constrained-experiment','rw8-robust-uncertainty','rw8-pareto-frontier','rw8-factorial-coupled-design'],
+  goal:'Elegir estrategias solo entre alternativas factibles, documentar descartes y rechazar extrapolación a calibraciones OEM.'}
 ];
 export function evaluateLearningPath(progress,lessons){
  const exists=new Set(lessons.map(l=>l.id));

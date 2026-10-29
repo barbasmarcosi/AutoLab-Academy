@@ -1,0 +1,30 @@
+import{test,expect}from'@playwright/test';
+test('RW6/RW7 port overlap and heat-release hypotheses save repeatable evidence',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-ports"]').click();
+ await expect(page.getByRole('heading',{name:'Rotary Ports & Combustion Lab'})).toBeVisible();
+ await page.locator('#rp-port').selectOption('advance');
+ await page.locator('#rp-port-pred').selectOption('aumenta');
+ await page.locator('#rp-burn').selectOption('later');
+ await page.locator('#rp-burn-pred').selectOption('disminuye');
+ await page.locator('#rp-real').selectOption('no');
+ await page.getByRole('button',{name:'Congelar tres hipótesis y contrastar'}).click();
+ await expect(page.getByText('Calendario sintético de puertos, sin máscaras geométricas ni caudal')).toBeVisible();
+ await expect(page.getByText('RW7: valores de curva supuesta, NO porcentaje de combustión medido')).toBeVisible();
+ await expect(page.locator('svg[role="img"]')).toBeVisible();
+ await page.locator('#rp-reason').fill('El calendario de puertos modifica el comienzo de admisión, con duración y escape fijos, de modo que cambia el solapamiento, no el caudal demostrado. La curva Wiebe usa un reloj y parámetros separados del calendario.');
+ await page.locator('#rp-limits').fill('Los modelos no tienen CFD, geometría de puerto real, mediciones de presión, emisiones ni temperatura; se requieren ensayos de banco independientes antes de concluir rendimiento.');
+ await page.getByRole('button',{name:'Evaluar investigación RW6/RW7'}).click();
+ await expect(page.getByText(/Resultado: 100\/100/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar expediente RW6/RW7'}).click();
+ await expect(page.getByRole('button',{name:'Evidencia registrada'})).toBeDisabled();
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('RW6/RW7 — Puertos y combustión conceptual')).toBeVisible();
+ await page.reload();await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('RW6/RW7 — Puertos y combustión conceptual')).toBeVisible();
+});
+test('RW6/RW7: incomplete predictions cannot reveal or record',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="rotary-ports"]').click();
+ await page.getByRole('button',{name:'Congelar tres hipótesis y contrastar'}).click();
+ await expect(page.getByText(/Antes de calcular, formulá las tres hipótesis/)).toBeVisible();
+ await expect(page.getByRole('button',{name:'Guardar expediente RW6/RW7'})).toHaveCount(0);
+});

@@ -1,5 +1,11 @@
 # AutoLab Academy — Plan de implementación
 
+## Extensión de visión — Diagnostic Engineering + Automotive R&D (propuesta)
+
+AutoLab evoluciona hacia un **tronco completo de mecánica automotriz**, la **ingeniería inversa, optimización multiobjetivo e invención de herramientas**, en paralelo con el diagnóstico basado en evidencia. El documento [ENGINEERING_MINDSET_RD_VISION.md](ENGINEERING_MINDSET_RD_VISION.md) define el perfil profesional objetivo, itinerarios, experimentos, roadmap R0–R5, criterios de aceptación, validación y límites de seguridad.
+
+**Nuevos carriles del plan:** [Automotive Mechanics Core — MC00–MC14; MC-P1–MC-P5](AUTOMOTIVE_MECHANICS_CURRICULUM.md) abarca motores, transmisiones, frenos, chasis, climatización, electrónica y sistemas híbridos/EV; [Rotary Engineering Lab — RW0–RW10; RW-P0–RW-P5](ROTARY_ENGINEERING_LAB.md) convierte al motor Wankel en una especialización de mecánica e I+D con geometría, sellado, combustión, ECU, eficiencia, emisiones y comparación reproducible frente a alternativas. **Ambos son planificación, no funcionalidades implementadas ni competencias profesionales certificadas.** Se priorizarán como incrementos pequeños sin desplazar la estabilización y calidad de la PWA existente.
+
 ## Estado real al 25/10/2026
 
 - v1.9.17 (candidato en validación): saneamiento de timestamps de candump no finitos o excesivos, cálculos estadísticos finitos ante entradas externas corruptas, dos regresiones unitarias y SW v38→v39. Ver docs/CAN_INPUT_HARDENING_V1_9_17.md.

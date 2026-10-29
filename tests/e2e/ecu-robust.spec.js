@@ -1,0 +1,64 @@
+import{test,expect}from'@playwright/test';
+test('RW8+ edge: nominal DAILY is rejected robustly, evidence saved after scientific caveats',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="ecu-robust"]').click();
+ await expect(page.getByRole('heading',{name:'Robust Optimization Research Lab'})).toBeVisible();
+ await expect(page.locator('#eb-scenario option')).toHaveCount(3);
+ await page.locator('#eb-scenario').selectOption('edge');
+ await page.locator('#eb-nominal').selectOption('1');
+ await page.locator('#eb-robust').selectOption('0');
+ await page.locator('#eb-frontier').selectOption('0');
+ await page.locator('#eb-factorial').selectOption('3');
+ await page.locator('#eb-real').selectOption('no');
+ await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
+ await expect(page.getByText('Factibilidad adimensional nominal y ante límites adversos ±0,03')).toBeVisible();
+ await expect(page.getByText(/Sin opción robustamente admisible/)).toBeVisible();
+ await expect(page.getByRole('heading',{name:/Diseño factorial 2²/})).toBeVisible();
+ await expect(page.getByText(/DAILY: 3\/4 casos/)).toBeVisible();
+ await expect(page.getByText('RW8+: barrido de techo térmico ±0,04 en índice ficticio')).toBeVisible();
+ await page.locator('#eb-critical').selectOption('thermal');
+ await page.locator('#eb-pareto').selectOption('feasible-set');
+ await page.locator('#eb-reason').fill('DAILY satisface el límite térmico nominal, pero no supera el peor caso con incertidumbre de índice de más 0,03. La frontera de Pareto solo puede construirse con alternativas que cumplen todas las restricciones.');
+ await page.locator('#eb-limits').fill('Las amplitudes y los índices son ficticios y no tienen distribución estadística ni calibración de sensores. Harían falta modelos reales y validación instrumental.');
+ await page.getByRole('button',{name:'Evaluar investigación robusta'}).click();
+ await expect(page.getByText(/Resultado: 100\/100/)).toBeVisible();
+ await page.getByRole('button',{name:'Guardar expediente RW8+'}).click();
+ await expect(page.getByRole('button',{name:'Evidencia registrada'})).toBeDisabled();
+ await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('RW8+ — Robustez y Pareto ECU')).toBeVisible();
+ await page.reload();await page.locator('nav.nav button[data-id="portfolio"]').click();
+ await expect(page.getByText('RW8+ — Robustez y Pareto ECU')).toBeVisible();
+});
+test('RW8+ full frontier includes four nondominated profiles in open scenario',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="ecu-robust"]').click();
+ await page.locator('#eb-scenario').selectOption('open');
+ await page.locator('#eb-nominal').selectOption('4');
+ await page.locator('#eb-robust').selectOption('4');
+ await page.locator('#eb-frontier').selectOption('4');
+ await page.locator('#eb-factorial').selectOption('4');
+ await page.locator('#eb-real').selectOption('no');
+ await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
+ await expect(page.getByText(/Cantidad: nominal 4, robusta 4, frontera 4/)).toBeVisible();
+});
+test('RW8+ requires all prior predictions before exposing the solver or saved results',async({page})=>{
+ await page.goto('./');await page.locator('nav.nav button[data-id="ecu-robust"]').click();
+ await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
+ await expect(page.getByText(/Antes de revelar, completá cinco predicciones/)).toBeVisible();
+ await expect(page.getByRole('button',{name:'Guardar expediente RW8+'})).toHaveCount(0);
+});
+
+test('RW8++ factorial requires its own frozen hypothesis and renders four coupled corner experiments',async({page})=>{
+ await page.goto('./');
+ await page.locator('nav.nav button[data-id="ecu-robust"]').click();
+ await page.locator('#eb-scenario').selectOption('edge');
+ await page.locator('#eb-nominal').selectOption('1');
+ await page.locator('#eb-robust').selectOption('0');
+ await page.locator('#eb-frontier').selectOption('0');
+ await page.locator('#eb-real').selectOption('no');
+ await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
+ await expect(page.getByText(/completá cinco predicciones/)).toBeVisible();
+ await page.locator('#eb-factorial').selectOption('3');
+ await page.getByRole('button',{name:'Congelar pronósticos y comparar'}).click();
+ await expect(page.getByRole('heading',{name:/Diseño factorial 2²/})).toBeVisible();
+ await expect(page.getByText(/DAILY: 3\/4 casos/)).toBeVisible();
+ await expect(page.locator('table caption').filter({hasText:'Esquinas factoriales ficticias'})).toBeVisible();
+});

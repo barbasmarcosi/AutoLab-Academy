@@ -2,14 +2,32 @@
 
 PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y electromovilidad**.
 
+## Seguimiento de implementación
+
+El avance real, criterios de cierre y próximas etapas están en [**Estado de implementación de Automotive R&D**](docs/IMPLEMENTATION_STATUS_RD.md). Este documento distingue funciones implementadas, validación automatizada pendiente y ensayos físicos externos.
+
+## Visión de evolución (propuesta)
+
+Además del diagnóstico basado en evidencias, aspiramos a formar profesionales capaces de **entender la mecánica del vehículo completo, investigar sistemas, optimizarlos y crear herramientas propias**. El plan [Diagnostic Engineering + Automotive R&D](docs/ENGINEERING_MINDSET_RD_VISION.md) conecta tres ejes:
+ 
+- [**Automotive Mechanics Core**](docs/AUTOMOTIVE_MECHANICS_CURRICULUM.md): formación integral sobre motores, transmisiones, suspensión, dirección, frenos, HVAC, electricidad, electrónica e híbridos/EV.
+- [**Rotary Engineering Lab**](docs/ROTARY_ENGINEERING_LAB.md): investigación del motor Wankel, geometría, sellos, puertos, combustión, ECU, fiabilidad y optimización; incluye un primer explorador geométrico offline RW0/RW1.
+- **Diagnostic Engineering + Automotive R&D**: experimentos comparativos, ingeniería inversa, herramientas propias, perfiles de ECU **simulados** y validación reproducible.
+
+**Estado actual:** MC00–MC14 dispone de un recorrido conceptual y varios laboratorios; Rotary Engineering incluye RW1, RW2/RW3, RW4/RW4+, RW5, RW6/RW6+/RW6++, RW7 y RW8/RW8+ en distintos niveles de modelización sintética. Esto no equivale a competencias físicas certificadas ni a validar motores reales. Consultá el estado de implementación para identificar las partes pendientes.
+
+El laboratorio **RW0/RW1 (Rotary Geometry Explorer)** ahora tiene cinemática Wankel simplificada, animación offline, cámaras y predicciones con evidencia persistida. El primer Rotary Research Bench compara la sensibilidad geométrica A/B frente a cambios sintéticos de excentricidad, sin atribuir mejoras de rendimiento. El RW1 no simula combustión ni representa volúmenes OEM. Otros laboratorios sí modelan conceptos simplificados de energía, puertos y control, pero no calculan rendimiento ni combustión real de un Wankel. [Modelo, fuentes y limitaciones](docs/ROTARY_GEOMETRY_MODEL.md).
+
+**Incremento MC-P1 / RW-P2 inicial:** cuatro lecciones de seguridad, metrología, torque y ciclos (MC00/MC01/MC03), doce preguntas incorporadas a los exámenes y al repaso. RW4 ofrece diagnóstico diferencial sintético entre pérdidas de estanqueidad e ignición, con semillas reproducibles, predicción de dos pruebas, incertidumbre e informe en portafolio. No corresponde a mediciones reales de compresión o calibraciones OEM.
+
 ## Qué está implementado
 
 - **Transferencia diagnóstica:** cinco familias con causas y síntomas alternativos: ECU/CKP, presión/MAF, CKP/CMP, CAN terminación/saturación y HEV auxiliar/interlock virtual. Exige hipótesis previa, prueba confirmatoria, descarte, contexto, pronóstico y límites; 20 combinaciones de casos ficticios reproducibles.
 - **Transferencia entre problemas:** cinco pares parametrizados con solución guiada seguida de una situación distinta (ley de Ohm inversa, PWM, CKP, carga CAN y SOC). Los resultados de la segunda situación se registran independientemente y se exportan; no demuestran generalización profesional.
 - **Errores por pregunta y reentrenamiento:** a partir de v1.7 cada nuevo examen guarda opción elegida, corrección y confianza; detecta últimas respuestas incorrectas, errores repetidos y exceso de confianza, permite repasar preguntas falladas y exportar evidencia. Nunca reconstruye artificialmente exámenes antiguos.
 - **Plan de estudio personalizable y local:** detecta repaso FSRS vencido, últimos exámenes por área, prácticas ficticias pendientes y lecciones no leídas. Permite sesiones de 15/30/45 minutos, acceso a la actividad y exportación Markdown; no inventa dominio o califica texto libre.
-- Academia con 61 lecciones, 150 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
-- Itinerario de nueve niveles (fundamentos, diagnóstico aplicado y ECUs), progreso de lectura y evaluación separados, con siguiente lección recomendada.
+- Academia con 94 lecciones, 278 preguntas, exámenes acumulativos equilibrados (15 preguntas de todas las áreas), y calendario de repaso adaptativo FSRS mediante librería ts-fsrs.
+- Itinerario de dieciséis niveles (diagnóstico, mecánica e investigación rotativa), progreso de lectura y evaluación separados, con siguiente lección recomendada.
 - **Taller Integrador:** tres expedientes multifuente (OBD, oscilogramas, circuitos y contexto) con hipótesis inicial, confirmación y descarte, incertidumbres, cadena auditada de evidencias e informes completos persistidos en backup/Portafolio. Solo datos sintéticos.
 - **Balance de cilindros:** 4 investigaciones de monitor P030x sintético: bobina primaria sin corriente, inyector abierto, compresión comparativa baja y aporte irregular por mezcla. Requiere comparar regímenes y obtener medición confirmatoria más prueba de contraste, sin algoritmos OEM.
 - **Inyección OBD:** 4 investigaciones MPI ficticias con comparación STFT/LTFT por ralentí/crucero/carga, plausibilidad MAF/MAP, lambda ilustrativa y pruebas independientes para aire adicional, presión insuficiente, MAF y estanqueidad de inyector. Informe Markdown; no es una calibración OEM.
