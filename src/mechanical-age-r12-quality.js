@@ -7,6 +7,7 @@
  * Works fully offline in the existing PWA.
  */
 import {evaluateAAWithoutService, syntheticAAReceiptPair} from './mechanical-age-raw-obd.js';
+import {assertMA00Report} from './mechanical-age-r13-claims.js';
 
 export const R12_VERSION='ma00-obd-multisession-quality-v1';
 export const R12_REQUIRED_PIDS=Object.freeze(['010C','0105','0104','0106','0107']);
@@ -39,7 +40,7 @@ const stat=audits=>({
 });
 
 function releaseBlocked(blockers,sessionCount,aa,provenance){
- return {
+ return assertMA00Report({
   version:R12_VERSION,protocol:'AA_4_calibration_then_2plus_holdout',
   sessionUnit:'independent-session-asserted-not-verified',
   sessionCount,calibrationSessionCount:0,holdoutSessionCount:0,
@@ -50,7 +51,7 @@ function releaseBlocked(blockers,sessionCount,aa,provenance){
   predictedFailure:null,structuralWear:null,mechanicalAgeKm:null,
   physicalAccuracyValidated:false,verifiedSessionIndependence:false,
   caveat:'Sin metrología independiente ni patrón físico. Ningún umbral de anomalía o desgaste está calibrado.'
- };
+ },'r12',{source:provenance.length===1&&provenance[0]==='synthetic'?'synthetic':'provided_obd_unverified'});
 }
 
 /** Descriptive change versus an *observed reference band*, not a fault alarm. */
@@ -117,7 +118,7 @@ export function assessObdMultiSessionRepeatability(sessions){
  }
  const changed=Object.entries(pidReports).filter(([,r])=>r.anyOutsideObservedReferenceBand).map(([pid])=>pid);
  const qa=stat(aa.sessionAudits);
- return {
+ return assertMA00Report({
   version:R12_VERSION,protocol:'AA_4_calibration_then_2plus_holdout',
   sessionUnit:'independent-session-asserted-not-verified',
   sessionCount:sessions.length,
@@ -138,7 +139,7 @@ export function assessObdMultiSessionRepeatability(sessions){
   mechanicalAgeKm:null,physicalAccuracyValidated:false,
   verifiedSessionIndependence:false,
   caveat:'La banda es descriptiva con 4 sesiones; no mide incertidumbre metrológica, error causal, falla, desgaste o edad. Tiempos host ≠ ECU.'
- };
+ },'r12',{source:synthetic?'synthetic':'provided_obd_unverified'});
 }
 
 /** Six genuinely distinct signal sequences, still entirely FAKE. */
