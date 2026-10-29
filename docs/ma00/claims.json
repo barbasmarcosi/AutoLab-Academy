@@ -107,7 +107,8 @@
         "channels",
         "warnings",
         "traceIntegrity",
-        "observability"
+        "observability",
+        "sourceTrace"
       ],
       "observation": [
         "hostReceiptTimePresent"
@@ -276,6 +277,14 @@
       "rpmRobustSigma",
       "medianCombinedFuelTrim",
       "syntheticDeviationIndex"
+    ],
+    "raw_session.sourceTrace": [
+      "version",
+      "sessionReference",
+      "eventCount",
+      "pidEventIndexes",
+      "independentlyAuthenticated",
+      "eventIndexIsNotAcquisitionTimestamp"
     ]
   },
   "caveats": [
@@ -284,5 +293,105 @@
     "No vehicle-level wear/RUL ground truth",
     "Other MA00 investigative modules and arbitrary nested third-party traces need separate output audits",
     "Technology must be declared; arbitrary engineFamily name never establishes powertrain"
-  ]
+  ],
+  "dynamicContracts": {
+    "channel": [
+      "channel",
+      "unit",
+      "attempts",
+      "success",
+      "failures",
+      "failFraction",
+      "median",
+      "medianAbsoluteDeviation",
+      "distinctValues",
+      "maxIdenticalRun",
+      "possibleStaleOrStable",
+      "observedSpan",
+      "medianReceiptGapMs",
+      "maxReceiptGapMs",
+      "medianHostRoundTripMs",
+      "unmeasuredRoundTripCount"
+    ],
+    "change": [
+      "unit",
+      "firstMedian",
+      "lastMedian",
+      "lastMinusFirst",
+      "maxMinusMin"
+    ],
+    "r12Pid": [
+      "unit",
+      "referenceSessions",
+      "holdoutSessions",
+      "referenceMedian",
+      "referenceObservedSpread",
+      "nominalPidReadoutStep",
+      "descriptiveBandHalfWidth",
+      "subsequentSessionMedians",
+      "subsequentMinusReference",
+      "sessionsOutsideObservedReferenceBand",
+      "anyOutsideObservedReferenceBand",
+      "thresholdMeaning"
+    ],
+    "r12Qa": [
+      "sessions",
+      "totalEvents",
+      "requestedTimestampsMissing",
+      "skippedBecauseOfSerialMismatch",
+      "apparentStableOrStalePids",
+      "hostReceiptTimesOnly",
+      "ecuAcquisitionTimingKnown"
+    ],
+    "traceCommon": [
+      "version",
+      "applies",
+      "internallyConsistent",
+      "errors",
+      "independentlyAuthenticated",
+      "wearInferenceAllowed"
+    ],
+    "traceSerial": [
+      "activePids",
+      "expectedEventCount",
+      "observedEventCount",
+      "caveat"
+    ],
+    "reference": [
+      "version",
+      "sessionReference",
+      "eventCount",
+      "pidEventIndexes",
+      "independentlyAuthenticated",
+      "eventIndexIsNotAcquisitionTimestamp"
+    ],
+    "falsificationControl": [
+      "id",
+      "label",
+      "expectedBehavior",
+      "behaviorObserved",
+      "comparisonAllowed",
+      "baselineIndex",
+      "alteredIndex",
+      "delta",
+      "blockers",
+      "baselineTrims",
+      "alteredTrims",
+      "structuralWearGroundTruth",
+      "causalServiceEffect",
+      "caveat"
+    ],
+    "phase": [
+      "sessions",
+      "rpm",
+      "rpmRobustSigma",
+      "combinedFuelTrim",
+      "experimentalDeviationIndex"
+    ],
+    "phaseMetric": [
+      "median",
+      "range"
+    ]
+  },
+  "lineageLimitation": "Session/PID references are ordinals in the supplied capture file, NOT cryptographic commitments, ECU timestamps, physical provenance or independently authenticated truth."
 }
