@@ -155,7 +155,7 @@ export function checkObservabilityClaim(claim){
  if(kind==='hypothesis'&&(!alternativeHypothesis||!testablePrediction))
   throw RangeError('Hipótesis sin alternativa ni prueba falsable');
  if(kind==='blocked'&&value!==null)throw RangeError('Estimación bloqueada debe ser null');
- if((kind==='operator_assertion'||kind==='synthetic_demonstration')&&level==='E5')
-  throw RangeError('Autoafirmaciones o simulaciones no validan desgaste físico');
+ if(level!=='E0')
+  throw RangeError('Niveles E1–E5 no autorizados todavía: requieren evidencia independiente verificada; autoafirmaciones o simulaciones no validan desgaste físico');
  return Object.freeze({...claim,independentlyVerified:false});
 }
