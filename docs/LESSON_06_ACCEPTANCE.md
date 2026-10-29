@@ -43,3 +43,8 @@
 **Puerta de aceptación:** solo considerar ≥9/10 de diseño si el SHA exacto supera compilación, unitarias, E2E focalizadas y matriz completa de Chromium/WebKit/WebKit móvil, sin fallos críticos. Publicación automática posterior exige `deploy: success`. No equivale a competencia profesional.
 
 **Próxima lección:** seguir el orden real del itinerario de 94 lecciones; no inferir del orden temático ni asumir que la teoría acredita práctica.
+
+## Verificación focalizada del candidato
+- Commit `e58e792e6a04efbc1936d7c8c8d44ed873911494`, [Actions #40800309412](https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40800309412): **SUCCESS** (unitarias, build, PWA offline y E2E focalizado Chromium con accesibilidad móvil).
+- Guardias verificadas: decisión de emergencia, falla crítica 0/100, explicación formativa no habilitante, rotación y exportación sin confundir lectura, práctica guiada y transferencia.
+- **Aceptación final pendiente:** hito `[pages-milestone]` con E2E completa en Chromium/WebKit/móvil y publicación GitHub Pages exitosa. Esta sección no declara competencia real.

@@ -53,3 +53,8 @@ The resolution does not require admin-level environment edits or merging PR #56:
 - `src/hv-lesson.js` contiene reconocimiento de peligros, práctica guiada de 3 casos y transferencia independiente de 9 expedientes: sin contactos HV, sin guías de reparación.
 - El sistema anula puntaje por autorización ficticia o por no activar respuesta de emergencia ante signos activos, y exige evidencia digital separada.
 - Revisión y criterios en `docs/LESSON_06_ACCEPTANCE.md`, **9,2/10 provisional de diseño**, no certificación. Disponible en Pages solo después de CI completa y deploy exitoso de un SHA etiquetado `[pages-milestone]`.
+
+## Candidato HV #06 de publicación
+- [CI focalizada #40800309412](https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40800309412): **SUCCESS** con pruebas unitarias, offline, accesibilidad y navegador.
+- Contenido: `lab-hv-safety-guided-v1`, `lab-hv-safety-holdout-v1` (9 expedientes), prueba previa de conceptos, ensayo explicativo de roles y fuentes HSE/NHTSA; código `src/hv-lesson.js`, caché `v104`.
+- Publicación exclusivamente tras E2E completa; la puntuación 9,2/10 es de diseño interno, nunca habilitación física.
