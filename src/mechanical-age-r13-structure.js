@@ -10,8 +10,8 @@ export const STRUCTURE_VERSION='ma00-r13-structure-v1';
 export const MODE01_PIDS=Object.freeze(['0103','0104','0105','0106','0107','010C','010F']);
 const FIELDS=Object.freeze({
  channel:'channel unit attempts success failures failFraction median medianAbsoluteDeviation distinctValues maxIdenticalRun possibleStaleOrStable observedSpan medianReceiptGapMs maxReceiptGapMs medianHostRoundTripMs unmeasuredRoundTripCount',
- change:'unit firstMedian lastMedian lastMinusFirst maxMinusMin',
- r12Pid:'unit referenceSessions holdoutSessions referenceMedian referenceObservedSpread nominalPidReadoutStep descriptiveBandHalfWidth subsequentSessionMedians subsequentMinusReference sessionsOutsideObservedReferenceBand anyOutsideObservedReferenceBand thresholdMeaning',
+ change:'unit firstMedian lastMedian lastMinusFirst maxMinusMin sourceSessionRefs',
+ r12Pid:'unit referenceSessions holdoutSessions referenceMedian referenceObservedSpread nominalPidReadoutStep descriptiveBandHalfWidth subsequentSessionMedians subsequentMinusReference sourceSessionRefs sessionsOutsideObservedReferenceBand anyOutsideObservedReferenceBand thresholdMeaning',
  r12Qa:'sessions totalEvents requestedTimestampsMissing skippedBecauseOfSerialMismatch apparentStableOrStalePids hostReceiptTimesOnly ecuAcquisitionTimingKnown',
  traceCommon:'version applies internallyConsistent errors independentlyAuthenticated wearInferenceAllowed',
  traceSerial:'activePids expectedEventCount observedEventCount caveat',
@@ -60,6 +60,12 @@ function traceValid(v,path,errors){
  if(v.applies===false&&v.internallyConsistent!==null)errors.push(path+': nonserial trace cannot assert verified consistency');
  if(v.applies===true&&v.internallyConsistent===true&&v.errors.length!==0)
   errors.push(path+': contradictory trace errors');
+}
+function sessionRefs(value,path,errors,expectedCount){
+ if(!boundedArray(value,path,errors,12))return;
+ if(value.length!==expectedCount||value.some(x=>typeof x!=='string'||!/^session:[A-Za-z0-9][\w.-]{2,79}$/.test(x)))
+  errors.push(path+': expected ordered source session references');
+ if(new Set(value).size!==value.length)errors.push(path+': duplicate source session');
 }
 function rawSourceRefs(x,path,errors,report){
  if(!checkFields(x,FIELDS.reference.split(' '),path,errors))return;
@@ -116,6 +122,7 @@ function r12Checks(report,errors){
    if(!boundedArray(obj?.subsequentMinusReference,path+'.subsequentMinusReference',errors,8))return;
    if(obj?.referenceSessions!==4||obj?.holdoutSessions!==report.holdoutSessionCount)
     errors.push(path+': calibration/holdout changed');
+   sessionRefs(obj?.sourceSessionRefs,path+'.sourceSessionRefs',errors,report.sessionCount);
    if(obj?.subsequentSessionMedians.some(x=>!finite(x))||obj?.subsequentMinusReference.some(x=>!finite(x)))
     errors.push(path+': invalid median or delta');
   });
@@ -139,6 +146,7 @@ export function auditDynamicMA00Structure(report,kind){
   if(report.observedChanges!==null){
    map(report.observedChanges,'aa.observedChanges',errors,(x,path)=>{
     checkFields(x,FIELDS.change.split(' '),path,errors);
+    sessionRefs(x?.sourceSessionRefs,path+'.sourceSessionRefs',errors,report.sessionCount);
    });
   }
  }
