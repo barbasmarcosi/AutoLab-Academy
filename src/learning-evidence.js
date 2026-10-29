@@ -12,6 +12,7 @@ import{SCOPE_HOLDOUT_ID}from'./scope-transfer.js';
 import{CAN_HOLDOUT_ID}from'./can-transfer.js';
 import{BMS_HOLDOUT_ID}from'./bms-lesson.js';
 import{HV_HOLDOUT_ID}from'./hv-lesson.js';
+import{GROUND_HOLDOUT_ID}from'./ground-lesson.js';
 export const EVIDENCE_MODEL='lesson-evidence-structured-v1';
 export function lessonEvidence(progress,lessonId){
  const read=Boolean(progress?.notes?.['lesson-'+lessonId]);
@@ -27,7 +28,7 @@ export function lessonEvidence(progress,lessonId){
    passed:false,attempts:0};
  const linkedLab=practice?.kind==='linked'?{
   id:practice.caseId,status:p.status,attempts:p.attempts}:null;
- const holdout=(lessonId==='volt-drop'||lessonId==='motor-data'||lessonId==='scope'||lessonId==='can'||lessonId==='bms'||lessonId==='hv')?(()=>{const holdoutId=lessonId==='volt-drop'?VOLT_DROP_HOLDOUT_ID:lessonId==='motor-data'?DTC_HOLDOUT_ID:lessonId==='scope'?SCOPE_HOLDOUT_ID:lessonId==='can'?CAN_HOLDOUT_ID:lessonId==='bms'?BMS_HOLDOUT_ID:HV_HOLDOUT_ID;const attempts=(Array.isArray(progress?.cases)?progress.cases:[]).filter(x=>x?.id===holdoutId);return {available:true,attempts:attempts.length,passed:attempts.some(x=>x.passed===true),firstRecordedAttemptPassed:attempts.length?attempts[0].passed===true:null};})():null;
+ const holdout=(lessonId==='volt-drop'||lessonId==='motor-data'||lessonId==='scope'||lessonId==='can'||lessonId==='bms'||lessonId==='hv'||lessonId==='ground-test')?(()=>{const holdoutId=lessonId==='volt-drop'?VOLT_DROP_HOLDOUT_ID:lessonId==='motor-data'?DTC_HOLDOUT_ID:lessonId==='scope'?SCOPE_HOLDOUT_ID:lessonId==='can'?CAN_HOLDOUT_ID:lessonId==='bms'?BMS_HOLDOUT_ID:lessonId==='hv'?HV_HOLDOUT_ID:GROUND_HOLDOUT_ID;const attempts=(Array.isArray(progress?.cases)?progress.cases:[]).filter(x=>x?.id===holdoutId);return {available:true,attempts:attempts.length,passed:attempts.some(x=>x.passed===true),firstRecordedAttemptPassed:attempts.length?attempts[0].passed===true:null};})():null;
  const assessed=reasoning.available||lab.available||Boolean(holdout);
  const checks=[read,...(reasoning.available?[reasoning.passed]:[]),...(lab.available?[lab.passed]:[]),...(holdout?[holdout.passed]:[])];
  const documented=assessed&&checks.every(Boolean);
@@ -63,7 +64,7 @@ export function learningEvidenceOverview(progress,lessons,stages){
   if(found)return found;
   const e=byLesson.get(id);
   if(!e.read)return {lessonId:id,kind:'reading',label:'Estudiar la teoría y sus límites'};
-  if(id==='volt-drop'||id==='motor-data'||id==='scope'||id==='can'||id==='bms'||id==='hv'){
+  if(id==='volt-drop'||id==='motor-data'||id==='scope'||id==='can'||id==='bms'||id==='hv'||id==='ground-test'){
    if(!e.lab.passed)return {lessonId:id,kind:'embedded-lab',label:e.lab.attempts?'Repetir banco guiado':'Experimentar con voltímetro virtual'};
    if(!e.holdout.passed)return {lessonId:id,kind:'independent-holdout',label:e.holdout.attempts?'Revisar el caso independiente':'Resolver caso reservado sin ayudas'};
   }

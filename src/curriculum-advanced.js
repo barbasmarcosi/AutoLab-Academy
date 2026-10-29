@@ -8,15 +8,15 @@ export const additionalLessons=[
     "sections": [
       [
         "La falla bajo carga",
-        "Una unión sulfatada puede mostrar continuidad correcta sin demanda y caer varios voltios al alimentar el consumidor. El dato útil es la caída entre dos puntos del tramo bajo una condición de corriente estable y conocida."
+        "Un contacto con resistencia adicional puede mostrar caída casi nula cuando no circula corriente; en el circuito ficticio de 12 V la caída es ΔV = I × R, comparando los dos extremos del mismo tramo y una condición de demanda estable. Esto no demuestra por sí solo sulfato, ni identifica componente físico."
       ],
       [
         "Localización progresiva",
-        "Dividí el recorrido en tramos: borne, cable, unión y consumidor. Una caída excesiva en un subtramo acota la falla, pero no identifica su causa física sin inspección y repetición de medida."
+        "Compará tramos positivo, retorno y carga, sin asumir que una lectura aislada identifica la falla. Una resistencia de contacto y una demanda de carga distinta pueden cambiar voltajes similares; las predicciones discriminantes requieren misma condición de fuente y referencia."
       ],
       [
         "Informe reproducible",
-        "Anotá punto inicial y final de las puntas, condición de carga, tensión de batería, corriente y valor obtenido. Nunca desconectes masas críticas durante funcionamiento ni puentees protecciones."
+        "En el simulador de baja tensión documentá modelo, extremos identificados, corriente, condición y observables que refutan la hipótesis. Nunca desconectes masas críticas durante funcionamiento, ni puentes protecciones; estos valores sintéticos no constituyen un ensayo vehicular."
       ]
     ],
     "url": "https://www.picoauto.com/library/automotive-guided-tests/"
