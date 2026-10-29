@@ -153,3 +153,21 @@ test('lesson 5 BMS requires both guided and independently held-out evidence',()=
  x=lessonEvidence(p,'bms');assert.equal(x.documented,true);
  assert.equal(x.holdout.firstRecordedAttemptPassed,false);
 });
+
+test('lesson 6 is not certified by theory or another lesson; guided and held-out safety evidence are distinct',()=>{
+ const p=progress();p.notes['lesson-hv']='2026-10-29';
+ p.cases.push({id:'lab-hv-safety-guided-v1',passed:true});
+ p.cases.push({id:caseId('hv'),passed:true});
+ let x=lessonEvidence(p,'hv');
+ assert.equal(x.holdout.available,true);
+ assert.equal(x.documented,false);
+ assert.ok(x.gaps.includes('independent-holdout'));
+ p.cases.push({id:'lab-bms-holdout-v1',passed:true});
+ assert.equal(lessonEvidence(p,'hv').documented,false);
+ p.cases.push({id:'lab-hv-safety-holdout-v1',passed:false});
+ x=lessonEvidence(p,'hv');assert.equal(x.holdout.passed,false);
+ p.cases.push({id:'lab-hv-safety-holdout-v1',passed:true});
+ x=lessonEvidence(p,'hv');assert.equal(x.holdout.passed,true);assert.equal(x.documented,true);
+ assert.equal(x.holdout.firstRecordedAttemptPassed,false);
+ assert.equal(x.disclaimer.includes('certificación'),true);
+});
