@@ -8,7 +8,7 @@ export const BMS_GUIDED_ID="lab-bms-guided-v1";
 export const BMS_HOLDOUT_ID="lab-bms-holdout-v1";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const signed=n=>Number(n).toFixed(2).replace(".",",");
-const causes=Object.freeze({bias:"Sesgo positivo del sensor de corriente",capacity:"Capacidad útil distinta de la supuesta",initial:"SOC inicial supuesto incorrecto",unknown:"Sin evidencia suficiente"});
+const causes=Object.freeze({bias:"Sesgo sistemático del sensor de corriente",capacity:"Capacidad útil distinta de la supuesta",initial:"SOC inicial supuesto incorrecto",unknown:"Sin evidencia suficiente"});
 export const BMS_BASELINE=Object.freeze([
  {id:"soc",question:"Una celda tiene 3,7 V bajo carga. ¿Alcanza para conocer exactamente su SOC?",
   options:["Sí, la tensión identifica el porcentaje en toda química","No, influyen química, temperatura, carga y relajación","Sí, si se informa también el nombre del fabricante"],answer:1,
@@ -173,7 +173,7 @@ export function mountBmsGuided(root,{record,onSaved=()=>{}}={}){
  const render=()=>{
   const scenario=BMS_SCENARIOS.find(x=>x.id===scenarioId);
   root.innerHTML="<section class='panel stack' aria-label='BMS guiado con conteo de carga'><h3>Banco BMS: referencia, sesgo y capacidad</h3>"+
-   (!prior?select("bms-g-scenario","Ejemplo guiado",BMS_SCENARIOS.map(c=>[c.id,c.title]))+
+   (prior===null?select("bms-g-scenario","Ejemplo guiado",BMS_SCENARIOS.map(c=>[c.id,c.title]))+
     "<p>"+esc(scenario.description)+"</p>"+
     "<label for='bms-g-pred'>Predecí diferencia final estimación − referencia (puntos porcentuales)</label><input id='bms-g-pred' type='number' step='any' class='field'/>"+
     "<button class='button' type='button' data-bms-g='freeze'>Congelar predicción antes de resolver</button>":
@@ -189,12 +189,12 @@ export function mountBmsGuided(root,{record,onSaved=()=>{}}={}){
     "<button class='button' type='button' data-bms-g='save'>Guardar evidencia guiada</button>"))+
    "<p id='bms-g-status' role='status' aria-live='polite'></p>"+
    "<p class='muted small'>Un número perfecto dentro de un modelo sintético NO verifica un estado electroquímico real ni seguridad HV.</p></section>";
-   if(!prior&&scenarioId!=="nominal")$("bms-g-scenario").value=scenarioId;
+   if(prior===null&&scenarioId!=="nominal")$("bms-g-scenario").value=scenarioId;
  };
- root.addEventListener("change",e=>{if(e.target.id==="bms-g-scenario"&&!prior){scenarioId=e.target.value;render();}});
+ root.addEventListener("change",e=>{if(e.target.id==="bms-g-scenario"&&prior===null){scenarioId=e.target.value;render();}});
  root.addEventListener("click",async e=>{
   const button=e.target.closest("[data-bms-g]");if(!button||busy)return;
-  if(button.dataset.bmsG==="freeze"&&!prior){
+  if(button.dataset.bmsG==="freeze"&&prior===null){
    const raw=$("bms-g-pred").value;
    if(!raw||!Number.isFinite(Number(raw))||Math.abs(Number(raw))>100){$("bms-g-status").textContent="Indicá la predicción numérica antes de revelar.";return;}
    prior=Number(raw);render();return;

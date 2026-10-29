@@ -13,7 +13,7 @@ test('94 lessons have honest, complete, independently auditable evidence coverag
  assert.equal(summary.totals.reasoningAvailable,39);
  assert.equal(lessonEvidence(progress(),'volt-drop').reasoning.available,false,'The first lesson uses its dedicated holdout');
  assert.equal(summary.totals.embeddedAvailable,23);
- assert.equal(summary.totals.holdoutAvailable,4);
+ assert.equal(summary.totals.holdoutAvailable,5);
  assert.equal(summary.totals.holdoutPassed,0);
  assert.equal(summary.totals.linkedOnly,12);
  assert.equal(summary.totals.documentedTraining,0);
@@ -68,6 +68,7 @@ test('path recommendation: theory then guided lab, reserved transfer and objecti
   if(id==='motor-data')p.cases.push({id:'lab-dtc-holdout-v1',passed:true});
   if(id==='scope')p.cases.push({id:'lab-scope-holdout-v1',passed:true});
   if(id==='can')p.cases.push({id:'lab-can-holdout-v1',passed:true});
+  if(id==='bms')p.cases.push({id:'lab-bms-holdout-v1',passed:true});
  }
  p.notes['lesson-mc06-dual-fault-instrumentation']='2026-10-26';
  snapshot=learningEvidenceOverview(p,lessons,learningStages);
@@ -134,5 +135,20 @@ test('lesson 4 guided CAN termination and reserved transfer are independent evid
  x=lessonEvidence(p,'can');assert.equal(x.holdout.attempts,1);assert.equal(x.holdout.passed,false);
  p.cases.push({id:'lab-can-holdout-v1',passed:true});
  x=lessonEvidence(p,'can');assert.equal(x.holdout.passed,true);assert.equal(x.documented,true);
+ assert.equal(x.holdout.firstRecordedAttemptPassed,false);
+});
+
+test('lesson 5 BMS requires both guided and independently held-out evidence',()=>{
+ const p=progress();p.notes['lesson-bms']='2026-10-29';
+ p.cases.push({id:'lab-bms-guided-v1',passed:true});
+ p.cases.push({id:caseId('bms'),passed:true});
+ let x=lessonEvidence(p,'bms');assert.equal(x.documented,false);assert.equal(x.holdout.available,true);
+ assert.ok(x.gaps.includes('independent-holdout'));
+ p.cases.push({id:'lab-can-holdout-v1',passed:true});
+ assert.equal(lessonEvidence(p,'bms').documented,false);
+ p.cases.push({id:'lab-bms-holdout-v1',passed:false});
+ assert.equal(lessonEvidence(p,'bms').holdout.passed,false);
+ p.cases.push({id:'lab-bms-holdout-v1',passed:true});
+ x=lessonEvidence(p,'bms');assert.equal(x.documented,true);
  assert.equal(x.holdout.firstRecordedAttemptPassed,false);
 });

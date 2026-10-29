@@ -56,6 +56,7 @@ test('MC06 recommendation requires genuine v3 transfer then its own embedded lab
   p.cases.push({id:'lab-dtc-holdout-v1',at:'2026-10-26T16:00:04Z',score:100,passed:true});
   p.cases.push({id:'lab-scope-holdout-v1',at:'2026-10-26T16:00:05Z',score:100,passed:true});
   p.cases.push({id:'lab-can-holdout-v1',at:'2026-10-26T16:00:06Z',score:100,passed:true});
+  p.cases.push({id:'lab-bms-holdout-v1',at:'2026-10-26T16:00:07Z',score:100,passed:true});
   p.notes['lesson-mc06-dual-fault-instrumentation']='2026-10-26T16:00:00Z';
   await saveProgress(p);
  });

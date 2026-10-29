@@ -61,6 +61,7 @@ import{scopeTheoryIllustration,mountScopeBaseline,mountScopeControls}from'./scop
 import{mountScopeHoldout}from'./scope-transfer.js';
 import{canTheoryIllustration,mountCanBaseline,mountCanConceptLab}from'./can-lesson.js';
 import{mountCanHoldout}from'./can-transfer.js';
+import{bmsTheoryIllustration,mountBmsBaseline,mountBmsGuided,mountBmsHoldout}from'./bms-lesson.js';
 import{ecuCases,evaluateEcu,ecuReport}from'./ecu-lab.js';
 import{WAVEFORM_SCENARIOS,generateWaveform,gradeWaveform,parseWaveAnswer}from'./waveform-lab.js';
 const lessons=[...baseLessons,...additionalLessons,...ecuLessons,...componentLessons,...differentialLessons,...temporalLessons,...fuelLessons,...misfireLessons,...integrativeLessons,...mechanicsLessons,...mechanicsSystemsLessons,...chassisSystemsLessons,...powertrainLessons,...engineeringBridgeLessons,...inventorLessons,...rotaryGeometryLessons,...rotaryThermalLessons,...rotaryHeatLessons,...rotaryPortBurnLessons,...ecuOptimizationLessons,...ecuRobustLessons,...rotaryApertureLessons,...rotaryInverseLessons],questions=[...baseQuestions,...additionalQuestions,...ecuQuestions,...componentQuestions,...differentialQuestions,...temporalQuestions,...fuelQuestions,...misfireQuestions,...integrativeQuestions,...mechanicsQuestions,...mechanicsSystemsQuestions,...chassisSystemsQuestions,...powertrainQuestions,...engineeringBridgeQuestions,...inventorQuestions,...rotaryGeometryQuestions,...rotaryThermalQuestions,...rotaryHeatQuestions,...rotaryPortBurnQuestions,...ecuOptimizationQuestions,...ecuRobustQuestions,...rotaryApertureQuestions,...rotaryInverseQuestions];
@@ -727,8 +728,8 @@ function learn(){
 }
 function lessonPracticeStatusText(id){
  const status=practiceProgress(data,id);
- const p=lessonPractice(id),virtual=['numeric-bench','wave-inquiry','volt-drop','dtc-guided'].includes(p?.page);
- if((id==='volt-drop'||id==='motor-data'||id==='scope'||id==='can')&&status.status==='passed'){
+ const p=lessonPractice(id),virtual=['numeric-bench','wave-inquiry','volt-drop','dtc-guided','bms-guided'].includes(p?.page);
+ if((id==='volt-drop'||id==='motor-data'||id==='scope'||id==='can'||id==='bms')&&status.status==='passed'){
   const h=lessonEvidence(data,id).holdout;
   return h?.passed?'Banco guiado y caso independiente completados · evidencia digital, no competencia física':
    'Banco guiado completado · caso independiente '+(h?.attempts?'pendiente de aprobación':'sin resolver');
@@ -766,12 +767,12 @@ function lessonPracticePanel(l){
   (l.id==='volt-drop'?'':reasoning)+
   (p.kind==='embedded'?
    '<div class="lesson-practice-body" id="lesson-practice-host" aria-label="Simulador real integrado"></div>'+
-   (['numeric-bench','wave-inquiry','volt-drop','dtc-guided'].includes(p.page)?'<p class="muted small">Banco calculado y sintético integrado en esta lección; no es una medición real ni acredita competencias físicas.</p>':
+   (['numeric-bench','wave-inquiry','volt-drop','dtc-guided','bms-guided'].includes(p.page)?'<p class="muted small">Banco calculado y sintético integrado en esta lección; no es una medición real ni acredita competencias físicas.</p>':
     '<p class="muted small">El mismo laboratorio sigue disponible desde el menú. Guardar evidencia práctica no equivale a marcar la lectura.</p>'+
     button('Abrir banco como pantalla completa','nav','data-id="'+attr(p.page)+'"','alt')):
    '<p>Este ejercicio funciona en su banco especializado: el enlace abre el laboratorio real, donde se evalúan predicciones y evidencia.</p>'+
    button('Ir a la práctica correspondiente','nav','data-id="'+attr(p.page)+'"'))+
-  (l.id==='volt-drop'?'<div id="volt-holdout-host" class="reasoning-host" aria-label="Caso reservado de transferencia independiente"></div>':l.id==='motor-data'?'<div id="dtc-holdout-host" class="reasoning-host" aria-label="Investigación DTC independiente y reservada"></div>':l.id==='scope'?'<div id="scope-holdout-host" class="reasoning-host" aria-label="Investigación independiente de señales y pantalla"></div>':l.id==='can'?'<div id="can-holdout-host" class="reasoning-host" aria-label="Investigación independiente sobre red CAN"></div>':'')+
+  (l.id==='volt-drop'?'<div id="volt-holdout-host" class="reasoning-host" aria-label="Caso reservado de transferencia independiente"></div>':l.id==='motor-data'?'<div id="dtc-holdout-host" class="reasoning-host" aria-label="Investigación DTC independiente y reservada"></div>':l.id==='scope'?'<div id="scope-holdout-host" class="reasoning-host" aria-label="Investigación independiente de señales y pantalla"></div>':l.id==='can'?'<div id="can-holdout-host" class="reasoning-host" aria-label="Investigación independiente sobre red CAN"></div>':l.id==='bms'?'<div id="bms-holdout-host" class="reasoning-host" aria-label="Investigación BMS independiente"></div>':'')+
   (l.id==='volt-drop'?reasoning:'')+inquiry+'</section>';
 }
 function lessonView(){
@@ -783,7 +784,7 @@ function lessonView(){
  '<article class="panel lesson-body"><p class="muted">Teoría: '+(data.notes['lesson-'+l.id]?'lectura registrada':'lectura pendiente')+
  '. Evidencia práctica: <span id="lesson-theory-practice-status">'+esc(lessonPracticeStatusText(l.id))+'</span>'+
  '. Razonamiento: <span id="lesson-theory-reasoning-status">'+esc(lessonReasoningStatusText(l.id))+'</span>. Ninguno acredita competencia física.</p>'+
- (l.id==='volt-drop'?'<div id="volt-baseline-host"></div>':l.id==='motor-data'?'<div id="dtc-baseline-host"></div>':l.id==='scope'?'<div id="scope-baseline-host"></div>':l.id==='can'?'<div id="can-baseline-host"></div>':'')+sections(allSections)+(l.id==='volt-drop'?voltDropTheoryIllustration():l.id==='motor-data'?dtcTheoryIllustration():l.id==='scope'?scopeTheoryIllustration()+'<div id="scope-controls-host"></div>':l.id==='can'?canTheoryIllustration()+'<div id="can-concepts-host"></div>':'')+'</article>'+lessonPracticePanel(l)+
+ (l.id==='volt-drop'?'<div id="volt-baseline-host"></div>':l.id==='motor-data'?'<div id="dtc-baseline-host"></div>':l.id==='scope'?'<div id="scope-baseline-host"></div>':l.id==='can'?'<div id="can-baseline-host"></div>':l.id==='bms'?'<div id="bms-baseline-host"></div>':'')+sections(allSections)+(l.id==='volt-drop'?voltDropTheoryIllustration():l.id==='motor-data'?dtcTheoryIllustration():l.id==='scope'?scopeTheoryIllustration()+'<div id="scope-controls-host"></div>':l.id==='can'?canTheoryIllustration()+'<div id="can-concepts-host"></div>':l.id==='bms'?bmsTheoryIllustration():'')+'</article>'+lessonPracticePanel(l)+
  '<article class="panel lesson-body">'+
  '<div class="notice">La teoría y las simulaciones de la academia no habilitan prácticas reales peligrosas. Para alta tensión seguí capacitación, equipos y procedimientos profesionales.</div><hr class="divider"/>'+
  link(l.url,'Abrir fuente y lecturas relacionadas')+
@@ -1562,6 +1563,15 @@ if(page==='learn'&&selectedLesson){
  if(canBaseline)mountCanBaseline(canBaseline);
  const canConcepts=document.getElementById('can-concepts-host');
  if(canConcepts)mountCanConceptLab(canConcepts);
+ const bmsBaseline=document.getElementById('bms-baseline-host');
+ if(bmsBaseline)mountBmsBaseline(bmsBaseline);
+ const bmsHoldout=document.getElementById('bms-holdout-host');
+ if(bmsHoldout)mountBmsHoldout(bmsHoldout,{record:saveLabEntry,history:data.cases,onSaved:()=>{
+  if(page!=='learn'||selectedLesson!==lessonAtMount)return;
+  const label=document.getElementById('lesson-practice-status'),summary=document.getElementById('lesson-theory-practice-status');
+  if(label)label.textContent=lessonPracticeStatusText(lessonAtMount);
+  if(summary)summary.textContent=lessonPracticeStatusText(lessonAtMount);
+ }});
  const canHoldout=document.getElementById('can-holdout-host');
  if(canHoldout)mountCanHoldout(canHoldout,{record:saveLabEntry,history:data.cases,onSaved:()=>{
   if(page!=='learn'||selectedLesson!==lessonAtMount)return;
@@ -1612,7 +1622,7 @@ if(page==='learn'&&selectedLesson){
   const mounts={powertrain:mountPowertrainLab,inventor:mountInventorLab,rotary:mountRotaryLab,'ecu-robust':mountRobustResearch,
    'numeric-bench':(node,opts)=>mountNumericBench(node,{...opts,lessonId:lessonAtMount}),
    'wave-inquiry':(node,opts)=>mountWaveInquiry(node,{...opts,lessonId:lessonAtMount}),
-   'volt-drop':mountVoltDropPractice,'dtc-guided':mountDtcGuided};
+   'volt-drop':mountVoltDropPractice,'dtc-guided':mountDtcGuided,'bms-guided':mountBmsGuided};
   const node=document.getElementById('lesson-practice-host'),mount=mounts[practice.page];
   if(node&&mount){
    mount(node,{record:async entry=>{

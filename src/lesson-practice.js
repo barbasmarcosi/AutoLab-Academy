@@ -5,6 +5,8 @@
  * existing lab, while preserving the learner's theory reading marker.
  */
 export const LESSON_PRACTICES=Object.freeze([
+ {lessonId:'bms',page:'bms-guided',kind:'embedded',caseId:'lab-bms-guided-v1',
+  title:'BMS: contar carga sin confundir estimación con medición',prompt:'Congelá tu pronóstico del error en SOC, compará las curvas existentes de referencia y conteo de carga, justificá un mecanismo y luego resolvé un caso reservado sin la respuesta anticipada.'},
  {lessonId:'motor-data',page:'dtc-guided',kind:'embedded',caseId:'lab-dtc-guided-v1',title:'Banco DTC: comparar alternativas, medir y refutar',prompt:'Congelá una hipótesis, reuní cuatro observaciones ficticias discriminantes y justificá qué evidencia haría cambiar tu diagnóstico. Después resolvé un caso reservado con predicción y prueba independiente.'},
  {lessonId:'volt-drop',page:'volt-drop',kind:'embedded',caseId:'lab-volt-drop-guided-v1',
   title:'Banco guiado: medí, predecí y localizá una caída resistiva',prompt:'Aplicá I × R a fuente ideal, positivo, retorno y carga; variá una resistencia, compará dos lecturas y recibí corrección específica.'},
