@@ -178,6 +178,44 @@
         "structuralWear",
         "mechanicalAgeKm"
       ]
+    },
+    "replicates": {
+      "metadata": [
+        "version",
+        "comparable",
+        "blockers",
+        "sessionUnitCount",
+        "evidenceLevel",
+        "verdict"
+      ],
+      "container": [
+        "phases",
+        "baseline",
+        "after",
+        "observedDifferences"
+      ],
+      "unknown": [
+        "confidenceInterval",
+        "causalMaintenanceEffect"
+      ],
+      "blocked": [
+        "structuralWear",
+        "mechanicalAgeEquivalentKm"
+      ]
+    },
+    "falsification": {
+      "metadata": [
+        "version",
+        "source",
+        "passedBehaviorChecks",
+        "conclusion"
+      ],
+      "container": [
+        "controls"
+      ],
+      "blocked": [
+        "mechanicalAgeInferenceAllowed"
+      ]
     }
   },
   "nestedContracts": {
@@ -228,6 +266,16 @@
       "evidenceFromIndependentPhysicalReference",
       "functionalDiagnosisSupported",
       "sampleUnit"
+    ],
+    "replicates.phases": [
+      "before",
+      "after"
+    ],
+    "replicates.observedDifferences": [
+      "medianRpm",
+      "rpmRobustSigma",
+      "medianCombinedFuelTrim",
+      "syntheticDeviationIndex"
     ]
   },
   "caveats": [
