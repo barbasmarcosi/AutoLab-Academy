@@ -38,11 +38,16 @@ test('lesson 6 rubric uses risk evidence, authority limits, and does not penaliz
   assert.equal(good.changed,true);assert.equal(good.qualitativeReview,'pending');
   assert.equal(good.expected.decision,c.decision);
   assert.equal(gradeHvCase({...base,risk:HV_RISKS.find(x=>x[0]!==c.risk)[0]}).score,70);
-  assert.equal(gradeHvCase({...base,authority:'qualified_required'}).score,80);
+  assert.equal(gradeHvCase({...base,authority:'qualified_required'}).score,0);
   const bad=gradeHvCase({...base,decision:'unsafe'});
   assert.equal(bad.score,0);assert.equal(bad.passed,false);assert.equal(bad.criticalFailure,true);
   const cert=gradeHvCase({...base,authority:'quiz_certifies'});
   assert.equal(cert.score,0);assert.equal(cert.criticalFailure,true);
+  if(c.decision==='emergency'){
+   const delay=gradeHvCase({...base,decision:'refer'});
+   assert.equal(delay.criticalFailure,true,'Fail closed when emergency response delayed');
+   assert.equal(delay.score,0);
+  }
   assert.throws(()=>gradeHvCase({...base,observations:base.observations.slice(1)}),RangeError);
   assert.throws(()=>gradeHvCase({...base,observations:['incident','incident','authority','limits']}),RangeError);
   assert.throws(()=>gradeHvCase({...base,prior:{...prior,caseId:'H98'}}),RangeError);

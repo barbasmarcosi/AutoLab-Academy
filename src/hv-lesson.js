@@ -109,7 +109,7 @@ export function gradeHvCase({caseId,prior,observations,decision,risk,authority,r
  if(typeof reasoning!=='string'||reasoning.trim().length<30||typeof alternative!=='string'||alternative.trim().length<20)
   throw RangeError('Documentá por qué decidís así y un argumento alternativo (30 y 20 caracteres)');
  const response=decision===c.decision,recognition=risk===c.risk,limits=authority==='no_authority',
- unsafe=decision==='unsafe'||authority==='quiz_certifies';
+ unsafe=decision==='unsafe'||authority!=='no_authority'||(c.decision==='emergency'&&decision!=='emergency');
  // Non-negotiable critical failure: an unsafe intervention or invented certification => 0.
  const score=unsafe?0:50*Number(response)+30*Number(recognition)+20*Number(limits);
  return Object.freeze({score,passed:score===100&&!unsafe,response,recognition,limits,criticalFailure:unsafe,
