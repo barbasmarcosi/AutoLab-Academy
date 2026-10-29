@@ -1,0 +1,240 @@
+{
+  "registryVersion": "ma00-r13-claims-v1",
+  "purpose": "Source-controlled report field registry. src/mechanical-age-r13-claims.js remains the runtime authority. This JSON does not certify physical accuracy.",
+  "evidenceLevels": {
+    "E0": "In-code fixtures and internal tests, not physical evidence",
+    "E1": "External protocol emulator/replay, transport verification only",
+    "E2": "Virtual generator with independent oracle, simulation only",
+    "E3": "Independent licensed public automotive dataset, scoped to its labels",
+    "E4": "Controlled repeated vehicle measurements with independent metrology, NOT AVAILABLE",
+    "E5": "Independent prospective physical wear ground truth, NOT AVAILABLE"
+  },
+  "claimKinds": {
+    "metadata": "Declared context; may be operator assertion",
+    "container": "Structured child values, not independently validated",
+    "observation": "Digital reading, not confirmed physical quantity",
+    "derived": "Arithmetic on recorded data, no causal claim",
+    "operator_assertion": "Context entered by operator, not authenticated",
+    "synthetic_demonstration": "Illustrative score for code tests only",
+    "hypothesis": "Falsifiable mechanism with alternative and test",
+    "unknown": "Unverified, typically null or explicit false",
+    "blocked": "Forbidden physical inference; must remain null or false"
+  },
+  "preRealPhysicalClaimVeto": [
+    "structuralWear",
+    "mechanicalAgeKm",
+    "mechanicalAgeEquivalentKm",
+    "mechanicalAgeChangeKm",
+    "remainingUsefulLife",
+    "predictedFailure",
+    "healthScore",
+    "estimatedAgeKm",
+    "remainingAutomotiveLife"
+  ],
+  "reportContracts": {
+    "snapshot": {
+      "metadata": [
+        "model",
+        "protocol",
+        "phase",
+        "source",
+        "engineFamily",
+        "sampleCount",
+        "elapsedSec",
+        "medianIntervalMs",
+        "maxIntervalMs",
+        "status",
+        "exclusion",
+        "vehicleAlias",
+        "scoringStatus",
+        "provenance",
+        "indexMeaning",
+        "thresholdsMeaning",
+        "caveat"
+      ],
+      "container": [
+        "measurementEvidence",
+        "signalObservability",
+        "features",
+        "observability"
+      ],
+      "synthetic_demonstration": [
+        "deviationIndex"
+      ],
+      "blocked": [
+        "structuralWear",
+        "mechanicalAgeEquivalentKm",
+        "remainingUsefulLife"
+      ]
+    },
+    "comparison": {
+      "metadata": [
+        "model",
+        "comparable",
+        "blockers",
+        "interpretation",
+        "structuralRejuvenationClaim"
+      ],
+      "container": [
+        "before",
+        "after",
+        "measurementEvidence"
+      ],
+      "synthetic_demonstration": [
+        "deltaDeviationIndex"
+      ],
+      "blocked": [
+        "mechanicalAgeChangeKm"
+      ]
+    },
+    "raw_session": {
+      "metadata": [
+        "version",
+        "sessionId",
+        "vehicleAlias",
+        "engineFamily",
+        "adapterModel",
+        "softwareVersion",
+        "source",
+        "capturedAt",
+        "clock",
+        "eventCount",
+        "elapsedHostReceiptMs",
+        "requestTimeMissingCount",
+        "caveat"
+      ],
+      "container": [
+        "channels",
+        "warnings",
+        "traceIntegrity",
+        "observability"
+      ],
+      "observation": [
+        "hostReceiptTimePresent"
+      ],
+      "unknown": [
+        "sensorAcquisitionTimeKnown",
+        "simultaneityVerified"
+      ],
+      "blocked": [
+        "estimatedAgeKm",
+        "structuralWear",
+        "remainingUsefulLife"
+      ]
+    },
+    "aa": {
+      "metadata": [
+        "version",
+        "design",
+        "sessionCount",
+        "dataUnit",
+        "comparable",
+        "blockers",
+        "caveat"
+      ],
+      "container": [
+        "sessionAudits",
+        "observedChanges"
+      ],
+      "unknown": [
+        "confidenceInterval",
+        "noiseThresholdCalibrated",
+        "verifiedIndependence",
+        "causalEffect"
+      ],
+      "blocked": [
+        "healthScore",
+        "mechanicalAgeKm",
+        "wear"
+      ]
+    },
+    "r12": {
+      "metadata": [
+        "version",
+        "protocol",
+        "sessionUnit",
+        "sessionCount",
+        "calibrationSessionCount",
+        "holdoutSessionCount",
+        "status",
+        "eligibleForDescriptiveTrend",
+        "blockers",
+        "provenance",
+        "evidenceGrade",
+        "caveat"
+      ],
+      "container": [
+        "qa",
+        "pidReports",
+        "summary"
+      ],
+      "unknown": [
+        "physicalAccuracyValidated",
+        "verifiedSessionIndependence",
+        "calibratedWearThreshold"
+      ],
+      "blocked": [
+        "predictedFailure",
+        "structuralWear",
+        "mechanicalAgeKm"
+      ]
+    }
+  },
+  "nestedContracts": {
+    "snapshot.features": [
+      "medianRpm",
+      "rpmRobustSigma",
+      "medianEctC",
+      "medianLoadPct",
+      "medianIatC",
+      "medianCombinedTrimPct",
+      "temperatureRange",
+      "loadRange"
+    ],
+    "snapshot.observability": [
+      "version",
+      "powertrain",
+      "fuel",
+      "control",
+      "status",
+      "mode",
+      "requiredPids",
+      "missingPids",
+      "supportedPids",
+      "unobservableMechanisms",
+      "blockers",
+      "allowableInterpretation",
+      "independentlyVerified"
+    ],
+    "raw_session.observability": [
+      "version",
+      "powertrain",
+      "fuel",
+      "control",
+      "status",
+      "mode",
+      "requiredPids",
+      "missingPids",
+      "supportedPids",
+      "unobservableMechanisms",
+      "blockers",
+      "allowableInterpretation",
+      "independentlyVerified"
+    ],
+    "r12.summary": [
+      "channelsWithObservedShift",
+      "shiftedChannelCount",
+      "comparableWarmIdleByOperatorDocumentation",
+      "evidenceFromIndependentPhysicalReference",
+      "functionalDiagnosisSupported",
+      "sampleUnit"
+    ]
+  },
+  "caveats": [
+    "Captured serial bytes are not proof of ECU authenticity or calibrated signal accuracy",
+    "No warranty/guaranteed coverage on automobiles",
+    "No vehicle-level wear/RUL ground truth",
+    "Other MA00 investigative modules and arbitrary nested third-party traces need separate output audits",
+    "Technology must be declared; arbitrary engineFamily name never establishes powertrain"
+  ]
+}
