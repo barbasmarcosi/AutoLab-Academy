@@ -91,3 +91,20 @@ test('MA00 R12 six-session OBD quality demo is offline and abstains on unverifie
   await expect(page.getByText('Comparación descriptiva habilitada')).toBeVisible();
  }finally{await context.setOffline(false);}
 });
+
+
+test('MA00 R13 shows classified evidence and never promotes user-entered OBD to synthetic evidence',async({page})=>{
+ await page.goto('./');
+ await page.locator('nav.nav button[data-id="mechanical-age"]').click();
+ await page.getByRole('button',{name:'Evaluar ambas mediciones'}).click();
+ await expect(page.getByText(/R13 · Contrato de afirmaciones: clasificado; nivel E0/)).toHaveCount(2);
+ await expect(page.getByText(/tecnología declarada gasoline_ice \/ gasoline/)).toHaveCount(2);
+ const original=JSON.parse(await page.locator('#ma-before').inputValue());
+ original.samples[4].rpm+=3;
+ original.source='synthetic'; // user cannot forge the demo's evidence tier in the UI
+ await page.locator('#ma-before').fill(JSON.stringify(original,null,2));
+ await page.getByRole('button',{name:'Evaluar ambas mediciones'}).click();
+ await expect(page.getByText(/R13 · Contrato de afirmaciones: clasificado; nivel unverified/)).toHaveCount(2);
+ await expect(page.getByText(/Datos externos: NO calculamos ningún índice no calibrado/)).toBeVisible();
+ await expect(page.getByText(/Edad equivalente:.*no determinada/)).toHaveCount(2);
+});
