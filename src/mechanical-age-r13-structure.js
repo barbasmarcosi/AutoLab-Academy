@@ -68,8 +68,14 @@ function rawSourceRefs(x,path,errors,report){
  if(x.eventCount!==report.eventCount||typeof x.sessionReference!=='string'||
   x.sessionReference!==('session:'+report.sessionId))
   errors.push(path+': session reference mismatch');
- map(x.pidEventIndexes,path+'.pidEventIndexes',errors,(indexes,p)=>{
+ let referencedCount=0;
+ const observedPids=new Set();
+ map(x.pidEventIndexes,path+'.pidEventIndexes',errors,(indexes,p,pid)=>{
+  observedPids.add(pid);
   if(!boundedArray(indexes,p,errors,20000))return;
+  if(indexes.length!==report.channels?.[pid]?.attempts)
+   errors.push(p+': source events do not match counted PID attempts');
+  referencedCount+=indexes.length;
   let previous=-1;
   for(const idx of indexes){
    if(!Number.isInteger(idx)||idx<0||idx>=report.eventCount||idx<=previous){
@@ -78,6 +84,9 @@ function rawSourceRefs(x,path,errors,report){
    previous=idx;
   }
  });
+ if(referencedCount!==report.eventCount)errors.push(path+': source event references incomplete');
+ if(Object.keys(report.channels??{}).some(pid=>!observedPids.has(pid)))
+  errors.push(path+': source PID map missing observed channel');
 }
 function rawChecks(report,errors,prefix='raw_session'){
  map(report.channels,prefix+'.channels',errors,(ch,path,pid)=>{
@@ -135,7 +144,7 @@ export function auditDynamicMA00Structure(report,kind){
  }
  if(kind==='r12')r12Checks(report,errors);
  if(kind==='replicates'){
-  checkFields(report.phases,FIELDS.phase.slice(0,0).split(' ').filter(Boolean).concat(['before','after']),'replicates.phases',errors);
+  checkFields(report.phases,['before','after'],'replicates.phases',errors);
   for(const phase of ['baseline','after']){
    const x=report[phase];
    if(x===null)continue;
