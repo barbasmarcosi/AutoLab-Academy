@@ -148,7 +148,11 @@ export function mountHvGuided(root,{record,onSaved=()=>{}}={}){
   const c=HV_GUIDED_CASES[index],d=$('hv-g-decision').value,r=$('hv-g-risk').value;
   if(!d||!r){$('hv-g-feedback').textContent='Elegí respuesta y peligro antes de comparar.';return;}
   if(d!==c.decision||r!==c.risk){
-   $('hv-g-feedback').textContent="No es una decisión segura para este caso. Revisá los signos, el límite de autorización y la necesidad de derivación. No se permite avanzar por ensayo inseguro.";
+   $('hv-g-feedback').textContent="No avanzamos. "+(
+    c.decision==='emergency'?"Aquí hay riesgo inmediato: mantené distancia, advertí a otras personas y contactá servicios locales de emergencia; no te acerques al paquete.":
+    c.decision==='refer'?"La falta de autorización y procedimiento específico exige suspender el trabajo HV y derivarlo a personal competente; no intentes comprobarlo personalmente.":
+    "Aquí solo se solicitó información documental: localizá la guía oficial sin realizar diagnóstico, contacto o intervención física."
+   )+" El peligro principal del caso es "+HV_RISKS.find(x=>x[0]===c.risk)[1]+". Reintentá después de comparar los criterios.";
    return;
   }
   if(index<HV_GUIDED_CASES.length-1){index++;render();return;}
