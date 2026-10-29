@@ -3,6 +3,7 @@
  * This is a SOFTWARE policy: source strings and operator documents are NOT
  * independently authenticated, even when internally consistent.
  */
+import {auditDynamicMA00Structure} from './mechanical-age-r13-structure.js';
 export const CLAIMS_VERSION='ma00-r13-evidence-claims-v1';
 export const CLAIM_LEVELS=Object.freeze(['E0','E1','E2','E3','E4','E5']);
 export const CLAIM_KIND=Object.freeze(['metadata','observation','derived','operator_assertion',
@@ -27,7 +28,7 @@ export const REPORT_FIELDS=Object.freeze({
  }),
  raw_session:Object.freeze({
   metadata:'version sessionId vehicleAlias engineFamily adapterModel softwareVersion source capturedAt clock eventCount elapsedHostReceiptMs requestTimeMissingCount caveat',
-  container:'channels warnings traceIntegrity observability',
+  container:'channels warnings traceIntegrity observability sourceTrace',
   observation:'hostReceiptTimePresent',
   unknown:'sensorAcquisitionTimeKnown simultaneityVerified',
   blocked:'estimatedAgeKm structuralWear remainingUsefulLife',
@@ -111,7 +112,8 @@ export function auditMA00Report(report,kind,{source=null}={}){
    if(!Object.hasOwn(data,field))missingNested.push(container+'.'+field);
   }
  }
- const violations=[];
+ const dynamicViolations=auditDynamicMA00Structure(report,kind);
+ const violations=[...dynamicViolations];
  if(unclassified.length)violations.push('Campos sin clasificación: '+unclassified.join(', '));
  if(missing.length)violations.push('Campos declarados pero ausentes: '+missing.join(', '));
  if(unclassifiedNested.length)violations.push('Subcampos sin clasificación: '+unclassifiedNested.join(', '));
@@ -130,7 +132,7 @@ export function auditMA00Report(report,kind,{source=null}={}){
  const nullOnly=['confidenceInterval','causalEffect'];
  for(const key of nullOnly)if(Object.hasOwn(report,key)&&report[key]!==null)
   violations.push('Intervalo o efecto causal no validado: '+key);
- return {version:CLAIMS_VERSION,kind,complete:unclassified.length===0&&missing.length===0&&unclassifiedNested.length===0&&missingNested.length===0,
+ return {version:CLAIMS_VERSION,kind,complete:unclassified.length===0&&missing.length===0&&unclassifiedNested.length===0&&missingNested.length===0&&dynamicViolations.length===0,
   violations,unclassified:[...unclassified,...unclassifiedNested],missing:[...missing,...missingNested],classifiedCount:keys.length-unclassified.length,
   evidenceLevel:relevantSource==='synthetic'?'E0':'unverified',
   independentlyVerified:false,
