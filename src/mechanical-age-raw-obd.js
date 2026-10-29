@@ -156,7 +156,7 @@ export function evaluateAAWithoutService(sessions){
  const comparable=blockers.length===0;
  const first=audits[0],last=audits[audits.length-1];
  const changes=comparable?Object.fromEntries(
-  Object.keys(first.channels).filter(pid=>pid!=='0103'&&audits.every(a=>a.channels[pid]?.median!==null)).map(pid=>[
+  Object.keys(first.channels).filter(pid=>pid!=='0103'&&audits.every(a=>finite(a.channels[pid]?.median))).map(pid=>[
    pid,{unit:first.channels[pid].unit,firstMedian:first.channels[pid].median,
     lastMedian:last.channels[pid].median,
     lastMinusFirst:medianDifference(first.channels[pid].median,last.channels[pid].median),
