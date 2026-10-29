@@ -22,7 +22,7 @@ test('lesson 3: scope reserved case freezes forecast, calibrates signal, refutes
   await h.locator('[data-scope-h="measure"]').click();
   await expect(h.locator('#scope-h-observations')).toContainText((i+1)+'/4');
  }
- await expect(h.locator('#scope-h-observations')).toContainText('260,00 Hz');
+ await expect(h.locator('#scope-h-observations')).toContainText('2,60 períodos equivalentes');
  await h.locator('#scope-h-freq').fill('260');
  await h.locator('#scope-h-diagnosis').selectOption('frequency');
  await h.locator('#scope-h-decisive').selectOption('period');

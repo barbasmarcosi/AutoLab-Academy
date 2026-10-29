@@ -38,7 +38,7 @@ export function scopeHoldoutReading(id,test){
  if(test==="period")return "Cresta a cresta con reloj calibrado: "+fmt(period)+" ms por ciclo. Referencia inicial 5,00 ms.";
  if(test==="vertical")return "Pantalla: "+fmt(2.4/c.voltsDiv)+" divisiones pico a pico a "+fmt(c.voltsDiv)+" V/div. Vpp físico del generador modelo: 2,40 V.";
  if(test==="reference")return "Nivel medio aparente: "+fmt(2.5+c.referenceShift)+" V respecto de la referencia seleccionada; patrón original 2,50 V.";
- if(test==="source")return "Instrumento patrón ficticio sobre la salida: "+fmt(c.hz)+" Hz y 2,40 Vpp (sin cambio físico de amplitud).";
+ if(test==="source")return "Instrumento patrón ficticio sobre la salida: en 10,00 ms se observan "+fmt(c.hz/100)+" períodos equivalentes; Vpp = 2,40 V (sin cambio físico de amplitud).";
  throw RangeError("Prueba de osciloscopía inválida");
 }
 export function freezeScopeHoldout({caseId,hypothesis,firstTest,predictedHz}={}){
