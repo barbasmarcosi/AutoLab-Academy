@@ -212,12 +212,19 @@ def _metrics_by_selection(truth,recs,baseline,mask):
     errors=[recs[i]["prediction"]-truth[i] for i in ids]
     covered=[recs[i]["interval"][0]<=truth[i]<=recs[i]["interval"][1]
              for i in ids if recs[i]["interval"] is not None]
+    # A subset with withheld cases has no interval defined for every member.
+    # Never report the accepted-only interval coverage as though it describes
+    # the whole cohort or the rejected group.
+    interval_defined_for_all=len(covered)==len(ids)
     return {
         "engines":len(ids),
         "ridgeMAEcycles":round(sum(abs(e) for e in errors)/len(ids),3),
         "baselineMAEcycles":round(sum(abs(baseline[i]-truth[i]) for i in ids)/len(ids),3),
         "ridgeBiasCycles":round(statistics.mean(errors),3),
-        "intervalCoverageFraction":round(sum(covered)/len(covered),5) if covered else None,
+        "intervalCoverageFraction":(
+            round(sum(covered)/len(covered),5) if interval_defined_for_all else None
+        ),
+        "intervalAvailableForAllEngines":interval_defined_for_all,
     }
 
 
