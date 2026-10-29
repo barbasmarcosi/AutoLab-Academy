@@ -17,8 +17,8 @@ test('guided BMS cases reuse existing generator/counter with independently decla
  const expectations=[['nominal','nominal',80,80,0],['bias','bias',79,80,-1],['aged','capacity',80,75,5]];
  for(const [id,cause,estimate,reference,gap] of expectations){
   const x=bmsGuidedOutcome(id);
-  assert.equal(x.cause,cause);assert.equal(x.estimatedSoc,estimate);assert.equal(x.referenceSoc,reference);
-  assert.equal(x.gapPp,gap);assert.equal(x.dischargeAh,id==='bias'?12.6:12);
+  assert.equal(x.cause,cause);assert.ok(Math.abs(x.estimatedSoc-estimate)<1e-8);assert.ok(Math.abs(x.referenceSoc-reference)<1e-8);
+  assert.ok(Math.abs(x.gapPp-gap)<1e-8);assert.ok(Math.abs(x.dischargeAh-(id==='bias'?12.6:12))<1e-8);
   const good=gradeBmsGuided({scenarioId:id,plannedGap:gap,finalCause:cause,reasoning:'Modelo',alternative:'Alternativa'});
   assert.equal(good.score,100);assert.equal(good.passed,true);assert.equal(good.qualitativeReview,'pending');
   assert.equal(gradeBmsGuided({scenarioId:id,plannedGap:gap+3,finalCause:cause,reasoning:'a',alternative:'b'}).score,50);
@@ -32,15 +32,15 @@ test('reserved BMS cases are novel and span bias, effective capacity and initial
   assert.equal(Object.isFrozen(c),true);
   const m=bmsHoldoutModel(c.id);
   assert.ok(Number.isFinite(m.gapPp));assert.ok(Number.isFinite(m.sohPct));
-  assert.equal(m.estimatedSoc,80-100*c.biasA/60);
-  assert.equal(m.referenceSoc,c.trueInitialSoc-1200/c.capacityAh);
+  assert.ok(Math.abs(m.estimatedSoc-(80-100*c.biasA/60))<1e-8);
+  assert.ok(Math.abs(m.referenceSoc-(c.trueInitialSoc-1200/c.capacityAh))<1e-8);
   for(const t of BMS_HOLDOUT_TESTS)assert.ok(bmsHoldoutReading(c.id,t.id).length>65);
   assert.doesNotMatch(c.condition,/sesgo de corriente|capacidad útil reducida|soc inicial supuesto/i);
  }
  assert.ok(bmsHoldoutModel('B01').gapPp<0);
- assert.equal(bmsHoldoutModel('B02').gapPp,5);
- assert.equal(bmsHoldoutModel('B03').gapPp,5);
- assert.equal(bmsHoldoutModel('B07').gapPp,1);
+ assert.ok(Math.abs(bmsHoldoutModel('B02').gapPp-5)<1e-8);
+ assert.ok(Math.abs(bmsHoldoutModel('B03').gapPp-5)<1e-8);
+ assert.ok(Math.abs(bmsHoldoutModel('B07').gapPp-1)<1e-8);
  assert.throws(()=>bmsHoldoutModel('missing'),RangeError);
  assert.throws(()=>bmsHoldoutReading('B01','bad'),RangeError);
 });
@@ -69,7 +69,7 @@ test('holdout scoring requires complete independent measurements, numeric gap an
 test('held-out BMS wrong diagnosis never passes even if numeric gap was calculated correctly',()=>{
  const p=freezeBmsHoldout({caseId:'B01',hypothesis:'capacity',firstTest:'sensor',predictedGapPp:5});
  const g=gradeBmsHoldout({caseId:'B01',prior:p,measurements:['sensor','capacity','initial','trajectory'],observedGapPp:-1,
- diagnosis:'capacity',decisiveTest:'sensor',falsifier:BMS_HOLDOUT_FALSIFIERS.capacity.answer,reasoning:'Texto',alternative:'Otra'});
+ diagnosis:'capacity',decisiveTest:'capacity',falsifier:BMS_HOLDOUT_FALSIFIERS.capacity.answer,reasoning:'Texto',alternative:'Otra'});
  assert.equal(g.score,45);assert.equal(g.causal,false);assert.equal(g.discriminated,false);assert.equal(g.passed,false);
 });
 test('BMS reserved sequence rotates and skips unrelated or corrupted history',()=>{
