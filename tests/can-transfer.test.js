@@ -59,3 +59,7 @@ test('reserved-case index rotates only valid v1 entries, ignores corrupt history
    report:JSON.stringify({rubric:CAN_HOLDOUT_ID,caseId:CAN_HOLDOUT_CASES[i].id})}]),(i+1)%9);
  }
 });
+
+test('CAN reserved intake stories do not announce extra terminators or arbitration',()=>{
+ for(const c of CAN_HOLDOUT_CASES)assert.doesNotMatch(c.condition,/terminador adicional|arbitraje simultáneo|solicitan bus al mismo tiempo/i);
+});

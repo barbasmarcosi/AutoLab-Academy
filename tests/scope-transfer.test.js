@@ -62,3 +62,8 @@ test('lesson 3: retry cycles real v1 case evidence, not unrelated or malformed r
    report:JSON.stringify({rubric:SCOPE_HOLDOUT_ID,caseId:SCOPE_HOLDOUT_CASES[i].id})}]),expected);
  }
 });
+
+test('scope reserved intake stories do not announce the hidden physical or display adjustment',()=>{
+ const terms=/período aumentado|período menor|sensibilidad vertical mayor|referencia de medición desplazada|ajuste de pantalla|fuente de banco con período/i;
+ for(const c of SCOPE_HOLDOUT_CASES)assert.doesNotMatch(c.condition,terms);
+});

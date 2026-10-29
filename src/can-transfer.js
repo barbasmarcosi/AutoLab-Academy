@@ -8,12 +8,12 @@ const rows=[
  ["N01","termination",120,12,1.7,"Observaciones con retrasos y pérdidas de tramas ficticias"],
  ["N02","supply",60,0,2.0,"Un nodo no responde; otros intercambian tramas"],
  ["N03","arbitration",60,12,2.0,"Retraso de un emisor bajo tráfico simultáneo"],
- ["N04","termination",40,12,1.6,"Recepciones intermitentes y posible terminador adicional"],
+ ["N04","termination",40,12,1.6,"Recepciones intermitentes bajo una condición no identificada"],
  ["N05","supply",60,0,2.1,"Nodo silencioso; red restante estable"],
- ["N06","arbitration",60,12,1.9,"Tramas diferidas durante arbitraje simultáneo"],
+ ["N06","arbitration",60,12,1.9,"Tramas de un emisor aparecen más tarde de lo previsto"],
  ["N07","termination",120,12,1.8,"Tasa variable de recepción de una trama sintética"],
  ["N08","supply",60,0,2.0,"Comprobación de transmisor no participativo"],
- ["N09","arbitration",60,12,2.0,"Dos emisores estándar solicitan bus al mismo tiempo"]
+ ["N09","arbitration",60,12,2.0,"En ocasiones aumenta el intervalo entre mensajes del mismo emisor"]
 ];
 export const CAN_HOLDOUT_CASES=Object.freeze(rows.map(([id,cause,resistanceOhm,nodeSupplyV,differentialV,condition])=>
  Object.freeze({id,cause,resistanceOhm,nodeSupplyV,differentialV,condition})));

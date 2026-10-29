@@ -5,15 +5,15 @@
  */
 export const SCOPE_HOLDOUT_ID="lab-scope-holdout-v1";
 const rows=[
- ["S01","frequency",260,1,0,"Señal a régimen de banco elevado"],
- ["S02","gain",200,2,0,"Captura comparada con escala vertical distinta"],
- ["S03","reference",200,1,1,"Referencia de medición desplazada"],
- ["S04","frequency",150,1,0,"Fuente de banco con período aumentado"],
- ["S05","gain",200,0.5,0,"Captura con sensibilidad vertical mayor"],
- ["S06","reference",200,1,-1,"Segundo punto de referencia para medir"],
- ["S07","frequency",320,1,0,"Captura con período menor"],
- ["S08","gain",200,2,0,"Ajuste de pantalla de un banco diferente"],
- ["S09","reference",200,1,1,"Referencia de retorno seleccionada de nuevo"]
+ ["S01","frequency",260,1,0,"La separación horizontal entre crestas difiere de la captura anterior"],
+ ["S02","gain",200,2,0,"La forma de onda aparece con una altura diferente en la pantalla"],
+ ["S03","reference",200,1,1,"La línea media aparente no coincide con la captura anterior"],
+ ["S04","frequency",150,1,0,"Se repite una discrepancia temporal en una nueva captura del banco"],
+ ["S05","gain",200,0.5,0,"La altura en divisiones difiere de otra captura del mismo banco"],
+ ["S06","reference",200,1,-1,"Se observa un desplazamiento vertical sin confirmar su origen"],
+ ["S07","frequency",320,1,0,"La separación aparente entre crestas se modificó"],
+ ["S08","gain",200,2,0,"La presentación vertical difiere del registro previo"],
+ ["S09","reference",200,1,1,"El nivel medio aparente parece cambiar respecto del registro previo"]
 ];
 export const SCOPE_HOLDOUT_CASES=Object.freeze(rows.map(([id,cause,hz,voltsDiv,referenceShift,condition])=>
  Object.freeze({id,cause,hz,voltsDiv,referenceShift,condition})));
