@@ -56,6 +56,11 @@ class TestR11(unittest.TestCase):
         self.assertEqual(counts["publishedPredictions"]+counts["totalAbstentions"],12)
         self.assertEqual(out["publishedOnly"]["engines"],counts["publishedPredictions"])
         self.assertEqual(out["withheldOnlyForAudit"]["engines"],counts["totalAbstentions"])
+        self.assertTrue(out["publishedOnly"]["intervalAvailableForAllEngines"] or
+                        out["publishedOnly"]["engines"]==0)
+        if counts["totalAbstentions"]:
+            self.assertIsNone(out["wholeCohortForAudit"]["intervalCoverageFraction"])
+            self.assertFalse(out["wholeCohortForAudit"]["intervalAvailableForAllEngines"])
 
     def test_change_rul_does_not_change_calibration_or_decisions(self):
         a=r11.evaluate(self.train,self.test,self.labels)
@@ -72,6 +77,8 @@ class TestR11(unittest.TestCase):
         self.assertEqual(bad["decisionCounts"]["publishedPredictions"],0)
         self.assertIsNone(bad["publishedOnly"]["ridgeMAEcycles"])
         self.assertIsNone(bad["publishedOnly"]["intervalCoverageFraction"])
+        self.assertIsNone(bad["wholeCohortForAudit"]["intervalCoverageFraction"])
+        self.assertFalse(bad["wholeCohortForAudit"]["intervalAvailableForAllEngines"])
         with self.assertRaisesRegex(ValueError,"Missing/nonfinite"):
             r11.novelty([float("nan")]*25,{"center":{4:0},"scale":{4:1},"operations":{1:(0,1)}})
 
