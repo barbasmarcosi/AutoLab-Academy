@@ -11,10 +11,12 @@ import {
 import {evaluateMechanicalSnapshot,compareMechanicalSnapshots,syntheticServicePair} from '../src/mechanical-age-research.js';
 import {auditRawObdSession,evaluateAAWithoutService,syntheticAAReceiptPair} from '../src/mechanical-age-raw-obd.js';
 import {assessObdMultiSessionRepeatability,syntheticR12ReceiptSeries} from '../src/mechanical-age-r12-quality.js';
+import {evaluateReplicatedMeasurements,syntheticReplicatedServiceCase} from '../src/mechanical-age-repeatability.js';
+import {runMechanicalAgeFalsification} from '../src/mechanical-age-falsification.js';
 
 const deep=x=>structuredClone(x);
 test('R13: all principal report contracts classify their top-level and nested claims',()=>{
- assert.equal(Object.keys(REPORT_FIELDS).length,5);
+ assert.equal(Object.keys(REPORT_FIELDS).length,7);
  assert.ok(Object.keys(REPORT_SUBFIELDS).length>=3);
  const {before,after}=syntheticServicePair();
  const reports=[
@@ -23,6 +25,8 @@ test('R13: all principal report contracts classify their top-level and nested cl
   [auditRawObdSession(syntheticAAReceiptPair()[0]),'raw_session'],
   [evaluateAAWithoutService(syntheticAAReceiptPair()),'aa'],
   [assessObdMultiSessionRepeatability(syntheticR12ReceiptSeries()),'r12'],
+  [evaluateReplicatedMeasurements(syntheticReplicatedServiceCase()),'replicates'],
+  [runMechanicalAgeFalsification(),'falsification'],
  ];
  for(const [report,kind] of reports){
   assert.equal(report.evidenceContract.version,CLAIMS_VERSION);
