@@ -318,7 +318,8 @@
       "firstMedian",
       "lastMedian",
       "lastMinusFirst",
-      "maxMinusMin"
+      "maxMinusMin",
+      "sourceSessionRefs"
     ],
     "r12Pid": [
       "unit",
@@ -331,6 +332,7 @@
       "subsequentSessionMedians",
       "subsequentMinusReference",
       "sessionsOutsideObservedReferenceBand",
+      "sourceSessionRefs",
       "anyOutsideObservedReferenceBand",
       "thresholdMeaning"
     ],
