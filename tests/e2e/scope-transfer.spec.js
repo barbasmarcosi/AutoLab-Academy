@@ -1,0 +1,60 @@
+import{test,expect}from'@playwright/test';import{readFile}from'node:fs/promises';
+import AxeBuilder from'@axe-core/playwright';
+test('lesson 3: scope reserved case freezes forecast, calibrates signal, refutes and exports evidence',async({page})=>{
+ await page.goto('./');
+ await page.getByRole('button',{name:'Academia',exact:true}).click();
+ await page.locator('.lesson-card').filter({hasText:'Lectura inicial de señales con osciloscopio'}).getByRole('button',{name:'Estudiar'}).click();
+ const h=page.locator('#scope-holdout-host');
+ await expect(h.getByText('Investigación independiente: señal o pantalla')).toBeVisible();
+ await expect(h).toContainText('Banco reservado S01');
+ await h.locator('[data-scope-h="freeze"]').click();
+ await expect(h.locator('#scope-h-status')).toContainText('Congelá hipótesis');
+ await h.locator('#scope-h-prior').selectOption('gain');
+ await h.locator('#scope-h-first').selectOption('period');
+ await h.locator('#scope-h-pred').fill('200');
+ await h.locator('[data-scope-h="freeze"]').click();
+ await expect(h.locator('#scope-h-frozen')).toContainText('200,00 Hz');
+ await h.locator('#scope-h-probe').selectOption('vertical');
+ await h.locator('[data-scope-h="measure"]').click();
+ await expect(h.locator('#scope-h-status')).toContainText('primera prueba');
+ for(const [i,probe] of ['period','vertical','reference','source'].entries()){
+  await h.locator('#scope-h-probe').selectOption(probe);
+  await h.locator('[data-scope-h="measure"]').click();
+  await expect(h.locator('#scope-h-observations')).toContainText((i+1)+'/4');
+ }
+ await expect(h.locator('#scope-h-observations')).toContainText('260,00 Hz');
+ await h.locator('#scope-h-freq').fill('260');
+ await h.locator('#scope-h-diagnosis').selectOption('frequency');
+ await h.locator('#scope-h-decisive').selectOption('period');
+ await h.locator('input[name="scope-h-falsifier"][value="0"]').check();
+ await h.locator('[data-scope-h="grade"]').click();
+ await expect(h.locator('#scope-h-status')).toContainText('Explicá tu criterio');
+ await h.locator('#scope-h-why').fill('Un patrón temporal independiente muestra que el período pasó de 5,00 a 3,85 ms.');
+ await h.locator('#scope-h-alt').fill('V/div sólo cambia la escala; el patrón de fuente confirma frecuencia.');
+ await h.locator('[data-scope-h="grade"]').click();
+ await expect(h.locator('#scope-h-result')).toContainText('100/100');
+ await expect(h.locator('#scope-h-result')).toContainText('pendiente de revisión cualitativa');
+ await expect(page.locator('#lesson-theory-practice-status')).toContainText('Práctica todavía no registrada');
+ await page.locator('nav.nav button[data-id="data"]').click();
+ const download=page.waitForEvent('download');
+ await page.locator('[data-action="export"]').click();
+ const file=JSON.parse(await readFile(await(await download).path(),'utf8'));
+ const saved=file.payload.cases.findLast(x=>x.id==='lab-scope-holdout-v1');
+ expect(saved).toMatchObject({passed:true,score:100});
+ const report=JSON.parse(saved.report);
+ expect(report).toMatchObject({rubric:'lab-scope-holdout-v1',caseId:'S01',qualitativeReview:'pending',
+  final:{observedHz:260,diagnosis:'frequency',decisiveTest:'period',falsifier:0}});
+ expect(report.prior).toMatchObject({hypothesis:'gain',firstTest:'period',predictedHz:200});
+ expect(report.observations).toHaveLength(4);
+});
+test('lesson 3: reserved scope transfer is mobile accessible and rotates on retake',async({page})=>{
+ await page.setViewportSize({width:375,height:812});
+ await page.goto('./');
+ await page.getByRole('button',{name:'Academia',exact:true}).click();
+ await page.locator('.lesson-card').filter({hasText:'Lectura inicial de señales con osciloscopio'}).getByRole('button',{name:'Estudiar'}).click();
+ const h=page.locator('#scope-holdout-host');
+ const axe=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze()).violations;
+ expect(axe.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))).toEqual([]);
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1);
+ expect(overflow).toBe(false);
+});
