@@ -42,3 +42,9 @@ The resolution does not require admin-level environment edits or merging PR #56:
 - Se corrige el run completo fallido de lección 03 (438 correctos, tres expectativas desactualizadas de un único test) y se incorpora CAN con banco de terminación/arbitraje, nueve investigaciones y su CI focalizada.
 - Publicar **ambas lecciones juntas en una sola versión** del sitio para evitar sobrescribir un hito nuevo con el posterior cierre de un workflow anterior.
 - La puerta es el commit exacto marcado `[pages-milestone]`, `verify: success` y `Publish validated AutoLab Academy milestones to Pages: deploy success`. Hasta entonces la web conserva el hito 02.
+
+## Revisión anti-fuga de respuestas antes de aceptación
+- Tras el candidato inicial del hito 03+04, un control pedagógico encontró que algunas **descripciones iniciales de casos reservados contenían la causa** (ajuste de pantalla, referencia o terminador adicional). Esto reduce la independencia del ejercicio.
+- Se sustituyeron por **síntomas observables sin revelar el mecanismo**, y se añadieron tests de regresión en `tests/scope-transfer.test.js` y `tests/can-transfer.test.js`.
+- [CI focalizada #40794071876](https://github.com/barbasmarcosi/AutoLab-Academy/actions/runs/40794071876): PASS de unidad, compilación y navegador.
+- **Candidato final revisado**: commit con marcador `[pages-milestone]` posterior a `30bc0ab0`. Conserva la puerta completa y publicación desde workflow del `main`. No calificar como aceptado hasta obtener validación del SHA revisado y deploy éxito.
