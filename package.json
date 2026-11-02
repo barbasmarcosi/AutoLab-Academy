@@ -20,7 +20,7 @@
     "ts-fsrs": "5.4.2"
   },
   "devDependencies": {
-    "esbuild": "0.25.12",
+    "esbuild": "0.28.2",
     "@playwright/test": "1.64.1",
     "@axe-core/playwright": "4.14.0"
   }
