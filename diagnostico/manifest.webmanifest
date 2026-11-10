@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "AutoLab · Modo Taller",
+  "short_name": "Modo Taller",
+  "description": "Laboratorio de diagnóstico automotriz, gratuito y offline.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070e13",
+  "theme_color": "#070e13",
+  "icons": [
+    {
+      "src": "../icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
