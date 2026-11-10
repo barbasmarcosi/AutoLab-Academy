@@ -2,6 +2,22 @@
 
 PWA para estudiar y entrenar **diagnóstico electrónico automotriz, redes CAN y electromovilidad**.
 
+## Nuevo: Modo Taller para iPhone
+
+Ruta tras publicar: **https://barbasmarcosi.github.io/AutoLab-Academy/diagnostico/**.
+
+Modo juego independiente, pensado para Safari/iPhone y disponible sin pagos, anuncios ni cuenta. Tres órdenes de trabajo con **nueve variantes de avería**:
+
+1. Arranque frío y lectura ECT imposible: termistor, señal o retorno abierto.
+2. Reinicio de ECU bajo carga: alimentación, masa o fuente.
+3. Inyector sin aporte: bobina abierta, alimentación ausente o driver sin conmutación.
+
+Flujo: hipótesis inicial → selección de pruebas con instrumentos virtuales → pronóstico previo → lectura → diagnóstico final justificado → informe. El sistema registra intentos y mejores resultados en el almacenamiento local del navegador. Se limita el puntaje cuando no hay evidencia discriminante, incluso si se acierta la causa.
+
+**Limitaciones técnicas deliberadas:** casos deterministas de baja tensión, con tres causas por expediente, valores sintéticos y supuestos explícitos. No se simula SPICE ni software OEM, ni se evalúa semánticamente la redacción. Para una sesión real de taller harían falta mediciones y procedimientos del fabricante.
+
+Se integra al artefacto de GitHub Pages mediante scripts/prepare-site.mjs. El service worker lo incluye en su precaché para uso offline después de una primera visita con conexión. Para probar el juego directamente durante desarrollo, servir la raíz del repositorio por HTTP y abrir /diagnostico/.
+
 ## Qué está implementado
 
 - **Transferencia diagnóstica:** cinco familias con causas y síntomas alternativos: ECU/CKP, presión/MAF, CKP/CMP, CAN terminación/saturación y HEV auxiliar/interlock virtual. Exige hipótesis previa, prueba confirmatoria, descarte, contexto, pronóstico y límites; 20 combinaciones de casos ficticios reproducibles.

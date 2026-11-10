@@ -7,7 +7,7 @@ rmSync('site',{recursive:true,force:true});
 mkdirSync(base,{recursive:true});
 for(const file of ['index.html','manifest.webmanifest','sw.js'])
  copyFileSync(file,join(base,file));
-for(const dir of ['src','icons'])cpSync(dir,join(base,dir),{recursive:true});
+for(const dir of ['src','icons','diagnostico'])cpSync(dir,join(base,dir),{recursive:true});
 mkdirSync(join(base,'samples'),{recursive:true});
 copyFileSync(join('samples','autolab-synthetic.dbc'),join(base,'samples','autolab-synthetic.dbc'));
 mkdirSync(join(base,'third-party'),{recursive:true});
