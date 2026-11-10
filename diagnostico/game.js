@@ -110,3 +110,7 @@ app.addEventListener('click',e=>{
  }catch(err){state.error=err.message;render();window.scrollTo({top:0,behavior:'smooth'});}
 });
 render();
+
+if('serviceWorker' in navigator && location.protocol==='https:'){
+ navigator.serviceWorker.register('../sw.js',{scope:'../'}).catch(()=>{});
+}
