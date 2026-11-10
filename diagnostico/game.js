@@ -3,7 +3,7 @@ const KEY='autolab-modo-taller-v1';
 const app=document.getElementById('app');
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const saved=(()=>{try{return JSON.parse(localStorage.getItem(KEY))||{};}catch{return {};}})();
-let state={active:saved.active?.version===1?saved.active:null,history:Array.isArray(saved.history)?saved.history:[],mode:saved.mode==='reto'?'reto':'guia',selection:null,error:''};
+let state={active:saved.active?.version===1?saved.active:null,history:Array.isArray(saved.history)?saved.history:[],mode:saved.mode==='reto'?'reto':'guia',screen:'home',selection:null,error:''};
 function store(){
  try{localStorage.setItem(KEY,JSON.stringify({active:state.active,history:state.history.slice(-100),mode:state.mode}));}
  catch{state.error='El navegador no pudo guardar el progreso. Podés seguir jugando, pero al cerrar podría perderse.';}
