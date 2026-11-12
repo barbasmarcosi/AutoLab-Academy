@@ -46,6 +46,48 @@ test('correcto solo con causa, medición discriminante, pronóstico y explicaci�
   assert.equal(gradeDifferential(unsafe).score,0);
  }
 });
+test('una conclusión acertada sin hipótesis inicial válida no recibe 100 ni aprueba',()=>{
+ for(const c of differentialCases)for(let index=0;index<2;index++){
+  const probe=c.probes.find(p=>p.discriminating&&!p.unsafe);
+  const base=createDifferentialSession(c.id,index);
+  base.variantIndex=index;
+  base.final=c.variants[index].id;
+  base.reasoning=reasoning;
+  base.observations=[{id:probe.id,prediction:probe.classification}];
+  for(const initial of ['', 'hipotesis-fabricada']){
+   const grade=gradeDifferential({...base,initial});
+   assert.equal(grade.initialRecorded,false);
+   assert.equal(grade.passed,false);
+   assert.equal(grade.score,50);
+  }
+  const valid=gradeDifferential({...base,initial:c.variants[1-index].id});
+  assert.equal(valid.initialRecorded,true);
+  assert.equal(valid.passed,true);
+  assert.equal(valid.score,100);
+ }
+});
+test('acertar una predicción ambigua no sustituye la discriminante',()=>{
+ for(const c of differentialCases)for(let index=0;index<2;index++){
+  const ambiguous=c.probes.find(p=>!p.discriminating&&!p.unsafe);
+  const decisive=c.probes.find(p=>p.discriminating&&!p.unsafe);
+  const s=createDifferentialSession(c.id,index);
+  s.variantIndex=index;
+  s.initial=c.variants[index].id;
+  s.final=c.variants[index].id;
+  s.reasoning=reasoning;
+  s.observations=[
+   {id:ambiguous.id,prediction:ambiguous.classification},
+   {id:decisive.id,prediction:decisive.classification==='normal'?'abnormal':'normal'}
+  ];
+  const grade=gradeDifferential(s);
+  assert.equal(grade.discriminated,true);
+  assert.equal(grade.predicted,false);
+  assert.equal(grade.passed,false);
+  assert.equal(grade.score,90);
+  s.observations[1].prediction=decisive.classification;
+  assert.equal(gradeDifferential(s).passed,true);
+ }
+});
 test('informe incluye predicción previa, respuesta, referencia y límites',()=>{
  const c=differentialCases[0],s=createDifferentialSession(c.id,0);
  s.initial=c.variants[1].id;s.final=c.variants[s.variantIndex].id;s.reasoning=reasoning;

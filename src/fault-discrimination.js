@@ -83,14 +83,21 @@ export function gradeDifferential(session){
  const observed=[...new Set((session.observations||[]).map(o=>o.id))].map(id=>getDifferentialProbe(c.id,session.variantIndex,id));
  const unsafe=observed.some(p=>p.unsafe);
  const discriminated=observed.some(p=>p.discriminating&&!p.unsafe);
+ // Only a correct forecast for a discriminating, revealed observation counts.
+ // Predicting a shared symptom (or an unsafe action) cannot validate a hypothesis.
  const predicted=observed.some(p=>{
-  const o=session.observations.find(x=>x.id===p.id);
-  return !p.unsafe&&o.prediction===p.classification;
+  if(p.unsafe||!p.discriminating)return false;
+  const o=(session.observations||[]).find(x=>x?.id===p.id);
+  return o?.prediction===p.classification;
  });
+ // The UI locks the initial hypothesis before measurement, but this pure
+ // grader must also reject absent or forged values. It cannot prove timing.
+ const initialRecorded=c.variants.some(v=>v.id===session.initial);
  const correct=session.final===correctId;
  const documented=String(session.reasoning||'').trim().length>=100&&String(session.reasoning||'').trim().length<=3000;
- const score=unsafe?0:(correct?50:0)+(discriminated?30:0)+(predicted?10:0)+(documented?10:0);
- return {score,passed:!unsafe&&correct&&discriminated&&predicted&&documented,correct,discriminated,predicted,documented,unsafe,solution:correctId,textReviewed:false};
+ const score=unsafe?0:(correct&&initialRecorded?50:0)+(discriminated?30:0)+(predicted?10:0)+(documented?10:0);
+ return {score,passed:!unsafe&&initialRecorded&&correct&&discriminated&&predicted&&documented,
+  initialRecorded,correct,discriminated,predicted,documented,unsafe,solution:correctId,textReviewed:false};
 }
 export function differentialTrace(caseId,index,count=240){
  const c=findCase(caseId);
