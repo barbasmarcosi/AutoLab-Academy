@@ -137,3 +137,23 @@ test('v1.9.4: entradas sobredimensionadas siguen rechazadas',()=>{
 });
 
 test('v1.9.11: una respuesta omitida nunca se transforma en la opción cero',()=>{const q={id:'zero',answer:0};for(const selected of [undefined,null,'',false,'0','  ',NaN,-1,0.5,{},[]])assert.equal(gradeQuestion(q,selected),false);assert.equal(gradeQuestion(q,0),true);assert.equal(scoreExam([q],[null]).percentage,0);assert.equal(scoreExam([q],['']).percentage,0);assert.equal(scoreExam([q],[0]).percentage,100);});
+
+
+test('v1.9.19: un examen inválido no desaparece silenciosamente de la copia restaurada',()=>{
+ const p=emptyProgress();
+ p.attempts.push({id:'valid',topic:'can',percentage:90,at:'2026-10-27'});
+ p.attempts.push({id:'invalid',topic:'can',percentage:'100',at:'2026-10-27'});
+ assert.throws(()=>validateBackup(p),/examen incompatible/);
+ assert.throws(()=>parseBackup(JSON.stringify({format:'autolab-academy-backup',payload:p})),/examen incompatible/);
+ p.attempts.pop();
+ assert.equal(validateBackup(p).attempts.length,1);
+});
+test('v1.9.19: un expediente inválido no desaparece silenciosamente de la copia restaurada',()=>{
+ const p=emptyProgress();
+ p.cases.push({id:'valid',score:90,at:'2026-10-27',passed:false});
+ p.cases.push({id:'invalid',score:'100',at:'2026-10-27',passed:true});
+ assert.throws(()=>validateBackup(p),/expediente incompatible/);
+ assert.throws(()=>serializeBackup(p),/expediente incompatible/);
+ p.cases.pop();
+ assert.equal(validateBackup(p).cases.length,1);
+});
